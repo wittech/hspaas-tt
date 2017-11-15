@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<dubbo:application name="hsmonitor-provider" logger="slf4j" />
+
+    <dubbo:registry protocol="zookeeper" address="${zk.address}" timeout="15000"  file="${user.home}/applications/hsmonitor-dubbo.cache"/>
+
+    <dubbo:provider timeout="100000" retries="0" protocol="dubbo" default="true"/>
+    <dubbo:protocol name="dubbo" serialization="kryo" port="-1"/>
+
+    <dubbo:protocol name="hessian" port="-1"/>
+
+    <dubbo:annotation package="com.huashi.monitor"/>
+
+    <!-- 定义全局的配置，测试中@Reference的check=false不起作用，在这里配置 -->
+    <dubbo:consumer check="false"/>
+	
+</beans>

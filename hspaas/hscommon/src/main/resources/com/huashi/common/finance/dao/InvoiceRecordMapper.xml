@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.finance.dao.InvoiceRecordMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.common.finance.domain.InvoiceRecord">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="operator_id" property="operatorId" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="charge_type" property="chargeType" jdbcType="INTEGER" />
+		<result column="charge_money" property="chargeMoney" jdbcType="DOUBLE" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="money" property="money" jdbcType="DOUBLE" />
+		<result column="tracking_number" property="trackingNumber"
+			jdbcType="VARCHAR" />
+		<result column="express" property="express" jdbcType="VARCHAR" />
+		<result column="memo" property="memo" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="mail_man" property="mailMan" jdbcType="VARCHAR" />
+		<result column="zip_code" property="zipCode" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="mailing_time" property="mailingTime" jdbcType="TIMESTAMP" />
+		<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+		<result column="tax_number" property="taxNumber" jdbcType="VARCHAR" />
+		<association property="user" column="user_id"
+			javaType="com.huashi.common.user.domain.User">
+			<id column="user_id" property="id" />
+			<result column="name" property="name" />
+			<result column="user_mobile" property="mobile" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, title, user_id, operator_id, type, charge_type, charge_money, status,
+		money,
+		tracking_number, express, memo, remark, address, mobile, mail_man, zip_code,
+		create_time,
+		mailing_time, modify_time,tax_number
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspass_invoice_record
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from hspass_invoice_record
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.finance.domain.InvoiceRecord">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspass_invoice_record (id, title, user_id,
+		operator_id, type, charge_type,
+		charge_money, status, money,
+		tracking_number, express, memo,
+		remark, address, mobile,
+		mail_man, zip_code, create_time,
+		mailing_time, modify_time,tax_number)
+		values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR},
+		#{userId,jdbcType=INTEGER},
+		#{operatorId,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{chargeType,jdbcType=INTEGER},
+		#{chargeMoney,jdbcType=DOUBLE}, #{status,jdbcType=INTEGER},
+		#{money,jdbcType=DOUBLE},
+		#{trackingNumber,jdbcType=VARCHAR}, #{express,jdbcType=VARCHAR}, #{memo,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR},
+		#{mobile,jdbcType=VARCHAR},
+		#{mailMan,jdbcType=VARCHAR}, #{zipCode,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+		#{mailingTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP},#{taxNumber})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.finance.domain.InvoiceRecord">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspass_invoice_record
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,
+			<if test="title != null">
+				title,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="operatorId != null">
+				operator_id,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="chargeType != null">
+				charge_type,
+			</if>
+			<if test="chargeMoney != null">
+				charge_money,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="money != null">
+				money,
+			</if>
+			<if test="trackingNumber != null">
+				tracking_number,
+			</if>
+			<if test="express != null">
+				express,
+			</if>
+			<if test="memo != null">
+				memo,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="mailMan != null">
+				mail_man,
+			</if>
+			<if test="zipCode != null">
+				zip_code,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="mailingTime != null">
+				mailing_time,
+			</if>
+			<if test="modifyTime != null">
+				modify_time,
+			</if>
+            <if test="taxNumber != null">
+                tax_number
+            </if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{id,jdbcType=INTEGER},
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="operatorId != null">
+				#{operatorId,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=INTEGER},
+			</if>
+			<if test="chargeType != null">
+				#{chargeType,jdbcType=INTEGER},
+			</if>
+			<if test="chargeMoney != null">
+				#{chargeMoney,jdbcType=DOUBLE},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="money != null">
+				#{money,jdbcType=DOUBLE},
+			</if>
+			<if test="trackingNumber != null">
+				#{trackingNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="express != null">
+				#{express,jdbcType=VARCHAR},
+			</if>
+			<if test="memo != null">
+				#{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="mailMan != null">
+				#{mailMan,jdbcType=VARCHAR},
+			</if>
+			<if test="zipCode != null">
+				#{zipCode,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="mailingTime != null">
+				#{mailingTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifyTime != null">
+				#{modifyTime,jdbcType=TIMESTAMP},
+			</if>
+            <if test="taxNumber != null">
+                #{taxNumber}
+            </if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.finance.domain.InvoiceRecord">
+		update hspass_invoice_record
+		<set>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="operatorId != null">
+				operator_id = #{operatorId,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				type = #{type,jdbcType=INTEGER},
+			</if>
+			<if test="chargeType != null">
+				charge_type = #{chargeType,jdbcType=INTEGER},
+			</if>
+			<if test="chargeMoney != null">
+				charge_money = #{chargeMoney,jdbcType=DOUBLE},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="money != null">
+				money = #{money,jdbcType=DOUBLE},
+			</if>
+			<if test="trackingNumber != null">
+				tracking_number = #{trackingNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="express != null">
+				express = #{express,jdbcType=VARCHAR},
+			</if>
+			<if test="memo != null">
+				memo = #{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="mailMan != null">
+				mail_man = #{mailMan,jdbcType=VARCHAR},
+			</if>
+			<if test="zipCode != null">
+				zip_code = #{zipCode,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="mailingTime != null">
+				mailing_time = #{mailingTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifyTime != null">
+				modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+			</if>
+            <if test="taxNumber != null">
+                tax_number = #{taxNumber}
+            </if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.finance.domain.InvoiceRecord">
+		update hspass_invoice_record
+		set title = #{title,jdbcType=VARCHAR},
+		user_id = #{userId,jdbcType=INTEGER},
+		operator_id = #{operatorId,jdbcType=VARCHAR},
+		type = #{type,jdbcType=INTEGER},
+		charge_type = #{chargeType,jdbcType=INTEGER},
+		charge_money = #{chargeMoney,jdbcType=DOUBLE},
+		status = #{status,jdbcType=INTEGER},
+		money = #{money,jdbcType=DOUBLE},
+		tracking_number = #{trackingNumber,jdbcType=VARCHAR},
+		express = #{express,jdbcType=VARCHAR},
+		memo = #{memo,jdbcType=VARCHAR},
+		remark = #{remark,jdbcType=VARCHAR},
+		address = #{address,jdbcType=VARCHAR},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		mail_man = #{mailMan,jdbcType=VARCHAR},
+		zip_code = #{zipCode,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		mailing_time = #{mailingTime,jdbcType=TIMESTAMP},
+		modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+		tax_number = #{taxNumber}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from hspass_invoice_record where user_id
+		= #{userId}
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from hspass_invoice_record where user_id =
+		#{userId}
+		order by id desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select i.*,u.name,u.mobile user_mobile from hspass_invoice_record
+		i,hspaas_user u where i.user_id = u.id
+		<if test="invoiceKeyword != null and invoiceKeyword != ''">
+			and (i.title like '%${invoiceKeyword}%' or address like
+			'%${invoiceKeyword}%' or mail_man like '%${invoiceKeyword}%')
+		</if>
+		<if test="userKeyword != null and userKeyword != ''">
+			and (u.name like '%${userKeyword}%' or u.mobile like
+			'%${userKeyword}%')
+		</if>
+		order by i.status asc,i.id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(i.id) from hspass_invoice_record i,hspaas_user u where
+		i.user_id = u.id
+		<if test="invoiceKeyword != null and invoiceKeyword != ''">
+			and (i.title like '%${invoiceKeyword}%' or address like
+			'%${invoiceKeyword}%' or mail_man like '%${invoiceKeyword}%')
+		</if>
+		<if test="userKeyword != null and userKeyword != ''">
+			and (u.name like '%${userKeyword}%' or u.mobile like
+			'%${userKeyword}%')
+		</if>
+	</select>
+
+	<select id="findById" resultMap="BaseResultMap">
+		select i.*,u.name,u.mobile
+		user_mobile from hspass_invoice_record i,hspaas_user u where i.user_id
+		= u.id
+		and i.id = #{0}
+	</select>
+</mapper>

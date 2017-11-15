@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.passage.dao.SmsPassageAccessMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.passage.domain.SmsPassageAccess">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="group_id" property="groupId" jdbcType="INTEGER" />
+		<result column="route_type" property="routeType" jdbcType="INTEGER" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="passage_code" property="passageCode" jdbcType="VARCHAR" />
+		<result column="protocol" property="protocol" jdbcType="VARCHAR" />
+		<result column="call_type" property="callType" jdbcType="TINYINT" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<result column="params_definition" property="paramsDefinition" jdbcType="VARCHAR" />
+		<result column="params" property="params" jdbcType="VARCHAR" />
+		<result column="result_format" property="resultFormat" jdbcType="VARCHAR" />
+		<result column="success_code" property="successCode" jdbcType="VARCHAR" />
+		<result column="position" property="position" jdbcType="VARCHAR" />
+		<result column="mobile_size" property="mobileSize" jdbcType="INTEGER" />
+		<result column="packets_size" property="packetsSize" jdbcType="INTEGER" />
+		<result column="connection_size" property="connectionSize" jdbcType="INTEGER" />
+		<result column="read_timeout" property="readTimeout" jdbcType="INTEGER" />
+		<result column="access_code" property="accessCode" jdbcType="VARCHAR" />
+		<result column="ext_number" property="extNumber" jdbcType="INTEGER" />
+		<result column="province_code" property="provinceCode" jdbcType="INTEGER" />
+		<result column="sign_mode" property="signMode" jdbcType="TINYINT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="sms_template_param" property="smsTemplateParam" jdbcType="INTEGER" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, group_id, route_type, cmcp, province_code, passage_id, passage_code, protocol, call_type,
+		url, params_definition, params, result_format, success_code, position, mobile_size, packets_size, access_code,
+		ext_number, sign_mode, create_time, status, connection_size, read_timeout, sms_template_param
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_access
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		sms_passage_access
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.passage.domain.SmsPassageAccess">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_passage_access (user_id, group_id, route_type,
+		cmcp,
+		passage_id, passage_code, protocol,
+		call_type, url, params_definition,
+		params,
+		result_format, success_code,
+		position, mobile_size,
+		packets_size, 
+		connection_size, read_timeout,
+		access_code,
+		ext_number, sign_mode,
+		create_time, province_code, sms_template_param)
+		values
+		(#{userId,jdbcType=INTEGER},
+		#{groupId,jdbcType=INTEGER},
+		#{routeType,jdbcType=INTEGER},
+		#{cmcp,jdbcType=INTEGER},
+		#{passageId,jdbcType=INTEGER},
+		#{passageCode,jdbcType=VARCHAR},
+		#{protocol,jdbcType=VARCHAR},
+		#{callType,jdbcType=TINYINT}, #{url,jdbcType=VARCHAR},
+		#{paramsDefinition,jdbcType=VARCHAR},
+		#{params,jdbcType=VARCHAR},
+		#{resultFormat,jdbcType=VARCHAR}, #{successCode,jdbcType=VARCHAR},
+		#{position,jdbcType=VARCHAR}, #{mobileSize,jdbcType=INTEGER},
+		#{packetsSize,jdbcType=INTEGER}, 
+		#{connectionSize,jdbcType=INTEGER},
+		#{readTimeout,jdbcType=INTEGER},
+		#{accessCode,jdbcType=VARCHAR},
+		#{extNumber,jdbcType=INTEGER},
+		#{signMode,jdbcType=TINYINT},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{provinceCode,jdbcType=INTEGER},
+		#{smsTemplateParam,jdbcType=INTEGER}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.passage.domain.SmsPassageAccess">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_passage_access
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="groupId != null">
+				group_id,
+			</if>
+			<if test="routeType != null">
+				route_type,
+			</if>
+			<if test="cmcp != null">
+				cmcp,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="passageCode != null">
+				passage_code,
+			</if>
+			<if test="protocol != null">
+				protocol,
+			</if>
+			<if test="callType != null">
+				call_type,
+			</if>
+			<if test="url != null">
+				url,
+			</if>
+			<if test="paramsDefinition != null">
+				params_definition,
+			</if>
+			<if test="params != null">
+				params,
+			</if>
+			<if test="resultFormat != null">
+				result_format,
+			</if>
+			<if test="successCode != null">
+				success_code,
+			</if>
+			<if test="position != null">
+				position,
+			</if>
+			<if test="mobileSize != null">
+				mobile_size,
+			</if>
+			<if test="packetsSize != null">
+				packets_size,
+			</if>
+			<if test="connectionSize != null">
+				connection_size,
+			</if>
+			<if test="readTimeout != null">
+				read_timeout,
+			</if>
+			<if test="accessCode != null">
+				access_code,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="signMode != null">
+				sign_mode,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="provinceCode != null">
+				province_code,
+			</if>
+			<if test="smsTemplateParam != null">
+				sms_template_param,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="groupId != null">
+				#{groupId,jdbcType=INTEGER},
+			</if>
+			<if test="routeType != null">
+				#{routeType,jdbcType=INTEGER},
+			</if>
+			<if test="cmcp != null">
+				#{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="passageCode != null">
+				#{passageCode,jdbcType=VARCHAR},
+			</if>
+			<if test="protocol != null">
+				#{protocol,jdbcType=VARCHAR},
+			</if>
+			<if test="callType != null">
+				#{callType,jdbcType=TINYINT},
+			</if>
+			<if test="url != null">
+				#{url,jdbcType=VARCHAR},
+			</if>
+			<if test="paramsDefinition != null">
+				#{paramsDefinition,jdbcType=VARCHAR},
+			</if>
+			<if test="params != null">
+				#{params,jdbcType=VARCHAR},
+			</if>
+			<if test="resultFormat != null">
+				#{resultFormat,jdbcType=VARCHAR},
+			</if>
+			<if test="successCode != null">
+				#{successCode,jdbcType=VARCHAR},
+			</if>
+			<if test="position != null">
+				#{position,jdbcType=VARCHAR},
+			</if>
+			<if test="mobileSize != null">
+				#{mobileSize,jdbcType=INTEGER},
+			</if>
+			<if test="packetsSize != null">
+				#{packetsSize,jdbcType=INTEGER},
+			</if>
+			<if test="connectionSize != null">
+				#{connectionSize,jdbcType=INTEGER},
+			</if>
+			<if test="readTimeout != null">
+				#{readTimeout,jdbcType=INTEGER},
+			</if>
+			<if test="accessCode != null">
+				#{accessCode,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=INTEGER},
+			</if>
+			<if test="signMode != null">
+				#{signMode,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="provinceCode != null">
+				#{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="smsTemplateParam != null">
+				#{smsTemplateParam,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.passage.domain.SmsPassageAccess">
+		update sms_passage_access
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="groupId != null">
+				group_id = #{groupId,jdbcType=INTEGER},
+			</if>
+			<if test="routeType != null">
+				route_type = #{routeType,jdbcType=INTEGER},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="provinceCode != null">
+				province_code = #{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="passageCode != null">
+				passage_code = #{passageCode,jdbcType=VARCHAR},
+			</if>
+			<if test="protocol != null">
+				protocol = #{protocol,jdbcType=VARCHAR},
+			</if>
+			<if test="callType != null">
+				call_type = #{callType,jdbcType=TINYINT},
+			</if>
+			<if test="url != null">
+				url = #{url,jdbcType=VARCHAR},
+			</if>
+			<if test="paramsDefinition != null">
+				params_definition = #{paramsDefinition,jdbcType=VARCHAR},
+			</if>
+			<if test="params != null">
+				params = #{params,jdbcType=VARCHAR},
+			</if>
+			<if test="resultFormat != null">
+				result_format = #{resultFormat,jdbcType=VARCHAR},
+			</if>
+			<if test="successCode != null">
+				success_code = #{successCode,jdbcType=VARCHAR},
+			</if>
+			<if test="position != null">
+				position = #{position,jdbcType=VARCHAR},
+			</if>
+			<if test="mobileSize != null">
+				mobile_size = #{mobileSize,jdbcType=INTEGER},
+			</if>
+			<if test="packetsSize != null">
+				packets_size = #{packetsSize,jdbcType=INTEGER},
+			</if>
+			<if test="connectionSize != null">
+				connection_size = #{connectionSize,jdbcType=INTEGER},
+			</if>
+			<if test="readTimeout != null">
+				read_timeout =  #{readTimeout,jdbcType=INTEGER},
+			</if>
+			<if test="accessCode != null">
+				access_code = #{accessCode,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=INTEGER},
+			</if>
+			<if test="signMode != null">
+				sign_mode = #{signMode,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="smsTemplateParam != null">
+				sms_template_param = #{smsTemplateParam,jdbcType=INTEGER},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.passage.domain.SmsPassageAccess">
+		update
+		sms_passage_access
+		set user_id = #{userId,jdbcType=INTEGER},
+		group_id =
+		#{groupId,jdbcType=INTEGER},
+		route_type =
+		#{routeType,jdbcType=INTEGER},
+		cmcp = #{cmcp,jdbcType=INTEGER},
+		province_code = #{provinceCode,jdbcType=INTEGER},
+		passage_id =
+		#{passageId,jdbcType=INTEGER},
+		passage_code =
+		#{passageCode,jdbcType=VARCHAR},
+		protocol =
+		#{protocol,jdbcType=VARCHAR},
+		call_type = #{callType,jdbcType=TINYINT},
+		url = #{url,jdbcType=VARCHAR},
+		params_definition =
+		#{paramsDefinition,jdbcType=VARCHAR},
+		params =
+		#{params,jdbcType=VARCHAR},
+		result_format =
+		#{resultFormat,jdbcType=VARCHAR},
+		success_code =
+		#{successCode,jdbcType=VARCHAR},
+		position =
+		#{position,jdbcType=VARCHAR},
+		mobile_size =
+		#{mobileSize,jdbcType=INTEGER},
+		packets_size =
+		#{packetsSize,jdbcType=INTEGER},
+		connection_size = #{connectionSize,jdbcType=INTEGER},
+		read_timeout =  #{readTimeout,jdbcType=INTEGER},
+		ext_number =
+		#{extNumber,jdbcType=INTEGER},
+		access_code =
+		#{accessCode,jdbcType=VARCHAR},
+		sign_mode =
+		#{signMode,jdbcType=TINYINT},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		status =
+		#{status,jdbcType=TINYINT},
+		sms_template_param = #{smsTemplateParam,jdbcType=INTEGER},
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_access
+	</select>
+
+	<select id="selectWaitPulling" resultMap="BaseResultMap">
+		select passage_id,
+		protocol, call_type, url, params,success_code
+		from sms_passage_access
+		where call_type = #{callType} and status = 0
+		group by passage_id,
+		protocol, call_type,
+		url, params,success_code
+	</select>
+
+	<select id="selectByType" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_access where call_type = #{type}
+	</select>
+
+	<select id="selectByUserIdAndCmcp" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_access where user_id = #{userId,jdbcType=INTEGER}
+		and
+		cmcp = #{cmcp,jdbcType=INTEGER} and route_type = 0 order by id desc
+		limit 1
+	</select>
+
+	<select id="selectByUserIdAndRouteCmcp" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_access where user_id = #{userId,jdbcType=INTEGER}
+		and
+		route_type = #{route}
+		and province_code = #{provinceCode}
+		and cmcp =
+		#{cmcp}
+		order by id desc limit 1
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_access where 1=1
+		<if test="passageId != null and passageId != ''">
+			and passage_id = #{passageId}
+		</if>
+		<if test="userId != null and userId != ''">
+			and user_id = #{userId}
+		</if>
+		order by create_time desc limit #{start},#{end}
+	</select>
+
+	<select id="count" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(id) from sms_passage_access where 1=1
+		<if test="passageId != null and passageId != ''">
+			and passage_id = #{passageId}
+		</if>
+		<if test="userId != null and userId != ''">
+			and user_id = #{userId}
+		</if>
+	</select>
+
+	<delete id="deleteByUserId">
+		delete from sms_passage_access where user_id =
+		#{userId}
+	</delete>
+
+	<select id="getByTypeAndUrl" resultMap="BaseResultMap">
+		select passage_id,
+		protocol,
+		call_type, url, params_definition,params, result_format,
+		success_code,
+		position, mobile_size, packets_size, access_code,
+		ext_number
+		from
+		sms_passage_access
+		where url = #{url} and call_type =
+		#{callType}
+		limit 1
+	</select>
+
+	<select id="selectByPassageId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_access where passage_id = ${passageId}
+	</select>
+
+	<delete id="deleteByPasageId">
+		delete from sms_passage_access where passage_id = ${passageId}
+	</delete>
+	
+	<delete id="updateStatusByPassageId">
+		update sms_passage_access set status = #{status} where passage_id = ${passageId}
+	</delete>
+	
+	
+
+</mapper>

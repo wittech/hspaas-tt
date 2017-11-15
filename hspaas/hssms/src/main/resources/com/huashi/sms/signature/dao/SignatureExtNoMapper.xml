@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.signature.dao.SignatureExtNoMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.signature.domain.SignatureExtNo">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="signature" property="signature" jdbcType="VARCHAR" />
+		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, signature, ext_number, remark, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sms_signature_extno
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		sms_signature_extno
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.signature.domain.SignatureExtNo">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_signature_extno (user_id, signature, ext_number,
+		remark, create_time)
+		values (#{userId,jdbcType=INTEGER},
+		#{signature,jdbcType=VARCHAR},
+		#{extNumber,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.signature.domain.SignatureExtNo">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_signature_extno
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="signature != null">
+				signature,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="signature != null">
+				#{signature,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.signature.domain.SignatureExtNo">
+		update sms_signature_extno
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="signature != null">
+				signature = #{signature,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.signature.domain.SignatureExtNo">
+		update
+		sms_signature_extno
+		set user_id = #{userId,jdbcType=INTEGER},
+		signature
+		= #{signature,jdbcType=VARCHAR},
+		ext_number =
+		#{extNumber,jdbcType=VARCHAR},
+		remark = #{remark,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP}
+		where id =
+		#{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from sms_signature_extno where 1=1
+		<if test="signature != null and signature != ''">
+			and signature like CONCAT('%', #{signature},'%')
+		</if>
+		<if test="userId != null and userId != ''">
+			and user_id = #{userId}
+		</if>
+		order by id desc limit #{start}, #{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(id) from sms_signature_extno where 1=1
+		<if test="signature != null and signature != ''">
+			and signature like CONCAT('%', #{signature},'%')
+		</if>
+		<if test="userId != null and userId != ''">
+			and user_id = #{userId}
+		</if>
+	</select>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		select id, user_id, signature, ext_number from sms_signature_extno
+	</select>
+	
+	<select id="selectByUserId" resultMap="BaseResultMap">
+		select id, user_id, signature, ext_number from sms_signature_extno where user_id = #{userId}
+	</select>
+	
+
+</mapper>

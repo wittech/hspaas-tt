@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.record.dao.SmsApiFailedRecordMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.record.domain.SmsApiFailedRecord">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="app_type" property="appType" jdbcType="TINYINT" />
+		<result column="submit_type" property="submitType" jdbcType="TINYINT" />
+		<result column="app_key" property="appKey" jdbcType="VARCHAR" />
+		<result column="app_secret" property="appSecret" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="timestamps" property="timestamps" jdbcType="VARCHAR" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
+		<result column="attach" property="attach" jdbcType="VARCHAR" />
+		<result column="callback" property="callback" jdbcType="VARCHAR" />
+		<result column="submit_url" property="submitUrl" jdbcType="VARCHAR" />
+		<result column="ip" property="ip" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="resp_code" property="respCode" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, app_type, submit_type, app_key, app_secret, mobile,
+		timestamps, content,
+		ext_number, attach, callback, submit_url, ip, create_time, resp_code, remark
+	</sql>
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from sms_api_failed_record
+		<where>
+			<if test="keyword != null and keyword != ''">
+				app_key like '%${keyword}%' or content like '%${keyword}%' or mobile like '%${keyword}%'
+			</if>
+		</where>
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select * from sms_api_failed_record
+		<where>
+			<if test="keyword != null and keyword != ''">
+				app_key like '%${keyword}%' or content like '%${keyword}%' or mobile like '%${keyword}%'
+			</if>
+		</where>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sms_api_failed_record
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from sms_api_failed_record
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.record.domain.SmsApiFailedRecord">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_api_failed_record (user_id, app_type, submit_type,
+		app_key, app_secret, mobile,
+		timestamps, content, ext_number,
+		attach, callback, submit_url,
+		ip, create_time, resp_code,
+		remark)
+		values (#{userId,jdbcType=INTEGER}, #{appType,jdbcType=TINYINT},
+		#{submitType,jdbcType=TINYINT},
+		#{appKey,jdbcType=VARCHAR}, #{appSecret,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR},
+		#{timestamps,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR},
+		#{extNumber,jdbcType=VARCHAR},
+		#{attach,jdbcType=VARCHAR}, #{callback,jdbcType=VARCHAR}, #{submitUrl,jdbcType=VARCHAR},
+		#{ip,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+		#{respCode,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.record.domain.SmsApiFailedRecord">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_api_failed_record
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="appType != null">
+				app_type,
+			</if>
+			<if test="submitType != null">
+				submit_type,
+			</if>
+			<if test="appKey != null">
+				app_key,
+			</if>
+			<if test="appSecret != null">
+				app_secret,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="timestamps != null">
+				timestamps,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="attach != null">
+				attach,
+			</if>
+			<if test="callback != null">
+				callback,
+			</if>
+			<if test="submitUrl != null">
+				submit_url,
+			</if>
+			<if test="ip != null">
+				ip,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="respCode != null">
+				resp_code,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="appType != null">
+				#{appType,jdbcType=TINYINT},
+			</if>
+			<if test="submitType != null">
+				#{submitType,jdbcType=TINYINT},
+			</if>
+			<if test="appKey != null">
+				#{appKey,jdbcType=VARCHAR},
+			</if>
+			<if test="appSecret != null">
+				#{appSecret,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="timestamps != null">
+				#{timestamps,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				#{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				#{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="submitUrl != null">
+				#{submitUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="ip != null">
+				#{ip,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="respCode != null">
+				#{respCode,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.record.domain.SmsApiFailedRecord">
+		update sms_api_failed_record
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="appType != null">
+				app_type = #{appType,jdbcType=TINYINT},
+			</if>
+			<if test="submitType != null">
+				submit_type = #{submitType,jdbcType=TINYINT},
+			</if>
+			<if test="appKey != null">
+				app_key = #{appKey,jdbcType=VARCHAR},
+			</if>
+			<if test="appSecret != null">
+				app_secret = #{appSecret,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="timestamps != null">
+				timestamps = #{timestamps,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				attach = #{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				callback = #{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="submitUrl != null">
+				submit_url = #{submitUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="ip != null">
+				ip = #{ip,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="respCode != null">
+				resp_code = #{respCode,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.record.domain.SmsApiFailedRecord">
+		update sms_api_failed_record
+		set user_id = #{userId,jdbcType=INTEGER},
+		app_type = #{appType,jdbcType=TINYINT},
+		submit_type = #{submitType,jdbcType=TINYINT},
+		app_key = #{appKey,jdbcType=VARCHAR},
+		app_secret = #{appSecret,jdbcType=VARCHAR},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		timestamps = #{timestamps,jdbcType=VARCHAR},
+		content = #{content,jdbcType=VARCHAR},
+		ext_number = #{extNumber,jdbcType=VARCHAR},
+		attach = #{attach,jdbcType=VARCHAR},
+		callback = #{callback,jdbcType=VARCHAR},
+		submit_url = #{submitUrl,jdbcType=VARCHAR},
+		ip = #{ip,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		resp_code = #{respCode,jdbcType=VARCHAR},
+		remark = #{remark,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="selectCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from sms_api_failed_record where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and mobile like CONCAT('%',#{phoneNumber},'%')
+		</if>
+	</select>
+
+	<select id="selectPageList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from sms_api_failed_record where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and mobile like CONCAT('%',#{phoneNumber},'%')
+		</if>
+		order by id desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+</mapper>

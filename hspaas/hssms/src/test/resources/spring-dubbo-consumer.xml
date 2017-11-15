@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context.xsd
+	http://code.alibabatech.com/schema/dubbo 
+	http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- <context:component-scan base-package="com.huashi.sms" /> -->
+
+	<dubbo:application name="hssms-consumer-test" />
+
+	<dubbo:registry protocol="zookeeper" address="zookeeper://localhost:2181"
+		timeout="15000" />
+		
+	<!-- 定义全局的配置，测试中@Reference的check=false不起作用，在这里配置 -->
+	<dubbo:consumer check="false" />
+
+	<dubbo:annotation package="com.huashi.sms" />
+
+</beans>

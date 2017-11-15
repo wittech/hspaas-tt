@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.record.dao.SmsMtMessageDeliverMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.record.domain.SmsMtMessageDeliver">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="msg_id" property="msgId" jdbcType="VARCHAR" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="status_code" property="statusCode" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="deliver_time" property="deliverTime" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, msg_id, cmcp, mobile, status_code, status,
+		deliver_time, create_time,
+		remark
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mt_message_deliver
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		sms_mt_message_deliver
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliver">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mt_message_deliver (msg_id, cmcp, mobile,
+		status_code,
+		status, deliver_time,
+		create_time, remark)
+		values
+		(#{msgId,jdbcType=VARCHAR}, #{cmcp,jdbcType=INTEGER},
+		#{mobile,jdbcType=VARCHAR},
+		#{statusCode,jdbcType=VARCHAR},
+		#{status,jdbcType=INTEGER}, #{deliverTime,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliver">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mt_message_deliver
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="msgId != null">
+				msg_id,
+			</if>
+			<if test="cmcp != null">
+				cmcp,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="statusCode != null">
+				status_code,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="deliverTime != null">
+				deliver_time,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="msgId != null">
+				#{msgId,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				#{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="statusCode != null">
+				#{statusCode,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="deliverTime != null">
+				#{deliverTime,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliver">
+		update sms_mt_message_deliver
+		<set>
+			<if test="msgId != null">
+				msg_id = #{msgId,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="statusCode != null">
+				status_code = #{statusCode,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="deliverTime != null">
+				deliver_time = #{deliverTime,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliver">
+		update
+		sms_mt_message_deliver
+		set msg_id = #{msgId,jdbcType=VARCHAR},
+		cmcp =
+		#{cmcp,jdbcType=INTEGER},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		status_code = #{statusCode,jdbcType=VARCHAR},
+		status =
+		#{status,jdbcType=INTEGER},
+		deliver_time =
+		#{deliverTime,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		remark = #{remark,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="selectByMobileAndMsgid" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mt_message_deliver where msg_id = #{msgId} and mobile = #{mobile}
+		order by id desc limit 1
+	</select>
+
+	<insert id="batchInsert" parameterType="List">
+		insert ignore into sms_mt_message_deliver (msg_id, cmcp, mobile,
+		status_code, status, deliver_time, create_time, remark) values
+
+		<foreach collection="list" item="message" index="index"
+			separator=",">
+			(#{message.msgId}, #{message.cmcp}, #{message.mobile},
+			#{message.statusCode},
+			#{message.status},
+			#{message.deliverTime},
+			#{message.createTime},
+			#{message.remark})
+		</foreach>
+	</insert>
+</mapper>

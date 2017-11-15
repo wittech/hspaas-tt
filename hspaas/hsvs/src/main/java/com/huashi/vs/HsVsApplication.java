@@ -1,0 +1,42 @@
+/**
+ * 
+ */
+package com.huashi.vs;
+
+import java.util.concurrent.CountDownLatch;
+
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
+
+import com.huashi.common.util.LogUtils;
+
+/**
+ * 
+  * TODO 华时语音服务启动入口
+  *
+  * @author zhengying
+  * @version V1.0.0   
+  * @date 2016年7月3日 下午5:24:06
+ */
+@SpringBootApplication
+@ImportResource({ "classpath:spring.xml" })
+public class HsVsApplication {
+	@Bean
+	public CountDownLatch closeLatch() {
+		return new CountDownLatch(1);
+	}
+
+	public static void main(String args[]) throws InterruptedException {
+
+		ApplicationContext ctx = new SpringApplicationBuilder()
+				.sources(HsVsApplication.class).web(false).run(args);
+
+		LogUtils.info("----------------华时语音服务项目已启动----------------");
+
+		CountDownLatch closeLatch = ctx.getBean(CountDownLatch.class);
+		closeLatch.await();
+	}
+}

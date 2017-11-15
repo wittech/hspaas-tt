@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.passage.dao.SmsPassageMessageTemplateMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.passage.domain.SmsPassageMessageTemplate">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="template_id" property="templateId" jdbcType="VARCHAR" />
+		<result column="template_content" property="templateContent"
+			jdbcType="VARCHAR" />
+		<result column="regex_value" property="regexValue" jdbcType="VARCHAR" />
+		<result column="param_names" property="paramNames" jdbcType="VARCHAR" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="status" property="status" jdbcType="TINYINT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, template_id, template_content, regex_value, param_names, passage_id, status, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_message_template
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from sms_passage_message_template
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageMessageTemplate">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_passage_message_template (template_id,
+		template_content, regex_value, param_names, passage_id,
+		status, create_time)
+		values (#{templateId,jdbcType=VARCHAR}, #{templateContent,jdbcType=VARCHAR},
+		#{regexValue,jdbcType=VARCHAR}, #{paramNames,jdbcType=VARCHAR},
+		#{passageId,jdbcType=INTEGER},
+		#{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageMessageTemplate">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_passage_message_template
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="templateId != null">
+				template_id,
+			</if>
+			<if test="templateContent != null">
+				template_content,
+			</if>
+			<if test="regexValue != null">
+				regex_value,
+			</if>
+			<if test="paramNames != null">
+				param_names,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="templateId != null">
+				#{templateId,jdbcType=VARCHAR},
+			</if>
+			<if test="templateContent != null">
+				#{templateContent,jdbcType=VARCHAR},
+			</if>
+			<if test="regexValue != null">
+				#{regexValue,jdbcType=VARCHAR},
+			</if>
+			<if test="paramNames != null">
+				#{paramNames,jdbcType=VARCHAR},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageMessageTemplate">
+		update sms_passage_message_template
+		<set>
+			<if test="templateId != null">
+				template_id = #{templateId,jdbcType=VARCHAR},
+			</if>
+			<if test="templateContent != null">
+				template_content = #{templateContent,jdbcType=VARCHAR},
+			</if>
+			<if test="regexValue != null">
+				regex_value = #{regexValue,jdbcType=VARCHAR},
+			</if>
+			<if test="paramNames != null">
+				param_names = #{paramNames,jdbcType=VARCHAR},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageMessageTemplate">
+		update sms_passage_message_template
+		set template_id = #{templateId,jdbcType=VARCHAR},
+		template_content = #{templateContent,jdbcType=VARCHAR},
+		regex_value = #{regexValue,jdbcType=VARCHAR},
+		param_names = #{paramNames,jdbcType=VARCHAR},
+		passage_id = #{passageId,jdbcType=INTEGER},
+		status = #{status,jdbcType=TINYINT},
+		create_time = #{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	
+	<select id="selectList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_message_template where 1=1
+		<if test="content != null and content != ''">
+			and template_content like CONCAT('%', #{content},'%')
+		</if>
+		<if test="passageId != null and passageId != ''">
+			and passage_id = #{passageId}
+		</if>
+		<if test="templateId != null and templateId != ''">
+			and template_id = #{templateId}
+		</if>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="selectCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(id) from sms_passage_message_template where 1=1
+		<if test="content != null and content != ''">
+			and template_content like CONCAT('%', #{content},'%')
+		</if>
+		<if test="passageId != null and passageId != ''">
+			and passage_id = #{passageId}
+		</if>
+		<if test="templateId != null and templateId != ''">
+			and template_id = #{templateId}
+		</if>
+	</select>
+	
+	<select id="selectByPassageId" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" />
+		from sms_passage_message_template where passage_id = #{passageId}
+	</select>
+	
+	<select id="selectByPassageTemplateId" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" />
+		from sms_passage_message_template where template_id = #{templateId} order by id desc limit 1
+	</select>
+	
+	<select id="selectAvaiable" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" />
+		from sms_passage_message_template where status = 0
+	</select>
+	
+</mapper>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.fs.passage.dao.FluxPassageParameterMapper" >
+  <resultMap id="BaseResultMap" type="com.huashi.fs.passage.domain.FluxPassageParameter" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="passage_id" property="passageId" jdbcType="INTEGER" />
+    <result column="protocol" property="protocol" jdbcType="VARCHAR" />
+    <result column="call_type" property="callType" jdbcType="TINYINT" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="params_definition" property="paramsDefinition" jdbcType="VARCHAR" />
+    <result column="params" property="params" jdbcType="VARCHAR" />
+    <result column="result_format" property="resultFormat" jdbcType="VARCHAR" />
+    <result column="success_code" property="successCode" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, passage_id, protocol, call_type, url, params_definition, params, result_format, 
+    success_code, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from fs_passage_parameter
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from fs_passage_parameter
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.huashi.fs.passage.domain.FluxPassageParameter" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into fs_passage_parameter (passage_id, protocol, call_type, 
+      url, params_definition, params, 
+      result_format, success_code, create_time
+      )
+    values (#{passageId,jdbcType=INTEGER}, #{protocol,jdbcType=VARCHAR}, #{callType,jdbcType=TINYINT}, 
+      #{url,jdbcType=VARCHAR}, #{paramsDefinition,jdbcType=VARCHAR}, #{params,jdbcType=VARCHAR}, 
+      #{resultFormat,jdbcType=VARCHAR}, #{successCode,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.huashi.fs.passage.domain.FluxPassageParameter" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into fs_passage_parameter
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="passageId != null" >
+        passage_id,
+      </if>
+      <if test="protocol != null" >
+        protocol,
+      </if>
+      <if test="callType != null" >
+        call_type,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="paramsDefinition != null" >
+        params_definition,
+      </if>
+      <if test="params != null" >
+        params,
+      </if>
+      <if test="resultFormat != null" >
+        result_format,
+      </if>
+      <if test="successCode != null" >
+        success_code,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="passageId != null" >
+        #{passageId,jdbcType=INTEGER},
+      </if>
+      <if test="protocol != null" >
+        #{protocol,jdbcType=VARCHAR},
+      </if>
+      <if test="callType != null" >
+        #{callType,jdbcType=TINYINT},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="paramsDefinition != null" >
+        #{paramsDefinition,jdbcType=VARCHAR},
+      </if>
+      <if test="params != null" >
+        #{params,jdbcType=VARCHAR},
+      </if>
+      <if test="resultFormat != null" >
+        #{resultFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="successCode != null" >
+        #{successCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huashi.fs.passage.domain.FluxPassageParameter" >
+    update fs_passage_parameter
+    <set >
+      <if test="passageId != null" >
+        passage_id = #{passageId,jdbcType=INTEGER},
+      </if>
+      <if test="protocol != null" >
+        protocol = #{protocol,jdbcType=VARCHAR},
+      </if>
+      <if test="callType != null" >
+        call_type = #{callType,jdbcType=TINYINT},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="paramsDefinition != null" >
+        params_definition = #{paramsDefinition,jdbcType=VARCHAR},
+      </if>
+      <if test="params != null" >
+        params = #{params,jdbcType=VARCHAR},
+      </if>
+      <if test="resultFormat != null" >
+        result_format = #{resultFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="successCode != null" >
+        success_code = #{successCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huashi.fs.passage.domain.FluxPassageParameter" >
+    update fs_passage_parameter
+    set passage_id = #{passageId,jdbcType=INTEGER},
+      protocol = #{protocol,jdbcType=VARCHAR},
+      call_type = #{callType,jdbcType=TINYINT},
+      url = #{url,jdbcType=VARCHAR},
+      params_definition = #{paramsDefinition,jdbcType=VARCHAR},
+      params = #{params,jdbcType=VARCHAR},
+      result_format = #{resultFormat,jdbcType=VARCHAR},
+      success_code = #{successCode,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

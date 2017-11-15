@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.settings.dao.AddressBookMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.settings.domain.AddressBook">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="is_default" property="isDefault" jdbcType="INTEGER" />
+		<result column="city" property="city" jdbcType="VARCHAR" />
+		<result column="province" property="province" jdbcType="VARCHAR" />
+		<result column="area" property="area" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="zip_code" property="zipCode" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, name, user_id, mobile, is_default, city, province,
+		area, address,
+		zip_code, create_time,
+		modify_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspass_address_book
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		hspass_address_book
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.settings.domain.AddressBook">
+		insert into
+		hspass_address_book (id, name, user_id,
+		mobile, is_default, city,
+		province, area, address,
+		zip_code, create_time, modify_time
+		)
+		values
+		(#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR},
+		#{userId,jdbcType=INTEGER},
+		#{mobile,jdbcType=VARCHAR},
+		#{isDefault,jdbcType=INTEGER}, #{city,jdbcType=VARCHAR},
+		#{province,jdbcType=VARCHAR}, #{area,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR},
+		#{zipCode,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.settings.domain.AddressBook">
+		insert into hspass_address_book
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="isDefault != null">
+				is_default,
+			</if>
+			<if test="city != null">
+				city,
+			</if>
+			<if test="province != null">
+				province,
+			</if>
+			<if test="area != null">
+				area,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="zipCode != null">
+				zip_code,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="modifyTime != null">
+				modify_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="isDefault != null">
+				#{isDefault,jdbcType=INTEGER},
+			</if>
+			<if test="city != null">
+				#{city,jdbcType=VARCHAR},
+			</if>
+			<if test="province != null">
+				#{province,jdbcType=VARCHAR},
+			</if>
+			<if test="area != null">
+				#{area,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="zipCode != null">
+				#{zipCode,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifyTime != null">
+				#{modifyTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.settings.domain.AddressBook">
+		update hspass_address_book
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="isDefault != null">
+				is_default = #{isDefault,jdbcType=INTEGER},
+			</if>
+			<if test="city != null">
+				city = #{city,jdbcType=VARCHAR},
+			</if>
+			<if test="province != null">
+				province = #{province,jdbcType=VARCHAR},
+			</if>
+			<if test="area != null">
+				area = #{area,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="zipCode != null">
+				zip_code = #{zipCode,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifyTime != null">
+				modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.settings.domain.AddressBook">
+		update
+		hspass_address_book
+		set name = #{name,jdbcType=VARCHAR},
+		user_id =
+		#{userId,jdbcType=INTEGER},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		is_default = #{isDefault,jdbcType=INTEGER},
+		city =
+		#{city,jdbcType=VARCHAR},
+		province = #{province,jdbcType=VARCHAR},
+		area
+		= #{area,jdbcType=VARCHAR},
+		address = #{address,jdbcType=VARCHAR},
+		zip_code = #{zipCode,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		modify_time =
+		#{modifyTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<update id="updateStatus" parameterType="java.lang.Integer">
+		update
+		hspass_address_book set is_default =0 where id != #{id}
+	</update>
+
+	<select id="findListByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspass_address_book where user_id = #{userId}
+		order by id desc
+	</select>
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from hspass_address_book where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="mobile != null">
+			and mobile like CONCAT('%',#{mobile},'%')
+		</if>
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from hspass_address_book where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="mobile != null">
+			and mobile like CONCAT('%',#{mobile},'%')
+		</if>
+		order by id desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+
+	<select id="selectByDefaultFlag" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspass_address_book where user_id = #{userId} and is_default = 1
+		order by id desc limit 1
+	</select>
+
+
+</mapper>

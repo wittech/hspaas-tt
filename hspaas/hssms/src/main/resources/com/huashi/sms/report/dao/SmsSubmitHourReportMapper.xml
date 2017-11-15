@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.report.dao.SmsSubmitHourReportMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.report.domain.SmsSubmitHourReport">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="province_code" property="provinceCode"
+			jdbcType="INTEGER" />
+		<result column="submit_count" property="submitCount" jdbcType="INTEGER" />
+		<result column="bill_count" property="billCount" jdbcType="INTEGER" />
+		<result column="unknown_count" property="unknownCount"
+			jdbcType="INTEGER" />
+		<result column="success_count" property="successCount"
+			jdbcType="INTEGER" />
+		<result column="submit_failed_count" property="submitFailedCount"
+			jdbcType="INTEGER" />
+		<result column="other_count" property="otherCount" jdbcType="INTEGER" />
+		<result column="status" property="status" jdbcType="TINYINT" />
+		<result column="born_hours" property="bornHours" jdbcType="INTEGER" />
+		<result column="hour_time" property="hourTime" jdbcType="BIGINT" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, passage_id, province_code, submit_count, bill_count,
+		unknown_count,
+		success_count, submit_failed_count, other_count, status, born_hours, hour_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sms_submit_hour_report
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from sms_submit_hour_report
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.report.domain.SmsSubmitHourReport">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_submit_hour_report (user_id, passage_id,
+		province_code,
+		submit_count, bill_count, unknown_count,
+		success_count, submit_failed_count, other_count,
+		status, born_hours, hour_time
+		)
+		values (#{userId,jdbcType=INTEGER}, #{passageId,jdbcType=INTEGER},
+		#{provinceCode,jdbcType=INTEGER},
+		#{submitCount,jdbcType=INTEGER}, #{billCount,jdbcType=INTEGER}, #{unknownCount,jdbcType=INTEGER},
+		#{successCount,jdbcType=INTEGER},
+		#{submitFailedCount,jdbcType=INTEGER}, #{otherCount,jdbcType=INTEGER},
+		#{status,jdbcType=TINYINT}, #{bornHours,jdbcType=INTEGER},
+		#{hourTime,jdbcType=BIGINT}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.report.domain.SmsSubmitHourReport">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_submit_hour_report
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="provinceCode != null">
+				province_code,
+			</if>
+			<if test="submitCount != null">
+				submit_count,
+			</if>
+			<if test="billCount != null">
+				bill_count,
+			</if>
+			<if test="unknownCount != null">
+				unknown_count,
+			</if>
+			<if test="successCount != null">
+				success_count,
+			</if>
+			<if test="submitFailedCount != null">
+				submit_failed_count,
+			</if>
+			<if test="otherCount != null">
+				other_count,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="bornHours != null">
+				born_hours,
+			</if>
+			<if test="hourTime != null">
+				hour_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="provinceCode != null">
+				#{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="submitCount != null">
+				#{submitCount,jdbcType=INTEGER},
+			</if>
+			<if test="billCount != null">
+				#{billCount,jdbcType=INTEGER},
+			</if>
+			<if test="unknownCount != null">
+				#{unknownCount,jdbcType=INTEGER},
+			</if>
+			<if test="successCount != null">
+				#{successCount,jdbcType=INTEGER},
+			</if>
+			<if test="submitFailedCount != null">
+				#{submitFailedCount,jdbcType=INTEGER},
+			</if>
+			<if test="otherCount != null">
+				#{otherCount,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="bornHours != null">
+				#{bornHours,jdbcType=INTEGER},
+			</if>
+			<if test="hourTime != null">
+				#{hourTime,jdbcType=BIGINT},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.report.domain.SmsSubmitHourReport">
+		update sms_submit_hour_report
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="provinceCode != null">
+				province_code = #{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="submitCount != null">
+				submit_count = #{submitCount,jdbcType=INTEGER},
+			</if>
+			<if test="billCount != null">
+				bill_count = #{billCount,jdbcType=INTEGER},
+			</if>
+			<if test="unknownCount != null">
+				unknown_count = #{unknownCount,jdbcType=INTEGER},
+			</if>
+			<if test="successCount != null">
+				success_count = #{successCount,jdbcType=INTEGER},
+			</if>
+			<if test="submitFailedCount != null">
+				submit_failed_count = #{submitFailedCount,jdbcType=INTEGER},
+			</if>
+			<if test="otherCount != null">
+				other_count = #{otherCount,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="bornHours != null">
+				born_hours = #{bornHours,jdbcType=INTEGER},
+			</if>
+			<if test="hourTime != null">
+				hour_time = #{hourTime,jdbcType=BIGINT},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.report.domain.SmsSubmitHourReport">
+		update sms_submit_hour_report
+		set user_id = #{userId,jdbcType=INTEGER},
+		passage_id = #{passageId,jdbcType=INTEGER},
+		province_code = #{provinceCode,jdbcType=INTEGER},
+		submit_count = #{submitCount,jdbcType=INTEGER},
+		bill_count = #{billCount,jdbcType=INTEGER},
+		unknown_count = #{unknownCount,jdbcType=INTEGER},
+		success_count = #{successCount,jdbcType=INTEGER},
+		submit_failed_count = #{submitFailedCount,jdbcType=INTEGER},
+		other_count = #{otherCount,jdbcType=INTEGER},
+		status = #{status,jdbcType=TINYINT},
+		born_hours = #{bornHours,jdbcType=INTEGER},
+		hour_time = #{hourTime,jdbcType=BIGINT}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<insert id="batchInsert" parameterType="List">
+		insert ignore into sms_submit_hour_report (user_id, passage_id,
+		province_code,
+		submit_count, bill_count, unknown_count,
+		success_count, submit_failed_count, other_count,
+		status, born_hours, hour_time) values
+
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.userId,jdbcType=INTEGER},
+			#{item.passageId,jdbcType=INTEGER},
+			#{item.provinceCode,jdbcType=INTEGER},
+			#{item.submitCount,jdbcType=INTEGER},
+			#{item.billCount,jdbcType=INTEGER},
+			#{item.unknownCount,jdbcType=INTEGER},
+			#{item.successCount,jdbcType=INTEGER},
+			#{item.submitFailedCount,jdbcType=INTEGER},
+			#{item.otherCount,jdbcType=INTEGER},
+			#{item.status,jdbcType=TINYINT}, #{item.bornHours,jdbcType=INTEGER},
+			#{item.hourTime,jdbcType=BIGINT})
+		</foreach>
+	</insert>
+	
+	<select id="selectUserPassageSubmitReport" resultMap="BaseResultMap">
+		select user_id, passage_id,
+			SUM(submit_count) AS submit_count, SUM(bill_count) AS bill_count, SUM(unknown_count) AS unknown_count, 
+			SUM(success_count) AS success_count, SUM(submit_failed_count) AS submit_failed_count, 
+			SUM(other_count) AS other_count
+			from sms_submit_hour_report
+		where hour_time &gt;= #{startTime} and hour_time &lt;= #{endTime}
+		<if test="userId != null">
+			and user_id = #{userId}
+		</if>
+		group by user_id, passage_id
+	</select>
+	
+	<select id="selectUserSubmitReport" resultMap="BaseResultMap">
+		select user_id,
+			SUM(submit_count) AS submit_count, SUM(bill_count) AS bill_count, SUM(unknown_count) AS unknown_count, 
+			SUM(success_count) AS success_count, SUM(submit_failed_count) AS submit_failed_count, 
+			SUM(other_count) AS other_count
+			from sms_submit_hour_report
+		where hour_time &gt;= #{startTime} and hour_time &lt;= #{endTime}
+		<if test="userId != null">
+			and user_id = #{userId}
+		</if>
+		group by user_id
+	</select>
+	
+	<select id="selectPassageSubmitReport" resultMap="BaseResultMap">
+		select passage_id,
+			SUM(submit_count) AS submit_count, SUM(bill_count) AS bill_count, SUM(unknown_count) AS unknown_count, 
+			SUM(success_count) AS success_count, SUM(submit_failed_count) AS submit_failed_count, 
+			SUM(other_count) AS other_count
+			from sms_submit_hour_report
+		where hour_time &gt;= #{startTime} and hour_time &lt;= #{endTime}
+		<if test="passageId != null">
+			and passage_id = #{passageId}
+		</if>
+		group by passage_id
+	</select>
+	
+	<select id="selectProvinceSubmitReport" resultMap="BaseResultMap">
+		select province_code,
+			SUM(submit_count) AS submit_count, SUM(bill_count) AS bill_count, SUM(unknown_count) AS unknown_count, 
+			SUM(success_count) AS success_count, SUM(submit_failed_count) AS submit_failed_count, 
+			SUM(other_count) AS other_count
+			from sms_submit_hour_report
+		where hour_time &gt;= #{startTime} and hour_time &lt;= #{endTime}
+		<if test="passageId != null">
+			and passage_id = #{passageId}
+		</if>
+		group by province_code
+	</select>
+	
+</mapper>

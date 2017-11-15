@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.user.dao.UserMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.user.domain.User">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_name" property="userName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="salt" property="salt" jdbcType="VARCHAR" />
+		<result column="secret_password" property="secretPassword"
+			jdbcType="VARCHAR" />
+		<result column="source" property="source" jdbcType="TINYINT" />
+		<result column="regist_ip" property="registIp" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="knick" property="knick" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="TINYINT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_name, mobile, email, password, salt, secret_password, source,
+		regist_ip,
+		name, knick, status, create_time, update_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from hspaas_user
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.user.domain.User">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user (user_name, mobile, email,
+		password, salt, secret_password,
+		source, regist_ip, name,
+		knick, status, create_time,
+		update_time)
+		values (#{userName,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR},
+		#{email,jdbcType=VARCHAR},
+		#{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR}, #{secretPassword,jdbcType=VARCHAR},
+		#{source,jdbcType=TINYINT}, #{registIp,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{knick,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.user.domain.User">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userName != null">
+				user_name,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="email != null">
+				email,
+			</if>
+			<if test="password != null">
+				password,
+			</if>
+			<if test="salt != null">
+				salt,
+			</if>
+			<if test="secretPassword != null">
+				secret_password,
+			</if>
+			<if test="source != null">
+				source,
+			</if>
+			<if test="registIp != null">
+				regist_ip,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="knick != null">
+				knick,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userName != null">
+				#{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				#{email,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null">
+				#{password,jdbcType=VARCHAR},
+			</if>
+			<if test="salt != null">
+				#{salt,jdbcType=VARCHAR},
+			</if>
+			<if test="secretPassword != null">
+				#{secretPassword,jdbcType=VARCHAR},
+			</if>
+			<if test="source != null">
+				#{source,jdbcType=TINYINT},
+			</if>
+			<if test="registIp != null">
+				#{registIp,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="knick != null">
+				#{knick,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.user.domain.User">
+		update hspaas_user
+		<set>
+			<if test="userName != null">
+				user_name = #{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				email = #{email,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null">
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test="salt != null">
+				salt = #{salt,jdbcType=VARCHAR},
+			</if>
+			<if test="secretPassword != null">
+				secret_password = #{secretPassword,jdbcType=VARCHAR},
+			</if>
+			<if test="source != null">
+				source = #{source,jdbcType=TINYINT},
+			</if>
+			<if test="registIp != null">
+				regist_ip = #{registIp,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="knick != null">
+				knick = #{knick,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.user.domain.User">
+		update hspaas_user
+		set user_name = #{userName,jdbcType=VARCHAR},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		email = #{email,jdbcType=VARCHAR},
+		password = #{password,jdbcType=VARCHAR},
+		salt = #{salt,jdbcType=VARCHAR},
+		secret_password = #{secretPassword,jdbcType=VARCHAR},
+		source = #{source,jdbcType=TINYINT},
+		regist_ip = #{registIp,jdbcType=VARCHAR},
+		name = #{name,jdbcType=VARCHAR},
+		knick = #{knick,jdbcType=VARCHAR},
+		status = #{status,jdbcType=TINYINT},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		update_time = #{updateTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectCountByEmail" parameterType="java.lang.String"
+		resultType="int">
+		select count(*) from hspaas_user where email = #{email} and
+		status = 0
+	</select>
+
+	<select id="selectCountByMobile" parameterType="java.lang.String"
+		resultType="int">
+		select count(*) from hspaas_user where mobile = #{mobile}
+		and status = 0
+	</select>
+
+	<select id="getByEmail" resultMap="BaseResultMap">
+		select * from hspaas_user where email = #{email} limit 1
+	</select>
+
+	<select id="getByMobile" resultMap="BaseResultMap">
+		select * from hspaas_user where mobile = #{mobile} limit 1
+	</select>
+
+	<select id="getByUsername" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select id, salt, email, mobile from hspaas_user
+		where
+		(email = #{username} or mobile = #{username}) and status = 0
+	</select>
+
+	<select id="getByUsernameAndPassword" resultType="int"
+		parameterType="java.util.Map">
+		select count(*) from hspaas_user where (email =
+		#{username} or mobile = #{username}) and password= #{password} and
+		status = 0
+	</select>
+
+	<update id="updateUserState">
+		update hspaas_user set status = #{flag} where id = #{userId}
+	</update>
+
+	<update id="updateUserInfo">
+		update hspaas_user set
+		<if test="password != null">
+			password = #{password,jdbcType=VARCHAR},
+		</if>
+		<if test="salt != null">
+			salt = #{salt,jdbcType=VARCHAR},
+		</if>
+		<if test="secretPassword != null">
+			secret_password = #{secretPassword,jdbcType=VARCHAR},
+		</if>
+		user_name=#{userName},mobile=#{mobile},email=#{email},name=#{name},knick=#{knick}
+		where id=#{id}
+	</update>
+	
+	<select id="selectAvaiableUserList" resultMap="BaseResultMap">
+		select 
+		<include refid="Base_Column_List" />
+		from hspaas_user where status = 0
+	</select>
+	
+	<!-- 用户映射（虚拟） -->
+	<resultMap id="UserMappingResultMap" type="com.huashi.common.user.model.UserModel">
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="user_name" property="username" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="app_key" property="appkey" jdbcType="VARCHAR" />
+		<result column="app_secret" property="appsecret" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="selectAllMapping" resultMap="UserMappingResultMap">
+		SELECT d.user_id, u.user_name, u.mobile, u.email, u.name, u.status, d.app_key, d.app_secret
+		FROM hspaas_user u JOIN hspaas_user_developer d ON u.id = d.user_id
+	</select>
+	
+	<select id="selectMappingByUserId" resultMap="UserMappingResultMap">
+		SELECT d.user_id, u.user_name, u.mobile, u.email, u.name, u.status, d.app_key, d.app_secret
+		FROM hspaas_user u JOIN hspaas_user_developer d ON u.id = d.user_id WHERE u.id = #{userId} limit 1 
+	</select>
+	
+</mapper>

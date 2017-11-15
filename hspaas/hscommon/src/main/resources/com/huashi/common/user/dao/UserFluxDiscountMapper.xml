@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.user.dao.UserFluxDiscountMapper" >
+  <resultMap id="BaseResultMap" type="com.huashi.common.user.domain.UserFluxDiscount" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="local_status" property="localStatus" jdbcType="INTEGER" />
+    <result column="local_cm_off" property="localCmOff" jdbcType="DOUBLE" />
+    <result column="local_ct_off" property="localCtOff" jdbcType="DOUBLE" />
+    <result column="local_cu_off" property="localCuOff" jdbcType="DOUBLE" />
+    <result column="global_cm_off" property="globalCmOff" jdbcType="DOUBLE" />
+    <result column="global_ct_off" property="globalCtOff" jdbcType="DOUBLE" />
+    <result column="global_cu_off" property="globalCuOff" jdbcType="DOUBLE" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, local_status, local_cm_off, local_ct_off, local_cu_off, global_cm_off, 
+    global_ct_off, global_cu_off, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from hspaas_user_flux_discount
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByUserId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from hspaas_user_flux_discount
+    where user_id = #{userId} order by create_time desc limit 1
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from hspaas_user_flux_discount
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.huashi.common.user.domain.UserFluxDiscount" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into hspaas_user_flux_discount (id, user_id, local_status, 
+      local_cm_off, local_ct_off, local_cu_off, 
+      global_cm_off, global_ct_off, global_cu_off, 
+      create_time)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{localStatus,jdbcType=INTEGER}, 
+      #{localCmOff,jdbcType=DOUBLE}, #{localCtOff,jdbcType=DOUBLE}, #{localCuOff,jdbcType=DOUBLE}, 
+      #{globalCmOff,jdbcType=DOUBLE}, #{globalCtOff,jdbcType=DOUBLE}, #{globalCuOff,jdbcType=DOUBLE}, 
+      #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.huashi.common.user.domain.UserFluxDiscount" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into hspaas_user_flux_discount
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      id,
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="localStatus != null" >
+        local_status,
+      </if>
+      <if test="localCmOff != null" >
+        local_cm_off,
+      </if>
+      <if test="localCtOff != null" >
+        local_ct_off,
+      </if>
+      <if test="localCuOff != null" >
+        local_cu_off,
+      </if>
+      <if test="globalCmOff != null" >
+        global_cm_off,
+      </if>
+      <if test="globalCtOff != null" >
+        global_ct_off,
+      </if>
+      <if test="globalCuOff != null" >
+        global_cu_off,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id,jdbcType=INTEGER},
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="localStatus != null" >
+        #{localStatus,jdbcType=INTEGER},
+      </if>
+      <if test="localCmOff != null" >
+        #{localCmOff,jdbcType=DOUBLE},
+      </if>
+      <if test="localCtOff != null" >
+        #{localCtOff,jdbcType=DOUBLE},
+      </if>
+      <if test="localCuOff != null" >
+        #{localCuOff,jdbcType=DOUBLE},
+      </if>
+      <if test="globalCmOff != null" >
+        #{globalCmOff,jdbcType=DOUBLE},
+      </if>
+      <if test="globalCtOff != null" >
+        #{globalCtOff,jdbcType=DOUBLE},
+      </if>
+      <if test="globalCuOff != null" >
+        #{globalCuOff,jdbcType=DOUBLE},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.user.domain.UserFluxDiscount" >
+    update hspaas_user_flux_discount
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="localStatus != null" >
+        local_status = #{localStatus,jdbcType=INTEGER},
+      </if>
+      <if test="localCmOff != null" >
+        local_cm_off = #{localCmOff,jdbcType=DOUBLE},
+      </if>
+      <if test="localCtOff != null" >
+        local_ct_off = #{localCtOff,jdbcType=DOUBLE},
+      </if>
+      <if test="localCuOff != null" >
+        local_cu_off = #{localCuOff,jdbcType=DOUBLE},
+      </if>
+      <if test="globalCmOff != null" >
+        global_cm_off = #{globalCmOff,jdbcType=DOUBLE},
+      </if>
+      <if test="globalCtOff != null" >
+        global_ct_off = #{globalCtOff,jdbcType=DOUBLE},
+      </if>
+      <if test="globalCuOff != null" >
+        global_cu_off = #{globalCuOff,jdbcType=DOUBLE},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huashi.common.user.domain.UserFluxDiscount" >
+    update hspaas_user_flux_discount
+    set user_id = #{userId,jdbcType=INTEGER},
+      local_status = #{localStatus,jdbcType=INTEGER},
+      local_cm_off = #{localCmOff,jdbcType=DOUBLE},
+      local_ct_off = #{localCtOff,jdbcType=DOUBLE},
+      local_cu_off = #{localCuOff,jdbcType=DOUBLE},
+      global_cm_off = #{globalCmOff,jdbcType=DOUBLE},
+      global_ct_off = #{globalCtOff,jdbcType=DOUBLE},
+      global_cu_off = #{globalCuOff,jdbcType=DOUBLE},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByUserId">
+  	   update hspaas_user_flux_discount
+	    set local_cm_off = #{localCmOff,jdbcType=DOUBLE},
+	      local_ct_off = #{localCtOff,jdbcType=DOUBLE},
+	      local_cu_off = #{localCuOff,jdbcType=DOUBLE},
+	      global_cm_off = #{globalCmOff,jdbcType=DOUBLE},
+	      global_ct_off = #{globalCtOff,jdbcType=DOUBLE},
+	      global_cu_off = #{globalCuOff,jdbcType=DOUBLE}
+	    where user_id = #{userId,jdbcType=INTEGER}
+  </update>
+</mapper>

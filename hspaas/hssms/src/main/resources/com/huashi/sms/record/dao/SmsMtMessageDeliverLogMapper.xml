@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.record.dao.SmsMtMessageDeliverLogMapper" >
+  <resultMap id="BaseResultMap" type="com.huashi.sms.record.domain.SmsMtMessageDeliverLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="passage_code" property="passageCode" jdbcType="VARCHAR" />
+    <result column="msg_id" property="msgId" jdbcType="VARCHAR" />
+    <result column="deliver_time" property="deliverTime" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.huashi.sms.record.domain.SmsMtMessageDeliverLog" extends="BaseResultMap" >
+    <result column="report" property="report" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, passage_code, msg_id, deliver_time, create_time
+  </sql>
+  <sql id="Blob_Column_List" >
+    report
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from sms_mt_message_deliver_log
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from sms_mt_message_deliver_log
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliverLog" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_mt_message_deliver_log (passage_code, msg_id, deliver_time, 
+      create_time, report)
+    values (#{passageCode,jdbcType=VARCHAR}, #{msgId,jdbcType=VARCHAR}, #{deliverTime,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{report,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliverLog" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_mt_message_deliver_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="passageCode != null" >
+        passage_code,
+      </if>
+      <if test="msgId != null" >
+        msg_id,
+      </if>
+      <if test="deliverTime != null" >
+        deliver_time,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="report != null" >
+        report,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="passageCode != null" >
+        #{passageCode,jdbcType=VARCHAR},
+      </if>
+      <if test="msgId != null" >
+        #{msgId,jdbcType=VARCHAR},
+      </if>
+      <if test="deliverTime != null" >
+        #{deliverTime,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="report != null" >
+        #{report,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliverLog" >
+    update sms_mt_message_deliver_log
+    <set >
+      <if test="passageCode != null" >
+        passage_code = #{passageCode,jdbcType=VARCHAR},
+      </if>
+      <if test="msgId != null" >
+        msg_id = #{msgId,jdbcType=VARCHAR},
+      </if>
+      <if test="deliverTime != null" >
+        deliver_time = #{deliverTime,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="report != null" >
+        report = #{report,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliverLog" >
+    update sms_mt_message_deliver_log
+    set passage_code = #{passageCode,jdbcType=VARCHAR},
+      msg_id = #{msgId,jdbcType=VARCHAR},
+      deliver_time = #{deliverTime,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      report = #{report,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huashi.sms.record.domain.SmsMtMessageDeliverLog" >
+    update sms_mt_message_deliver_log
+    set passage_code = #{passageCode,jdbcType=VARCHAR},
+      msg_id = #{msgId,jdbcType=VARCHAR},
+      deliver_time = #{deliverTime,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

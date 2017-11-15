@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.user.dao.UserDeveloperMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.user.domain.UserDeveloper">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="app_key" property="appKey" jdbcType="VARCHAR" />
+		<result column="app_secret" property="appSecret" jdbcType="VARCHAR" />
+		<result column="salt" property="salt" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, app_key, app_secret, salt, status,
+		create_time, update_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_developer
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		hspaas_user_developer
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.user.domain.UserDeveloper">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_developer (user_id, app_key, app_secret,
+		salt,
+		status, create_time,
+		update_time)
+		values (#{userId,jdbcType=INTEGER},
+		#{appKey,jdbcType=VARCHAR},
+		#{appSecret,jdbcType=VARCHAR},
+		#{salt,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.user.domain.UserDeveloper">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_developer
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="appKey != null">
+				app_key,
+			</if>
+			<if test="appSecret != null">
+				app_secret,
+			</if>
+			<if test="salt != null">
+				salt,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="appKey != null">
+				#{appKey,jdbcType=VARCHAR},
+			</if>
+			<if test="appSecret != null">
+				#{appSecret,jdbcType=VARCHAR},
+			</if>
+			<if test="salt != null">
+				#{salt,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.user.domain.UserDeveloper">
+		update hspaas_user_developer
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="appKey != null">
+				app_key = #{appKey,jdbcType=VARCHAR},
+			</if>
+			<if test="appSecret != null">
+				app_secret = #{appSecret,jdbcType=VARCHAR},
+			</if>
+			<if test="salt != null">
+				salt = #{salt,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.user.domain.UserDeveloper">
+		update
+		hspaas_user_developer
+		set user_id = #{userId,jdbcType=INTEGER},
+		app_key
+		= #{appKey,jdbcType=VARCHAR},
+		app_secret =
+		#{appSecret,jdbcType=VARCHAR},
+		salt = #{salt,jdbcType=VARCHAR},
+		status =
+		#{status,jdbcType=INTEGER},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select id, user_id, app_key, app_secret, status,
+		create_time from hspaas_user_developer where user_id = #{userId} and
+		status = 0
+	</select>
+
+	<select id="selectByAppkey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select d.id, d.user_id, d.app_key, d.app_secret, d.salt,
+		u.status, d.create_time, d.update_time
+		from hspaas_user_developer d
+		join hspaas_user u on d.user_id = u.id
+		where app_key = #{appkey} and u.status = 0
+	</select>
+
+	<select id="selectByAppkeyAndSecret" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_developer where app_key = #{appkey} and app_secret =
+		#{appsecret}
+	</select>
+	
+	<select id="selectAll" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" /> from hspaas_user_developer 
+	</select>
+	
+</mapper>

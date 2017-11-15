@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.bill.product.dao.ProductMapper">
+	<resultMap id="productResultMap" type="com.huashi.bill.product.domain.Product">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="amount" property="amount" />
+		<result column="sort" property="sort" />
+		<result column="status" property="status" />
+		<result column="money" property="money" />
+		<result column="unit" property="unit" />
+		<result column="operation_id" property="operationId" />
+		<result column="modify_operation_id" property="modifyOperationId" />
+		<result column="remark" property="remark" />
+		<result column="type" property="type" />
+		<result column="create_time" property="createTime" />
+		<result column="modify_time" property="updateTime" />
+	</resultMap>
+
+	<insert id="insert">
+		insert into hspaas_product
+		(name,amount,sort,status,money,unit,operation_id,modify_operation_id,remark,type,create_time,modify_time)
+		values
+		(#{name},#{amount},#{sort},#{status},#{money},#{unit},#{operationId},#{modifyOperationId},#{remark},#{type},now(),now())
+	</insert>
+
+	<delete id="delete">
+		delete from hspaas_product where id = #{id}
+	</delete>
+
+	<update id="update">
+		update hspaas_product set name =
+		#{name},amount=#{amount},
+		sort = #{sort},money = #{money},unit=#{unit},
+		modify_operation_id = #{modifyOperationId},remark=#{remark},
+		type=#{type},modify_time = now()
+		where id = #{id}
+	</update>
+
+	<update id="updateStatus">
+		update hspaas_product set status = #{status} where id
+		= #{id}
+	</update>
+
+	<select id="findById" resultMap="productResultMap">
+		select * from hspaas_product
+		where id = #{id}
+	</select>
+
+	<select id="getCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(h.id) from hspaas_product h where 1 = 1
+		<if test="name != null and name != ''">
+			and h.name like '%${name}%'
+		</if>
+	</select>
+
+	<select id="findList" resultMap="productResultMap"
+		parameterType="java.util.Map">
+		select * from hspaas_product h where 1 = 1
+		<if test="name != null and name != ''">
+			and h.name like '%${name}%'
+		</if>
+		order by h.create_time desc limit #{start},#{end}
+	</select>
+
+	<select id="getSelectProductList" resultMap="productResultMap"
+		parameterType="java.util.Map">
+		select * from hspaas_product h where status = 0
+		<if test="name != null and name != ''">
+			and h.name like '%${0}%'
+		</if>
+		order by h.modify_time desc
+	</select>
+
+	<select id="getProductListByComboId" resultMap="productResultMap">
+		select p.* from
+		hspaas_product p,hspaas_combo_product h where p.id = h.product_id and
+		h.combo_id = #{0} order by h.id desc
+	</select>
+</mapper>

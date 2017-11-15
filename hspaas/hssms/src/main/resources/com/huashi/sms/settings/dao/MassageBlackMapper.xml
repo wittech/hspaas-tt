@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.settings.dao.MassageBlackMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.sms.settings.domain.MassageBlack">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="VARCHAR" />
+		<result column="delete_flag" property="deleteSign" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, mobile, user_id, delete_flag, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_massage_blacklist
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		update sms_massage_blacklist set delete_flag='1'
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.settings.domain.MassageBlack">
+		insert into sms_massage_blacklist (id, mobile,
+		user_id, delete_flag, create_time
+		)
+		values (#{id,jdbcType=INTEGER}, #{mobile,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR}, #{deleteSign,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.settings.domain.MassageBlack">
+		insert into sms_massage_blacklist
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="deleteSign != null">
+				delete_flag,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=VARCHAR},
+			</if>
+			<if test="deleteSign != null">
+				#{deleteSign,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.settings.domain.MassageBlack">
+		update sms_massage_blacklist
+		<set>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=VARCHAR},
+			</if>
+			<if test="deleteSign != null">
+				delete_flag = #{deleteSign,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.settings.domain.MassageBlack">
+		update sms_massage_blacklist
+		set mobile = #{mobile,jdbcType=VARCHAR},
+		user_id = #{userId,jdbcType=VARCHAR},
+		delete_flag = #{deleteSign,jdbcType=INTEGER},
+		create_time = #{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<insert id="batchInsert" parameterType="com.huashi.sms.settings.domain.MassageBlack">
+		insert into sms_massage_blacklist (mobile,
+		user_id, create_time)
+		values (#{mobile}, #{type},#{userId},now())
+	</insert>
+
+	<!-- 查询用户记录 返回对象 -->
+	<select id="selectByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_massage_blacklist where user_id = #{userId} and
+		delete_flag='0'
+	</select>
+
+	<!-- 查询用户记录 判断是否重复 -->
+	<select id="selectByUserIdAndMobile" resultType="java.lang.Integer">
+		select count(*) from sms_massage_blacklist where user_id = #{userId} and
+		mobile =#{mobile} and delete_flag='0'
+	</select>
+
+	<select id="selectByMobile" resultType="java.lang.Integer">
+		select count(*) from sms_massage_blacklist where
+		mobile =#{mobile} and delete_flag='0'
+	</select>
+
+
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from sms_massage_blacklist where user_id = #{userId}
+		and delete_flag='0'
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and mobile like CONCAT('%',#{phoneNumber},'%')
+		</if>
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from sms_massage_blacklist where user_id = #{userId} and
+		delete_flag='0'
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and mobile like CONCAT('%',#{phoneNumber},'%')
+		</if>
+		order by id desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+</mapper>

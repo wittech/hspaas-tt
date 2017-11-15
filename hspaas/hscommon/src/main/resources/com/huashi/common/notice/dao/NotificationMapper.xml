@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.notice.dao.NotificationMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.notice.domain.Notification">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="hits" property="hits" jdbcType="INTEGER" />
+		<result column="operation_id" property="operationId" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<resultMap id="ResultMapWithBLOBs" type="com.huashi.common.notice.domain.Notification"
+		extends="BaseResultMap">
+		<result column="content" property="content" jdbcType="LONGVARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, title, status, type, hits, operation_id, create_time
+	</sql>
+	<sql id="Blob_Column_List">
+		content
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		,
+		<include refid="Blob_Column_List" />
+		from hspaas_notification
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from hspaas_notification
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.notice.domain.Notification">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_notification (id, title, status,
+		type, hits, operation_id,
+		create_time, content)
+		values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR},
+		#{status,jdbcType=INTEGER},
+		#{type,jdbcType=INTEGER}, #{hits,jdbcType=INTEGER}, #{operationId,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP}, #{content,jdbcType=LONGVARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.notice.domain.Notification">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_notification
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,
+			<if test="title != null">
+				title,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="hits != null">
+				hits,
+			</if>
+			<if test="operationId != null">
+				operation_id,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{id,jdbcType=INTEGER},
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=INTEGER},
+			</if>
+			<if test="hits != null">
+				#{hits,jdbcType=INTEGER},
+			</if>
+			<if test="operationId != null">
+				#{operationId,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=LONGVARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.notice.domain.Notification">
+		update hspaas_notification
+		<set>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="type != null">
+				type = #{type,jdbcType=INTEGER},
+			</if>
+			<if test="hits != null">
+				hits = #{hits,jdbcType=INTEGER},
+			</if>
+			<if test="operationId != null">
+				operation_id = #{operationId,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=LONGVARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKeyWithBLOBs" parameterType="com.huashi.common.notice.domain.Notification">
+		update hspaas_notification
+		set title = #{title,jdbcType=VARCHAR},
+		status = #{status,jdbcType=INTEGER},
+		type = #{type,jdbcType=INTEGER},
+		hits = #{hits,jdbcType=INTEGER},
+		operation_id = #{operationId,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		content = #{content,jdbcType=LONGVARCHAR}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.notice.domain.Notification">
+		update hspaas_notification
+		set title = #{title,jdbcType=VARCHAR},
+		status = #{status,jdbcType=INTEGER},
+		type = #{type,jdbcType=INTEGER},
+		hits = #{hits,jdbcType=INTEGER},
+		operation_id = #{operationId,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectByCount" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select id, title, create_time from hspaas_notification
+		where status = 0 order by create_time desc limit #{count}
+	</select>
+	
+	<select id="findList" resultMap="BaseResultMap">
+		select * from hspaas_notification order by create_time desc limit #{start},#{end}	
+	</select>
+	
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(id) from hspaas_notification
+	</select>
+</mapper>

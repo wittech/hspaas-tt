@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration>
+
+	<property name="appName" value="hsdev" />
+	<property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss} |-%-5level [%thread] in %logger{50} - %msg%n" />
+
+	<contextName>${appName}</contextName>
+
+	<!-- appender 指定日志的输出位置, 可以自己实现,决定要把日志输出到什么位置 -->
+	<!-- 定义主要的几个日志等级 TRACE < DEBUG < INFO < WARN < ERROR < OFF -->
+
+	<!-- 控制台输出日志 -->
+	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+
+		<!-- 指定日志级别 -->
+		<!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter"> -->
+		<!--<level>INFO</level> -->
+		<!--</filter> -->
+
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出,%d:日期;%thread:线程名;%-5level：级别,从左显示5个字符宽度,可以自定义模板类 -->
+			<!--<layout class="chapters.layouts.MySampleLayout" /> -->
+			<pattern>${pattern}</pattern>
+		</encoder>
+
+	</appender>
+
+	<!-- 文件输出日志 -->
+	<appender name="infoAppender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		
+		<filter class="ch.qos.logback.classic.filter.LevelFilter"> 
+            <level>INFO</level>    
+            <onMatch>ACCEPT</onMatch>    
+            <onMismatch>DENY</onMismatch>    
+        </filter>
+
+		<!-- 采用追加日志的方式 -->
+		<append>false</append>
+
+		<!-- 每天产生一个日志文件,保存30天的日志文件 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>logs/info_%d{yyyy-MM-dd}_${appName}.log</fileNamePattern>
+			<maxHistory>60</maxHistory>
+		</rollingPolicy>
+
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出,%d:日期;%thread:线程名;%-5level：级别,从左显示5个字符宽度,可以自定义模板类 -->
+			<!--<layout class="chapters.layouts.MySampleLayout" /> -->
+			<pattern>${pattern}</pattern>
+		</encoder>
+		
+	</appender>
+	
+	<!-- 文件输出日志 -->
+	<appender name="warnAppender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		
+		<filter class="ch.qos.logback.classic.filter.LevelFilter"> 
+            <level>WARN</level>    
+            <onMatch>ACCEPT</onMatch>    
+            <onMismatch>DENY</onMismatch>    
+        </filter>
+
+		<!-- 采用追加日志的方式 -->
+		<append>false</append>
+
+		<!-- 每天产生一个日志文件,保存30天的日志文件 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>logs/warn_%d{yyyy-MM-dd}_${appName}.log</fileNamePattern>
+			<maxHistory>60</maxHistory>
+		</rollingPolicy>
+
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出,%d:日期;%thread:线程名;%-5level：级别,从左显示5个字符宽度,可以自定义模板类 -->
+			<!--<layout class="chapters.layouts.MySampleLayout" /> -->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} |-%-5level [%thread] in %logger{50} - %msg%n</pattern>
+		</encoder>
+		
+	</appender>
+	
+	<!-- 文件输出日志 -->
+	<appender name="errorAppender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		
+		<filter class="ch.qos.logback.classic.filter.LevelFilter"> 
+            <level>ERROR</level>    
+            <onMatch>ACCEPT</onMatch>    
+            <onMismatch>DENY</onMismatch>    
+        </filter>
+
+		<!-- 采用追加日志的方式 -->
+		<append>false</append>
+
+		<!-- 每天产生一个日志文件,保存30天的日志文件 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>logs/error_%d{yyyy-MM-dd}_${appName}.log</fileNamePattern>
+			<maxHistory>60</maxHistory>
+		</rollingPolicy>
+
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出,%d:日期;%thread:线程名;%-5level：级别,从左显示5个字符宽度,可以自定义模板类 -->
+			<!--<layout class="chapters.layouts.MySampleLayout" /> -->
+			<pattern>${pattern}</pattern>
+		</encoder>
+		
+	</appender>
+
+	<!-- 自定义logger的级别和打印的状态,默认会继承root中的配置打印. -->
+	<!--<logger name="logback" level="INFO" additivity="false"> -->
+	<!--<appender-ref ref="console-stdout"/> -->
+	<!--</logger> -->
+
+	<logger name="com.alibaba.dubbo" level="ERROR" />
+	<logger name="c.a.dubbo.registry.zookeeper" level="WARN" />
+
+	<!-- 定义日志的级别 引用appender -->
+	<root level="INFO">
+		<appender-ref ref="consoleAppender" />
+		<appender-ref ref="infoAppender" />
+		<appender-ref ref="warnAppender" />
+		<appender-ref ref="errorAppender" />
+	</root>
+
+</configuration>

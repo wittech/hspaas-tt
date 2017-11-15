@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.passage.dao.SmsPassageMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.sms.passage.domain.SmsPassage">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="word_number" property="wordNumber" jdbcType="TINYINT" />
+		<result column="priority" property="priority" jdbcType="TINYINT" />
+		<result column="hspaas_template_id" property="hspaasTemplateId" jdbcType="INTEGER" />
+		<result column="status" property="status" jdbcType="TINYINT" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="TINYINT" />
+		<result column="exclusive_user_id" property="exclusiveUserId" jdbcType="INTEGER" />
+		<result column="sign_mode" property="signMode" jdbcType="TINYINT" />
+		<result column="access_code" property="accessCode" jdbcType="VARCHAR" />
+		<result column="account" property="account" jdbcType="VARCHAR" />
+		<result column="pay_type" property="payType" jdbcType="TINYINT" />
+		<result column="balance" property="balance" jdbcType="INTEGER" />
+		<result column="mobile_size" property="mobileSize" jdbcType="INTEGER" />
+		<result column="packets_size" property="packetsSize" jdbcType="INTEGER" />
+		<result column="connection_size" property="connectionSize" jdbcType="INTEGER" />
+		<result column="read_timeout" property="readTimeout" jdbcType="INTEGER" />
+		<result column="ext_number" property="extNumber" jdbcType="INTEGER" />
+		<result column="born_term" property="bornTerm" jdbcType="INTEGER" />
+		<result column="sms_template_param" property="smsTemplateParam" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, name, code, cmcp, word_number, priority, hspaas_template_id, status,
+		remark, type, exclusive_user_id, sign_mode, access_code, account, pay_type, balance, mobile_size, 
+		packets_size, ext_number, create_time, modify_time, connection_size, read_timeout, born_term, sms_template_param
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		sms_passage
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.passage.domain.SmsPassage">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_passage (name, code, cmcp,
+		word_number, priority,
+		hspaas_template_id,
+		status, remark, type,
+		exclusive_user_id, 
+		sign_mode, access_code, account,
+		pay_type, balance,
+		mobile_size,
+		packets_size, 
+		connection_size, read_timeout,
+		ext_number, 
+		born_term, sms_template_param,
+		create_time,
+		modify_time)
+		values
+		(#{name,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+		#{cmcp,jdbcType=INTEGER},
+		#{wordNumber,jdbcType=TINYINT},
+		#{priority,jdbcType=TINYINT}, #{hspaasTemplateId,jdbcType=INTEGER},
+		#{status,jdbcType=TINYINT}, #{remark,jdbcType=VARCHAR},
+		#{type,jdbcType=TINYINT},
+		#{exclusiveUserId,jdbcType=INTEGER},
+		#{signMode,jdbcType=TINYINT}, #{accessCode,jdbcType=VARCHAR},
+		#{account,jdbcType=VARCHAR},
+		#{payType,jdbcType=TINYINT},
+		#{balance,jdbcType=INTEGER}, #{mobileSize,jdbcType=INTEGER},
+		#{packetsSize,jdbcType=INTEGER}, 
+		#{connectionSize,jdbcType=INTEGER},
+		#{readTimeout,jdbcType=INTEGER},
+		#{extNumber,jdbcType=INTEGER},
+		#{bornTerm,jdbcType=INTEGER},
+		#{smsTemplateParam,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{modifyTime,jdbcType=TIMESTAMP})
+	</insert>
+	
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.passage.domain.SmsPassage">
+		update sms_passage
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				code = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="wordNumber != null">
+				word_number = #{wordNumber,jdbcType=TINYINT},
+			</if>
+			<if test="priority != null">
+				priority = #{priority,jdbcType=TINYINT},
+			</if>
+			<if test="hspaasTemplateId != null">
+				hspaas_template_id =
+				#{hspaasTemplateId,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				type = #{type,jdbcType=TINYINT},
+			</if>
+			<if test="exclusiveUserId != null">
+				exclusive_user_id = #{exclusiveUserId,jdbcType=INTEGER},
+			</if>
+			<if test="signMode != null">
+				sign_mode = #{signMode,jdbcType=TINYINT},
+			</if>
+			<if test="accessCode != null">
+				access_code = #{accessCode,jdbcType=VARCHAR},
+			</if>
+			<if test="account != null">
+				account = #{account,jdbcType=VARCHAR},
+			</if>
+			<if test="payType != null">
+				pay_type = #{payType,jdbcType=TINYINT},
+			</if>
+			<if test="balance != null">
+				balance = #{balance,jdbcType=INTEGER},
+			</if>
+			<if test="mobileSize != null">
+				mobile_size = #{mobileSize,jdbcType=INTEGER},
+			</if>
+			<if test="packetsSize != null">
+				packets_size = #{packetsSize,jdbcType=INTEGER},
+			</if>
+			<if test="connectionSize != null">
+				connection_size = #{connectionSize,jdbcType=INTEGER},
+			</if>
+			<if test="readTimeout != null">
+				read_timeout =  #{readTimeout,jdbcType=INTEGER},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=INTEGER},
+			</if>
+			<if test="bornTerm != null">
+				born_term = #{bornTerm,jdbcType=INTEGER},
+			</if>
+			<if test="smsTemplateParam != null">
+				sms_template_param = #{smsTemplateParam,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifyTime != null">
+				modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.passage.domain.SmsPassage">
+		update sms_passage
+		set name = #{name,jdbcType=VARCHAR},
+		code = #{code,jdbcType=VARCHAR},
+		cmcp = #{cmcp,jdbcType=INTEGER},
+		word_number =
+		#{wordNumber,jdbcType=TINYINT},
+		priority =
+		#{priority,jdbcType=TINYINT},
+		hspaas_template_id =
+		#{hspaasTemplateId,jdbcType=INTEGER},
+		status =
+		#{status,jdbcType=TINYINT},
+		remark = #{remark,jdbcType=VARCHAR},
+		type =
+		#{type,jdbcType=TINYINT},
+		exclusive_user_id =
+		#{exclusiveUserId,jdbcType=INTEGER},
+		sign_mode =
+		#{signMode,jdbcType=TINYINT},
+		access_code =
+		#{accessCode,jdbcType=VARCHAR},
+		account = #{account,jdbcType=VARCHAR},
+		pay_type = #{payType,jdbcType=TINYINT},
+		balance =
+		#{balance,jdbcType=INTEGER},
+		mobile_size =
+		#{mobileSize,jdbcType=INTEGER},
+		packets_size =
+		#{packetsSize,jdbcType=INTEGER},
+		connection_size = #{connectionSize,jdbcType=INTEGER},
+		read_timeout =  #{readTimeout,jdbcType=INTEGER},
+		ext_number =
+		#{extNumber,jdbcType=INTEGER},
+		born_term = #{bornTerm,jdbcType=INTEGER},
+		sms_template_param = #{smsTemplateParam,jdbcType=INTEGER},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		modify_time =
+		#{modifyTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select * from sms_passage
+		<where>
+			<if test="keyword != null and keyword != ''">
+				name like '%${keyword}%'
+			</if>
+		</where>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(id) from sms_passage
+		<where>
+			<if test="keyword != null and keyword != ''">
+				name like '%${keyword}%'
+			</if>
+		</where>
+	</select>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage
+		where status = 0 order by id desc
+	</select>
+
+	<select id="selectByGroupId" resultMap="BaseResultMap">
+		select
+		passage.id,
+		passage.name, passage.code, passage.cmcp, passage.word_number,
+		passage.hspaas_template_id,
+		passage.status, passage.remark,
+		passage.type, passage.exclusive_user_id, passage.sign_mode,
+		passage.access_code,
+		passage.account,
+		passage.pay_type,
+		passage.create_time,
+		passage.modify_time, passage.packets_size, passage.mobile_size, 
+		passage.connection_size, passage.read_timeout,
+		passage.born_term, passage.sms_template_param,
+		detail.priority
+		from sms_passage passage
+		join sms_passage_group_detail
+		detail on passage.id = detail.passage_id
+		join sms_passage_group gp on
+		detail.group_id = gp.id
+		where gp.id =
+		#{groupId}
+		order by detail.priority
+		asc
+	</select>
+
+	<select id="getByCmcp" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage where status = 0 and (cmcp = #{0} or cmcp = 4)
+	</select>
+
+	<select id="selectAvaiablePassages" resultMap="BaseResultMap">
+		select distinct
+		sp.id,sp.name,sp.cmcp,spgd.priority from sms_passage sp
+		inner join
+		sms_passage_group_detail spgd on sp.id=spgd.passage_id
+		where
+		spgd.group_id=#{groupId,jdbcType=INTEGER}
+		and
+		(sp.cmcp=#{cmcp,jdbcType=INTEGER} or sp.cmcp=4)
+		and
+		spgd.route_type=#{routeType,jdbcType=INTEGER}
+		and
+		sp.status=#{status,jdbcType=INTEGER}
+		order by spgd.priority asc
+	</select>
+
+	<select id="findByCmcpOrAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage where status = 0 and type = 0 and (cmcp = #{0} or
+		cmcp = 4)
+	</select>
+
+	<select id="getByProvinceAndCmcp" resultMap="BaseResultMap">
+		select distinct s.*
+		from sms_passage s,sms_passage_province p
+		where s.id = p.passage_id and
+		(s.cmcp = #{cmcp} or s.cmcp = 4) and
+		(p.province_code = #{provinceCode}
+		or p.province_code = 0)
+		order by s.id desc
+	</select>
+
+	<select id="getPassageByCode" resultMap="BaseResultMap">
+		select s.id, s.status, s.create_time from sms_passage s where s.code = #{code} limit 1
+	</select>
+
+	<select id="selectAvaiableCodes" resultType="java.lang.String">
+		select distinct(code) from sms_passage passage where status = 0
+	</select>
+</mapper>

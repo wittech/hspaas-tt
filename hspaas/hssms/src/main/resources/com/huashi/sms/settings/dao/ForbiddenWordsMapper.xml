@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.settings.dao.ForbiddenWordsMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.sms.settings.domain.ForbiddenWords">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="word" property="word" jdbcType="VARCHAR" />
+		<result column="level" property="level" jdbcType="INTEGER" />
+		<result column="label" property="label" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, word, level, label, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_forbidden_words where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		sms_forbidden_words
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.settings.domain.ForbiddenWords">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_forbidden_words (word, level, label, create_time)
+		values
+		(#{word,jdbcType=VARCHAR}, #{level,jdbcType=INTEGER}, #{label,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.settings.domain.ForbiddenWords">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_forbidden_words
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="word != null">
+				word,
+			</if>
+			<if test="level != null">
+				level,
+			</if>
+			<if test="label != null">
+				label,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="word != null">
+				#{word,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				#{level,jdbcType=INTEGER},
+			</if>
+			<if test="label != null">
+				#{label,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.settings.domain.ForbiddenWords">
+		update sms_forbidden_words
+		<set>
+			<if test="word != null">
+				word = #{word,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				level = #{level,jdbcType=INTEGER},
+			</if>
+			<if test="label != null">
+				label = #{label,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.settings.domain.ForbiddenWords">
+		update
+		sms_forbidden_words
+		set word = #{word,jdbcType=VARCHAR},
+		level = #{level,jdbcType=INTEGER},
+		label = #{label,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+<!-- 	<cache type="org.mybatis.caches.ehcache.LoggingEhcache">
+		<property name="timeToIdleSeconds" value="3600" />1 hour
+		<property name="timeToLiveSeconds" value="3600" />1 hour
+		<property name="maxEntriesLocalHeap" value="1000" />
+		<property name="maxEntriesLocalDisk" value="10000000" />
+		<property name="memoryStoreEvictionPolicy" value="LRU" />
+	</cache> -->
+
+	<select id="selectAllWords" resultType="java.lang.String">
+		select distinct(word) from sms_forbidden_words
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" /> from sms_forbidden_words where 1 = 1
+		<if test="keyword != null and keyword != ''">
+			and word like '%${keyword}%'
+		</if>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from sms_forbidden_words where 1 = 1
+		<if test="keyword != null and keyword != ''">
+			and word like '%${keyword}%'
+		</if>
+	</select>
+	
+	<select id="selectByWord" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select <include refid="Base_Column_List" /> from sms_forbidden_words where word = #{word}
+	</select>
+	
+	<select id="selectByMultiWord" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" /> from sms_forbidden_words where word in
+		
+		<foreach item="item" index="index" collection="words" open="(" separator="," close=")">
+            #{item}  
+        </foreach>
+         
+	</select>
+
+</mapper>

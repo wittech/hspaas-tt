@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.notice.dao.EmailVerifyMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.notice.domain.EmailVerify">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="uid" property="uid" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="curl_info" property="curlInfo" jdbcType="VARCHAR" />
+		<result column="send_time" property="sendTime" jdbcType="TIMESTAMP" />
+		<result column="valid_time" property="validTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, uid, email, curl_info, send_time, valid_time, remark
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspass_email_verify
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		hspass_email_verify
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.notice.domain.EmailVerify">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspass_email_verify (id, uid, email,
+		curl_info, send_time,
+		valid_time,
+		remark)
+		values (#{id,jdbcType=INTEGER},
+		#{uid,jdbcType=VARCHAR},
+		#{email,jdbcType=VARCHAR},
+		#{curlInfo,jdbcType=VARCHAR}, #{sendTime,jdbcType=TIMESTAMP},
+		#{validTime,jdbcType=TIMESTAMP},
+		#{remark,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.notice.domain.EmailVerify">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspass_email_verify
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,
+			<if test="uid != null">
+				uid,
+			</if>
+			<if test="email != null">
+				email,
+			</if>
+			<if test="curlInfo != null">
+				curl_info,
+			</if>
+			<if test="sendTime != null">
+				send_time,
+			</if>
+			<if test="validTime != null">
+				valid_time,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{id,jdbcType=INTEGER},
+			<if test="uid != null">
+				#{uid,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				#{email,jdbcType=VARCHAR},
+			</if>
+			<if test="curlInfo != null">
+				#{curlInfo,jdbcType=VARCHAR},
+			</if>
+			<if test="sendTime != null">
+				#{sendTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="validTime != null">
+				#{validTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.notice.domain.EmailVerify">
+		update hspass_email_verify
+		<set>
+			<if test="uid != null">
+				uid = #{uid,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				email = #{email,jdbcType=VARCHAR},
+			</if>
+			<if test="curlInfo != null">
+				curl_info = #{curlInfo,jdbcType=VARCHAR},
+			</if>
+			<if test="sendTime != null">
+				send_time = #{sendTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="validTime != null">
+				valid_time = #{validTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.notice.domain.EmailVerify">
+		update
+		hspass_email_verify
+		set uid = #{uid,jdbcType=VARCHAR},
+		email =
+		#{email,jdbcType=VARCHAR},
+		curl_info = #{curlInfo,jdbcType=VARCHAR},
+		send_time = #{sendTime,jdbcType=TIMESTAMP},
+		valid_time =
+		#{validTime,jdbcType=TIMESTAMP},
+		remark = #{remark,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectByUid" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from hspass_email_verify where uid = #{uid} and valid_time is null
+	</select>
+
+	<update id="updateByUid" parameterType="java.lang.String">
+		update
+		hspass_email_verify set valid_time = now() where uid = #{uid}
+	</update>
+</mapper>

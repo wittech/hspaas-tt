@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.fs.order.dao.FluxOrderMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.fs.order.domain.FluxOrder">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="order_type" property="orderType" jdbcType="TINYINT" />
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="prodcut_name" property="prodcutName" jdbcType="VARCHAR" />
+		<result column="product_packages_size" property="productPackagesSize"
+			jdbcType="INTEGER" />
+		<result column="pay_status" property="payStatus" jdbcType="TINYINT" />
+		<result column="trade_status" property="tradeStatus" jdbcType="TINYINT" />
+		<result column="trade_refund" property="tradeRefund" jdbcType="TINYINT" />
+		<result column="official_price" property="officialPrice"
+			jdbcType="DOUBLE" />
+		<result column="price_off" property="priceOff" jdbcType="DOUBLE" />
+		<result column="deal_price" property="dealPrice" jdbcType="DOUBLE" />
+		<result column="local" property="local" jdbcType="VARCHAR" />
+		<result column="passage_group_id" property="passageGroupId"
+			jdbcType="INTEGER" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="provider_id" property="providerId" jdbcType="INTEGER" />
+		<result column="provider_prod_id" property="providerProdId"
+			jdbcType="INTEGER" />
+		<result column="provider_tradeno" property="providerTradeno"
+			jdbcType="VARCHAR" />
+		<result column="provider_result_code" property="providerResultCode"
+			jdbcType="VARCHAR" />
+		<result column="result_code" property="resultCode" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="finish_time" property="finishTime" jdbcType="TIMESTAMP" />
+		<result column="submit_time" property="submitTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, order_type, user_id, trade_no, mobile, prodcut_name,
+		product_packages_size, pay_status,
+		trade_status, trade_refund, official_price, price_off, deal_price, local,
+		passage_group_id,
+		passage_id, provider_id, provider_prod_id, provider_tradeno,
+		provider_result_code,
+		result_code, create_time, finish_time, submit_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from fs_order
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from fs_order
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.fs.order.domain.FluxOrder">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into fs_order (id, order_type, user_id,
+		trade_no, mobile, prodcut_name,
+		product_packages_size, pay_status, trade_status,
+		trade_refund, official_price, price_off,
+		deal_price, local, passage_group_id,
+		passage_id, provider_id, provider_prod_id,
+		provider_tradeno, provider_result_code, result_code,
+		create_time, finish_time, submit_time
+		)
+		values (#{id,jdbcType=BIGINT}, #{orderType,jdbcType=TINYINT},
+		#{userId,jdbcType=BIGINT},
+		#{tradeNo,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, #{prodcutName,jdbcType=VARCHAR},
+		#{productPackagesSize,jdbcType=INTEGER},
+		#{payStatus,jdbcType=TINYINT}, #{tradeStatus,jdbcType=TINYINT},
+		#{tradeRefund,jdbcType=TINYINT}, #{officialPrice,jdbcType=DOUBLE},
+		#{priceOff,jdbcType=DOUBLE},
+		#{dealPrice,jdbcType=DOUBLE}, #{local,jdbcType=VARCHAR}, #{passageGroupId,jdbcType=INTEGER},
+		#{passageId,jdbcType=INTEGER}, #{providerId,jdbcType=INTEGER},
+		#{providerProdId,jdbcType=INTEGER},
+		#{providerTradeno,jdbcType=VARCHAR},
+		#{providerResultCode,jdbcType=VARCHAR},
+		#{resultCode,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP}, #{finishTime,jdbcType=TIMESTAMP}, #{submitTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.fs.order.domain.FluxOrder">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into fs_order
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,
+			<if test="orderType != null">
+				order_type,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="tradeNo != null">
+				trade_no,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="prodcutName != null">
+				prodcut_name,
+			</if>
+			<if test="productPackagesSize != null">
+				product_packages_size,
+			</if>
+			<if test="payStatus != null">
+				pay_status,
+			</if>
+			<if test="tradeStatus != null">
+				trade_status,
+			</if>
+			<if test="tradeRefund != null">
+				trade_refund,
+			</if>
+			<if test="officialPrice != null">
+				official_price,
+			</if>
+			<if test="priceOff != null">
+				price_off,
+			</if>
+			<if test="dealPrice != null">
+				deal_price,
+			</if>
+			<if test="local != null">
+				local,
+			</if>
+			<if test="passageGroupId != null">
+				passage_group_id,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="providerId != null">
+				provider_id,
+			</if>
+			<if test="providerProdId != null">
+				provider_prod_id,
+			</if>
+			<if test="providerTradeno != null">
+				provider_tradeno,
+			</if>
+			<if test="providerResultCode != null">
+				provider_result_code,
+			</if>
+			<if test="resultCode != null">
+				result_code,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="finishTime != null">
+				finish_time,
+			</if>
+			<if test="submitTime != null">
+				submit_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{id,jdbcType=BIGINT},
+			<if test="orderType != null">
+				#{orderType,jdbcType=TINYINT},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=BIGINT},
+			</if>
+			<if test="tradeNo != null">
+				#{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="prodcutName != null">
+				#{prodcutName,jdbcType=VARCHAR},
+			</if>
+			<if test="productPackagesSize != null">
+				#{productPackagesSize,jdbcType=INTEGER},
+			</if>
+			<if test="payStatus != null">
+				#{payStatus,jdbcType=TINYINT},
+			</if>
+			<if test="tradeStatus != null">
+				#{tradeStatus,jdbcType=TINYINT},
+			</if>
+			<if test="tradeRefund != null">
+				#{tradeRefund,jdbcType=TINYINT},
+			</if>
+			<if test="officialPrice != null">
+				#{officialPrice,jdbcType=DOUBLE},
+			</if>
+			<if test="priceOff != null">
+				#{priceOff,jdbcType=DOUBLE},
+			</if>
+			<if test="dealPrice != null">
+				#{dealPrice,jdbcType=DOUBLE},
+			</if>
+			<if test="local != null">
+				#{local,jdbcType=VARCHAR},
+			</if>
+			<if test="passageGroupId != null">
+				#{passageGroupId,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="providerId != null">
+				#{providerId,jdbcType=INTEGER},
+			</if>
+			<if test="providerProdId != null">
+				#{providerProdId,jdbcType=INTEGER},
+			</if>
+			<if test="providerTradeno != null">
+				#{providerTradeno,jdbcType=VARCHAR},
+			</if>
+			<if test="providerResultCode != null">
+				#{providerResultCode,jdbcType=VARCHAR},
+			</if>
+			<if test="resultCode != null">
+				#{resultCode,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="finishTime != null">
+				#{finishTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="submitTime != null">
+				#{submitTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.fs.order.domain.FluxOrder">
+		update fs_order
+		<set>
+			<if test="orderType != null">
+				order_type = #{orderType,jdbcType=TINYINT},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=BIGINT},
+			</if>
+			<if test="tradeNo != null">
+				trade_no = #{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="prodcutName != null">
+				prodcut_name = #{prodcutName,jdbcType=VARCHAR},
+			</if>
+			<if test="productPackagesSize != null">
+				product_packages_size = #{productPackagesSize,jdbcType=INTEGER},
+			</if>
+			<if test="payStatus != null">
+				pay_status = #{payStatus,jdbcType=TINYINT},
+			</if>
+			<if test="tradeStatus != null">
+				trade_status = #{tradeStatus,jdbcType=TINYINT},
+			</if>
+			<if test="tradeRefund != null">
+				trade_refund = #{tradeRefund,jdbcType=TINYINT},
+			</if>
+			<if test="officialPrice != null">
+				official_price = #{officialPrice,jdbcType=DOUBLE},
+			</if>
+			<if test="priceOff != null">
+				price_off = #{priceOff,jdbcType=DOUBLE},
+			</if>
+			<if test="dealPrice != null">
+				deal_price = #{dealPrice,jdbcType=DOUBLE},
+			</if>
+			<if test="local != null">
+				local = #{local,jdbcType=VARCHAR},
+			</if>
+			<if test="passageGroupId != null">
+				passage_group_id = #{passageGroupId,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="providerId != null">
+				provider_id = #{providerId,jdbcType=INTEGER},
+			</if>
+			<if test="providerProdId != null">
+				provider_prod_id = #{providerProdId,jdbcType=INTEGER},
+			</if>
+			<if test="providerTradeno != null">
+				provider_tradeno = #{providerTradeno,jdbcType=VARCHAR},
+			</if>
+			<if test="providerResultCode != null">
+				provider_result_code = #{providerResultCode,jdbcType=VARCHAR},
+			</if>
+			<if test="resultCode != null">
+				result_code = #{resultCode,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="finishTime != null">
+				finish_time = #{finishTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="submitTime != null">
+				submit_time = #{submitTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.fs.order.domain.FluxOrder">
+		update fs_order
+		set order_type = #{orderType,jdbcType=TINYINT},
+		user_id = #{userId,jdbcType=BIGINT},
+		trade_no = #{tradeNo,jdbcType=VARCHAR},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		prodcut_name = #{prodcutName,jdbcType=VARCHAR},
+		product_packages_size = #{productPackagesSize,jdbcType=INTEGER},
+		pay_status = #{payStatus,jdbcType=TINYINT},
+		trade_status = #{tradeStatus,jdbcType=TINYINT},
+		trade_refund = #{tradeRefund,jdbcType=TINYINT},
+		official_price = #{officialPrice,jdbcType=DOUBLE},
+		price_off = #{priceOff,jdbcType=DOUBLE},
+		deal_price = #{dealPrice,jdbcType=DOUBLE},
+		local = #{local,jdbcType=VARCHAR},
+		passage_group_id = #{passageGroupId,jdbcType=INTEGER},
+		passage_id = #{passageId,jdbcType=INTEGER},
+		provider_id = #{providerId,jdbcType=INTEGER},
+		provider_prod_id = #{providerProdId,jdbcType=INTEGER},
+		provider_tradeno = #{providerTradeno,jdbcType=VARCHAR},
+		provider_result_code = #{providerResultCode,jdbcType=VARCHAR},
+		result_code = #{resultCode,jdbcType=INTEGER},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		finish_time = #{finishTime,jdbcType=TIMESTAMP},
+		submit_time = #{submitTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from fs_order where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="mobile != null">
+			and mobile like CONCAT('%',#{mobile},'%')
+		</if>
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from fs_order where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="mobile != null">
+			and mobile like CONCAT('%',#{mobile},'%')
+		</if>
+		order by id desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+
+	<select id="findUserIdAndMobileRecord" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from fs_order where user_id = #{userId}
+		<if test="mobile != null">
+			and mobile=#{mobile}
+		</if>
+		order by create_time desc limit 1
+	</select>
+</mapper>

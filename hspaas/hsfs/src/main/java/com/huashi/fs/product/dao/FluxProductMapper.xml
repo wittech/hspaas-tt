@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.fs.product.dao.FluxProductMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.fs.product.domain.FluxProduct">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="inner_code" property="innerCode" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="operator" property="operator" jdbcType="INTEGER" />
+		<result column="par_value" property="parValue" jdbcType="INTEGER" />
+		<result column="scope" property="scope" jdbcType="INTEGER" />
+		<result column="out_price_off" property="outPriceOff" jdbcType="DOUBLE" />
+		<result column="province_code" property="provinceCode"
+			jdbcType="VARCHAR" />
+		<result column="official_price" property="officialPrice"
+			jdbcType="DOUBLE" />
+		<result column="validaty_description" property="validatyDescription"
+			jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, code, inner_code, name, status, operator, par_value, scope,
+		out_price_off, province_code,
+		official_price, validaty_description, description, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from fs_product
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from fs_product
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.fs.product.domain.FluxProduct">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into fs_product (code, inner_code, name,
+		status, operator, par_value,
+		scope, out_price_off, province_code,
+		official_price, validaty_description, description,
+		create_time)
+		values (#{code,jdbcType=VARCHAR}, #{innerCode,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{status,jdbcType=INTEGER}, #{operator,jdbcType=INTEGER}, #{parValue,jdbcType=INTEGER},
+		#{scope,jdbcType=INTEGER}, #{outPriceOff,jdbcType=DOUBLE},
+		#{provinceCode,jdbcType=VARCHAR},
+		#{officialPrice,jdbcType=DOUBLE}, #{validatyDescription,jdbcType=VARCHAR},
+		#{description,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.fs.product.domain.FluxProduct">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into fs_product
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="code != null">
+				code,
+			</if>
+			<if test="innerCode != null">
+				inner_code,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="operator != null">
+				operator,
+			</if>
+			<if test="parValue != null">
+				par_value,
+			</if>
+			<if test="scope != null">
+				scope,
+			</if>
+			<if test="outPriceOff != null">
+				out_price_off,
+			</if>
+			<if test="provinceCode != null">
+				province_code,
+			</if>
+			<if test="officialPrice != null">
+				official_price,
+			</if>
+			<if test="validatyDescription != null">
+				validaty_description,
+			</if>
+			<if test="description != null">
+				description,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="innerCode != null">
+				#{innerCode,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="operator != null">
+				#{operator,jdbcType=INTEGER},
+			</if>
+			<if test="parValue != null">
+				#{parValue,jdbcType=INTEGER},
+			</if>
+			<if test="scope != null">
+				#{scope,jdbcType=INTEGER},
+			</if>
+			<if test="outPriceOff != null">
+				#{outPriceOff,jdbcType=DOUBLE},
+			</if>
+			<if test="provinceCode != null">
+				#{provinceCode,jdbcType=VARCHAR},
+			</if>
+			<if test="officialPrice != null">
+				#{officialPrice,jdbcType=DOUBLE},
+			</if>
+			<if test="validatyDescription != null">
+				#{validatyDescription,jdbcType=VARCHAR},
+			</if>
+			<if test="description != null">
+				#{description,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.fs.product.domain.FluxProduct">
+		update fs_product
+		<set>
+			<if test="code != null">
+				code = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="innerCode != null">
+				inner_code = #{innerCode,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="operator != null">
+				operator = #{operator,jdbcType=INTEGER},
+			</if>
+			<if test="parValue != null">
+				par_value = #{parValue,jdbcType=INTEGER},
+			</if>
+			<if test="scope != null">
+				scope = #{scope,jdbcType=INTEGER},
+			</if>
+			<if test="outPriceOff != null">
+				out_price_off = #{outPriceOff,jdbcType=DOUBLE},
+			</if>
+			<if test="provinceCode != null">
+				province_code = #{provinceCode,jdbcType=VARCHAR},
+			</if>
+			<if test="officialPrice != null">
+				official_price = #{officialPrice,jdbcType=DOUBLE},
+			</if>
+			<if test="validatyDescription != null">
+				validaty_description = #{validatyDescription,jdbcType=VARCHAR},
+			</if>
+			<if test="description != null">
+				description = #{description,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.fs.product.domain.FluxProduct">
+		update fs_product
+		set code = #{code,jdbcType=VARCHAR},
+		inner_code = #{innerCode,jdbcType=VARCHAR},
+		name = #{name,jdbcType=VARCHAR},
+		status = #{status,jdbcType=INTEGER},
+		operator = #{operator,jdbcType=INTEGER},
+		par_value = #{parValue,jdbcType=INTEGER},
+		scope = #{scope,jdbcType=INTEGER},
+		out_price_off = #{outPriceOff,jdbcType=DOUBLE},
+		province_code = #{provinceCode,jdbcType=VARCHAR},
+		official_price = #{officialPrice,jdbcType=DOUBLE},
+		validaty_description = #{validatyDescription,jdbcType=VARCHAR},
+		description = #{description,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectAllist" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+		select distinct par_value from fs_product where  operator = #{operator_id}
+	</select>
+	
+	<select id="selectByParValue" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" /> 
+		from fs_product where par_value = #{parValue} and operator = #{operator}
+		order by id desc
+	</select>
+	
+	
+</mapper>

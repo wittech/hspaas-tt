@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.record.dao.SmsMtProcessFailedMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.record.domain.SmsMtProcessFailed">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="sid" property="sid" jdbcType="BIGINT" />
+		<result column="app_type" property="appType" jdbcType="TINYINT" />
+		<result column="ip" property="ip" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="template_id" property="templateId" jdbcType="INTEGER" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="fee" property="fee" jdbcType="INTEGER" />
+		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
+		<result column="attach" property="attach" jdbcType="VARCHAR" />
+		<result column="callback" property="callback" jdbcType="VARCHAR" />
+		<result column="lastest_status" property="lastestStatus"
+			jdbcType="INTEGER" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, sid, app_type, ip, user_id, mobile, cmcp, template_id, content, fee,
+		ext_number,
+		attach, callback, lastest_status, status, create_time, remark
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mt_process_failed
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from sms_mt_process_failed
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.record.domain.SmsMtProcessFailed">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mt_process_failed (sid, app_type, ip,
+		user_id, mobile, cmcp,
+		template_id, content, fee,
+		ext_number, attach, callback,
+		lastest_status, status, create_time,
+		remark)
+		values (#{sid,jdbcType=BIGINT}, #{appType,jdbcType=TINYINT},
+		#{ip,jdbcType=VARCHAR},
+		#{userId,jdbcType=INTEGER}, #{mobile,jdbcType=VARCHAR}, #{cmcp,jdbcType=INTEGER},
+		#{templateId,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR},
+		#{fee,jdbcType=INTEGER},
+		#{extNumber,jdbcType=VARCHAR}, #{attach,jdbcType=VARCHAR}, #{callback,jdbcType=VARCHAR},
+		#{lastestStatus,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{remark,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.record.domain.SmsMtProcessFailed">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mt_process_failed
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="sid != null">
+				sid,
+			</if>
+			<if test="appType != null">
+				app_type,
+			</if>
+			<if test="ip != null">
+				ip,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="cmcp != null">
+				cmcp,
+			</if>
+			<if test="templateId != null">
+				template_id,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+			<if test="fee != null">
+				fee,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="attach != null">
+				attach,
+			</if>
+			<if test="callback != null">
+				callback,
+			</if>
+			<if test="lastestStatus != null">
+				lastest_status,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="sid != null">
+				#{sid,jdbcType=BIGINT},
+			</if>
+			<if test="appType != null">
+				#{appType,jdbcType=TINYINT},
+			</if>
+			<if test="ip != null">
+				#{ip,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				#{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="templateId != null">
+				#{templateId,jdbcType=INTEGER},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="fee != null">
+				#{fee,jdbcType=INTEGER},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				#{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				#{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="lastestStatus != null">
+				#{lastestStatus,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.record.domain.SmsMtProcessFailed">
+		update sms_mt_process_failed
+		<set>
+			<if test="sid != null">
+				sid = #{sid,jdbcType=BIGINT},
+			</if>
+			<if test="appType != null">
+				app_type = #{appType,jdbcType=TINYINT},
+			</if>
+			<if test="ip != null">
+				ip = #{ip,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="templateId != null">
+				template_id = #{templateId,jdbcType=INTEGER},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="fee != null">
+				fee = #{fee,jdbcType=INTEGER},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				attach = #{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				callback = #{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="lastestStatus != null">
+				lastest_status = #{lastestStatus,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.record.domain.SmsMtProcessFailed">
+		update sms_mt_process_failed
+		set sid = #{sid,jdbcType=BIGINT},
+		app_type = #{appType,jdbcType=TINYINT},
+		ip = #{ip,jdbcType=VARCHAR},
+		user_id = #{userId,jdbcType=INTEGER},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		cmcp = #{cmcp,jdbcType=INTEGER},
+		template_id = #{templateId,jdbcType=INTEGER},
+		content = #{content,jdbcType=VARCHAR},
+		fee = #{fee,jdbcType=INTEGER},
+		ext_number = #{extNumber,jdbcType=VARCHAR},
+		attach = #{attach,jdbcType=VARCHAR},
+		callback = #{callback,jdbcType=VARCHAR},
+		lastest_status = #{lastestStatus,jdbcType=INTEGER},
+		status = #{status,jdbcType=INTEGER},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		remark = #{remark,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select * from sms_mt_process_failed where 1 = 1
+		<if test="keyword != null and keyword != ''">
+			and (content like '%${keyword}%' or mobile like '%${keyword}%')
+		</if>
+		<if test="sid != null and sid > -1">
+			and sid = #{sid}
+		</if>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="getBySid" resultMap="BaseResultMap">
+		select * from sms_mt_process_failed where sid = #{0} order by id desc
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from sms_mt_process_failed where 1 = 1
+		<if test="keyword != null and keyword != ''">
+			and (content like '%${keyword}%' or mobile like '%${keyword}%')
+		</if>
+		<if test="sid != null and sid > -1">
+			and sid = #{sid}
+		</if>
+	</select>
+</mapper>

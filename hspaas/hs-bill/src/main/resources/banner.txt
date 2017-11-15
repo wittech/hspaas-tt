@@ -1,0 +1,12 @@
+${AnsiColor.BRIGHT_YELLOW}
+		 _    _         ____    _   _   _ 
+		| |  | |       |  _ \  (_) | | | |
+		| |__| |  ___  | |_) |  _  | | | |
+		|  __  | / __| |  _ <  | | | | | |
+		| |  | | \__ \ | |_) | | | | | | |
+		|_|  |_| |___/ |____/  |_| |_| |_|
+         
+         
+${AnsiColor.BRIGHT_BLUE}
+::: Huashi :::  ＼(^O^)／    Spring-Boot ${spring-boot.version}
+${AnsiColor.CYAN}                                                                      

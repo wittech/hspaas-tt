@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.fs.passage.dao.FluxPassageMapper" >
+  <resultMap id="BaseResultMap" type="com.huashi.fs.passage.domain.FluxPassage" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="discount" property="discount" jdbcType="DOUBLE" />
+    <result column="agent_name" property="agentName" jdbcType="VARCHAR" />
+    <result column="pay_type" property="payType" jdbcType="TINYINT" />
+    <result column="passage_type" property="passageType" jdbcType="TINYINT" />
+    <result column="scope" property="scope" jdbcType="TINYINT" />
+    <result column="province_code" property="provinceCode" jdbcType="TINYINT" />
+    <result column="operator" property="operator" jdbcType="TINYINT" />
+    <result column="submit_interval" property="submitInterval" jdbcType="INTEGER" />
+    <result column="priority" property="priority" jdbcType="TINYINT" />
+    <result column="scan_interval" property="scanInterval" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="limit_size" property="limitSize" jdbcType="INTEGER" />
+    <result column="balance" property="balance" jdbcType="DOUBLE" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, code, discount, agent_name, pay_type, passage_type, scope, province_code, 
+    operator, submit_interval, priority, scan_interval, status, remark, limit_size, balance, 
+    create_time, modify_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from fs_passage
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from fs_passage
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.huashi.fs.passage.domain.FluxPassage" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into fs_passage (name, code, discount, 
+      agent_name, pay_type, passage_type, 
+      scope, province_code, operator, 
+      submit_interval, priority, scan_interval, 
+      status, remark, limit_size, 
+      balance, create_time, modify_time
+      )
+    values (#{name,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{discount,jdbcType=DOUBLE}, 
+      #{agentName,jdbcType=VARCHAR}, #{payType,jdbcType=TINYINT}, #{passageType,jdbcType=TINYINT}, 
+      #{scope,jdbcType=TINYINT}, #{provinceCode,jdbcType=TINYINT}, #{operator,jdbcType=TINYINT}, 
+      #{submitInterval,jdbcType=INTEGER}, #{priority,jdbcType=TINYINT}, #{scanInterval,jdbcType=INTEGER}, 
+      #{status,jdbcType=TINYINT}, #{remark,jdbcType=VARCHAR}, #{limitSize,jdbcType=INTEGER}, 
+      #{balance,jdbcType=DOUBLE}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.huashi.fs.passage.domain.FluxPassage" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into fs_passage
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="discount != null" >
+        discount,
+      </if>
+      <if test="agentName != null" >
+        agent_name,
+      </if>
+      <if test="payType != null" >
+        pay_type,
+      </if>
+      <if test="passageType != null" >
+        passage_type,
+      </if>
+      <if test="scope != null" >
+        scope,
+      </if>
+      <if test="provinceCode != null" >
+        province_code,
+      </if>
+      <if test="operator != null" >
+        operator,
+      </if>
+      <if test="submitInterval != null" >
+        submit_interval,
+      </if>
+      <if test="priority != null" >
+        priority,
+      </if>
+      <if test="scanInterval != null" >
+        scan_interval,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="limitSize != null" >
+        limit_size,
+      </if>
+      <if test="balance != null" >
+        balance,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="discount != null" >
+        #{discount,jdbcType=DOUBLE},
+      </if>
+      <if test="agentName != null" >
+        #{agentName,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null" >
+        #{payType,jdbcType=TINYINT},
+      </if>
+      <if test="passageType != null" >
+        #{passageType,jdbcType=TINYINT},
+      </if>
+      <if test="scope != null" >
+        #{scope,jdbcType=TINYINT},
+      </if>
+      <if test="provinceCode != null" >
+        #{provinceCode,jdbcType=TINYINT},
+      </if>
+      <if test="operator != null" >
+        #{operator,jdbcType=TINYINT},
+      </if>
+      <if test="submitInterval != null" >
+        #{submitInterval,jdbcType=INTEGER},
+      </if>
+      <if test="priority != null" >
+        #{priority,jdbcType=TINYINT},
+      </if>
+      <if test="scanInterval != null" >
+        #{scanInterval,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="limitSize != null" >
+        #{limitSize,jdbcType=INTEGER},
+      </if>
+      <if test="balance != null" >
+        #{balance,jdbcType=DOUBLE},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huashi.fs.passage.domain.FluxPassage" >
+    update fs_passage
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="discount != null" >
+        discount = #{discount,jdbcType=DOUBLE},
+      </if>
+      <if test="agentName != null" >
+        agent_name = #{agentName,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null" >
+        pay_type = #{payType,jdbcType=TINYINT},
+      </if>
+      <if test="passageType != null" >
+        passage_type = #{passageType,jdbcType=TINYINT},
+      </if>
+      <if test="scope != null" >
+        scope = #{scope,jdbcType=TINYINT},
+      </if>
+      <if test="provinceCode != null" >
+        province_code = #{provinceCode,jdbcType=TINYINT},
+      </if>
+      <if test="operator != null" >
+        operator = #{operator,jdbcType=TINYINT},
+      </if>
+      <if test="submitInterval != null" >
+        submit_interval = #{submitInterval,jdbcType=INTEGER},
+      </if>
+      <if test="priority != null" >
+        priority = #{priority,jdbcType=TINYINT},
+      </if>
+      <if test="scanInterval != null" >
+        scan_interval = #{scanInterval,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="limitSize != null" >
+        limit_size = #{limitSize,jdbcType=INTEGER},
+      </if>
+      <if test="balance != null" >
+        balance = #{balance,jdbcType=DOUBLE},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huashi.fs.passage.domain.FluxPassage" >
+    update fs_passage
+    set name = #{name,jdbcType=VARCHAR},
+      code = #{code,jdbcType=VARCHAR},
+      discount = #{discount,jdbcType=DOUBLE},
+      agent_name = #{agentName,jdbcType=VARCHAR},
+      pay_type = #{payType,jdbcType=TINYINT},
+      passage_type = #{passageType,jdbcType=TINYINT},
+      scope = #{scope,jdbcType=TINYINT},
+      province_code = #{provinceCode,jdbcType=TINYINT},
+      operator = #{operator,jdbcType=TINYINT},
+      submit_interval = #{submitInterval,jdbcType=INTEGER},
+      priority = #{priority,jdbcType=TINYINT},
+      scan_interval = #{scanInterval,jdbcType=INTEGER},
+      status = #{status,jdbcType=TINYINT},
+      remark = #{remark,jdbcType=VARCHAR},
+      limit_size = #{limitSize,jdbcType=INTEGER},
+      balance = #{balance,jdbcType=DOUBLE},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

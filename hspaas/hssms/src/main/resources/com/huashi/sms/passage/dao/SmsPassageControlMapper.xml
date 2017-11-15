@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.passage.dao.SmsPassageControlMapper" >
+  <resultMap id="BaseResultMap" type="com.huashi.sms.passage.domain.SmsPassageControl" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="passage_id" property="passageId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="BIT" />
+    <result column="cron" property="cron" jdbcType="VARCHAR" />
+    <result column="parameter_id" property="parameterId" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, passage_id, status, cron, parameter_id, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from sms_passage_control
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from sms_passage_control
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.huashi.sms.passage.domain.SmsPassageControl" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_passage_control (passage_id, status, cron, 
+      parameter_id, create_time)
+    values (#{passageId,jdbcType=INTEGER}, #{status,jdbcType=BIT}, #{cron,jdbcType=VARCHAR}, 
+      #{parameterId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.huashi.sms.passage.domain.SmsPassageControl" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_passage_control
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="passageId != null" >
+        passage_id,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="cron != null" >
+        cron,
+      </if>
+      <if test="parameterId != null" >
+        parameter_id,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="passageId != null" >
+        #{passageId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=BIT},
+      </if>
+      <if test="cron != null" >
+        #{cron,jdbcType=VARCHAR},
+      </if>
+      <if test="parameterId != null" >
+        #{parameterId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.passage.domain.SmsPassageControl" >
+    update sms_passage_control
+    <set >
+      <if test="passageId != null" >
+        passage_id = #{passageId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=BIT},
+      </if>
+      <if test="cron != null" >
+        cron = #{cron,jdbcType=VARCHAR},
+      </if>
+      <if test="parameterId != null" >
+        parameter_id = #{parameterId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huashi.sms.passage.domain.SmsPassageControl" >
+    update sms_passage_control
+    set passage_id = #{passageId,jdbcType=INTEGER},
+      status = #{status,jdbcType=BIT},
+      cron = #{cron,jdbcType=VARCHAR},
+      parameter_id = #{parameterId,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="findList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select 
+		<include refid="Base_Column_List" />
+		from sms_passage_control where 1=1
+		<if test="passageId != null and passageId != ''">
+			and passage_id = #{passageId}
+		</if>
+		<if test="status != null and status != ''">
+			and status = #{status}
+		</if>
+		order by create_time desc limit #{start},#{end}
+   </select>
+   
+   <select id="count" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(id) from sms_passage_control where 1=1
+		<if test="passageId != null and passageId != ''">
+			and passage_id = #{passageId}
+		</if>
+		<if test="status != null and status != ''">
+			and status = #{status}
+		</if>
+	</select>
+	
+	<select id="selectByPassageId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+	    select 
+	    <include refid="Base_Column_List" />
+	    from sms_passage_control
+	    where passage_id = #{passageId,jdbcType=INTEGER}
+  </select>
+</mapper>

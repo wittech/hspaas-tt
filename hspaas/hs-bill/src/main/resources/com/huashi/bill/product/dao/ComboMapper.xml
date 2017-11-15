@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.bill.product.dao.ComboMapper">
+	<resultMap id="comboResultMap" type="com.huashi.bill.product.domain.Combo">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="original_money" property="originalMoney" />
+		<result column="sell_money" property="sellMoney" />
+		<result column="sort" property="sort" />
+		<result column="status" property="status" />
+		<result column="operator_id" property="operatorId" />
+		<result column="modify_operation_id" property="modifyOperatorId" />
+		<result column="remark" property="remark" />
+		<result column="description" property="description" />
+		<result column="create_time" property="createTime" />
+		<result column="modify_time" property="modifyTime" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="is_in_time" property="isInTime" />
+	</resultMap>
+
+	<insert id="insert" parameterType="com.huashi.bill.product.domain.Combo">
+		insert into hspaas_combo
+		(name,original_money,sell_money,sort,status,operator_id,modify_operation_id,remark,description,create_time,modify_time,start_time,end_time,is_in_time)
+		values
+		(#{name},#{originalMoney},#{sellMoney},#{sort},#{status},#{operatorId},#{modifyOperatorId},#{remark},#{description},now(),now(),#{startTime},#{endTime},#{isInTime})
+		<selectKey resultType="java.lang.Integer" order="AFTER"
+			keyProperty="id">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+
+	<delete id="delete">
+		delete from hspaas_combo where id = #{id}
+	</delete>
+
+	<update id="update">
+		update hspaas_combo set name =
+		#{name},original_money=#{originalMoney},
+		sort = #{sort},sell_money =
+		#{sellMoney},
+		modify_operation_id =
+		#{modifyOperatorId},remark=#{remark},
+		description=#{description},modify_time = now(),
+		start_time =
+		#{startTime},end_time=#{endTime},is_in_time = #{isInTime}
+		where id =
+		#{id}
+	</update>
+
+	<update id="updateStatus">
+		update hspaas_combo set status = #{status} where id =
+		#{id}
+	</update>
+
+	<select id="findById" resultMap="comboResultMap">
+		select * from hspaas_combo where
+		id = #{id} and status = 0
+	</select>
+
+	<select id="getCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(h.id) from hspaas_combo h where 1 = 1
+		<if test="name != null and name != ''">
+			and h.name like '%${name}%'
+		</if>
+		<if test="startTime != null and startTime != ''">
+			and date(h.start_time) &gt;=#{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			and date(h.end_time) &lt;=#{endTime}
+		</if>
+	</select>
+
+	<select id="findList" resultMap="comboResultMap" parameterType="java.util.Map">
+		select h.* from hspaas_combo h where 1 = 1
+		<if test="name != null and name != ''">
+			and h.name like '%${name}%'
+		</if>
+		<if test="startTime != null and startTime != ''">
+			and date(h.start_time) &gt;=#{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			and date(h.end_time) &lt;=#{endTime}
+		</if>
+		order by h.create_time desc limit #{start},#{end}
+	</select>
+
+	<select id="getComboByProdctId" resultMap="comboResultMap">
+		select c.* from
+		hspaas_combo c,hspaas_combo_product p where c.id = p.combo_id and
+		product_id = #{id}
+	</select>
+
+	<select id="getCountNum" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(1) from hspaas_combo where status=0
+	</select>
+
+	<select id="findPageList" resultMap="comboResultMap"
+		parameterType="java.util.Map">
+		select id, name, sell_money, description, start_time
+		,end_time, is_in_time
+		from hspaas_combo where status=0 order by sort
+		limit #{pageRecord} offset #{startPage}
+	</select>
+</mapper>

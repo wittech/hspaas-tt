@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.passage.dao.SmsPassageChangeLogMapper" >
+  <resultMap id="BaseResultMap" type="com.huashi.sms.passage.domain.SmsPassageChangeLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="passage_id" property="passageId" jdbcType="INTEGER" />
+    <result column="old_passage_id" property="oldPassageId" jdbcType="INTEGER" />
+    <result column="group_id" property="groupId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="route_type" property="routeType" jdbcType="INTEGER" />
+    <result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+    <result column="operate_mode" property="operateMode" jdbcType="INTEGER" />
+    <result column="operate_user" property="operateUser" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, passage_id, old_passage_id, group_id, user_id, route_type, cmcp, operate_mode, 
+    operate_user, remark, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from sms_passage_change_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from sms_passage_change_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.huashi.sms.passage.domain.SmsPassageChangeLog" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_passage_change_log (passage_id, old_passage_id, group_id, 
+      user_id, route_type, cmcp, 
+      operate_mode, operate_user, remark, 
+      create_time)
+    values (#{passageId,jdbcType=INTEGER}, #{oldPassageId,jdbcType=INTEGER}, #{groupId,jdbcType=INTEGER}, 
+      #{userId,jdbcType=INTEGER}, #{routeType,jdbcType=INTEGER}, #{cmcp,jdbcType=INTEGER}, 
+      #{operateMode,jdbcType=INTEGER}, #{operateUser,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.huashi.sms.passage.domain.SmsPassageChangeLog" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sms_passage_change_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="passageId != null" >
+        passage_id,
+      </if>
+      <if test="oldPassageId != null" >
+        old_passage_id,
+      </if>
+      <if test="groupId != null" >
+        group_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="routeType != null" >
+        route_type,
+      </if>
+      <if test="cmcp != null" >
+        cmcp,
+      </if>
+      <if test="operateMode != null" >
+        operate_mode,
+      </if>
+      <if test="operateUser != null" >
+        operate_user,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="passageId != null" >
+        #{passageId,jdbcType=INTEGER},
+      </if>
+      <if test="oldPassageId != null" >
+        #{oldPassageId,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        #{groupId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="routeType != null" >
+        #{routeType,jdbcType=INTEGER},
+      </if>
+      <if test="cmcp != null" >
+        #{cmcp,jdbcType=INTEGER},
+      </if>
+      <if test="operateMode != null" >
+        #{operateMode,jdbcType=INTEGER},
+      </if>
+      <if test="operateUser != null" >
+        #{operateUser,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.passage.domain.SmsPassageChangeLog" >
+    update sms_passage_change_log
+    <set >
+      <if test="passageId != null" >
+        passage_id = #{passageId,jdbcType=INTEGER},
+      </if>
+      <if test="oldPassageId != null" >
+        old_passage_id = #{oldPassageId,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        group_id = #{groupId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="routeType != null" >
+        route_type = #{routeType,jdbcType=INTEGER},
+      </if>
+      <if test="cmcp != null" >
+        cmcp = #{cmcp,jdbcType=INTEGER},
+      </if>
+      <if test="operateMode != null" >
+        operate_mode = #{operateMode,jdbcType=INTEGER},
+      </if>
+      <if test="operateUser != null" >
+        operate_user = #{operateUser,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huashi.sms.passage.domain.SmsPassageChangeLog" >
+    update sms_passage_change_log
+    set passage_id = #{passageId,jdbcType=INTEGER},
+      old_passage_id = #{oldPassageId,jdbcType=INTEGER},
+      group_id = #{groupId,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=INTEGER},
+      route_type = #{routeType,jdbcType=INTEGER},
+      cmcp = #{cmcp,jdbcType=INTEGER},
+      operate_mode = #{operateMode,jdbcType=INTEGER},
+      operate_user = #{operateUser,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

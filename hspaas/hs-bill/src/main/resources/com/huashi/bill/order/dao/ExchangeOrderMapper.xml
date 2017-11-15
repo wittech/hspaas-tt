@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.bill.order.dao.ExchangeOrderMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.bill.order.domain.ExchangeOrder">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="from_user_id" property="fromUserId" jdbcType="INTEGER" />
+		<result column="exchange_type" property="exchangeType"
+			jdbcType="INTEGER" />
+		<result column="app_type" property="appType" jdbcType="INTEGER" />
+		<result column="platform_type" property="platformType"
+			jdbcType="INTEGER" />
+		<result column="product_fee" property="productFee" jdbcType="DOUBLE" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="complete_time" property="completeTime"
+			jdbcType="TIMESTAMP" />
+		<result column="operator" property="operator" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, order_no, user_id, from_user_id, exchange_type, app_type,
+		platform_type, product_fee,
+		status, remark, create_time, complete_time, operator
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_exchange_order
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from hspaas_exchange_order
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.bill.order.domain.ExchangeOrder">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_exchange_order (order_no, user_id, from_user_id,
+		exchange_type, app_type, platform_type,
+		product_fee, status, remark,
+		create_time, complete_time, operator
+		)
+		values (#{orderNo,jdbcType=VARCHAR}, #{userId,jdbcType=INTEGER},
+		#{fromUserId,jdbcType=INTEGER},
+		#{exchangeType,jdbcType=INTEGER}, #{appType,jdbcType=INTEGER}, #{platformType,jdbcType=INTEGER},
+		#{productFee,jdbcType=DOUBLE}, #{status,jdbcType=INTEGER},
+		#{remark,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP}, #{completeTime,jdbcType=TIMESTAMP}, #{operator,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.bill.order.domain.ExchangeOrder">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_exchange_order
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="orderNo != null">
+				order_no,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="fromUserId != null">
+				from_user_id,
+			</if>
+			<if test="exchangeType != null">
+				exchange_type,
+			</if>
+			<if test="appType != null">
+				app_type,
+			</if>
+			<if test="platformType != null">
+				platform_type,
+			</if>
+			<if test="productFee != null">
+				product_fee,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="completeTime != null">
+				complete_time,
+			</if>
+			<if test="operator != null">
+				operator,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="orderNo != null">
+				#{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="fromUserId != null">
+				#{fromUserId,jdbcType=INTEGER},
+			</if>
+			<if test="exchangeType != null">
+				#{exchangeType,jdbcType=INTEGER},
+			</if>
+			<if test="appType != null">
+				#{appType,jdbcType=INTEGER},
+			</if>
+			<if test="platformType != null">
+				#{platformType,jdbcType=INTEGER},
+			</if>
+			<if test="productFee != null">
+				#{productFee,jdbcType=DOUBLE},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="completeTime != null">
+				#{completeTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="operator != null">
+				#{operator,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.bill.order.domain.ExchangeOrder">
+		update hspaas_exchange_order
+		<set>
+			<if test="orderNo != null">
+				order_no = #{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="fromUserId != null">
+				from_user_id = #{fromUserId,jdbcType=INTEGER},
+			</if>
+			<if test="exchangeType != null">
+				exchange_type = #{exchangeType,jdbcType=INTEGER},
+			</if>
+			<if test="appType != null">
+				app_type = #{appType,jdbcType=INTEGER},
+			</if>
+			<if test="platformType != null">
+				platform_type = #{platformType,jdbcType=INTEGER},
+			</if>
+			<if test="productFee != null">
+				product_fee = #{productFee,jdbcType=DOUBLE},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="completeTime != null">
+				complete_time = #{completeTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="operator != null">
+				operator = #{operator,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.bill.order.domain.ExchangeOrder">
+		update hspaas_exchange_order
+		set order_no = #{orderNo,jdbcType=VARCHAR},
+		user_id = #{userId,jdbcType=INTEGER},
+		from_user_id = #{fromUserId,jdbcType=INTEGER},
+		exchange_type = #{exchangeType,jdbcType=INTEGER},
+		app_type = #{appType,jdbcType=INTEGER},
+		platform_type = #{platformType,jdbcType=INTEGER},
+		product_fee = #{productFee,jdbcType=DOUBLE},
+		status = #{status,jdbcType=INTEGER},
+		remark = #{remark,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		complete_time = #{completeTime,jdbcType=TIMESTAMP},
+		operator = #{operator,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+</mapper>

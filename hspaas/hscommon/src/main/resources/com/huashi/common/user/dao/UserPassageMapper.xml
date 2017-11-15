@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.user.dao.UserPassageMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.user.domain.UserPassage">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="passage_group_id" property="passageGroupId"
+			jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, type, passage_group_id, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_passage
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		hspaas_user_passage
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.user.domain.UserPassage">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_passage (user_id, type, passage_group_id,
+		create_time)
+		values (#{userId,jdbcType=INTEGER},
+		#{type,jdbcType=INTEGER},
+		#{passageGroupId,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.user.domain.UserPassage">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_passage
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="passageGroupId != null">
+				passage_group_id,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=INTEGER},
+			</if>
+			<if test="passageGroupId != null">
+				#{passageGroupId,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.user.domain.UserPassage">
+		update hspaas_user_passage
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="type != null">
+				type = #{type,jdbcType=INTEGER},
+			</if>
+			<if test="passageGroupId != null">
+				passage_group_id = #{passageGroupId,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.user.domain.UserPassage">
+		update
+		hspaas_user_passage
+		set user_id = #{userId,jdbcType=INTEGER},
+		type =
+		#{type,jdbcType=INTEGER},
+		passage_group_id =
+		#{passageGroupId,jdbcType=INTEGER},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="selectByUserIdAndType" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_passage
+		where user_id = #{userId,jdbcType=INTEGER} and
+		type = #{type,jdbcType=INTEGER} order by id desc limit 1
+	</select>
+
+	<select id="findByUserId" resultMap="BaseResultMap">
+		select * from
+		hspaas_user_passage where user_id = #{0}
+	</select>
+
+	<delete id="deleteByUserId">
+		delete from hspaas_user_passage where user_id = #{0}
+	</delete>
+
+	<update id="updateByUserIdAndType">
+		update hspaas_user_passage set passage_group_id = #{passageGroupId} where user_id = #{userId} and type = #{type}
+	</update>
+
+	<select id="getPassageGroupListByGroupId" resultMap="BaseResultMap">
+		select * from hspaas_user_passage where passage_group_id = #{passageGroupId}
+	</select>
+</mapper>

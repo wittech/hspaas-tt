@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.passage.dao.SmsPassageReachrateSettingsMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.passage.domain.SmsPassageReachrateSettings">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="interval" property="interval" jdbcType="BIGINT" />
+		<result column="start_time" property="startTime" jdbcType="BIGINT" />
+		<result column="time_length" property="timeLength" jdbcType="BIGINT" />
+		<result column="count_point" property="countPoint" jdbcType="INTEGER" />
+		<result column="rate_threshold" property="rateThreshold"
+			jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="status" property="status" />
+		<result column="passage_id" property="passageId" />
+		<result column="passage_name" property="passageName" />
+		<result column="mobile" property="mobile" />
+	</resultMap>
+
+	<resultMap id="PassageResultMap" type="com.huashi.sms.passage.domain.SmsPassage">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="code" property="code" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, `interval`, start_time, time_length, count_point, rate_threshold,
+		create_time, status, passage_id, mobile
+	</sql>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_reachrate_settings
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from sms_passage_reachrate_settings
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+
+	<insert id="insert"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageReachrateSettings">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_passage_reachrate_settings (`interval`, start_time,
+		time_length,count_point, rate_threshold, create_time, status,
+		passage_id, mobile)
+		values (#{interval,jdbcType=BIGINT}, #{startTime,jdbcType=BIGINT},
+		#{timeLength,jdbcType=BIGINT},#{countPoint,jdbcType=INTEGER},
+		#{rateThreshold,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},#{status}, #{passageId}, #{mobile})
+	</insert>
+
+	<insert id="insertSelective"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageReachrateSettings">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_passage_reachrate_settings
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="interval != null">
+				`interval`,
+			</if>
+			<if test="startTime != null">
+				start_time,
+			</if>
+			<if test="timeLength != null">
+				time_length,
+			</if>
+			<if test="countPoint != null">
+				count_point,
+			</if>
+			<if test="rateThreshold != null">
+				rate_threshold,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="mobile != null">
+				mobile
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="interval != null">
+				#{interval,jdbcType=BIGINT},
+			</if>
+			<if test="startTime != null">
+				#{startTime,jdbcType=BIGINT},
+			</if>
+			<if test="timeLength != null">
+				#{timeLength,jdbcType=BIGINT},
+			</if>
+			<if test="countPoint != null">
+				#{countPoint,jdbcType=INTEGER},
+			</if>
+			<if test="rateThreshold != null">
+				#{rateThreshold,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=BIGINT},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageReachrateSettings">
+		update sms_passage_reachrate_settings
+		<set>
+			<if test="interval != null">
+				`interval` = #{interval,jdbcType=BIGINT},
+			</if>
+			<if test="startTime != null">
+				start_time = #{startTime,jdbcType=BIGINT},
+			</if>
+			<if test="timeLength != null">
+				time_length = #{timeLength,jdbcType=BIGINT},
+			</if>
+			<if test="countPoint != null">
+				count_point = #{countPoint,jdbcType=INTEGER},
+			</if>
+			<if test="rateThreshold != null">
+				rate_threshold = #{rateThreshold,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile}
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<update id="updateByPrimaryKey"
+		parameterType="com.huashi.sms.passage.domain.SmsPassageReachrateSettings">
+		update sms_passage_reachrate_settings
+		set `interval` = #{interval,jdbcType=BIGINT},
+		start_time = #{startTime,jdbcType=BIGINT},
+		time_length = #{timeLength,jdbcType=BIGINT},
+		count_point = #{countPoint,jdbcType=INTEGER},
+		rate_threshold = #{rateThreshold,jdbcType=INTEGER},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		status = #{status},
+		mobile = #{mobile},
+		passage_id = #{passageId}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="findAllPassageId" resultType="java.lang.Long">
+		select distinct passage_id from sms_passage_reachrate_settings order by id
+		desc
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select s.*,p.name passage_name from sms_passage_reachrate_settings
+		s,sms_passage p
+		where s.passage_id = p.id
+		<if test="keyword != null and keyword != ''">
+			and p.name like '%${keyword}%'
+		</if>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from sms_passage_reachrate_settings s,sms_passage p
+		where s.passage_id = p.id
+		<if test="keyword != null and keyword != ''">
+			and p.name like '%${keyword}%'
+		</if>
+	</select>
+
+	<select id="getPassageByUseable" resultMap="PassageResultMap">
+		select p.* from sms_passage p where p.id not in
+		(select distinct passage_id from sms_passage_reachrate_settings) order by
+		p.id desc
+	</select>
+
+	<select id="getByUseable" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_reachrate_settings where status = 1 order by id desc
+	</select>
+
+</mapper>

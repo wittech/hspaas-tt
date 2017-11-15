@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.bill.order.dao.TradeOrderMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.bill.order.domain.TradeOrder">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+		<result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="invoice_flag" property="invoiceFlag" jdbcType="BIT" />
+		<result column="trade_type" property="tradeType" jdbcType="INTEGER" />
+		<result column="app_type" property="appType" jdbcType="INTEGER" />
+		<result column="product_combo_id" property="productComboId"
+			jdbcType="INTEGER" />
+		<result column="product_name" property="productName" jdbcType="VARCHAR" />
+		<result column="product_fee" property="productFee" jdbcType="DOUBLE" />
+		<result column="pay_type" property="payType" jdbcType="TINYINT" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="message" property="message" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="pay_time" property="payTime" jdbcType="TIMESTAMP" />
+		<result column="complete_time" property="completeTime"
+			jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="full_name" property="userFullName" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, order_no, trade_no, user_id, invoice_flag, trade_type,
+		app_type,
+		product_combo_id,
+		product_name, product_fee, pay_type, status,
+		message, create_time, pay_time,
+		complete_time,
+		remark
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_trade_order
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		hspaas_trade_order
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.bill.order.domain.TradeOrder">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_trade_order (order_no, trade_no, user_id,
+		invoice_flag, trade_type, app_type,
+		product_combo_id, product_name,
+		product_fee,
+		pay_type, status, message,
+		create_time, pay_time,
+		complete_time,
+		remark)
+		values (#{orderNo,jdbcType=VARCHAR},
+		#{tradeNo,jdbcType=VARCHAR},
+		#{userId,jdbcType=INTEGER},
+		#{invoiceFlag,jdbcType=BIT}, #{tradeType,jdbcType=INTEGER},
+		#{appType,jdbcType=INTEGER},
+		#{productComboId,jdbcType=INTEGER},
+		#{productName,jdbcType=VARCHAR},
+		#{productFee,jdbcType=DOUBLE},
+		#{payType,jdbcType=TINYINT}, #{status,jdbcType=INTEGER},
+		#{message,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{payTime,jdbcType=TIMESTAMP},
+		#{completeTime,jdbcType=TIMESTAMP},
+		#{remark,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.bill.order.domain.TradeOrder">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_trade_order
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="orderNo != null">
+				order_no,
+			</if>
+			<if test="tradeNo != null">
+				trade_no,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="invoiceFlag != null">
+				invoice_flag,
+			</if>
+			<if test="tradeType != null">
+				trade_type,
+			</if>
+			<if test="appType != null">
+				app_type,
+			</if>
+			<if test="productComboId != null">
+				product_combo_id,
+			</if>
+			<if test="productName != null">
+				product_name,
+			</if>
+			<if test="productFee != null">
+				product_fee,
+			</if>
+			<if test="payType != null">
+				pay_type,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="message != null">
+				message,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="payTime != null">
+				pay_time,
+			</if>
+			<if test="completeTime != null">
+				complete_time,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="orderNo != null">
+				#{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test="tradeNo != null">
+				#{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="invoiceFlag != null">
+				#{invoiceFlag,jdbcType=BIT},
+			</if>
+			<if test="tradeType != null">
+				#{tradeType,jdbcType=INTEGER},
+			</if>
+			<if test="appType != null">
+				#{appType,jdbcType=INTEGER},
+			</if>
+			<if test="productComboId != null">
+				#{productComboId,jdbcType=INTEGER},
+			</if>
+			<if test="productName != null">
+				#{productName,jdbcType=VARCHAR},
+			</if>
+			<if test="productFee != null">
+				#{productFee,jdbcType=DOUBLE},
+			</if>
+			<if test="payType != null">
+				#{payType,jdbcType=TINYINT},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="message != null">
+				#{message,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="payTime != null">
+				#{payTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="completeTime != null">
+				#{completeTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.bill.order.domain.TradeOrder">
+		update hspaas_trade_order
+		<set>
+			<if test="orderNo != null">
+				order_no = #{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test="tradeNo != null">
+				trade_no = #{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="invoiceFlag != null">
+				invoice_flag = #{invoiceFlag,jdbcType=BIT},
+			</if>
+			<if test="tradeType != null">
+				trade_type = #{tradeType,jdbcType=INTEGER},
+			</if>
+			<if test="appType != null">
+				app_type = #{appType,jdbcType=INTEGER},
+			</if>
+			<if test="productComboId != null">
+				product_combo_id = #{productComboId,jdbcType=INTEGER},
+			</if>
+			<if test="productName != null">
+				product_name = #{productName,jdbcType=VARCHAR},
+			</if>
+			<if test="productFee != null">
+				product_fee = #{productFee,jdbcType=DOUBLE},
+			</if>
+			<if test="payType != null">
+				pay_type = #{payType,jdbcType=TINYINT},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="message != null">
+				message = #{message,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="payTime != null">
+				pay_time = #{payTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="completeTime != null">
+				complete_time = #{completeTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.bill.order.domain.TradeOrder">
+		update
+		hspaas_trade_order
+		set order_no = #{orderNo,jdbcType=VARCHAR},
+		trade_no
+		= #{tradeNo,jdbcType=VARCHAR},
+		user_id = #{userId,jdbcType=INTEGER},
+		invoice_flag = #{invoiceFlag,jdbcType=BIT},
+		trade_type =
+		#{tradeType,jdbcType=INTEGER},
+		app_type = #{appType,jdbcType=INTEGER},
+		product_combo_id = #{productComboId,jdbcType=INTEGER},
+		product_name =
+		#{productName,jdbcType=VARCHAR},
+		product_fee =
+		#{productFee,jdbcType=DOUBLE},
+		pay_type = #{payType,jdbcType=TINYINT},
+		status = #{status,jdbcType=INTEGER},
+		message =
+		#{message,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		pay_time =
+		#{payTime,jdbcType=TIMESTAMP},
+		complete_time =
+		#{completeTime,jdbcType=TIMESTAMP},
+		remark = #{remark,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="selectByTradeNo" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_trade_order
+		where trade_no = #{tradeNo,jdbcType=VARCHAR}
+		order by id desc limit 1
+	</select>
+
+	<update id="updateOrder2Comoplte">
+		update hspaas_trade_order set pay_time = now(),
+		complete_time = now(), status = 3 where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(0) from hspaas_trade_order where 1 = 1
+		<if test="userId > 0">
+			and user_id = #{userId}
+		</if>
+		<if test="orderNo != null">
+			and order_no=#{orderNo}
+		</if>
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="status != null">
+			and status=#{status}
+		</if>
+		<if test="payType != null">
+			and pay_type=#{payType}
+		</if>
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from hspaas_trade_order where 1 = 1
+		<if test="userId > 0">
+			and user_id = #{userId}
+		</if>
+		<if test="orderNo != null">
+			and order_no=#{orderNo}
+		</if>
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="status != null">
+			and status=#{status}
+		</if>
+		<if test="payType != null">
+			and pay_type=#{payType}
+		</if>
+		order by create_time desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+
+
+
+	<select id="findCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(0) from hspaas_trade_order t,hspaas_user_profile u where
+		t.user_id = u.user_id
+		<if test="keyword != null and keyword != ''">
+			and (t.order_no like '%${keyword}%' or u.full_name like '%${keyword}%')
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and date(t.create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and date(t.create_time) &lt;=#{endDate}
+		</if>
+		<if test="status > -1">
+			and t.status=#{status}
+		</if>
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select t.*,u.full_name from hspaas_trade_order t,hspaas_user_profile u
+		where t.user_id = u.user_id
+		<if test="keyword != null and keyword != ''">
+			and (t.order_no like '%${keyword}%' or u.full_name like
+			'%${keyword}%')
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and date(t.create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and date(t.create_time) &lt;=#{endDate}
+		</if>
+		<if test="status > -1">
+			and t.status=#{status}
+		</if>
+		order by t.create_time desc
+		limit #{start},#{end}
+	</select>
+</mapper>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.bill.pay.dao.AlipayBillMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.bill.pay.domain.AlipayBill">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="out_trade_no" property="outTradeNo" jdbcType="VARCHAR" />
+		<result column="subject" property="subject" jdbcType="VARCHAR" />
+		<result column="payment_type" property="paymentType" jdbcType="VARCHAR" />
+		<result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
+		<result column="trade_status" property="tradeStatus" jdbcType="VARCHAR" />
+		<result column="total_fee" property="totalFee" jdbcType="DOUBLE" />
+		<result column="notify_id" property="notifyId" jdbcType="VARCHAR" />
+		<result column="notify_time" property="notifyTime" jdbcType="VARCHAR" />
+		<result column="notify_type" property="notifyType" jdbcType="VARCHAR" />
+		<result column="seller_email" property="sellerEmail" jdbcType="VARCHAR" />
+		<result column="seller_id" property="sellerId" jdbcType="VARCHAR" />
+		<result column="buyer_email" property="buyerEmail" jdbcType="VARCHAR" />
+		<result column="buyer_id" property="buyerId" jdbcType="VARCHAR" />
+		<result column="is_success" property="isSuccess" jdbcType="BIT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, out_trade_no, subject, payment_type, trade_no, trade_status,
+		total_fee, notify_id,
+		notify_time, notify_type, seller_email, seller_id, buyer_email, buyer_id,
+		is_success,
+		create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_alipay_bill
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from hspaas_alipay_bill
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.bill.pay.domain.AlipayBill">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_alipay_bill (out_trade_no, subject, payment_type,
+		trade_no, trade_status, total_fee,
+		notify_id, notify_time, notify_type,
+		seller_email, seller_id, buyer_email,
+		buyer_id, is_success, create_time
+		)
+		values (#{outTradeNo,jdbcType=VARCHAR}, #{subject,jdbcType=VARCHAR},
+		#{paymentType,jdbcType=VARCHAR},
+		#{tradeNo,jdbcType=VARCHAR}, #{tradeStatus,jdbcType=VARCHAR}, #{totalFee,jdbcType=DOUBLE},
+		#{notifyId,jdbcType=VARCHAR}, #{notifyTime,jdbcType=VARCHAR},
+		#{notifyType,jdbcType=VARCHAR},
+		#{sellerEmail,jdbcType=VARCHAR}, #{sellerId,jdbcType=VARCHAR}, #{buyerEmail,jdbcType=VARCHAR},
+		#{buyerId,jdbcType=VARCHAR}, #{isSuccess,jdbcType=BIT},
+		#{createTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.bill.pay.domain.AlipayBill">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_alipay_bill
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="outTradeNo != null">
+				out_trade_no,
+			</if>
+			<if test="subject != null">
+				subject,
+			</if>
+			<if test="paymentType != null">
+				payment_type,
+			</if>
+			<if test="tradeNo != null">
+				trade_no,
+			</if>
+			<if test="tradeStatus != null">
+				trade_status,
+			</if>
+			<if test="totalFee != null">
+				total_fee,
+			</if>
+			<if test="notifyId != null">
+				notify_id,
+			</if>
+			<if test="notifyTime != null">
+				notify_time,
+			</if>
+			<if test="notifyType != null">
+				notify_type,
+			</if>
+			<if test="sellerEmail != null">
+				seller_email,
+			</if>
+			<if test="sellerId != null">
+				seller_id,
+			</if>
+			<if test="buyerEmail != null">
+				buyer_email,
+			</if>
+			<if test="buyerId != null">
+				buyer_id,
+			</if>
+			<if test="isSuccess != null">
+				is_success,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="outTradeNo != null">
+				#{outTradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="subject != null">
+				#{subject,jdbcType=VARCHAR},
+			</if>
+			<if test="paymentType != null">
+				#{paymentType,jdbcType=VARCHAR},
+			</if>
+			<if test="tradeNo != null">
+				#{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="tradeStatus != null">
+				#{tradeStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="totalFee != null">
+				#{totalFee,jdbcType=DOUBLE},
+			</if>
+			<if test="notifyId != null">
+				#{notifyId,jdbcType=VARCHAR},
+			</if>
+			<if test="notifyTime != null">
+				#{notifyTime,jdbcType=VARCHAR},
+			</if>
+			<if test="notifyType != null">
+				#{notifyType,jdbcType=VARCHAR},
+			</if>
+			<if test="sellerEmail != null">
+				#{sellerEmail,jdbcType=VARCHAR},
+			</if>
+			<if test="sellerId != null">
+				#{sellerId,jdbcType=VARCHAR},
+			</if>
+			<if test="buyerEmail != null">
+				#{buyerEmail,jdbcType=VARCHAR},
+			</if>
+			<if test="buyerId != null">
+				#{buyerId,jdbcType=VARCHAR},
+			</if>
+			<if test="isSuccess != null">
+				#{isSuccess,jdbcType=BIT},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.bill.pay.domain.AlipayBill">
+		update hspaas_alipay_bill
+		<set>
+			<if test="outTradeNo != null">
+				out_trade_no = #{outTradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="subject != null">
+				subject = #{subject,jdbcType=VARCHAR},
+			</if>
+			<if test="paymentType != null">
+				payment_type = #{paymentType,jdbcType=VARCHAR},
+			</if>
+			<if test="tradeNo != null">
+				trade_no = #{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test="tradeStatus != null">
+				trade_status = #{tradeStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="totalFee != null">
+				total_fee = #{totalFee,jdbcType=DOUBLE},
+			</if>
+			<if test="notifyId != null">
+				notify_id = #{notifyId,jdbcType=VARCHAR},
+			</if>
+			<if test="notifyTime != null">
+				notify_time = #{notifyTime,jdbcType=VARCHAR},
+			</if>
+			<if test="notifyType != null">
+				notify_type = #{notifyType,jdbcType=VARCHAR},
+			</if>
+			<if test="sellerEmail != null">
+				seller_email = #{sellerEmail,jdbcType=VARCHAR},
+			</if>
+			<if test="sellerId != null">
+				seller_id = #{sellerId,jdbcType=VARCHAR},
+			</if>
+			<if test="buyerEmail != null">
+				buyer_email = #{buyerEmail,jdbcType=VARCHAR},
+			</if>
+			<if test="buyerId != null">
+				buyer_id = #{buyerId,jdbcType=VARCHAR},
+			</if>
+			<if test="isSuccess != null">
+				is_success = #{isSuccess,jdbcType=BIT},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.bill.pay.domain.AlipayBill">
+		update hspaas_alipay_bill
+		set out_trade_no = #{outTradeNo,jdbcType=VARCHAR},
+		subject = #{subject,jdbcType=VARCHAR},
+		payment_type = #{paymentType,jdbcType=VARCHAR},
+		trade_no = #{tradeNo,jdbcType=VARCHAR},
+		trade_status = #{tradeStatus,jdbcType=VARCHAR},
+		total_fee = #{totalFee,jdbcType=DOUBLE},
+		notify_id = #{notifyId,jdbcType=VARCHAR},
+		notify_time = #{notifyTime,jdbcType=VARCHAR},
+		notify_type = #{notifyType,jdbcType=VARCHAR},
+		seller_email = #{sellerEmail,jdbcType=VARCHAR},
+		seller_id = #{sellerId,jdbcType=VARCHAR},
+		buyer_email = #{buyerEmail,jdbcType=VARCHAR},
+		buyer_id = #{buyerId,jdbcType=VARCHAR},
+		is_success = #{isSuccess,jdbcType=BIT},
+		create_time = #{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+</mapper>

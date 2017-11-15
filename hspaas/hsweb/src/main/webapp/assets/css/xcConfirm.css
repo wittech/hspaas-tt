@@ -1,0 +1,71 @@
+.verticalAlign{ vertical-align:middle; display:inline-block; height:100%; margin-left:-1px;}
+
+.xcConfirm .xc_layer{position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #666666; opacity: 0.5; z-index: 1000;}
+.xcConfirm .popBox{position: fixed; background-color: #ffffff; z-index: 1001; _width: 570px; margin-top: 0px; font-weight: bold; color: #535e66;_position: absolute; _bottom: auto;_top : 274.5px;}
+.xcConfirm .popBox .ttBox{height: 30px; line-height: 30px; padding: 14px 30px; border-bottom: solid 1px #eef0f1;}
+.xcConfirm .popBox .ttBox .tt{font-size: 18px; display: block; float: left; height: 30px; position: relative;}
+.xcConfirm .popBox .ttBox .clsBtn{display: block; cursor: pointer; width: 12px; height: 12px; position: absolute; top: 22px; right: 30px; background: url(../images/icons.png) -48px -96px no-repeat;}
+.xcConfirm .popBox .txtBox{overflow-y: auto;}
+
+.xcConfirm .popBox .txtBox .bigIcon{float: left; margin-right: 20px; width: 48px; height: 48px; background-image: url(../images/icons.png); background-repeat: no-repeat; background-position: 48px 0;}
+
+.xcConfirm .popBox .txtBox .html_content {margin : 10px 10px;}
+.xcConfirm .popBox .txtBox p{ margin-top: 16px; overflow-x: hidden; overflow-y: auto;font-size: 14px;}
+.xcConfirm .popBox .txtBox p input{width: 240px; height: 30px;line-height: 30px; border: solid 1px #eef0f1; margin-top: 6px;}
+.xcConfirm .popBox .btnArea{border-top: solid 1px #eef0f1;}
+.xcConfirm .popBox .btnGroup{float: right;}
+.xcConfirm .popBox .btnGroup .sgBtn{margin-top: 14px; margin-right: 10px;}
+.xcConfirm .popBox .sgBtn{display: block; cursor: pointer; float: left; width: 95px; height: 35px; line-height: 35px; text-align: center; color: #FFFFFF; }
+.xcConfirm .popBox .sgBtn.ok{background-color: #0095d9; color: #FFFFFF;}
+.xcConfirm .popBox .sgBtn.cancel{background-color: #546a79; color: #FFFFFF;}
+
+
+.xc_container dl.dl1 { float: left; display: inline; margin-right: 170px;}
+.xc_container dd { margin-bottom: 10px;}
+.xc_container .select { min-width: 128px;}
+.xc_container .select_province { float: left; display: inline; margin-right: 20px;}
+.xc_container .select_city { margin-left: 148px; min-width: 128px;}
+.xc_container input[type='text'] { min-width: 240px;}
+.xc_container dd a { display: inline-block; margin-left: 20px;}
+.xc_container dd a.correct_pwd,.xc_container dd a.do { background: #7fb7ef; color: #fff; font-size: 14px; font-weight: bold; width: 80px; height: 26px; line-height: 26px; text-align: center;}
+.xc_container dd a.upgrade { background: #7fb7ef; color: #fff; font-size: 14px; font-weight: bold; width: 107px; height: 26px; line-height: 26px; text-align: center;}
+.xc_container dd a.correct_pwd:hover { background: #319acc;}
+
+.xc_container .xc_edit_con {margin: 20px;}
+.xc_container .xc_edit_field {margin-bottom: 20px;}
+
+.xc_container dt {
+	width: 130px;
+    line-height: 40px;
+    text-align: right;
+    float: left;
+    display: inline;
+    margin-right: 10px;
+    font-size: 14px;
+    color: #4c4c4c;
+}
+
+.xc_container dd {
+	margin-left: 145px;
+	margin-bottom: 10px;
+}
+
+.xc_container input {
+    border: 1px #ccc solid;
+    padding-left: 10px;
+    height: 38px;
+    line-height: 38px;
+    background: #fff;
+    color: #888;
+    font-style: 14px;
+    vertical-align: middle;
+    outline: none;
+    width : 200px;
+}
+
+.xc_edit_btn {
+    text-align: center;
+}
+
+.xc-bg-main{color:#fff;font-size:12px;font-weight:bold;padding:6px 20px;background:#319acc; border:1px solid #319acc;}
+.xc-bg-main:hover{background:#28b5d6; }

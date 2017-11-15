@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 所有权限点，在此文件中描述，通过方法生成常量与SQL -->
+<data>
+	<node name="基础信息" code="1000">
+		<node name="客户信息" code="1001" ref="1000">
+			<node name="客户基础信息" code="1001001" ref="1001" url="/base/customer">
+				<node name="客户基础信息操作" code="1001001001" ref="1001001"/>
+			</node>
+			<node name="通道模板管理" code="1001002" ref="1001" url="/base/passage_template">
+				<node name="客户基础信息操作" code="1001002001" ref="1001001"/>
+			</node>
+		</node>
+		<node name="公告管理" code="1002" ref="1000">
+			<node name="公告管理" code="1002001" ref="1002" url="/base/notification">
+				<node name="公告管理操作" code="1002001001" ref="1002001"/>
+			</node>
+			<node name="站内消息" code="1002002" ref="1002" url="/base/notification_message">
+				<node name="站内消息操作" code="1002002001" ref="1002002"/>
+			</node>
+		</node>
+		<node name="套餐管理" code="1003" ref="1000">
+			<node name="套餐管理" code="1003001" ref="1003" url="/base/combo">
+				<node name="套餐管理操作" code="1003001001" ref="1003001"/>
+			</node>
+			<node name="套餐购买充值记录" code="1003002" ref="1003" url="/base/combo_record">
+				<node name="套餐购买充值记录操作" code="1003002001" ref="1003002"/>
+			</node>
+			<node name="产品管理" code="1003003" ref="1003" url="/base/product">
+				<node name="产品管理" code="1003003001" ref="1003002"/>
+			</node>
+		</node>
+		<node name="发票管理" code="1004" ref="1000" url="/base/invoice">
+			<node name="发票管理操作" code="1004001" ref="1004"/>
+		</node>
+	</node>
+	
+	<node name="短信管理" code="2000">
+		<node name="通道管理" code="2001" ref="2000">
+			<node name="通道管理" code="2001001" ref="2001" url="/sms/passage">
+				<node name="通道管理操作" code="2001001001" ref="2002001"/>
+			</node>
+
+			<node name="通道组管理" code="2001002" ref="2001" url="/sms/passage_group">
+				<node name="通道组管理操作" code="2001002001" ref="2002002"/>
+			</node>
+			<node name="通道轮训控制管理" code="2001003" ref="2001" url="/sms/passage_control">
+				<node name="通道轮训控制管理操作" code="2001003001" ref="2002003"/>
+			</node>
+			<node name="用户运行中通道管理" code="2001004" ref="2001" url="/sms/passage_access">
+				<node name="用户运行中通道管理操作" code="2001004001" ref="2002004"/>
+			</node>
+		</node>
+		<node name="短信记录查询" code="2002" ref="2000">
+			<node name="短信调用失败记录" code="2002001" ref="2002" url="/sms/record/invoke_fail_list">
+				<node name="上行短信查询操作" code="2003001001" ref="2002001"/>
+			</node>
+			<node name="短信处理失败记录" code="2002002" ref="2002" url="/sms/record/disponse_fail_list">
+				<node name="下行短信查询操作" code="2003002001" ref="2002002"/>
+			</node>
+			<node name="短信发送记录" code="2002003" ref="2002" url="/sms/record/send_record_list">
+				<node name="失败短息查询操作" code="2002003001" ref="2002003"/>
+			</node>
+            <node name="短信人工处理记录" code="2002004" ref="2002" url="/sms/record/manual_disponse_list">
+                <node name="失败短息查询操作" code="2002004001" ref="2002004"/>
+            </node>
+            <node name="短信上行接收记录" code="2002005" ref="2002" url="/sms/record/up_revice_list">
+                <node name="失败短息查询操作" code="2002005001" ref="2002005"/>
+            </node>
+		</node>
+		<node name="模板管理" code="2003" ref="2000" url="/sms/message_template">
+			<node name="模板管理操作" code="2003001" ref="2003"/>
+		</node>
+		<node name="黑白名单管理" code="2004" ref="2000">
+			<node name="黑名单管理" code="2004001" ref="2004" url="/sms/black_list">
+				<node name="黑名单管理操作" code="2005001001" ref="2004001"/>
+			</node>
+			<node name="白名单管理" code="2004002" ref="2004" url="/sms/white_list">
+				<node name="白名单管理操作" code="2005002001" ref="2004002"/>
+			</node>
+			<node name="敏感词管理" code="2004003" ref="2004" url="/sms/forbidden_word">
+				<node name="敏感词管理操作" code="2005003001" ref="2004003"/>
+			</node>
+		</node>
+	</node>
+	
+	<node name="流量管理" code="3000">
+		<node name="接入商管理" code="3001" ref="3000" url="/customer/index">
+			<node name="接入商管理操作" code="3001001" ref="3001"/>
+		</node>
+		<node name="通道管理" code="3002" ref="3000">
+			<node name="通道管理" code="3002001" ref="3002" url="/customer/add">
+				<node name="通道管理操作" code="3002001001" ref="3002001"/>
+			</node>
+			<node name="通道组管理" code="3002002" ref="3002" url="/customer/add">
+				<node name="通道组管理操作" code="3002002001" ref="3002002"/>
+			</node>
+		</node>
+		<node name="流量充值记录" code="3003" ref="3000">
+			<node name="处理中的记录" code="3003001" ref="3003" url="/feelog/index">
+				<node name="处理中的记录操作" code="3003001001" ref="3003001"/>
+			</node>
+			<node name="已完成的记录" code="3003002" ref="3003" url="/feelog/index">
+				<node name="已完成的记录操作" code="3003002001" ref="3003002"/>
+			</node>
+		</node>
+		<node name="流量包管理" code="3004" ref="3000" url="/feelog/index">
+			<node name="流量包管理操作" code="3004001" ref="3004"/>
+		</node>
+	</node>
+	<node name="语音管理" code="4000">
+		<node name="接入商管理" code="4001" ref="4000" url="/customer/index">
+			<node name="接入商管理操作" code="4001001" ref="4001"/>
+		</node>
+		<node name="通道管理" code="4002" ref="4000">
+			<node name="通道管理" code="4002001" ref="4002" url="/customer/add">
+				<node name="通道管理操作" code="4002001001" ref="4002001" />
+			</node>
+			<node name="通道组管理" code="4002002" ref="4002" url="/customer/add">
+				<node name="通道组管理操作" code="4002002001" ref="4002002"/>
+			</node>
+		</node>
+		<node name="语音发送记录" code="4003" ref="4000">
+			<node name="处理中的记录" code="4003001" ref="4003" url="/feelog/index">
+				<node name="处理中的记录操作" code="4003001001" ref="4003001"/>
+			</node>
+			<node name="已完成的记录" code="4003002" ref="4003" url="/feelog/index">
+				<node name="已完成的记录操作" code="4003002001" ref="4003002"/>
+			</node>
+		</node>
+		<node name="流量包管理" code="4004" ref="4000" url="/feelog/index">
+			<node name="流量包管理操作" code="4004001" ref="4004"/>
+		</node>
+	</node>
+	<node name="报表统计" code="5000">
+		<node name="短信统计" code="5001" ref="5000">
+			<node name="通道汇总" code="5001001" ref="5001" url="/customer/index">
+				<node name="通道汇总操作" code="5001001001" ref="5001001" />
+			</node>
+			<node name="帐号汇总" code="5001002" ref="5001" url="/customer/index">
+				<node name="帐号汇总操作" code="5001002001" ref="5001002"/>
+			</node>
+			<node name="提供商结算账单" code="5001003" ref="5001" url="/customer/index">
+				<node name="提供商结算账单操作" code="5001003001" ref="5001003" />
+			</node>
+		</node>
+		<node name="流量消费统计" code="5002" ref="5000">
+			<node name="客户消费统计" code="5002001" ref="5002" url="/customer/add">
+				<node name="客户消费统计操作" code="5002001001" ref="5002001"/>
+			</node>
+			<node name="上家统计" code="5002002" ref="5002" url="/customer/add">
+				<node name="上家统计操作" code="5002002001" ref="5002002"/>
+			</node>
+			<node name="账单统计" code="5002003" ref="5002" url="/customer/add">
+				<node name="账单统计操作" code="5002003001" ref="5002003"/>
+			</node>
+		</node>
+		<node name="套餐统计" code="5003" ref="5000" url="/feelog/index">
+			<node name="套餐统计操作" code="5003001" ref="5003" />
+		</node>
+	</node>
+	<node name="系统管理" code="6000">
+		<node name="用户管理" code="6001" ref="6000" url="/boss/user">
+			<node name="用户管理操作" code="6001001" ref="6001"/>
+		</node>
+		<node name="角色管理" code="6002" ref="6000" url="/boss/role">
+			<node name="角色管理操作" code="6002001" ref="6002"/>
+		</node>
+		<node name="日志管理" code="6003" ref="6000" url="/boss/log">
+			<node name="日志管理操作" code="6003001" ref="6003"/>
+		</node>
+	</node>
+	
+	<node name="监控中心" code="8000">
+		<node name="通道监控中心" code="8001" ref="8001">
+			<node name="通道自取报告" code="8001001" ref="8001" url="/monitor/inviteIndex"/>
+			<node name="通道状态监控" code="8001002" ref="8001" url=""/>
+		</node>
+		<node name="通道告警查询" code="8002" ref="8002">
+			<node name="回执率失标查询" code="8002001" ref="8002" url=""/>
+		</node>
+	</node>
+</data>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.passage.dao.PassageTemplateMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.common.passage.domain.PassageTemplate">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="protocol" property="protocol" jdbcType="VARCHAR" />
+		<result column="passage_type" property="passageType" jdbcType="TINYINT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, name, protocol, passage_type, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_passage_template
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from hspaas_passage_template
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.passage.domain.PassageTemplate">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_passage_template (name, protocol, passage_type,
+		create_time)
+		values (#{name,jdbcType=VARCHAR}, #{protocol,jdbcType=VARCHAR},
+		#{passageType,jdbcType=TINYINT},
+		now())
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.passage.domain.PassageTemplate">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_passage_template
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null">
+				name,
+			</if>
+			<if test="protocol != null">
+				protocol,
+			</if>
+			<if test="passageType != null">
+				passage_type,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="protocol != null">
+				#{protocol,jdbcType=VARCHAR},
+			</if>
+			<if test="passageType != null">
+				#{passageType,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.passage.domain.PassageTemplate">
+		update hspaas_passage_template
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="protocol != null">
+				protocol = #{protocol,jdbcType=VARCHAR},
+			</if>
+			<if test="passageType != null">
+				passage_type = #{passageType,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.passage.domain.PassageTemplate">
+		update hspaas_passage_template
+		set name = #{name,jdbcType=VARCHAR},
+		protocol = #{protocol,jdbcType=VARCHAR},
+		passage_type = #{passageType,jdbcType=TINYINT}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<select id="findList" resultMap="BaseResultMap">
+		select * from hspaas_passage_template where 1 = 1
+			<if test="keyword !=null and keyword != ''">
+				and name like '%${keyword}%'
+			</if>
+			<if test="type >= 0">
+				and passage_type = #{type}
+			</if>
+		order by id desc limit #{start},#{end}
+	</select>
+	
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(id) from hspaas_passage_template where 1 = 1  
+			<if test="keyword !=null and keyword != ''">
+				and name like '%${keyword}%'
+			</if>
+			<if test="type >= 0">
+				and passage_type = #{type}
+			</if>
+	</select>
+	
+	<select id="findByPassageType" resultMap="BaseResultMap">
+		select * from hspaas_passage_template where passage_type = #{0}
+	</select>
+</mapper>

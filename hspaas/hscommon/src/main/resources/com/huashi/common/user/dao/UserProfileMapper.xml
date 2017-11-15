@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.user.dao.UserProfileMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.user.domain.UserProfile">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="full_name" property="fullName" jdbcType="VARCHAR" />
+		<result column="card_no" property="cardNo" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="telephone" property="telephone" jdbcType="VARCHAR" />
+		<result column="company" property="company" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="VARCHAR" />
+		<result column="city" property="city" jdbcType="VARCHAR" />
+		<result column="zipcode" property="zipcode" jdbcType="VARCHAR" />
+		<result column="level" property="level" jdbcType="VARCHAR" />
+		<result column="birthday" property="birthday" jdbcType="VARCHAR" />
+		<result column="gender" property="gender" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="authstatus" property="authstatus" jdbcType="VARCHAR" />
+		<result column="property" property="property" jdbcType="VARCHAR" />
+		<result column="manager" property="manager" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="photo" property="photo" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, full_name, card_no, address, mobile, telephone, company,
+		state, city,
+		zipcode, level, birthday, gender, type, authstatus, property, manager, remark,
+		photo,
+		create_time, update_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_profile
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from hspaas_user_profile
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.user.domain.UserProfile">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_profile (user_id, full_name, card_no,
+		address, mobile, telephone,
+		company, state, city,
+		zipcode, level, birthday,
+		gender, type, authstatus,
+		property, manager, remark,
+		photo, create_time, update_time
+		)
+		values (#{userId,jdbcType=INTEGER}, #{fullName,jdbcType=VARCHAR},
+		#{cardNo,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, #{telephone,jdbcType=VARCHAR},
+		#{company,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR},
+		#{city,jdbcType=VARCHAR},
+		#{zipcode,jdbcType=VARCHAR}, #{level,jdbcType=VARCHAR}, #{birthday,jdbcType=VARCHAR},
+		#{gender,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR},
+		#{authstatus,jdbcType=VARCHAR},
+		#{property,jdbcType=VARCHAR}, #{manager,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},
+		#{photo,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.user.domain.UserProfile">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_profile
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="fullName != null">
+				full_name,
+			</if>
+			<if test="cardNo != null">
+				card_no,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="telephone != null">
+				telephone,
+			</if>
+			<if test="company != null">
+				company,
+			</if>
+			<if test="state != null">
+				state,
+			</if>
+			<if test="city != null">
+				city,
+			</if>
+			<if test="zipcode != null">
+				zipcode,
+			</if>
+			<if test="level != null">
+				level,
+			</if>
+			<if test="birthday != null">
+				birthday,
+			</if>
+			<if test="gender != null">
+				gender,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="authstatus != null">
+				authstatus,
+			</if>
+			<if test="property != null">
+				property,
+			</if>
+			<if test="manager != null">
+				manager,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="photo != null">
+				photo,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="fullName != null">
+				#{fullName,jdbcType=VARCHAR},
+			</if>
+			<if test="cardNo != null">
+				#{cardNo,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="telephone != null">
+				#{telephone,jdbcType=VARCHAR},
+			</if>
+			<if test="company != null">
+				#{company,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="city != null">
+				#{city,jdbcType=VARCHAR},
+			</if>
+			<if test="zipcode != null">
+				#{zipcode,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				#{level,jdbcType=VARCHAR},
+			</if>
+			<if test="birthday != null">
+				#{birthday,jdbcType=VARCHAR},
+			</if>
+			<if test="gender != null">
+				#{gender,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="authstatus != null">
+				#{authstatus,jdbcType=VARCHAR},
+			</if>
+			<if test="property != null">
+				#{property,jdbcType=VARCHAR},
+			</if>
+			<if test="manager != null">
+				#{manager,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="photo != null">
+				#{photo,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.user.domain.UserProfile">
+		update hspaas_user_profile
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="fullName != null">
+				full_name = #{fullName,jdbcType=VARCHAR},
+			</if>
+			<if test="cardNo != null">
+				card_no = #{cardNo,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="telephone != null">
+				telephone = #{telephone,jdbcType=VARCHAR},
+			</if>
+			<if test="company != null">
+				company = #{company,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				state = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="city != null">
+				city = #{city,jdbcType=VARCHAR},
+			</if>
+			<if test="zipcode != null">
+				zipcode = #{zipcode,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				level = #{level,jdbcType=VARCHAR},
+			</if>
+			<if test="birthday != null">
+				birthday = #{birthday,jdbcType=VARCHAR},
+			</if>
+			<if test="gender != null">
+				gender = #{gender,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				type = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="authstatus != null">
+				authstatus = #{authstatus,jdbcType=VARCHAR},
+			</if>
+			<if test="property != null">
+				property = #{property,jdbcType=VARCHAR},
+			</if>
+			<if test="manager != null">
+				manager = #{manager,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="photo != null">
+				photo = #{photo,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.user.domain.UserProfile">
+		update hspaas_user_profile
+		set user_id = #{userId,jdbcType=INTEGER},
+		full_name = #{fullName,jdbcType=VARCHAR},
+		card_no = #{cardNo,jdbcType=VARCHAR},
+		address = #{address,jdbcType=VARCHAR},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		telephone = #{telephone,jdbcType=VARCHAR},
+		company = #{company,jdbcType=VARCHAR},
+		state = #{state,jdbcType=VARCHAR},
+		city = #{city,jdbcType=VARCHAR},
+		zipcode = #{zipcode,jdbcType=VARCHAR},
+		level = #{level,jdbcType=VARCHAR},
+		birthday = #{birthday,jdbcType=VARCHAR},
+		gender = #{gender,jdbcType=VARCHAR},
+		type = #{type,jdbcType=VARCHAR},
+		authstatus = #{authstatus,jdbcType=VARCHAR},
+		property = #{property,jdbcType=VARCHAR},
+		manager = #{manager,jdbcType=VARCHAR},
+		remark = #{remark,jdbcType=VARCHAR},
+		photo = #{photo,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		update_time = #{updateTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<select id="getCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(h.id) from hspaas_user_profile h,hspaas_user_developer d
+		where h.user_id = d.user_id
+		<if test="fullName != null and fullName != ''">
+			and h.full_name like '%${fullName}%'
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and h.mobile like '%${mobile}%'
+		</if>
+		<if test="company != null and company != ''">
+			and h.company like '%${company}%'
+		</if>
+		<if test="cardNo != null and cardNo != ''">
+			and h.card_no like '%${cardNo}%'
+		</if>
+		<if test="state != null and state != '' and state != '-1'">
+			and h.state = '${state}'
+		</if>
+		<if test="appkey != null and appkey != ''">
+			and d.app_key like '%${appkey}%'
+		</if>
+	</select>
+	
+	<select id="findList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+		h.id, h.user_id, h.full_name, h.card_no, h.address, h.mobile,
+		h.telephone, h.company,h.state, h.city,
+		h.zipcode, h.level, h.birthday, h.gender, h.type, h.authstatus,
+		h.property, h.manager, h.remark,
+		h.photo,h.create_time, h.update_time
+		from hspaas_user_profile h,hspaas_user_developer d where h.user_id = d.user_id
+		<if test="fullName != null and fullName != ''">
+			and full_name like '%${fullName}%'
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and mobile like '%${mobile}%'
+		</if>
+		<if test="company != null and company != ''">
+			and company like '%${company}%'
+		</if>
+		<if test="cardNo != null and cardNo != ''">
+			and card_no like '%${cardNo}%'
+		</if>
+		<if test="state != null and state != '' and state != '-1'">
+			and state = '${state}'
+		</if>
+		<if test="appkey != null and appkey != ''">
+			and d.app_key like '%${appkey}%'
+		</if>
+		order by create_time desc limit #{start},#{end}
+	</select>
+
+	<select id="selectProfileByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_profile
+		where user_id = #{user_id}
+	</select>
+
+	<update id="updateUserProfileState">
+		update hspaas_user_profile set state = #{flag} where
+		user_id = #{userId}
+	</update>
+
+	<update id="updateUserProfileInfo">
+		update hspaas_user_profile set
+		full_name=#{fullName},card_no=#{cardNo},address=#{address},
+		telephone=#{telephone},company=#{company},
+		city=#{city},zipcode=#{zipcode},birthday=#{birthday},
+		gender=#{gender},remark=#{remark}
+		where user_id=#{userId}
+	</update>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		select * from hspaas_user_profile order by id desc
+	</select>
+</mapper>

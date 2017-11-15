@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.settings.dao.SmsMobileWhiteListMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.settings.domain.SmsMobileWhiteList">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, mobile, user_id, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mobile_whitelist
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		sms_mobile_whitelist
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.settings.domain.SmsMobileWhiteList">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mobile_whitelist (id, mobile, user_id, create_time)
+		values (#{id,jdbcType=INTEGER},
+		#{type,jdbcType=INTEGER},
+		#{userId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.settings.domain.SmsMobileWhiteList">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mobile_whitelist
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{id,jdbcType=INTEGER},
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.settings.domain.SmsMobileWhiteList">
+		update sms_mobile_whitelist
+		<set>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.settings.domain.SmsMobileWhiteList">
+		update
+		sms_mobile_whitelist
+		set mobile = #{mobile,jdbcType=VARCHAR},
+		user_id =
+		#{userId,jdbcType=INTEGER},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<insert id="batchInsert" parameterType="List">
+		insert into sms_mobile_whitelist (mobile, user_id, create_time)
+		values
+
+		<foreach collection="list" item="report" index="index"
+			separator=",">
+			(#{report.mobile,jdbcType=VARCHAR}, 
+			#{report.userId,jdbcType=INTEGER}, 
+			now())
+		</foreach>
+	</insert>
+
+	<!-- 查询用户记录 返回对象 -->
+	<select id="selectByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mobile_whitelist where user_id = #{userId}
+	</select>
+
+	<!-- 查询用户记录 判断是否重复 -->
+	<select id="selectByUserIdAndMobile" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from sms_mobile_whitelist where user_id
+		= #{userId} and
+		mobile =#{mobile}
+	</select>
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from sms_mobile_whitelist where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and mobile like CONCAT(#{phoneNumber},'%')
+		</if>
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mobile_whitelist where user_id = #{userId}
+		<if test="startDate != null">
+			and date(create_time) &gt;=#{startDate}
+		</if>
+		<if test="endDate != null">
+			and date(create_time) &lt;=#{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and mobile like CONCAT(#{phoneNumber},'%')
+		</if>
+		order by id desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mobile_whitelist where 1 = 1
+		<if test="keyword != null and keyword != ''">
+			and mobile like '${keyword}%'
+		</if>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from sms_mobile_whitelist where 1 = 1
+		<if test="keyword != null and keyword != ''">
+			and mobile like '${keyword}%'
+		</if>
+	</select>
+
+	<select id="selectAll" resultMap="BaseResultMap">
+		select user_id, mobile from
+		sms_mobile_whitelist
+	</select>
+
+</mapper>

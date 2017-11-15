@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.settings.dao.ProvinceLocalMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.common.settings.domain.ProvinceLocal">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="province_code" property="provinceCode"
+			jdbcType="INTEGER" />
+		<result column="number_area" property="numberArea" jdbcType="VARCHAR" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="city" property="city" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, province_code, number_area, cmcp, city, create_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_province_local
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from hspaas_province_local
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.settings.domain.ProvinceLocal">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_province_local (province_code, number_area, cmcp,
+		city, create_time)
+		values (#{provinceCode,jdbcType=INTEGER}, #{numberArea,jdbcType=VARCHAR},
+		#{cmcp,jdbcType=INTEGER},
+		#{city,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.settings.domain.ProvinceLocal">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_province_local
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="provinceCode != null">
+				province_code,
+			</if>
+			<if test="numberArea != null">
+				number_area,
+			</if>
+			<if test="cmcp != null">
+				cmcp,
+			</if>
+			<if test="city != null">
+				city,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="provinceCode != null">
+				#{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="numberArea != null">
+				#{numberArea,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				#{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="city != null">
+				#{city,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.settings.domain.ProvinceLocal">
+		update hspaas_province_local
+		<set>
+			<if test="provinceCode != null">
+				province_code = #{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="numberArea != null">
+				number_area = #{numberArea,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="city != null">
+				city = #{city,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.settings.domain.ProvinceLocal">
+		update hspaas_province_local
+		set province_code = #{provinceCode,jdbcType=INTEGER},
+		number_area = #{numberArea,jdbcType=VARCHAR},
+		cmcp = #{cmcp,jdbcType=INTEGER},
+		city = #{city,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	
+	<select id="selectAvaiable" resultMap="BaseResultMap">
+		select province_code, number_area, cmcp, city from hspaas_province_local
+	</select>
+	
+</mapper>

@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.sms.record.dao.SmsMoMessageReceiveMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.sms.record.domain.SmsMoMessageReceive">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="msg_id" property="msgId" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="need_push" property="needPush" jdbcType="BIT" />
+		<result column="push_url" property="pushUrl" jdbcType="VARCHAR" />
+		<result column="destnation_no" property="destnationNo"
+			jdbcType="VARCHAR" />
+		<result column="receive_time" property="receiveTime" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="create_unixtime" property="createUnixtime"
+			jdbcType="BIGINT" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, passage_id, msg_id, mobile, content,
+		need_push, push_url,
+		destnation_no,
+		receive_time, create_time,
+		create_unixtime
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mo_message_receive
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		sms_mo_message_receive
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.sms.record.domain.SmsMoMessageReceive">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mo_message_receive (user_id, passage_id, msg_id,
+		mobile, content, destnation_no,
+		receive_time, create_time,
+		create_unixtime,need_push,
+		push_url
+		)
+		values (#{userId,jdbcType=INTEGER},
+		#{passageId,jdbcType=INTEGER},
+		#{msgId,jdbcType=VARCHAR},
+		#{mobile,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR},
+		#{destnationNo,jdbcType=VARCHAR},
+		#{receiveTime,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{createUnixtime,jdbcType=BIGINT},
+		#{needPush,jdbcType=BIT},
+		#{pushUrl,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.sms.record.domain.SmsMoMessageReceive">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into sms_mo_message_receive
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="msgId != null">
+				msg_id,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+			<if test="destnationNo != null">
+				destnation_no,
+			</if>
+			<if test="receiveTime != null">
+				receive_time,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="createUnixtime != null">
+				create_unixtime,
+			</if>
+			<if test="needPush != null">
+				need_push,
+			</if>
+			<if test="pushUrl != null">
+				push_url,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="msgId != null">
+				#{msgId,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="destnationNo != null">
+				#{destnationNo,jdbcType=VARCHAR},
+			</if>
+			<if test="receiveTime != null">
+				#{receiveTime,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createUnixtime != null">
+				#{createUnixtime,jdbcType=BIGINT},
+			</if>
+			<if test="needPush != null">
+				#{needPush,jdbcType=BIT},
+			</if>
+			<if test="pushUrl != null">
+				#{pushUrl,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.sms.record.domain.SmsMoMessageReceive">
+		update sms_mo_message_receive
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="msgId != null">
+				msg_id = #{msgId,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="destnationNo != null">
+				destnation_no = #{destnationNo,jdbcType=VARCHAR},
+			</if>
+			<if test="receiveTime != null">
+				receive_time = #{receiveTime,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createUnixtime != null">
+				create_unixtime = #{createUnixtime,jdbcType=BIGINT},
+			</if>
+			<if test="needPush != null">
+				need_push = #{needPush,jdbcType=BIT},
+			</if>
+			<if test="pushUrl != null">
+				push_url = #{pushUrl,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.record.domain.SmsMoMessageReceive">
+		update
+		sms_mo_message_receive
+		set user_id = #{userId,jdbcType=INTEGER},
+		passage_id = #{passageId,jdbcType=INTEGER},
+		need_push = #{needPush,jdbcType=BIT},
+		push_url = #{pushUrl,jdbcType=VARCHAR},
+		msg_id =
+		#{msgId,jdbcType=VARCHAR},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		content
+		= #{content,jdbcType=VARCHAR},
+		destnation_no =
+		#{destnationNo,jdbcType=VARCHAR},
+		receive_time =
+		#{receiveTime,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		create_unixtime =
+		#{createUnixtime,jdbcType=BIGINT}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from sms_mo_message_receive sr where
+		1 = 1
+		<if test="keyword != null and keyword != ''">
+			and (content like '%${keyword}%' or mobile like
+			'%${keyword}%')
+		</if>
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select sr.* from sms_mo_message_receive
+		sr where 1 = 1
+		<if test="keyword != null and keyword != ''">
+			and (content like '%${keyword}%' or mobile like
+			'%${keyword}%')
+		</if>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from sms_mo_message_receive where user_id = #{userId}
+		<if test="startDate != null">
+			and receive_time &gt;= #{startDate}
+		</if>
+		<if test="endDate != null">
+			and receive_time &lt;= #{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and src_terminal_id like CONCAT('%',#{phoneNumber},'%')
+		</if>
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from sms_mo_message_receive where user_id = #{userId}
+		<if test="startDate != null">
+			and receive_time &gt;= #{startDate}
+		</if>
+		<if test="endDate != null">
+			and receive_time &lt;= #{endDate}
+		</if>
+		<if test="phoneNumber != null">
+			and src_terminal_id like CONCAT('%',#{phoneNumber},'%')
+		</if>
+		order by id desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+	
+	<insert id="batchInsert" parameterType="List">
+		insert into sms_mo_message_receive (
+		user_id, passage_id, msg_id, mobile, content,
+		destnation_no, need_push, push_url,
+		receive_time, create_time,
+		create_unixtime) values
+
+		<foreach collection="list" item="message" index="index"
+			separator=",">
+			(#{message.userId,jdbcType=INTEGER}, 
+			#{message.passageId,jdbcType=INTEGER}, 
+			#{message.msgId,jdbcType=VARCHAR},
+			#{message.mobile,jdbcType=VARCHAR},
+			#{message.content,jdbcType=VARCHAR},
+			#{message.destnationNo,jdbcType=VARCHAR},
+			#{message.needPush,jdbcType=BIT},
+			#{message.pushUrl,jdbcType=VARCHAR},
+			#{message.receiveTime,jdbcType=VARCHAR},
+			#{message.createTime,jdbcType=TIMESTAMP},
+			#{message.createUnixtime,jdbcType=BIGINT})
+		</foreach>
+	</insert>
+</mapper>
