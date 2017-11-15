@@ -69,7 +69,7 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 
 		} catch (Exception e) {
 			// 需要做重试判断
-			logger.error("处理失败：", e);
+			logger.error("MQ消费网关上行数据失败： {}", messageConverter.fromMessage(message), e);
 			if (message != null) {
 				smsMoMessageService.doReceiveToException(message);
 			}

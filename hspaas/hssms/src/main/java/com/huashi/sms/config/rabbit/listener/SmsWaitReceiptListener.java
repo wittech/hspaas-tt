@@ -66,7 +66,7 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
 			List<SmsMtMessageDeliver> delivers = doDeliverMessage(object);
 			
 			if(CollectionUtils.isEmpty(delivers)) {
-				logger.error("状态回执报告解析为空");
+				logger.error("状态回执报告解析为空 : {}", messageConverter.fromMessage(message));
 				return;
 			}
 
@@ -75,15 +75,14 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
 
 		} catch (Exception e) {
 			// 需要做重试判断
-			logger.error("处理失败：", e);
+			logger.error("MQ消费网关状态回执数据失败： {}", messageConverter.fromMessage(message), e);
 			if (message != null) {
 				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("reason", "上家推送状态回执报告:" + e.getMessage());
+				jsonObject.put("reason", "上家回执状态报告失败:" + e.getMessage());
 				jsonObject.put("message", messageConverter.fromMessage(message));
 				smsMtDeliverService.doDeliverToException(jsonObject);
 			}
 //			channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
-			
 		} finally {
 			// 确认消息成功消费
 			channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);

@@ -453,9 +453,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 			}
 
 		} catch (Exception e) {
-			// 需要做重试判断
-
-			logger.error("未知异常捕获", e);
+			logger.error("MQ消费提交网关数据失败： {}", messageConverter.fromMessage(message), e);
 			// channel.basicNack(message.getMessageProperties().getDeliveryTag(),
 			// false, false);
 		} finally {

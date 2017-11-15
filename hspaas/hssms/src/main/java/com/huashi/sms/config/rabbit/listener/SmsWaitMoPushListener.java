@@ -38,6 +38,12 @@ public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareM
 	@Autowired
 	private Jackson2JsonMessageConverter messageConverter;
 	
+	/**
+	 * 
+	   * TODO 上行推送数据
+	   * 
+	   * @param report
+	 */
 	private void doTranslateHttpReport(SmsMoMessageReceive report) {
 		Long startTime = System.currentTimeMillis();
 		RetryResponse retryResponse = null;

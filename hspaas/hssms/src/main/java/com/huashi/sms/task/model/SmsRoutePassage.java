@@ -164,7 +164,7 @@ public class SmsRoutePassage implements Serializable {
 	
 	/**
 	 * 
-	   * TODO 获取错误信息
+	   * TODO 根据运营商获取对应运营商通道错误信息
 	   * 
 	   * @param cmcp
 	   * @return

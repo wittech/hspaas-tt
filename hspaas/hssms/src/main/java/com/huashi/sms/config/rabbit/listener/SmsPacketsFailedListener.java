@@ -47,7 +47,7 @@ public class SmsPacketsFailedListener implements ChannelAwareMessageListener {
 			smsMtSubmitService.doSmsException(submits);
 
 		} catch (Exception e) {
-			logger.error("未知异常捕获", e);
+			logger.error("MQ消费分包失败数据异常： {}", messageConverter.fromMessage(message), e);
 		} finally {
 			// 确认消息成功消费
 			channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
