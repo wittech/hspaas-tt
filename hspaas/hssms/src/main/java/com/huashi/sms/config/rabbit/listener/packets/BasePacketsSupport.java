@@ -677,27 +677,28 @@ public abstract class BasePacketsSupport {
 	
 	/**
 	 * 
-	 * TODO 拆分数组，按照分包数量进行数据拆分
+	 * TODO 重组手机号码，按照分包数量进行数据拆分
 	 * 
 	 * 分包数据
-	 * 
-	 * @param splitSize
-	 *            每个包上限数
+	 * @param mobile
+	 *            手机号码数组
+	 * @param mobileNumPerGroup
+	 *            每组手机号码个数
 	 * @return
 	 */
-	static List<String> doSplitMobileByPacketsSize(String[] mobile, int splitSize) {
+	static List<String> regroupMobiles(String[] mobile, int mobileNumPerGroup) {
 		int totalSize = mobile.length;
 		// 获取要拆分子数组个数
-		int count = (totalSize % splitSize == 0) ? (totalSize / splitSize) : (totalSize / splitSize + 1);
+		int count = (totalSize % mobileNumPerGroup == 0) ? (totalSize / mobileNumPerGroup) : (totalSize / mobileNumPerGroup + 1);
 
 		List<String> rows = new ArrayList<>();
 		StringBuilder builder = null;
 		for (int i = 0; i < count; i++) {
 
-			int index = i * splitSize;
+			int index = i * mobileNumPerGroup;
 			builder = new StringBuilder();
 
-			for (int j = 0; j < splitSize && index < totalSize; j++) {
+			for (int j = 0; j < mobileNumPerGroup && index < totalSize; j++) {
 				builder.append(mobile[index++]).append(",");
 			}
 

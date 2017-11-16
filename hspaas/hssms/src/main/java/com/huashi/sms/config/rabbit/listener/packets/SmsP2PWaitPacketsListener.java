@@ -896,7 +896,7 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 			}
 
 			// 如果手机号码多于分包数量，需要分包保存子任务
-			List<String> fmobiles = doSplitMobileByPacketsSize(mobiles, perMobileSize);
+			List<String> fmobiles = regroupMobiles(mobiles, perMobileSize);
 			if (CollectionUtils.isNotEmpty(fmobiles)) {
 				for (String m : fmobiles)
 					packets.add(joinTaskPackets(task, m, cmcp.getCode(), provinceCode, messageTemplateId, access,

@@ -3,7 +3,6 @@ package com.huashi.sms.config.rabbit.listener.packets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -101,15 +100,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 			// 初始化分包信息
 			task.setPackets(new ArrayList<>());
 			
-			// 循环判断是否有具体运营商通道信息
-			Map<Integer, String> provinceMobiles = null;
-			for(CMCP cmcp : CMCPS) {
-				provinceMobiles = getCmcpMobileNumbers(cmcp, mobileCatagory);
-				if(MapUtils.isEmpty(provinceMobiles))
-					continue;
-				
-				subpackage(task, provinceMobiles, routePassage, cmcp);
-			}
+			subpackage(task, routePassage);
 			
 			// 生成子任务，并异步发送数据
 			asyncSendTask(task, mobileCatagory);
@@ -179,7 +170,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 		}
 
 		// 如果存在错号或者重复号码需要将 之前的计费返还到客户余额
-		doReturnFeeWhenHasErrorMobile(task, mobileCatagory);
+		returnFeeToUser(task, mobileCatagory);
 	}
 
 	/**
@@ -189,7 +180,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	 * @param task
 	 * @param mobileCatagory
 	 */
-	private void doReturnFeeWhenHasErrorMobile(SmsMtTask task, MobileCatagory mobileCatagory) {
+	private void returnFeeToUser(SmsMtTask task, MobileCatagory mobileCatagory) {
 		if (task.getReturnFee() != null && task.getReturnFee() != 0 && mobileCatagory != null) {
 			logger.info("用户ID：{} 发送短信 存在错号：{}个，重复号码：{}个，单条计费：{}条，共扣费：{}条，共需返还{}条", task.getUserId(),
 					mobileCatagory.getFilterSize(), mobileCatagory.getRepeatSize(), task.getFee(),
@@ -327,8 +318,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	// rabbitTemplate.setConfirmCallback(this);
 	// }
 	
-	
-	
 	@Reference
 	protected IUserPassageService userPassageService;
 	@Reference
@@ -363,7 +352,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	// 默认每个包手机号码上限数
-	private static final int DEFAULT_MOBILE_SIZE_PER_PACKTES = 500;
+	private static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 500;
 
 	/**
 	 * 
@@ -386,6 +375,17 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 		
 		return userSmsConfig;
 	}
+	
+	/**
+	 * 
+	   * TODO 保存子任务
+	   * @param task
+	   * @param mobile
+	   * @param passageAccess
+	 */
+	private void joinTaskPackets(SmsMtTask task, String mobile, SmsPassageAccess passageAccess) {
+		joinTaskPackets(task, mobile, passageAccess, null, null);
+	}
 
 	/**
 	 * 
@@ -404,8 +404,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	 * @param passageAccess
 	 *            通道信息
 	 */
-	protected void joinTaskPackets(SmsMtTask task, String mobile, CMCP[] cmcps, Integer[] provinceCodes,
-			SmsPassageAccess passageAccess) {
+	protected void joinTaskPackets(SmsMtTask task, String mobile, SmsPassageAccess passageAccess, CMCP[] cmcps, Integer[] provinceCodes) {
 		SmsMtTaskPackets smsMtTaskPackets = new SmsMtTaskPackets();
 		smsMtTaskPackets.setSid(task.getSid());
 		smsMtTaskPackets.setMobile(mobile);
@@ -637,13 +636,13 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 		
 		Integer routeType = getMessageRouteType();
 		
-		Map<Integer, String> cmcpMobileNumbers = null;
+		Map<Integer, String> provinceCmcpMobileNumbers = null;
 		for(CMCP cmcp : CMCPS) {
-			cmcpMobileNumbers = getCmcpMobileNumbers(cmcp, mobileCatagory);
-			if(MapUtils.isEmpty(cmcpMobileNumbers))
+			provinceCmcpMobileNumbers = getCmcpMobileNumbers(cmcp, mobileCatagory);
+			if(MapUtils.isEmpty(provinceCmcpMobileNumbers))
 				continue;
 			
-			Set<Integer> provinceCodes = cmcpMobileNumbers.keySet();
+			Set<Integer> provinceCodes = provinceCmcpMobileNumbers.keySet();
 			for (Integer provinceCode : provinceCodes) {
 
 				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
@@ -659,10 +658,12 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 				}
 
 				if (isAvaiable) {
-					routePassage.setProvincePassage(cmcp, provinceCode, passageAccess);
-					routePassage.addPassageMobilesMapping(passageAccess.getPassageId(), cmcpMobileNumbers.get(provinceCode));
+//					routePassage.setProvincePassage(cmcp, provinceCode, passageAccess);
+					routePassage.addPassageMobilesMapping(passageAccess.getPassageId(), provinceCmcpMobileNumbers.get(provinceCode));
+					routePassage.getPassaegAccesses().put(passageAccess.getPassageId(), passageAccess);
 				} else {
-					routePassage.setErrorMessage(cmcp, "任务中包含通道不可用数据");
+					routePassage.setErrorMessage("任务中包含通道不可用数据");
+					routePassage.addUnknownMobiles(provinceCmcpMobileNumbers.get(provinceCode));;
 				}
 			}
 		}
@@ -855,13 +856,20 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 		}
 	}
 	
-	private void checkTaskPassage(SmsMtTask task, SmsRoutePassage routePassage, CMCP cmcp) {
+	/**
+	 * 
+	   * TODO 检查通道信息
+	   * 
+	   * @param task
+	   * @param routePassage
+	 */
+	private void checkTaskPassage(SmsMtTask task, SmsRoutePassage routePassage) {
 		// 通道错误信息
-		String passageErrorMessage = routePassage == null ? null : routePassage.getErrorMessage(cmcp);
+		String passageErrorMessage = routePassage == null ? null : routePassage.getErrorMessage();
 		
 		// 设置可操作类型
 		if (routePassage == null || StringUtils.isNotEmpty(passageErrorMessage) 
-				|| MapUtils.isEmpty(routePassage.getProvincePassage(cmcp))) {
+				|| MapUtils.isEmpty(routePassage.getPassaegAccesses())) {
 			
 			// 主要为了设置主任务错误信息和操作符 add by zhengying 2017-03-08
 			task.getErrorMessageReport().append(">").append(passageErrorMessage).append(" ;");
@@ -874,28 +882,24 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	/**
 	 * 
 	   * TODO 通道分包逻辑
-	   * 	需要判断分省后的各省份通道集合是否有同样通道信息，并且省份下面通道对应的手机号码未达到该通道的分包上限，则需要合包操作
+	   * 	根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
 	   * 
 	   * @param task
-	   * @param provinceMobiles
-	   * 	省份代码对应的手机号码集合信息
 	   * @param routePassage
 	   * 	用户运营商路由下对应的通道信息
-	   * @param cmcp
-	   * 	运营商
 	 */
-	protected void subpackage(SmsMtTask task, Map<Integer, String> provinceMobiles, SmsRoutePassage routePassage, CMCP cmcp) {
-		Map<Integer, SmsPassageAccess> provincePassages = routePassage.getProvincePassage(cmcp);
-		
-		checkTaskPassage(task, routePassage, cmcp);
+	protected void subpackage(SmsMtTask task, SmsRoutePassage routePassage) {
+		checkTaskPassage(task, routePassage);
 
 		String mobile = null;
 		SmsPassageAccess passage = null;
+		int requestPackageSize = DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE;
 		
-		// 遍历所有分省后的数据
-		for (Integer provinceCode : provinceMobiles.keySet()) {
-			mobile = provinceMobiles.get(provinceCode);
-
+		for(Integer passageId : routePassage.getPassageMobiles().keySet()) {
+			passage = routePassage.getPassaegAccesses().get(passageId);
+			mobile = routePassage.getPassageMobiles().get(passageId);
+			
+			// 判断手机号码是否为空
 			String[] mobiles = mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
 			if (mobiles.length == 0) {
 				logger.error("手机号码为空 {}", mobile.toString());
@@ -903,31 +907,46 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 			}
 			
 			// 通道信息为空，则子任务插入空数据
-			if(provincePassages == null || provincePassages.get(provinceCode) == null) {
-				joinTaskPackets(task, mobile, cmcp.getCode(), provinceCode, passage);
-				logger.info("通道信息为空,sid: {}, mobile:{}", task.getSid(), mobile.toString());
+			if(passage == null) {
+				joinTaskPackets(task, mobile, passage);
+				logger.info("通道信息为空, sid: {}, mobile:{}", task.getSid(), mobile.toString());
+				continue;
+			}
+			
+			requestPackageSize = getPassageRequestPackageSize(passage);
+
+			// 手机号码只有一个或者 请求分包数为0（不限制数量）则直接分成一个包提交
+			if (mobiles.length == 1 || requestPackageSize == 0) {
+				joinTaskPackets(task, mobile, passage);
 				continue;
 			}
 
-			passage = provincePassages.get(provinceCode);
-
-			// 大于预设的手机号码分包数需要 拆包处理
-			int perMobileSize = (passage == null || passage.getMobileSize() == null || passage.getMobileSize() == 0)
-					? DEFAULT_MOBILE_SIZE_PER_PACKTES : passage.getMobileSize();
-
-			// 0表示号码无限制
-			if (mobiles.length == 1 || perMobileSize == 0) {
-				joinTaskPackets(task, mobile, cmcp.getCode(), provinceCode, passage)
+			// 如果手机号码多于分包数量，需要对手机号码分包，重组子任务
+			List<String> groupMobiles = regroupMobiles(mobiles, requestPackageSize);
+			if(CollectionUtils.isEmpty(groupMobiles))
 				continue;
-			}
-
-			// 如果手机号码多于分包数量，需要分包保存子任务
-			List<String> fmobiles = doSplitMobileByPacketsSize(mobiles, perMobileSize);
-			if (CollectionUtils.isNotEmpty(fmobiles)) {
-				for (String m : fmobiles)
-					joinTaskPackets(task, m, cmcp.getCode(), provinceCode, passage);
-			}
+			
+			for (String gm : groupMobiles)
+				joinTaskPackets(task, gm, passage);
+		
 		}
+		
+		mobile = null;
+		passage = null;
+	}
+	
+	/**
+	 * 
+	   * TODO 获取通道每次HTTP/直连请求的手机号码最大个数
+	   * @param passage
+	   * @return
+	 */
+	private static int getPassageRequestPackageSize(SmsPassageAccess passage) {
+		if(passage == null || passage.getMobileSize() == null || passage.getMobileSize() == 0)
+			return DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE;
+		
+		// 大于预设的手机号码分包数需要 拆包处理
+		return passage.getMobileSize();
 	}
 
 }
