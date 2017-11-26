@@ -45,6 +45,14 @@ public interface SmsMobileWhiteListMapper {
 	 * @return
 	 */
 	List<SmsMobileWhiteList> selectByUserId(int userId);
+	
+	/**
+	 * 
+	   * TODO 根据用户ID查询手机号码集合（去重复）
+	   * @param userId
+	   * @return
+	 */
+	List<String> selectDistinctMobilesByUserId(int userId);
 
 	/**
 	 * 

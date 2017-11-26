@@ -627,20 +627,20 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 			Set<Integer> provinceCodes = mobileCatagory.getCmNumbers().keySet();
 			for (Integer provinceCode : provinceCodes) {
 
-				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-						CMCP.CHINA_MOBILE.getCode(), provinceCode);
-				
-				isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
-				if (!isAvaiable) {
-					// 如果通道不可用，判断当前运营商是否包含 全国通道
-					passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-							CMCP.CHINA_MOBILE.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY);
-					
-					isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
-				}
-
-				if (isAvaiable)
-					cmPassage.put(provinceCode, passageAccess);
+//				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
+//						CMCP.CHINA_MOBILE.getCode(), provinceCode);
+//				
+//				isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
+//				if (!isAvaiable) {
+//					// 如果通道不可用，判断当前运营商是否包含 全国通道
+//					passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
+//							CMCP.CHINA_MOBILE.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY);
+//					
+//					isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
+//				}
+//
+//				if (isAvaiable)
+//					cmPassage.put(provinceCode, passageAccess);
 //				else
 //					routePassage.setCmErrorMessage("任务中包含通道不可用数据");
 
@@ -653,20 +653,20 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 			Set<Integer> provinceCodes = mobileCatagory.getCtNumbers().keySet();
 			for (Integer provinceCode : provinceCodes) {
 
-				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-						CMCP.CHINA_TELECOM.getCode(), provinceCode);
-
-				isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
-				if (!isAvaiable) {
-					// 如果通道不可用，判断当前运营商是否包含 全国通道
-					passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-							CMCP.CHINA_TELECOM.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY);
-
-					isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
-				}
-
-				if (isAvaiable)
-					ctPassage.put(provinceCode, passageAccess);
+//				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
+//						CMCP.CHINA_TELECOM.getCode(), provinceCode);
+//
+//				isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
+//				if (!isAvaiable) {
+//					// 如果通道不可用，判断当前运营商是否包含 全国通道
+//					passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
+//							CMCP.CHINA_TELECOM.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY);
+//
+//					isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
+//				}
+//
+//				if (isAvaiable)
+//					ctPassage.put(provinceCode, passageAccess);
 //				else
 //					routePassage.setCtErrorMessage("任务中包含通道不可用数据");
 
@@ -678,20 +678,20 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 			Set<Integer> provinceCodes = mobileCatagory.getCuNumbers().keySet();
 			for (Integer provinceCode : provinceCodes) {
 
-				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-						CMCP.CHINA_UNICOM.getCode(), provinceCode);
-
-				isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
-				if (!isAvaiable) {
-					// 如果通道不可用，判断当前运营商是否包含 全国通道
-					passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-							CMCP.CHINA_UNICOM.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY);
-
-					isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
-				}
-
-				if (isAvaiable)
-					cuPassage.put(provinceCode, passageAccess);
+//				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
+//						CMCP.CHINA_UNICOM.getCode(), provinceCode);
+//
+//				isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
+//				if (!isAvaiable) {
+//					// 如果通道不可用，判断当前运营商是否包含 全国通道
+//					passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
+//							CMCP.CHINA_UNICOM.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY);
+//
+//					isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
+//				}
+//
+//				if (isAvaiable)
+//					cuPassage.put(provinceCode, passageAccess);
 //				else
 //					routePassage.setCuErrorMessage("任务中包含通道不可用数据");
 

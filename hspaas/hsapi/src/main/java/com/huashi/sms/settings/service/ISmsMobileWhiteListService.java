@@ -15,6 +15,7 @@ import com.huashi.sms.settings.domain.SmsMobileWhiteList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * TODO 白名单服务接口类
@@ -87,4 +88,13 @@ public interface ISmsMobileWhiteListService {
 	   * @return
 	 */
 	boolean isMobileWhitelist(int userId, String mobile);
+	
+	/**
+	 * 
+	   * TODO 根据用户ID获取白名单手机号码集合
+	   * 
+	   * @param userId
+	   * @return
+	 */
+	Set<String> getByUserId(int userId);
 }

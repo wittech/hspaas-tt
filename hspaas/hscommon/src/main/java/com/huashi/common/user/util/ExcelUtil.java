@@ -1,4 +1,4 @@
-package com.huashi.common.util;
+package com.huashi.common.user.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.huashi.common.notice.dao.SmsMtRecordMapper;
 import com.huashi.common.notice.domain.SmsMtRecord;
+import com.huashi.common.notice.util.MessageSendUtil;
 import com.huashi.common.notice.vo.SmsResponse;
-import com.huashi.sms.util.MessageSendUtil;
 
 @Service
 public class MessageSendService implements IMessageSendService {

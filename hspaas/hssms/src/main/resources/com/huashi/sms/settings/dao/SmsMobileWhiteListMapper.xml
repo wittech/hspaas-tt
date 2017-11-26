@@ -172,5 +172,9 @@
 		select user_id, mobile from
 		sms_mobile_whitelist
 	</select>
+	
+	<select id="selectDistinctMobilesByUserId" resultType="java.lang.String">
+		select distinct mobile from sms_mobile_whitelist where user_id = #{userId}
+	</select>
 
 </mapper>

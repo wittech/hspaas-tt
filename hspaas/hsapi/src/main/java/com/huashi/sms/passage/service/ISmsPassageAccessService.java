@@ -1,6 +1,7 @@
 package com.huashi.sms.passage.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext.PassageCallType;
@@ -26,6 +27,15 @@ public interface ISmsPassageAccessService {
 
 	/**
 	 * 
+	   * TODO 根据用户ID获取可用通道集合信息 
+	   * 
+	   * @param userId
+	   * @return
+	 */
+	Map<String, SmsPassageAccess> getByUserId(int userId);
+	
+	/**
+	 * 
 	 * TODO 根据条件查询可用通道
 	 * 
 	 * @param userId
@@ -38,8 +48,7 @@ public interface ISmsPassageAccessService {
 	 *            省份代码
 	 * @return
 	 */
-	SmsPassageAccess getByUserId(int userId, int route, int cmcp,
-			int provinceCode);
+	SmsPassageAccess get(int userId, int route, int cmcp, int provinceCode);
 
 	/**
 	 * 根据id获取对象信息
@@ -173,5 +182,19 @@ public interface ISmsPassageAccessService {
 	   * @return
 	 */
 	boolean updateAccessStatus(Integer passageId, Integer status);
+	
+	/**
+	 * 
+	   * TODO 获取REDIS通道组合KEY（用于REDIS用户通道组合使用）
+	   * 
+	   * @param routeType
+	   * 	路由类型
+	   * @param cmcp
+	   * 	运营商
+	   * @param provinceCode
+	   * 	省份代码 
+	   * @return
+	 */
+	String getAssistKey(Integer routeType, Integer cmcp, Integer provinceCode);
 
 }

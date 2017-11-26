@@ -171,7 +171,7 @@
                                 <td>${pl.passageName!''}</td>
                                 <td>${pl.fee!0}</td>
                                 <td>
-                                    ${(pl.mobile?trim)!''}[<#if pl.cmcp == 1>移动<#elseif pl.cmcp == 2>电信<#elseif pl.cmcp == 3>联通<#else>未知</#if>]
+                                    ${(pl.mobile?trim)!''}[<#if pl.cmcp?? && pl.cmcp == 1>移动<#elseif pl.cmcp?? && pl.cmcp?? && pl.cmcp == 2>电信<#elseif pl.cmcp?? && pl.cmcp == 3>联通<#else>未知</#if>]
                                 </td>
                                 <td>${(pl.destnationNo)!''}</td>
                                 <td>

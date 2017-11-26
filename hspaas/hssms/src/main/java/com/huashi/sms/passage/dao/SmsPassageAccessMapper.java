@@ -70,6 +70,16 @@ public interface SmsPassageAccessMapper {
 	 * @return
 	 */
 	SmsPassageAccess selectByUserIdAndCmcp(@Param("userId") int userId, @Param("cmcp") int cmcp);
+	
+	/**
+	 * 
+	   * TODO 根据用户ID和调用类型获取通道信息
+	   * 
+	   * @param userId
+	   * @param callType
+	   * @return
+	 */
+	List<SmsPassageAccess> selectByUserIdAndCallType(@Param("userId") int userId, @Param("callType") int callType);
 
 	/**
 	 * 

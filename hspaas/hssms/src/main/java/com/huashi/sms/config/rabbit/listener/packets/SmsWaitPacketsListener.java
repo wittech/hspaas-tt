@@ -85,7 +85,7 @@ import com.rabbitmq.client.Channel;
 public class SmsWaitPacketsListener extends BasePacketsSupport implements ChannelAwareMessageListener {
 	
 	// 短信模板
-	private ThreadLocal<MessageTemplate> messageTemplateLocal = new ThreadLocal<>();
+	private static ThreadLocal<MessageTemplate> messageTemplateLocal = new ThreadLocal<>();
 
 	/**
 	 * 
@@ -280,8 +280,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 
 			// 通道分包逻辑
 			doPassagePacketsFinished(model, mobileCatagory, passage);
-			
-			release();
 
 		} catch (Exception e) {
 			logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
@@ -290,14 +288,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 		}
 	}
 	
-	/**
-	 * 
-	   * TODO 释放资源，加速GC
-	 */
-	private void release() {
-		messageTemplateLocal = null;
-	}
-
 	// @Override
 	// public void confirm(CorrelationData correlationData, boolean ack, String
 	// cause) {
@@ -378,17 +368,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	
 	/**
 	 * 
-	   * TODO 保存子任务
-	   * @param task
-	   * @param mobile
-	   * @param passageAccess
-	 */
-	private void joinTaskPackets(SmsMtTask task, String mobile, SmsPassageAccess passageAccess) {
-		joinTaskPackets(task, mobile, passageAccess, null, null);
-	}
-
-	/**
-	 * 
 	 * TODO 保存子任务
 	 * 
 	 * 短信提交数据
@@ -404,18 +383,16 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	 * @param passageAccess
 	 *            通道信息
 	 */
-	protected void joinTaskPackets(SmsMtTask task, String mobile, SmsPassageAccess passageAccess, CMCP[] cmcps, Integer[] provinceCodes) {
+	protected void joinTaskPackets(SmsMtTask task, String mobile, SmsPassageAccess passageAccess) {
 		SmsMtTaskPackets smsMtTaskPackets = new SmsMtTaskPackets();
 		smsMtTaskPackets.setSid(task.getSid());
 		smsMtTaskPackets.setMobile(mobile);
 		
-		// 本次手机号码对应的运营商个数
-		if(cmcps.length == 1)
-			smsMtTaskPackets.setCmcp(cmcps[0].getCode());
-		
-		// 如果省份代码为单个则记录省份代码（多个不需要显示）
-		if(provinceCodes.length == 1)
-			smsMtTaskPackets.setProvinceCode(provinceCodes[0]);
+		// 本次通道对应的运营商和省份代码
+		if(passageAccess != null) {
+			smsMtTaskPackets.setCmcp(passageAccess.getCmcp());
+			smsMtTaskPackets.setProvinceCode(passageAccess.getProvinceCode());
+		}
 		
 		smsMtTaskPackets.setContent(task.getContent());
 		smsMtTaskPackets.setMobileSize(mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length);
@@ -636,6 +613,12 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 		
 		Integer routeType = getMessageRouteType();
 		
+		Map<String, SmsPassageAccess> userPassages = smsPassageAccessService.getByUserId(userId);
+		if(MapUtils.isEmpty(userPassages)) {
+			routePassage.setErrorMessage("任务中无可可用通道[all]");
+			return routePassage;
+		}
+		
 		Map<Integer, String> provinceCmcpMobileNumbers = null;
 		for(CMCP cmcp : CMCPS) {
 			provinceCmcpMobileNumbers = getCmcpMobileNumbers(cmcp, mobileCatagory);
@@ -644,16 +627,12 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 			
 			Set<Integer> provinceCodes = provinceCmcpMobileNumbers.keySet();
 			for (Integer provinceCode : provinceCodes) {
-
-				passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-						cmcp.getCode(), provinceCode);
+				passageAccess = userPassages.get(smsPassageAccessService.getAssistKey(routeType, cmcp.getCode(), provinceCode));
 				
 				isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
 				if (!isAvaiable) {
 					// 如果通道不可用，判断当前运营商是否包含 全国通道
-					passageAccess = smsPassageAccessService.getByUserId(routePassage.getUserId(), routeType,
-							cmcp.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY);
-					
+					passageAccess = userPassages.get(smsPassageAccessService.getAssistKey(routeType, cmcp.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY));
 					isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
 				}
 
@@ -663,7 +642,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 					routePassage.getPassaegAccesses().put(passageAccess.getPassageId(), passageAccess);
 				} else {
 					routePassage.setErrorMessage("任务中包含通道不可用数据");
-					routePassage.addUnknownMobiles(provinceCmcpMobileNumbers.get(provinceCode));;
+					routePassage.addUnknownMobiles(provinceCmcpMobileNumbers.get(provinceCode));
 				}
 			}
 		}
@@ -728,6 +707,9 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	public boolean isSameMobileOutOfRange(SmsMtTask task, UserSmsConfig smsConfig) {
 		fillTemplateAttributes(smsConfig);
 		
+		// 根据userId获取白名单手机号码数据
+		Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(task.getUserId());
+		
 		// 转换手机号码数组
 		List<String> mobiles = new ArrayList<>(Arrays.asList(task.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 		
@@ -736,11 +718,10 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 		
 		// 过滤超限集合
 		List<String> benyondTimesList = new ArrayList<>();
-		boolean isGreenPass = false;
 		for(String mobile : mobiles) {
 			// 判断手机号码是否是用户的白名单手机号码，是则不拦截 add by 2017-06-26
-			isGreenPass = smsMobileWhiteListService.isMobileWhitelist(task.getUserId(), mobile);
-			if(isGreenPass)
+			// edit by zhengying 20171126 加入批量查询白名单手机号码功能
+			if(CollectionUtils.isNotEmpty(whiteMobiles) && whiteMobiles.contains(mobile))
 				continue;
 			
 			// 判断短信发送是否超速
@@ -915,8 +896,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 			
 			requestPackageSize = getPassageRequestPackageSize(passage);
 
-			// 手机号码只有一个或者 请求分包数为0（不限制数量）则直接分成一个包提交
-			if (mobiles.length == 1 || requestPackageSize == 0) {
+			// 手机号码只有一个则直接分成一个包提交
+			if (mobiles.length == 1) {
 				joinTaskPackets(task, mobile, passage);
 				continue;
 			}

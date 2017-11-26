@@ -1,4 +1,4 @@
-package com.huashi.sms.util;
+package com.huashi.common.notice.util;
 
 import java.io.IOException;
 import java.util.ArrayList;

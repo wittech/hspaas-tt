@@ -17,6 +17,7 @@ import com.huashi.sms.config.worker.SmsWaitMtPushPersistenceWorker;
 import com.huashi.sms.config.worker.SmsWaitReceiptPersistenceWorker;
 import com.huashi.sms.config.worker.SmsWaitSubmitPersistenceWorker;
 import com.huashi.sms.config.worker.SmsWaitTaskPersistenceWorker;
+import com.huashi.sms.config.worker.WaitMtAppendPushWorker;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 import com.huashi.sms.record.service.ISmsMoPushService;
 import com.huashi.sms.record.service.ISmsMtDeliverService;
@@ -36,8 +37,6 @@ import com.huashi.sms.task.service.ISmsMtTaskService;
 @Order(50)
 public class SmsDbPersistenceRunner implements CommandLineRunner {
 
-	public ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
-
 	@Value("${db.persistence.threadnum:5}")
 	private int persistenceThreadNum;
 
@@ -55,12 +54,11 @@ public class SmsDbPersistenceRunner implements CommandLineRunner {
 	private ISmsMoMessageService smsMoMessageService;
 	@Autowired
 	private ISmsMoPushService smsMoPushService;
+	
+	@Autowired
+	private ThreadPoolTaskExecutor poolTaskExecutor;
 
 	private org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
-
-	public int getThreadNum() {
-		return poolTaskExecutor.getActiveCount();
-	}
 
 	@Override
 	public void run(String... arg0) throws Exception {
@@ -80,9 +78,15 @@ public class SmsDbPersistenceRunner implements CommandLineRunner {
 		taskThread.start();
 
 		// 开启提交短信单线程
-		Thread submitThread = new Thread(new SmsWaitSubmitPersistenceWorker(
-				stringRedisTemplate, smsMtSubmitService));
-		submitThread.start();
+//		Thread submitThread = new Thread(new SmsWaitSubmitPersistenceWorker(
+//				stringRedisTemplate, smsMtSubmitService));
+//		submitThread.start();
+		
+		for (int i=0; i < persistenceThreadNum; i++) {
+			// 开启提交短信单线程
+			poolTaskExecutor.execute(new SmsWaitSubmitPersistenceWorker(stringRedisTemplate, smsMtSubmitService));
+			poolTaskExecutor.execute(new WaitMtAppendPushWorker(stringRedisTemplate, smsMtPushService));
+		}
 
 		// 开启回执短信单线程
 		Thread receiptThread = new Thread(new SmsWaitReceiptPersistenceWorker(

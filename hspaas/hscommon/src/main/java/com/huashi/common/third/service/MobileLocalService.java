@@ -96,49 +96,7 @@ public class MobileLocalService implements IMobileLocalService {
 					continue;
 				}
 
-				ProvinceLocal pl = GLOBAL_MOBILE_LOCATION.get(area);
-				if (pl == null) {
-					// 如果不能确定省份,则根据 手机号码判断运营商,然后省份代码定义为 全国(0)
-					CMCP cmcp = CMCP.local(number);
-					switch (cmcp) {
-					case UNRECOGNIZED: {
-						filterNumbers.append(number).append(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
-						response.setFilterSize(response.getFilterSize() + 1);
-						break;
-					}
-					case CHINA_MOBILE: {
-						boolean isRepeat = reputCmcpMobiles(cmNumbers, Province.PROVINCE_CODE_ALLOVER_COUNTRY, number);
-						if (isRepeat) {
-							// 如果号码重复，则放置重复号码
-							repeatNumbers.append(number).append(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
-							response.setRepeatSize(response.getRepeatSize() + 1);
-						}
-						break;
-					}
-					case CHINA_TELECOM: {
-						boolean isRepeat = reputCmcpMobiles(ctNumbers, Province.PROVINCE_CODE_ALLOVER_COUNTRY, number);
-						if (isRepeat) {
-							// 如果号码重复，则放置重复号码
-							repeatNumbers.append(number).append(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
-							response.setRepeatSize(response.getRepeatSize() + 1);
-						}
-						break;
-					}
-					case CHINA_UNICOM: {
-						boolean isRepeat = reputCmcpMobiles(cuNumbers, Province.PROVINCE_CODE_ALLOVER_COUNTRY, number);
-						if (isRepeat) {
-							// 如果号码重复，则放置重复号码
-							repeatNumbers.append(number).append(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
-							response.setRepeatSize(response.getRepeatSize() + 1);
-						}
-						break;
-					}
-					default: {
-						break;
-					}
-					}
-					continue;
-				}
+				ProvinceLocal pl = getByMobile(number);
 
 				// 根据CMCP代码获取组装相关运营商信息
 				switch (CMCP.getByCode(pl.getCmcp())) {
@@ -289,6 +247,39 @@ public class MobileLocalService implements IMobileLocalService {
 		}
 
 		return false;
+	}
+
+	@Override
+	public ProvinceLocal getByMobile(String mobile) {
+		if(StringUtils.isEmpty(mobile))
+			return null;
+		
+		String area = pickupMobileLocal(mobile);
+		if (area == null)
+			return null;
+
+		ProvinceLocal pl = GLOBAL_MOBILE_LOCATION.get(area);
+		if(pl == null)
+			return new ProvinceLocal(Province.PROVINCE_CODE_ALLOVER_COUNTRY, CMCP.local(mobile).getCode());
+		
+		return pl;
+	}
+
+	@Override
+	public Map<String, ProvinceLocal> getByMobiles(String[] mobiles) {
+		if(mobiles == null || mobiles.length == 0)
+			return null;
+		
+		Map<String, ProvinceLocal> mobileLocal = new HashMap<String, ProvinceLocal>();
+		for(String mobile : mobiles) {
+			ProvinceLocal pl = getByMobile(mobile);
+			if(pl == null)
+				continue;
+			
+			mobileLocal.put(mobile, pl);
+		}
+		
+		return mobileLocal;
 	}
 
 }

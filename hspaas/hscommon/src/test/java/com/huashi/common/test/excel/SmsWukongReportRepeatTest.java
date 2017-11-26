@@ -1,4 +1,4 @@
-package com.huashi.sms.test.report;
+package com.huashi.common.test.excel;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,8 +22,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.alibaba.dubbo.config.spring.ReferenceBean;
 import com.alibaba.fastjson.JSON;
+import com.huashi.common.user.util.ExcelUtil;
 import com.huashi.common.util.DateUtil;
-import com.huashi.common.util.ExcelUtil;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;

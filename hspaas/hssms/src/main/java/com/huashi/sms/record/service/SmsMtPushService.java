@@ -128,8 +128,14 @@ public class SmsMtPushService implements ISmsMtPushService {
 				}
 				
 				if(jsonObject == null) {
+					// 如果数据生成时间超过5分钟则舍弃，不再重新补偿
+//					if(System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 5 * 60 * 1000 )
+//						continue;
+					
+					logger.info("deliver提交时间：{} 计算结果：{}", deliver.getCreateTime().getTime(), 
+							System.currentTimeMillis() - deliver.getCreateTime().getTime());
+					
 					waitPushDelivers.add(deliver);
-					logger.warn("当前msg_id : {}, mobile :{}未找到相关回执数据，待后续轮训补偿", deliver.getMsgId(), deliver.getMobile());
 					continue;
 				}
 				
@@ -193,7 +199,7 @@ public class SmsMtPushService implements ISmsMtPushService {
 	private void sendToPushBeforeDeliverdFinished(List<SmsMtMessageDeliver> waitPushDelivers) {
 		try {
 			// 如果解析推送数据为空,则将数据扔至REDIS队列,待轮训任务扫描做补偿对账
-			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 
+			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_READY_APPEND_PUSH, 
 					JSON.toJSONString(waitPushDelivers, new SimplePropertyPreFilter("msgId", "mobile", "statusCode", "deliverTime", "remark", "status", "createTime")));
 //			stringRedisTemplate.expire(SmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 5, TimeUnit.MINUTES);
 		} catch (Exception e) {

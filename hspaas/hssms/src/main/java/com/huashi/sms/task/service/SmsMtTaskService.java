@@ -201,6 +201,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 			// UserModel userModel = userService.getByUserId(task.getUserId());
 			// task.setUserModel(userModel);
 			// }
+			
+			if(task.getProvinceCode() == null)
+				continue;
 
 			if(provinceMap.containsKey(task.getProvinceCode())) {
 				task.setProvinceName(provinceMap.get(task.getProvinceCode()));

@@ -73,4 +73,15 @@ public class ProvinceLocal implements Serializable{
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
+
+	public ProvinceLocal(Integer provinceCode, Integer cmcp) {
+		super();
+		this.provinceCode = provinceCode;
+		this.cmcp = cmcp;
+	}
+
+	public ProvinceLocal() {
+		super();
+	}
+	
 }

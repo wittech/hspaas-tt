@@ -23,8 +23,10 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.bill.bill.constant.SmsBillConstant;
 import com.huashi.common.settings.context.SettingsContext.PushConfigStatus;
+import com.huashi.common.settings.domain.ProvinceLocal;
 import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.settings.service.IPushConfigService;
+import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.service.IUserSmsConfigService;
 import com.huashi.constants.CommonContext.CMCP;
@@ -82,6 +84,8 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 	private ISignatureExtNoService signatureExtNoService;
 	@Autowired
 	private ISmsPassageMessageTemplateService smsPassageMessageTemplateService;
+	@Reference
+	private IMobileLocalService mobileLocalService;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -382,6 +386,11 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 
 			BeanUtils.copyProperties(submit, _submit);
 			_submit.setMobile(mobile);
+			
+			// 获取省份代码/运营商相关内容 add by 20171126
+			ProvinceLocal provinceLocal = mobileLocalService.getByMobile(mobile);
+			_submit.setCmcp(provinceLocal.getCmcp());
+			_submit.setProvinceCode(provinceLocal.getProvinceCode());
 
 			// 如果提交数据失败，则需要制造伪造包补推送
 			if (_submit.getStatus() == MessageSubmitStatus.FAILED.getCode()) {

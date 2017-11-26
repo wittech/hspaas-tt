@@ -48,7 +48,7 @@ public class SmsRedisConstant {
 	
 	/**************加入分布式名称定义 edit by zhengying 20170726 ************/
 	// 针对下行短信回执状态已回,但推送状态未知情况(一般是回执状态回来过快而 SUBMIT消息还未入库) 分布式
-	public static String RED_MESSAGE_DELIVED_WAIT_PUSH_LIST = "ready_message_delived_process_push";
+	public static String RED_READY_APPEND_PUSH = "ready_mt_append_push";
 	// 短信下行 已回执状态，待推送给下家客户队列信息（分布式）
 	public static String RED_QUEUE_SMS_MT_WAIT_PUSH = "queue_sms_mt_wait_push";
 	

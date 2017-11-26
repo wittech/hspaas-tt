@@ -1,16 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.huashi</groupId>
-    <artifactId>hspaas</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
-  </parent>
-  <groupId>com.huashi.listener</groupId>
-  <artifactId>hs-listener</artifactId>
-  <name>华时监管中心</name>
-  <description>针对网关回执监听，通道状态更新，后台报表数据定时更新，接收厂商推送报告，上行回执等信息</description>
-  
-  <dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.huashi</groupId>
+		<artifactId>hspaas</artifactId>
+		<version>1.0.1-SNAPSHOT</version>
+	</parent>
+	<groupId>com.huashi.listener</groupId>
+	<artifactId>hs-listener</artifactId>
+	<name>华时监管中心</name>
+	<description>针对网关回执监听，通道状态更新，后台报表数据定时更新，接收厂商推送报告，上行回执等信息</description>
+
+	<dependencies>
 
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -28,39 +29,24 @@
 				</exclusion>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-tomcat</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<!-- Jboss Undertow嵌入式容器 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-undertow</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aspects</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
-		</dependency>
-
-		<!-- apache commons -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
 		</dependency>
 
 		<dependency>
@@ -74,35 +60,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.caucho</groupId>
-			<artifactId>hessian</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.huashi</groupId>
 			<artifactId>hsapi</artifactId>
 			<version>${project.parent.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>org.apache.poi</groupId>
-					<artifactId>poi</artifactId>
-				</exclusion>
-
-				<exclusion>
-					<groupId>org.apache.poi</groupId>
-					<artifactId>poi-ooxml</artifactId>
-				</exclusion>
-
-				<exclusion>
-					<groupId>org.apache.poi</groupId>
-					<artifactId>poi-ooxml-schemas</artifactId>
+					<groupId>org.freemarker</groupId>
+					<artifactId>freemarker</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
 		</dependency>
 
 		<dependency>
@@ -116,11 +82,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-		</dependency>
-		
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
 			<exclusions>
@@ -128,11 +89,15 @@
 					<artifactId>log4j-over-slf4j</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
 	</dependencies>
-	
+
 	<build>
 		<finalName>hs-listener</finalName>
 		<plugins>

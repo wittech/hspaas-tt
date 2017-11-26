@@ -60,9 +60,9 @@
                             <tr>
                                 <td rowspan="2" style="background: #fff;text-align: center;">${(pl_index+1)}</td>
                                 <td>
-                                    <#if pl.cmcp == 1>移动
-                                    <#elseif pl.cmcp == 2>电信
-                                    <#elseif  pl.cmcp == 3>联通
+                                    <#if pl.cmcp?? && pl.cmcp == 1>移动
+                                    <#elseif pl.cmcp?? && pl.cmcp == 2>电信
+                                    <#elseif pl.cmcp?? &&  pl.cmcp == 3>联通
                                     <#else>未知
                                     </#if>
                                 </td>

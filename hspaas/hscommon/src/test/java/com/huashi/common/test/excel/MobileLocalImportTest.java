@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.huashi.common.test.util.DataSourceUtil;
-import com.huashi.common.util.ExcelUtil;
+import com.huashi.common.user.util.ExcelUtil;
 import com.huashi.constants.CommonContext.CMCP;
 
 public class MobileLocalImportTest {

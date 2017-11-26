@@ -11,8 +11,10 @@ package com.huashi.sms.settings.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -42,10 +44,10 @@ import com.huashi.sms.settings.domain.SmsMobileWhiteList;
 @Service
 public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 
-	@Autowired
-	private SmsMobileWhiteListMapper smsMobileWhiteListMapper;
 	@Reference
 	private IUserService userService;
+	@Autowired
+	private SmsMobileWhiteListMapper smsMobileWhiteListMapper;
 	@Resource
 	private StringRedisTemplate stringRedisTemplate;
 	
@@ -180,8 +182,15 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 		return page;
 	}
 	
-	private String getAssistKey(Integer userId, String mobile) {
-		return String.format("%s:%d:%s", SmsRedisConstant.RED_MOBILE_WHITELIST, userId, mobile);
+	/**
+	 * 
+	   * TODO 获取白名单手机号码KEY名称
+	   * 
+	   * @param userId
+	   * @return
+	 */
+	private String getKey(Integer userId) {
+		return String.format("%s:%d", SmsRedisConstant.RED_MOBILE_WHITELIST, userId);
 	}
 
 	@Override
@@ -192,6 +201,7 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 			return true;
 		}
 		try {
+			stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_MOBILE_WHITELIST + "*"));
 			for(SmsMobileWhiteList mwl : list) {
 				pushToRedis(mwl);
 			}
@@ -204,8 +214,7 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 	
 	public boolean pushToRedis(SmsMobileWhiteList mwl) {
 		try {
-			stringRedisTemplate.opsForValue().set(getAssistKey(mwl.getUserId(), mwl.getMobile()), 
-					System.currentTimeMillis() + "");
+			stringRedisTemplate.opsForSet().add(getKey(mwl.getUserId()), mwl.getMobile());
 			return true;
 		} catch (Exception e) {
 			logger.error("REDIS加载手机白名单信息", e);
@@ -219,9 +228,24 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 			return false;
 		
 		try {
-			return stringRedisTemplate.hasKey(getAssistKey(userId, mobile));
+			return stringRedisTemplate.opsForSet().isMember(getKey(userId), mobile);
 		} catch (Exception e) {
+			logger.warn("redis 获取手机号码白名单失败，将从DB加载", e);
 			return smsMobileWhiteListMapper.selectByUserIdAndMobile(userId, mobile) > 0;
+		}
+	}
+
+	@Override
+	public Set<String> getByUserId(int userId) {
+		try {
+			return stringRedisTemplate.opsForSet().members(getKey(userId));
+		} catch (Exception e) {
+			logger.warn("redis 获取手机号码白名单集合失败，将从DB加载", e);
+			List<String> list = smsMobileWhiteListMapper.selectDistinctMobilesByUserId(userId);
+			if(CollectionUtils.isEmpty(list))
+				return null;
+			
+			return new HashSet<String>(list);
 		}
 	}
 
