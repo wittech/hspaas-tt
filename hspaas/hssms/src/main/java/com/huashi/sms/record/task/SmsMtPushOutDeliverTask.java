@@ -42,9 +42,6 @@ public class SmsMtPushOutDeliverTask {
 //						JSON.toJSONString(deliver, new SimplePropertyPreFilter("mobile", "statusCode", "deliverTime")));
 			long start = System.currentTimeMillis();
 			List<String> list = stringRedisTemplate.opsForList().range(SmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 0, 1999);
-			logger.info("查询ready_message_delived_process_push 耗时 ：{} MS", System.currentTimeMillis() - start);
-			
-			
 			
 			if(CollectionUtils.isEmpty(list))
 				return;

@@ -641,8 +641,8 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 
 				if (isAvaiable)
 					cmPassage.put(provinceCode, passageAccess);
-				else
-					routePassage.setCmErrorMessage("任务中包含通道不可用数据");
+//				else
+//					routePassage.setCmErrorMessage("任务中包含通道不可用数据");
 
 			}
 
@@ -667,8 +667,8 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 
 				if (isAvaiable)
 					ctPassage.put(provinceCode, passageAccess);
-				else
-					routePassage.setCtErrorMessage("任务中包含通道不可用数据");
+//				else
+//					routePassage.setCtErrorMessage("任务中包含通道不可用数据");
 
 			}
 		}
@@ -692,21 +692,21 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 
 				if (isAvaiable)
 					cuPassage.put(provinceCode, passageAccess);
-				else
-					routePassage.setCuErrorMessage("任务中包含通道不可用数据");
+//				else
+//					routePassage.setCuErrorMessage("任务中包含通道不可用数据");
 
 			}
 		}
 
 		// 判断三网通道是否为空，如果最终解析的不为空，则设置相关通道信息
-		if (MapUtils.isNotEmpty(cmPassage))
-			routePassage.setCmPassage(cmPassage);
-
-		if (MapUtils.isNotEmpty(ctPassage))
-			routePassage.setCtPassage(ctPassage);
-
-		if (MapUtils.isNotEmpty(cuPassage))
-			routePassage.setCuPassage(cuPassage);
+//		if (MapUtils.isNotEmpty(cmPassage))
+//			routePassage.setCmPassage(cmPassage);
+//
+//		if (MapUtils.isNotEmpty(ctPassage))
+//			routePassage.setCtPassage(ctPassage);
+//
+//		if (MapUtils.isNotEmpty(cuPassage))
+//			routePassage.setCuPassage(cuPassage);
 
 		return routePassage;
 	}
@@ -920,22 +920,22 @@ public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements Cha
 
 		// 分包子任务
 		List<SmsMtTaskPackets> packets = new ArrayList<>();
-		boolean isPassageAvaiable = routePassage != null;
+//		boolean isPassageAvaiable = routePassage != null;
 		// 移动分包逻辑
-		if (MapUtils.isNotEmpty(mobileCatagory.getCmNumbers())) {
-			doTaskPackets(task, messageTemplateId, mobileCatagory.getCmNumbers(), isPassageAvaiable,
-					routePassage.getCmErrorMessage(), routePassage.getCmPassage(), CMCP.CHINA_MOBILE, packets);
-		}
-		// 联通分包逻辑
-		if (MapUtils.isNotEmpty(mobileCatagory.getCuNumbers())) {
-			doTaskPackets(task, messageTemplateId, mobileCatagory.getCuNumbers(), isPassageAvaiable,
-					routePassage.getCuErrorMessage(), routePassage.getCuPassage(), CMCP.CHINA_UNICOM, packets);
-		}
-		// 电信分包逻辑
-		if (MapUtils.isNotEmpty(mobileCatagory.getCtNumbers())) {
-			doTaskPackets(task, messageTemplateId, mobileCatagory.getCtNumbers(), isPassageAvaiable,
-					routePassage.getCtErrorMessage(), routePassage.getCtPassage(), CMCP.CHINA_TELECOM, packets);
-		}
+//		if (MapUtils.isNotEmpty(mobileCatagory.getCmNumbers())) {
+//			doTaskPackets(task, messageTemplateId, mobileCatagory.getCmNumbers(), isPassageAvaiable,
+//					routePassage.getCmErrorMessage(), routePassage.getCmPassage(), CMCP.CHINA_MOBILE, packets);
+//		}
+//		// 联通分包逻辑
+//		if (MapUtils.isNotEmpty(mobileCatagory.getCuNumbers())) {
+//			doTaskPackets(task, messageTemplateId, mobileCatagory.getCuNumbers(), isPassageAvaiable,
+//					routePassage.getCuErrorMessage(), routePassage.getCuPassage(), CMCP.CHINA_UNICOM, packets);
+//		}
+//		// 电信分包逻辑
+//		if (MapUtils.isNotEmpty(mobileCatagory.getCtNumbers())) {
+//			doTaskPackets(task, messageTemplateId, mobileCatagory.getCtNumbers(), isPassageAvaiable,
+//					routePassage.getCtErrorMessage(), routePassage.getCtPassage(), CMCP.CHINA_TELECOM, packets);
+//		}
 
 		return packets;
 	}
