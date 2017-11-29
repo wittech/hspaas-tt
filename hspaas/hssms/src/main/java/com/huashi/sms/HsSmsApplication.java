@@ -26,11 +26,11 @@ public class HsSmsApplication {
 	public static void main(String args[]) {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(HsSmsApplication.class, args);
 		
-		loadApplicationPort(applicationContext);
-		
 		LogUtils.info("华时短信服务项目已启动");
 		
 		release();
+		
+		applicationContext.registerShutdownHook();
 		
 	}
 	

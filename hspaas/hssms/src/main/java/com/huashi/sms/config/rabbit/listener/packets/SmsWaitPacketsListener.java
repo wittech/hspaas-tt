@@ -13,8 +13,6 @@ import javax.annotation.Resource;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
@@ -83,7 +81,41 @@ import com.rabbitmq.client.Channel;
  */
 @Component
 public class SmsWaitPacketsListener extends BasePacketsSupport implements ChannelAwareMessageListener {
+
+	@Resource
+	private RabbitTemplate rabbitTemplate;
+	@Autowired
+	private ISmsTemplateService smsTemplateService;
+	@Autowired
+	private IForbiddenWordsService forbiddenWordsService;
+	@Autowired
+	private ISmsPassageAccessService smsPassageAccessService;
+	@Autowired
+	private Jackson2JsonMessageConverter messageConverter;
+	@Resource
+	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private ISmsMobileTablesService smsMobileTablesService;
+	@Autowired
+	private ISmsMobileBlackListService mobileBlackListService;
+	@Autowired
+	private ISmsMobileWhiteListService smsMobileWhiteListService;
+	@Autowired
+	private ISmsMtSubmitService smtMtSubmitService;
+
+	@Reference
+	private IMobileLocalService mobileLocalService;
+	@Reference
+	private IPushConfigService pushConfigService;
+	@Reference
+	private IUserBalanceService userBalanceService;
+	@Reference
+	private IUserPassageService userPassageService;
+	@Reference
+	private IUserSmsConfigService userSmsConfigService;
 	
+	// 默认每个包手机号码上限数
+	private static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 500;
 	// 短信模板
 	private static ThreadLocal<MessageTemplate> messageTemplateLocal = new ThreadLocal<>();
 
@@ -307,42 +339,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 	// // rabbitTemplate如果为单例的话，那回调就是最后设置的内容
 	// rabbitTemplate.setConfirmCallback(this);
 	// }
-	
-	@Reference
-	protected IUserPassageService userPassageService;
-	@Reference
-	protected IUserSmsConfigService userSmsConfigService;
-	@Autowired
-	protected ISmsTemplateService smsTemplateService;
-	@Autowired
-	protected IForbiddenWordsService forbiddenWordsService;
-	@Autowired
-	protected ISmsPassageAccessService smsPassageAccessService;
-	@Resource
-	protected RabbitTemplate rabbitTemplate;
-	@Autowired
-	protected Jackson2JsonMessageConverter messageConverter;
-	@Resource
-	protected StringRedisTemplate stringRedisTemplate;
-	@Autowired
-	private ISmsMobileTablesService smsMobileTablesService;
-	@Autowired
-	protected ISmsMobileBlackListService mobileBlackListService;
-	@Autowired
-	protected ISmsMobileWhiteListService smsMobileWhiteListService;
-	@Reference
-	protected IMobileLocalService mobileLocalService;
-	@Reference
-	protected IPushConfigService pushConfigService;
-	@Reference
-	protected IUserBalanceService userBalanceService;
-	@Autowired
-	protected ISmsMtSubmitService smtMtSubmitService;
-
-	protected Logger logger = LoggerFactory.getLogger(getClass());
-
-	// 默认每个包手机号码上限数
-	private static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 500;
 
 	/**
 	 * 
