@@ -1,4 +1,4 @@
-package com.huashi.sms.config;
+package com.huashi.sms.config.converter;
 
 import java.io.UnsupportedEncodingException;
 

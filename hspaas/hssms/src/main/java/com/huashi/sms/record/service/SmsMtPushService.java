@@ -1,6 +1,7 @@
 package com.huashi.sms.record.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,26 +18,28 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.worker.fork.MtReportPushToDeveloperWorker;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
 import com.huashi.sms.passage.context.PassageContext.PushStatus;
 import com.huashi.sms.record.dao.SmsMtMessagePushMapper;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.domain.SmsMtMessagePush;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
-import com.huashi.sms.record.task.SmsMtPushTask;
 import com.huashi.util.HttpClientUtil;
 
 /**
@@ -58,11 +61,18 @@ public class SmsMtPushService implements ISmsMtPushService {
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private ISmsMtSubmitService smsMtSubmitService;
-	
-	// 批量扫描大小
-	private static final int SCAN_PACKETS_SIZE = 1000;
 
+	@Value("${thread.poolsize.push:2}")
+	private int pushThreadPoolSize;
+	@Autowired
+	private ApplicationContext applicationContext;
+	@Resource
+	private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+	
 	private Logger logger = LoggerFactory.getLogger(getClass());
+	
+	// 推送分包分割主键（根据推送地址进行切割）
+	private static final String PUSH_BODY_SUBPACKAGE_KEY = "puthUrl";
 
 	@Override
 	@Transactional
@@ -96,38 +106,38 @@ public class SmsMtPushService implements ISmsMtPushService {
 	public String getUserPushQueueName(Integer userId) {
 		return String.format("%s:%d", SmsRedisConstant.RED_QUEUE_SMS_MT_WAIT_PUSH, userId);
 	}
-
-	@Override
-	public boolean sendToWaitPushQueue(List<SmsMtMessageDeliver> delivers) {
-		try {
-			Map<String, JSONObject> pushMap = new HashMap<>();
-			JSONObject jsonObject = null;
-			
-			Map<Integer, List<JSONObject>> report = new HashMap<>();
-			
-			// 针对上家回执数据已回但我方回执数据未入库情况需要 推送集合数据
-			List<SmsMtMessageDeliver> waitPushDelivers = new ArrayList<>();
-			long start = System.currentTimeMillis();
-			for(SmsMtMessageDeliver deliver : delivers) {
-				if(deliver == null)
-					continue;
-				
-				// 根据消息ID获取推送相关数据
-				if(MapUtils.isNotEmpty(pushMap) && pushMap.containsKey(deliver.getMsgId())) {
-					jsonObject = new JSONObject();
-					jsonObject.putAll(pushMap.get(deliver.getMsgId()));
-				} else {
-					try {
-						jsonObject = getWaitPushReport(deliver.getMsgId(), deliver.getMobile());
-						if(jsonObject != null)
-							pushMap.put(deliver.getMsgId(), jsonObject);
-					} catch (IllegalStateException e) {
-						// 忽略已经推送的信息
-						continue;
-					}
-				}
-				
-				if(jsonObject == null) {
+	
+	/**
+	 * 
+	   * TODO 组装报文前半部分信息
+	   * 
+	   * @param body
+	   * 		报文信息（上下文使用）
+	   * @param deliver
+	   * 		网关回执数据
+	   * @param cachedPushArgs
+	   * 		本地缓存推送参数信息（为了加快速度缓存变量，而不是每次都根据MSG_ID和MOBILE查询REDIS或者DB）
+	   * @param failoverDeliversQueue
+	   * 		本次处理失败（一般是查询REDIS或者DB都没有推送配置信息）重入待处理回执状态（后续线程重试）
+	   * 		
+	   * @return
+	 */
+	private boolean assembleBody(JSONObject body, SmsMtMessageDeliver deliver, Map<String, JSONObject> cachedPushArgs,
+			List<SmsMtMessageDeliver> failoverDeliversQueue) {
+		// 如果本地缓存中存在相关值，则直接获取，无需请求REDIS或DB
+		if(MapUtils.isNotEmpty(cachedPushArgs) && cachedPushArgs.containsKey(deliver.getMsgId())) {
+			body.putAll(cachedPushArgs.get(deliver.getMsgId()));
+			return true;
+		}
+		
+		else{
+			try {
+				body = getWaitPushBodyArgs(deliver.getMsgId(), deliver.getMobile());
+				if(body != null) {
+					cachedPushArgs.put(deliver.getMsgId(), body);
+					return true;
+				} 
+				else {
 					// 如果数据生成时间超过5分钟则舍弃，不再重新补偿
 //					if(System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 5 * 60 * 1000 )
 //						continue;
@@ -135,73 +145,120 @@ public class SmsMtPushService implements ISmsMtPushService {
 					logger.info("deliver提交时间：{} 计算结果：{}", deliver.getCreateTime().getTime(), 
 							System.currentTimeMillis() - deliver.getCreateTime().getTime());
 					
-					waitPushDelivers.add(deliver);
-					continue;
+					failoverDeliversQueue.add(deliver);
 				}
+			} catch (IllegalStateException e) {
+				logger.warn(e.getMessage());
+			}
+
+			return false;
+		} 
+	}
+	
+	/**
+	 * 
+	   * TODO 回执信息按照用户分包，上家一次性回执多个回执报文，报文中很可能是我司多个用户数据回执信息，顾要分包
+	   * @param body
+	   * 		单个报文信息
+	   * @param deliver
+	   * 		上家回执报文信息
+	   * @param userBodies
+	   * 		本次需要处理的过程累计的报文集合信息
+	   * @return
+	 */
+	private boolean subQueue(JSONObject body, SmsMtMessageDeliver deliver, Map<Integer, List<JSONObject>> userBodies) {
+		// edit by zhengying 将SID转型为string（部分客户提到推送到客户侧均按照字符类型去解析，顾做了转义）
+		body.put("sid", body.getLong("sid").toString());
+		body.put("mobile", deliver.getMobile());
+		body.put("status", deliver.getStatusCode());
+		body.put("receiveTime", deliver.getDeliverTime());
+		body.put("errorMsg", deliver.getStatus() == DeliverStatus.SUCCESS.getValue() ? "" : deliver.getStatusCode());
+		
+		try {
+			// 如果本次处理的用户ID已经包含在山下文处理集合中，则直接追加即可
+			if(MapUtils.isNotEmpty(userBodies) && userBodies.containsKey(body.getInteger("userId"))){
+				userBodies.get(body.getInteger("userId")).add(body);
+			} 
+			// 如果未曾处理过，则重新初始化集合
+			else {
+//				List<JSONObject> ds = new ArrayList<>();
+//				ds.add(body);
+				userBodies.put(body.getInteger("userId"), Arrays.asList(body));
+			}
+			
+			return true;
+		} catch (Exception e) {
+			logger.error("解析推送数据报告异常:{}", body.toJSONString(), e);
+			return false;
+		}
+	}
+
+	@Override
+	public boolean compareAndPushBody(List<SmsMtMessageDeliver> delivers) {
+		if(CollectionUtils.isEmpty(delivers))
+			return false;
+		
+		JSONObject body = new JSONObject();
+		Map<String, JSONObject> cachedPushArgs = new HashMap<>();
+		// 用户ID对应的 推送报告集合数据
+		Map<Integer, List<JSONObject>> userBodies = new HashMap<>();
+		// 针对上家回执数据已回，但我方回执数据未入库以及REDIS没有推送配置信息，后续线程重试补完成
+		List<SmsMtMessageDeliver> failoverDeliversQueue = new ArrayList<>();
+		
+		try {
+			for(SmsMtMessageDeliver deliver : delivers) {
+				if(deliver == null)
+					continue;
 				
-				// 移除待推送配置信息（如果存在移除REDIS缓存信息）
+				if(!assembleBody(body, deliver, cachedPushArgs, failoverDeliversQueue))
+					continue;
+				
 				removeReadyMtPushConfig(deliver.getMsgId(), deliver.getMobile());
 				
 				// 如果用户推送地址为空则表明不需要推送
-				if(StringUtils.isEmpty(jsonObject.getString("pushUrl"))) {
+				if(StringUtils.isEmpty(body.getString(PUSH_BODY_SUBPACKAGE_KEY)))
 					continue;
-				}
 				
-				// edit by zhengying 将SID转型为string
-				jsonObject.put("sid", jsonObject.getLong("sid").toString());
-				jsonObject.put("mobile", deliver.getMobile());
-				jsonObject.put("status", deliver.getStatusCode());
-				jsonObject.put("receiveTime", deliver.getDeliverTime());
-				jsonObject.put("errorMsg", deliver.getStatus() == DeliverStatus.SUCCESS.getValue() ? "" : deliver.getStatusCode());
-				
-				// 根据用户ID 进行分包
-				try {
-					if(MapUtils.isNotEmpty(report) && report.containsKey(jsonObject.getInteger("userId"))){
-						report.get(jsonObject.getInteger("userId")).add(jsonObject);
-					} else {
-						List<JSONObject> ds = new ArrayList<>();
-						ds.add(jsonObject);
-						report.put(jsonObject.getInteger("userId"), ds);
-					}
-				} catch (Exception e) {
-					logger.error("解析推送数据报告异常:{}", jsonObject.toJSONString(), e);
+				if(!subQueue(body, deliver, userBodies))
 					continue;
-				}
 			}
 			
-			logger.info("推送用户组装报文耗时：{}", System.currentTimeMillis() - start);
-			
 			// 如果针对上家已回执我方未入库数据存在则保存至REDIS
-			if(CollectionUtils.isNotEmpty(waitPushDelivers)) {
-				sendToPushBeforeDeliverdFinished(waitPushDelivers);
+			if(CollectionUtils.isNotEmpty(failoverDeliversQueue)) {
+				sendToDeliverdFailoverQueue(failoverDeliversQueue);
 			}
 			
 			// 根据用户ID分别组装数据
-			for(Integer userId : report.keySet()) {
-				stringRedisTemplate.opsForList().rightPush(getUserPushQueueName(userId), JSON.toJSONString(report.get(userId)));
+			for(Integer userId : userBodies.keySet()) {
+				stringRedisTemplate.opsForList().rightPush(getUserPushQueueName(userId), JSON.toJSONString(userBodies.get(userId)));
 			}
-			
-			jsonObject = null;
-			report = null;
-			
 			return true;
 		} catch (Exception e) {
 			logger.error("将上家回执数据发送至待推送队列逻辑失败，回执数据为：{}", JSON.toJSONString(delivers), e);
 		}
+		
+		// 处理本次资源，加速GC
+		body = null;
+		userBodies = null;
+		cachedPushArgs = null;
+		failoverDeliversQueue = null;
+		
 		return false;
 	}
 	
 	/**
 	 * 
 	   * TODO 针对上家回执数据已回但我方回执数据未入库情况需要 推送集合数据
-	   * @param waitPushDelivers
+	   * 
+	   * @param failoverDeliversQueue
 	 */
-	private void sendToPushBeforeDeliverdFinished(List<SmsMtMessageDeliver> waitPushDelivers) {
+	private void sendToDeliverdFailoverQueue(List<SmsMtMessageDeliver> failoverDeliversQueue) {
 		try {
-			// 如果解析推送数据为空,则将数据扔至REDIS队列,待轮训任务扫描做补偿对账
-			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_READY_APPEND_PUSH, 
-					JSON.toJSONString(waitPushDelivers, new SimplePropertyPreFilter("msgId", "mobile", "statusCode", "deliverTime", "remark", "status", "createTime")));
+			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_QUEUE_SMS_DELIVER_FAILOVER, 
+					JSON.toJSONString(failoverDeliversQueue, new SimplePropertyPreFilter("msgId", "mobile", "statusCode", 
+							"deliverTime", "remark", "status", "createTime")));
 //			stringRedisTemplate.expire(SmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 5, TimeUnit.MINUTES);
+			logger.warn("deliver failover count : {}" , failoverDeliversQueue.size());
 		} catch (Exception e) {
 			logger.error("针对上家回执数据已回但我方回执数据未入库情况需要 推送集合数据失败", e);
 		}
@@ -209,21 +266,23 @@ public class SmsMtPushService implements ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 获取待处理的推送报告数据
+	   * TODO 获取待处理的推送报告定义参数信息
+	   * 
+	   * 	eg. （SID, pushUrl, pushTimes ...）
+	   * 
 	   * @param msgId
 	   * @param mobile
 	   * @return
 	 */
-	public JSONObject getWaitPushReport(String msgId, String mobile) {
+	public JSONObject getWaitPushBodyArgs(String msgId, String mobile) {
 		// 首先在REDIS查询是否存在数据
 		try {
 			HashOperations<String, String, String> hashOperations = stringRedisTemplate.opsForHash();
 			if(hashOperations.hasKey(getMtPushConfigKey(msgId), mobile)) {
 				Object o = hashOperations.get(getMtPushConfigKey(msgId), mobile);
-				if(o == null)
-					return null;
+				if(o != null)
+					return JSON.parseObject(o.toString());
 				
-				return JSON.parseObject(o.toString());
 			}
 		} catch (Exception e) {
 			logger.warn("回执完成逻辑中获取待推送设置数据REDIS异常，DB补偿, {}", e.getMessage());
@@ -247,7 +306,7 @@ public class SmsMtPushService implements ISmsMtPushService {
 		
 		SmsMtMessagePush push = smsMtMessagePushMapper.findByMobileAndMsgid(mobile, msgId);
 		if(push != null)
-			throw new IllegalStateException("推送记录已存在，忽略");
+			throw new IllegalStateException("msgId:" + msgId +", mobile:" + mobile + "推送记录已存在，忽略");
 		
 		// 此处需要查询数据库是否需要有推送设置，无则不推送
 		SmsMtMessageSubmit submit = smsMtSubmitService.getByMsgidAndMobile(msgId, mobile);
@@ -298,6 +357,7 @@ public class SmsMtPushService implements ISmsMtPushService {
 			stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()), submit.getMobile(), JSON.toJSONString(submit, 
 					new SimplePropertyPreFilter("sid", "userId", "msgId", "attach", "pushUrl", "retryTimes")));
 			stringRedisTemplate.expire(getMtPushConfigKey(submit.getMsgId()), 3, TimeUnit.HOURS);
+			
 		} catch (Exception e) {
 			logger.error("设置待推送消息失败", e);
 		}
@@ -306,8 +366,9 @@ public class SmsMtPushService implements ISmsMtPushService {
 	@Override
 	public boolean addUserMtPushListener(Integer userId) {
 		try {
-			Thread thread = new Thread(new SmsMtPushTask(getUserPushQueueName(userId), this));
-			thread.start();
+			for (int i = 0; i < pushThreadPoolSize; i++) {
+				threadPoolTaskExecutor.execute(new MtReportPushToDeveloperWorker(applicationContext, getUserPushQueueName(userId)));
+			}
 			return true;
 		} catch (Exception e) {
 			logger.error("用户加入短信状态报告回执推送监听失败, 用户ID：{}", userId, e);
@@ -316,66 +377,72 @@ public class SmsMtPushService implements ISmsMtPushService {
 	}
 
 	@Override
-	public void pushReportToUser(String queueName) {
-		try {
-			stringRedisTemplate.watch(queueName);
-			// SCAN_BATCH_SIZE - 1， 是因为REDIS LRANGE 默认从0索引算起，0-999 则为1000个
-			List<String> list = stringRedisTemplate.opsForList().range(queueName, 0, SCAN_PACKETS_SIZE - 1);
-			if(CollectionUtils.isEmpty(list))
-				return;
-			
-			// 后续加入计数器，大于500个号码要进行拆分分包
-			Map<String, List<JSONObject>> report = new HashMap<>();
-			for (String t : list) {
-				List<JSONObject> data = JSON.parseObject(t, new TypeReference<List<JSONObject>>(){});
-				for(JSONObject d : data) {
-					if(d == null)
-						continue;
-					
-					// 根据用户的推送'URL'进行拆分组装状态报告
-					try {
-						if(MapUtils.isNotEmpty(report) && report.containsKey(d.getString("pushUrl"))){
-							report.get(d.getString("pushUrl")).add(d);
-						} else {
-							List<JSONObject> ds = new ArrayList<>();
-							ds.add(d);
-							report.put(d.getString("pushUrl"), ds);
-						}
-					} catch (Exception e) {
-						logger.error("解析推送数据报告异常:{}", d.toJSONString(), e);
-						continue;
-					}
-				}
-			}
-			
-			// 保留自本次的SCAN_BATCH_SIZE至最后数据，清除本次处理的500条
-			stringRedisTemplate.opsForList().trim(queueName, list.size(), -1);
-			stringRedisTemplate.unwatch();
+	public void pushMessageBodyToDeveloper(List<JSONObject> bodies) {
+		// 资源URL对应的推送地址(资源地址对应的总量超过500应该分包发送)
+		Map<String, List<JSONObject>> urlBodies = new HashMap<>();
+		String urlKey = null;
 		
+		for(JSONObject body : bodies) {
+			if(MapUtils.isEmpty(body))
+				continue;
+			
+			if(StringUtils.isEmpty(body.getString(PUSH_BODY_SUBPACKAGE_KEY)))
+				continue;
+			
+			urlKey = body.getString(PUSH_BODY_SUBPACKAGE_KEY);
+			
+			// 根据用户的推送'URL'进行拆分组装状态报告
+			try {
+				if(MapUtils.isNotEmpty(urlBodies) && urlBodies.containsKey(urlKey)){
+					urlBodies.get(urlKey).add(body);
+				} else {
+					urlBodies.put(urlKey, Arrays.asList(body));
+				}
+			} catch (Exception e) {
+				logger.error("解析推送数据报文异常:{}", body.toJSONString(), e);
+				continue;
+			}
+		}
+		
+		sendBody(urlBodies);
+	
+		urlKey = null;
+		urlBodies = null;
+	}
+	
+	/**
+	 * 
+	   * TODO 发送短信状态报文至下家并完成异步持久化
+	   * 
+	   * @param urlBodies
+	   * @return
+	 */
+	private boolean sendBody(Map<String, List<JSONObject>> urlBodies) {
+		try {
 			// 提交HTTP POST请求推送
 			RetryResponse response = null;
 			String content = null;
 			Long startTime = null;
-			for(String url : report.keySet()) {
+			for(String url : urlBodies.keySet()) {
 				startTime = System.currentTimeMillis();
-				content = JSON.toJSONString(report.get(url), new SimplePropertyPreFilter("sid", "mobile", "attach", "status", "receiveTime", "errorMsg"), SerializerFeature.WriteMapNullValue,
-						SerializerFeature.WriteNullStringAsEmpty);
+				content = JSON.toJSONString(urlBodies.get(url), new SimplePropertyPreFilter("sid", "mobile", "attach", "status", "receiveTime", "errorMsg"), 
+						SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullStringAsEmpty);
 				
 				response = post(url, content, PUSH_RETRY_TIMES, 1);
 				
-				logger.info("推送URL:{} , 推送数量：{} ，耗时： {} MS", url, report.get(url).size(), System.currentTimeMillis() - startTime);
-				doPushPersistence(report.get(url), response, System.currentTimeMillis() - startTime);
+				logger.info("推送URL:{} , 推送数量：{} ，耗时： {} MS", url, urlBodies.get(url).size(), System.currentTimeMillis() - startTime);
+				doPushPersistence(urlBodies.get(url), response, System.currentTimeMillis() - startTime);
 			}
 			
-			report = null;
 			response = null;
 			content = null;
 			startTime = null;
-
+			
+			return true;
 		} catch (Exception e) {
-			logger.error("推送下行状态至用户失败", e);
+			logger.error("推送下家状态报文或持久化失败 ", e);
+			return false;
 		}
-		return;
 	}
 	
 	// 推送回执信息，如果用户回执success才算正常接收，否则重试，达到重试上限次数，抛弃
@@ -473,8 +540,8 @@ public class SmsMtPushService implements ISmsMtPushService {
 	 */
 	private void doPushPersistence(List<JSONObject> data, RetryResponse retryResponse, long timeCost) {
 		SmsMtMessagePush push = null;
-		Set<String> msgIds = new HashSet<>();
-		List<SmsMtMessagePush> pushes = new ArrayList<>();
+		Set<String> waitPushMsgIdRedisKeys = new HashSet<>();
+		List<SmsMtMessagePush> persistPushesList = new ArrayList<>();
 		for(JSONObject report : data) {
 			push =  new SmsMtMessagePush();
 			push.setMsgId(report.getString("msgId"));
@@ -494,17 +561,18 @@ public class SmsMtPushService implements ISmsMtPushService {
 					SerializerFeature.WriteNullStringAsEmpty));
 			push.setCreateTime(new Date());
 			
-			msgIds.add(getMtPushConfigKey(report.getString("msgId")));
-			pushes.add(push);
+			waitPushMsgIdRedisKeys.add(getMtPushConfigKey(report.getString("msgId")));
+			persistPushesList.add(push);
 		}
 		
 		// 删除待推送消息信息
-		stringRedisTemplate.delete(msgIds);
+		stringRedisTemplate.delete(waitPushMsgIdRedisKeys);
 		// 发送数据至带持久队列中
-		stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_MT_PUSH_LIST, JSON.toJSONString(pushes));
+		stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_MT_PUSH_LIST, JSON.toJSONString(persistPushesList));
 		
 		push = null;
-		pushes = null;
-		msgIds = null;
+		persistPushesList = null;
+		waitPushMsgIdRedisKeys = null;
 	}
+
 }

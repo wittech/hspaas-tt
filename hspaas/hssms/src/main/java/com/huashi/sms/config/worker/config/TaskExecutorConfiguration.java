@@ -1,9 +1,10 @@
-package com.huashi.sms.config.worker;
+package com.huashi.sms.config.worker.config;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -15,19 +16,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @date 2017年9月20日 下午5:58:30
  */
 @Configuration
+@Order(1)
 public class TaskExecutorConfiguration {
 	
-
-	// 应用程序关闭标记（用于钩子回调）
-	public static volatile boolean isAppShutdown = false;
-
 	/**
 	 * 配置线程池
 	 * 
 	 * @return
 	 */
 	@Bean(name = "threadPoolTaskExecutor")
-	ThreadPoolTaskExecutor threadPoolTaskExecutor() {
+	public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
 
 		ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
 

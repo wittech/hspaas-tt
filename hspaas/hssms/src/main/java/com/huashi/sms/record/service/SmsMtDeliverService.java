@@ -78,7 +78,7 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 //			lock.acquire();
 			
 			// 将待推送消息发送至用户队列进行处理（2017-03-20 合包处理）
-			smsMtPushService.sendToWaitPushQueue(delivers);
+			smsMtPushService.compareAndPushBody(delivers);
 			
 			// 提交至待DB持久队列
 			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_STATUS_RECEIVE_LIST, JSON.toJSONString(delivers));

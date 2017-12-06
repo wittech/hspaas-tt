@@ -52,22 +52,21 @@ public interface ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 发送待推送消息至队列
+	   * TODO 比对回执报文数据并且发送报文至下家
 	   * 
 	   * @param delivers
 	   * @return
 	 */
-	boolean sendToWaitPushQueue(List<SmsMtMessageDeliver> delivers);
+	boolean compareAndPushBody(List<SmsMtMessageDeliver> delivers);
 	
 	/**
 	 * 
-	   * TODO 推送下行短信回执报告至用户
+	   * TODO 推送下行短信回执报告至开发者（下家客户）
 	   * 
-	   * @param queueName
-	   * 		用户对应的队列名称
-	   * @return
+	   * @param bodies
+	   * 	组装的推送报文数据
 	 */
-	void pushReportToUser(String queueName);
+	void pushMessageBodyToDeveloper(List<JSONObject> bodies);
 	
 	 /**
      * 
@@ -79,7 +78,7 @@ public interface ISmsMtPushService {
        * 	手机号码
        * @return
      */
-    JSONObject getWaitPushReport(String msgId, String mobile);
+    JSONObject getWaitPushBodyArgs(String msgId, String mobile);
     
     /**
      * 

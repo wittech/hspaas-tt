@@ -2,8 +2,9 @@ package com.huashi.common;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
@@ -11,7 +12,8 @@ import org.springframework.context.annotation.ImportResource;
 import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
-@ImportResource({ "classpath:spring.xml" })
+@ServletComponentScan
+@ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsCommonApplication {
 
 	@Bean
@@ -20,7 +22,8 @@ public class HsCommonApplication {
 	}
 
 	public static void main(String args[]) throws InterruptedException {
-		ApplicationContext ctx = new SpringApplicationBuilder().sources(HsCommonApplication.class).web(false).run(args);
+		ApplicationContext ctx = SpringApplication.run(
+				HsCommonApplication.class, args);
 
 		LogUtils.info("华时融合公共服务项目启动!");
 

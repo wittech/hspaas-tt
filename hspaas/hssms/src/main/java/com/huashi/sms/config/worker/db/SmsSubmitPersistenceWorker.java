@@ -1,12 +1,12 @@
-package com.huashi.sms.config.worker;
+package com.huashi.sms.config.worker.db;
 
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.context.ApplicationContext;
 
-import com.alibaba.fastjson.JSON;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.worker.AbstractWorker;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
 
 /**
@@ -17,10 +17,9 @@ import com.huashi.sms.record.service.ISmsMtSubmitService;
  * @version V1.0
  * @date 2016年12月14日 上午10:26:33
  */
-public class SmsWaitSubmitPersistenceWorker extends BaseWorker implements
-		Runnable {
+public class SmsSubmitPersistenceWorker extends AbstractWorker {
 
-	public SmsWaitSubmitPersistenceWorker(ApplicationContext applicationContext) {
+	public SmsSubmitPersistenceWorker(ApplicationContext applicationContext) {
 		super(applicationContext);
 	}
 
@@ -115,11 +114,9 @@ public class SmsWaitSubmitPersistenceWorker extends BaseWorker implements
 			logger.info("短信提交信息持久同步完成，共处理  {} 条, 耗时： {} ms", list.size(), System.currentTimeMillis() - startTime);
 		} catch (Exception e) {
 			logger.error("短信提交信息异步持久化失败", e);
-			// 处理失败放置处理失败队列中
-			getStringRedisTemplate().opsForList().rightPushAll(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_FAILED_LIST, JSON.toJSONString(list));
+			super.backupIfFailed(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_FAILED_LIST, list);
 		} finally {
-			timer.set(0);
-			list.clear();
+			super.clear(list);
 		}
 
 	}

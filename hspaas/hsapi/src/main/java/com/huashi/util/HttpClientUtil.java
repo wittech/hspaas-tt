@@ -4,9 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +46,8 @@ public class HttpClientUtil {
 	// 数据响应超时时间
 	public static final int SOCKET_READ_TIMEOUT = 8 * 1000;
 	
-    
-    private volatile static Map<String, CloseableHttpClient> LOCAL_HTTP_CLIENT_FACTORY = new HashMap<String, CloseableHttpClient>();
+    // 本次HTTP连接池
+    private static volatile  Map<String, CloseableHttpClient> LOCAL_HTTP_CLIENT_FACTORY = new ConcurrentHashMap<String, CloseableHttpClient>();
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
     
     // 默认最大连接池数量（针对整个域名主机）

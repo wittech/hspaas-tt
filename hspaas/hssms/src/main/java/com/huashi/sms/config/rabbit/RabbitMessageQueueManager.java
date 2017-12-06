@@ -2,24 +2,30 @@ package com.huashi.sms.config.rabbit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.druid.util.StringUtils;
 import com.huashi.sms.task.context.MQConstant;
 
 /**
@@ -34,11 +40,16 @@ import com.huashi.sms.task.context.MQConstant;
 public class RabbitMessageQueueManager {
 
 	@Resource
-	private AmqpAdmin amqpAdmin;
+	private RabbitAdmin rabbitAdmin;
 	@Resource
 	private MessageConverter messageConverter;
 	@Resource
 	private ConnectionFactory rabbitConnectionFactory;
+	
+	@Autowired
+	private ApplicationContext applicationContext;
+	@Autowired
+	private DefaultListableBeanFactory defaultListableBeanFactory;
 	
 	@Value("${mq.rabbit.consumers}")
 	private int concurrentConsumers;
@@ -83,12 +94,12 @@ public class RabbitMessageQueueManager {
 	public void createQueue(String queueName, boolean isDirectProtocol, ChannelAwareMessageListener channelAwareMessageListener) {
 		try {
 			DirectExchange exchange = new DirectExchange(MQConstant.EXCHANGE_SMS, true, false);
-			amqpAdmin.declareExchange(exchange);
+			rabbitAdmin.declareExchange(exchange);
 
 			Queue queue = new Queue(queueName, true, false, false, setQueueFeatures());
 			Binding smsWaitProcessBinding = BindingBuilder.bind(queue).to(exchange).with(queueName);
-			amqpAdmin.declareQueue(queue);
-			amqpAdmin.declareBinding(smsWaitProcessBinding);
+			rabbitAdmin.declareQueue(queue);
+			rabbitAdmin.declareBinding(smsWaitProcessBinding);
 			
 			// 如果为直连协议则控制消费者为预设的个数，其他协议则默认消费者配置
 			SimpleMessageListenerContainer container = this.messageListenerContainer(queueName, 
@@ -111,7 +122,7 @@ public class RabbitMessageQueueManager {
 	   * @param queueName
 	 */
 	public void removeQueue(String queueName) {
-		amqpAdmin.deleteQueue(queueName);
+		rabbitAdmin.deleteQueue(queueName);
 	}
 	
 	/**
@@ -122,7 +133,26 @@ public class RabbitMessageQueueManager {
 	   * @return
 	 */
 	public boolean isQueueExists(String queueName) {
-		return amqpAdmin.getQueueProperties(queueName) != null;
+		return rabbitAdmin.getQueueProperties(queueName) != null;
+	}
+	
+	/**
+	 * 
+	   * TODO 获取消息个数
+	   * 
+	   * @param queueName
+	   * @return
+	 */
+	public int getMessageCount(String queueName) {
+		if(StringUtils.isEmpty(queueName))
+			return 0;
+		
+		Properties properties = rabbitAdmin.getQueueProperties(queueName);
+		if(MapUtils.isEmpty(properties))
+			return 0;
+		
+		return Integer.parseInt(properties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
+		
 	}
 
 	private Map<String, Object> setQueueFeatures() {
@@ -156,7 +186,16 @@ public class RabbitMessageQueueManager {
 		container.setMaxConcurrentConsumers(maxConcurrentConsumers);
 		container.setPrefetchCount(rabbitPrefetchCount);
 		container.setMessageConverter(messageConverter);
+		container.setRabbitAdmin(rabbitAdmin);
+		
 		container.addQueueNames(queueName);
+		
+//		defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinition);
+//		
+//		applicationContext.getbean
+		
+//		container.shutdown();
+		
 		
 		// 关键所在，指定线程池
 //		ExecutorService service = Executors.newFixedThreadPool(10);

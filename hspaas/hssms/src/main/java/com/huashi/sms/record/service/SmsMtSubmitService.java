@@ -135,10 +135,6 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 		return page;
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(DateUtil.getSecondDate("2017-11-07 00:00:00").getTime());
-	}
-	
 	/**
 	 * 
 	   * TODO 转换时间戳信息
@@ -618,5 +614,5 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 		
 		return smsMtMessageSubmitMapper.selectCmcpReport(startTime, endTime);
 	}
-
+	
 }

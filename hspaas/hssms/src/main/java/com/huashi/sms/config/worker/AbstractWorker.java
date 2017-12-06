@@ -11,8 +11,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.alibaba.fastjson.JSON;
+import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
 
-public abstract class BaseWorker {
+/**
+ * 
+  * TODO 抽象进程基础类
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2017年11月30日 上午9:59:26
+ */
+public abstract class AbstractWorker implements Runnable{
 
 	protected ApplicationContext applicationContext;
 
@@ -33,14 +42,14 @@ public abstract class BaseWorker {
 	 * @return
 	 */
 	protected boolean isStop() {
-		return TaskExecutorConfiguration.isAppShutdown;
+		return SmsDbPersistenceRunner.isCustomThreadShutdown;
 	}
 
 	protected StringRedisTemplate getStringRedisTemplate() {
 		return applicationContext.getBean(StringRedisTemplate.class);
 	}
 	
-	public BaseWorker(ApplicationContext applicationContext) {
+	public AbstractWorker(ApplicationContext applicationContext) {
 		super();
 		this.applicationContext = applicationContext;
 	}
@@ -63,6 +72,24 @@ public abstract class BaseWorker {
 	
 	/**
 	 * 
+	   * TODO 数据失败后持久化REDIS
+	   * @param failedRedisKey
+	   * @param failedSize
+	   * 		本次失败数量
+	   * 
+	 */
+	@SuppressWarnings("rawtypes")
+	protected void backupIfFailed(String failedRedisKey, List list) {
+		try {
+			getStringRedisTemplate().opsForList().rightPushAll(failedRedisKey, JSON.toJSONString(list));
+			logger.error("源数据队列：{} 处理失败，加入失败队列完成：{}，共{}条", redisKey(), failedRedisKey, list.size());
+		} catch (Exception e) {
+			logger.error("源数据队列：{} 处理失败，加入失败队列异常：{}，共{}条", redisKey(), failedRedisKey, list.size(), e);
+		}
+	}
+	
+	/**
+	 * 
 	   * TODO 每次扫描的总数量
 	   * @return
 	 */
@@ -77,6 +104,17 @@ public abstract class BaseWorker {
 	 */
 	protected long timeout(){
 		return DEFAULT_TIMEOUT;
+	}
+	
+	/**
+	 * 
+	   * TODO 清除资源，重新开始
+	   * @param list
+	 */
+	@SuppressWarnings("rawtypes")
+	protected void clear(List list) {
+		timer.set(0);
+		list.clear();
 	}
 	
 	/**
@@ -103,9 +141,19 @@ public abstract class BaseWorker {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected <T> void execute() {
+	protected void execute() {
 		List list = new ArrayList();
-		while (!isStop()) {
+		while (true) {
+			if(isStop()) {
+				logger.info("JVM关闭事件已发起，执行自定义线程池停止...");
+				if(CollectionUtils.isNotEmpty(list)) {
+					logger.info("JVM关闭事件---当前线程处理数据不为空，执行最后一次后关闭线程...");
+					operate(list);
+				}
+				
+				break;
+			}
+			
 			try {
 				if (timer.get() == 0)
 					timer.set(System.currentTimeMillis());
@@ -142,11 +190,12 @@ public abstract class BaseWorker {
 				}
 
 			} catch (Exception e) {
-				logger.error("数据入库失败，数据为：{}", JSON.toJSONString(list), e);
+				logger.error("自定义监听线程过程处理失败，数据为：{}", JSON.toJSONString(list), e);
 			}
 		}
 	}
 	
+	@Override
 	public void run() {
 		execute();
 	}

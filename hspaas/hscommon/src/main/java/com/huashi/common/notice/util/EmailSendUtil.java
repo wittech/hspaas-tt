@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,7 +25,8 @@ public class EmailSendUtil {
 	@Autowired
 	private JavaMailSender mailSender;
 	@Autowired
-	private TaskExecutor taskExecutor;
+	@Qualifier("emailPoolTaskExecutor")
+	private TaskExecutor emailPoolTaskExecutor;
 
 	@Value("${notice.email.username}")
 	private String sendEmailAddress;
@@ -129,7 +131,7 @@ public class EmailSendUtil {
 			logger.info("邮件主题主题为空");
 		if (StringUtils.isEmpty(content))
 			logger.info("邮件内容为空");
-		taskExecutor.execute(new SendMailThread(to, subject, content));
+		emailPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
 	}
 	
 	public void sendEmail(String to, String subject, String content, String attachment) throws SendException {
@@ -141,7 +143,7 @@ public class EmailSendUtil {
 			logger.info("邮件主题主题为空");
 		if (StringUtils.isEmpty(content))
 			logger.info("邮件内容为空");
-		taskExecutor.execute(new SendMailThread(to, subject, content));
+		emailPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
 	}
 
 	/**

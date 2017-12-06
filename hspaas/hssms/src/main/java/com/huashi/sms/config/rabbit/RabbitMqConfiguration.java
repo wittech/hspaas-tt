@@ -3,9 +3,10 @@ package com.huashi.sms.config.rabbit;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -29,7 +30,7 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.huashi.common.util.IdGenerator;
-import com.huashi.sms.config.FastJsonMessageConverter;
+import com.huashi.sms.config.converter.FastJsonMessageConverter;
 import com.huashi.sms.task.context.MQConstant;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -101,8 +102,8 @@ public class RabbitMqConfiguration {
 //		connectionFactory.setConnectionCacheSize(5);
 
 		// 关键所在，指定线程池
-//		ExecutorService service = Executors.newFixedThreadPool(500);
-//		connectionFactory.setExecutor(service);
+		ExecutorService service = Executors.newFixedThreadPool(500);
+		connectionFactory.setExecutor(service);
 
 		connectionFactory.setRequestedHeartBeat(60);
 		connectionFactory.setConnectionTimeout(15000);// 15秒
@@ -114,61 +115,64 @@ public class RabbitMqConfiguration {
 	}
 
 	@Bean
-	public AmqpAdmin amqpAdmin(@Qualifier("rabbitConnectionFactory") ConnectionFactory rabbitConnectionFactory) {
-		AmqpAdmin amqpAdmin = new RabbitAdmin(rabbitConnectionFactory);
+	public RabbitAdmin rabbitAdmin(@Qualifier("rabbitConnectionFactory") ConnectionFactory rabbitConnectionFactory) {
+		RabbitAdmin rabbitAdmin = new RabbitAdmin(rabbitConnectionFactory);
 		DirectExchange exchange = new DirectExchange(MQConstant.EXCHANGE_SMS, true, false);
-		amqpAdmin.declareExchange(exchange);
+		rabbitAdmin.declareExchange(exchange);
+		rabbitAdmin.setAutoStartup(true);
+		
+		
 		
 		// 待分包处理队列
 		Queue smsWaitProcessQueue = new Queue(MQConstant.MQ_SMS_MT_WAIT_PROCESS, true, false, false, setQueueFeatures());
 		Binding smsWaitProcessBinding = BindingBuilder.bind(smsWaitProcessQueue).to(exchange)
 				.with(MQConstant.MQ_SMS_MT_WAIT_PROCESS);
-		amqpAdmin.declareQueue(smsWaitProcessQueue);
-		amqpAdmin.declareBinding(smsWaitProcessBinding);
+		rabbitAdmin.declareQueue(smsWaitProcessQueue);
+		rabbitAdmin.declareBinding(smsWaitProcessBinding);
 		
 		// 待点对点短信分包处理队列
 		Queue smsP2PWaitProcessQueue = new Queue(MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS, true, false, false, setQueueFeatures());
 		Binding smsP2PWaitProcessBinding = BindingBuilder.bind(smsP2PWaitProcessQueue).to(exchange)
 				.with(MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS);
-		amqpAdmin.declareQueue(smsP2PWaitProcessQueue);
-		amqpAdmin.declareBinding(smsP2PWaitProcessBinding);
+		rabbitAdmin.declareQueue(smsP2PWaitProcessQueue);
+		rabbitAdmin.declareBinding(smsP2PWaitProcessBinding);
 		
-//		// 分包处理完成，待提交网关（上家通道）队列
+		// 分包处理完成，待提交网关（上家通道）队列
 //		Queue smsWaitSubmitQueue = new Queue(MQConstant.MQ_SMS_MT_WAIT_SUBMIT, true, false, false, setQueueFeatures());
 //		Binding smsWaitSubmitBinding = BindingBuilder.bind(smsWaitSubmitQueue).to(exchange)
 //				.with(MQConstant.MQ_SMS_MT_WAIT_SUBMIT);
-//		amqpAdmin.declareQueue(smsWaitSubmitQueue);
-//		amqpAdmin.declareBinding(smsWaitSubmitBinding);
+//		rabbitAdmin.declareQueue(smsWaitSubmitQueue);
+//		rabbitAdmin.declareBinding(smsWaitSubmitBinding);
 
 		// 网关回执数据，带解析回执数据并推送
 		Queue smsWaitReceiptQueue = new Queue(MQConstant.MQ_SMS_MT_WAIT_RECEIPT, true, false, false, setQueueFeatures());
 		Binding smsWaitReceiptBinding = BindingBuilder.bind(smsWaitReceiptQueue).to(exchange)
 				.with(MQConstant.MQ_SMS_MT_WAIT_RECEIPT);
-		amqpAdmin.declareQueue(smsWaitReceiptQueue);
-		amqpAdmin.declareBinding(smsWaitReceiptBinding);
+		rabbitAdmin.declareQueue(smsWaitReceiptQueue);
+		rabbitAdmin.declareBinding(smsWaitReceiptBinding);
 
 		// 用户上行回复记录
 		Queue moReceiveQueue = new Queue(MQConstant.MQ_SMS_MO_RECEIVE, true, false, false, setQueueFeatures());
 		Binding moReceiveBinding = BindingBuilder.bind(moReceiveQueue).to(exchange)
 				.with(MQConstant.MQ_SMS_MO_RECEIVE);
-		amqpAdmin.declareQueue(moReceiveQueue);
-		amqpAdmin.declareBinding(moReceiveBinding);
+		rabbitAdmin.declareQueue(moReceiveQueue);
+		rabbitAdmin.declareBinding(moReceiveBinding);
 		
 		// 用户推送数据，带解析推送数据并推送(上行)
 		Queue moWaitPushQueue = new Queue(MQConstant.MQ_SMS_MO_WAIT_PUSH, true, false, false, setQueueFeatures());
 		Binding moWaitPushBinding = BindingBuilder.bind(moWaitPushQueue).to(exchange)
 				.with(MQConstant.MQ_SMS_MO_WAIT_PUSH);
-		amqpAdmin.declareQueue(moWaitPushQueue);
-		amqpAdmin.declareBinding(moWaitPushBinding);
+		rabbitAdmin.declareQueue(moWaitPushQueue);
+		rabbitAdmin.declareBinding(moWaitPushBinding);
 		
 		// 下行分包异常，如黑名单数据
 		Queue packetsExceptionQueue = new Queue(MQConstant.MQ_SMS_MT_PACKETS_EXCEPTION, true, false, false, setQueueFeatures());
 		Binding packetsExceptionBinding = BindingBuilder.bind(packetsExceptionQueue).to(exchange)
 				.with(MQConstant.MQ_SMS_MT_PACKETS_EXCEPTION);
-		amqpAdmin.declareQueue(packetsExceptionQueue);
-		amqpAdmin.declareBinding(packetsExceptionBinding);
+		rabbitAdmin.declareQueue(packetsExceptionQueue);
+		rabbitAdmin.declareBinding(packetsExceptionBinding);
 
-		return amqpAdmin;
+		return rabbitAdmin;
 	}
 
 	@Bean
@@ -181,6 +185,8 @@ public class RabbitMqConfiguration {
 		rabbitTemplate.setMessageConverter(messageConverter());
 		rabbitTemplate.setRetryTemplate(retryTemplate());
 		rabbitTemplate.setMandatory(true);
+		
+		rabbitTemplate.setReceiveTimeout(60000);
 
 		return rabbitTemplate;
 	}
