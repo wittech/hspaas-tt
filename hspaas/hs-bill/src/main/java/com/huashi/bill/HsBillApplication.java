@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ImportResource;
 import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
-@ImportResource({ "classpath:spring.xml" })
+@ImportResource({ "classpath:spring-dubbo.xml" })
 public class HsBillApplication {
 
 	@Bean

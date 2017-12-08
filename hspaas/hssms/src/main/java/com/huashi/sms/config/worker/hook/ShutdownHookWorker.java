@@ -41,15 +41,14 @@ public class ShutdownHookWorker implements Runnable {
 		synchronized (startupShutdownMonitor) {
 			SmsDbPersistenceRunner.isCustomThreadShutdown = true;
 			
-			Map<String, SimpleMessageListenerContainer> containers = applicationContext.getBeansOfType(SimpleMessageListenerContainer.class);
-			if(MapUtils.isNotEmpty(containers)) {
-				logger.info("共获取RABBIT监听{} 个， 名称为：{}", containers.size(), JSON.toJSONString(containers.keySet()));
-				
-				for(SimpleMessageListenerContainer container : containers.values()) {
-					container.shutdown();
-				}
-				
-			}
+//			Map<String, SimpleMessageListenerContainer> containers = applicationContext.getBeansOfType(SimpleMessageListenerContainer.class);
+//			if(MapUtils.isNotEmpty(containers)) {
+//				logger.info("共获取RABBIT监听{} 个， 名称为：{}", containers.size(), JSON.toJSONString(containers.keySet()));
+//				
+//				for(SimpleMessageListenerContainer container : containers.values()) {
+//					container.shutdown();
+//				}
+//			}
 			
 			threadPoolTaskExecutor.shutdown();
 		}

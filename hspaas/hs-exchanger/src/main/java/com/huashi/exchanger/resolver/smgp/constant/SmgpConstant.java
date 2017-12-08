@@ -64,6 +64,9 @@ public final class SmgpConstant {
     public static final int MAX_MESSAGE_UCS2_LENGTH = 140;
 	
     // 公共状态回执成功码
- 	public static final String COMMON_MT_STATUS_SUCCESS_CODE = "000";
+ 	public static final String SMGP_MT_STATUS_SUCCESS_CODE = "000";
+ 	
+ // 公共状态回执成功码
+  	public static final String COMMON_MT_STATUS_SUCCESS_CODE = "DELIVRD";
  	
 }

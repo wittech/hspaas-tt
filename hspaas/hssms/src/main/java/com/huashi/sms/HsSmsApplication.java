@@ -17,13 +17,13 @@ public class HsSmsApplication {
 		SpringApplication.run(HsSmsApplication.class, args);
 		LogUtils.info("华时短信服务项目已启动");
 		
-		try {
-			Thread.sleep(5000);
-			System.exit(0);
-			
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(5000);
+//			System.exit(0);
+//			
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 }

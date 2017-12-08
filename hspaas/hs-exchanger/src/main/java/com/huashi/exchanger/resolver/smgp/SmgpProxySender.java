@@ -373,11 +373,14 @@ public class SmgpProxySender {
 			response.setMsgId(report.bytesToHexString(report.getReplyMsgId()));
 			response.setMobile(mobile);
 			response.setCmcp(CMCP.local(response.getMobile()).getCode());
-			response.setStatusCode(String.format("%s:%s", report.getErrorCode(), report.getStat()));
 			response.setStatus((StringUtils.isNotEmpty(report.getErrorCode())
-					&& SmgpConstant.COMMON_MT_STATUS_SUCCESS_CODE
-							.equalsIgnoreCase(report.getErrorCode()) ? DeliverStatus.SUCCESS
-					.getValue() : DeliverStatus.FAILED.getValue()));
+					&& SmgpConstant.SMGP_MT_STATUS_SUCCESS_CODE.equalsIgnoreCase(report.getErrorCode()) 
+					? DeliverStatus.SUCCESS.getValue() : DeliverStatus.FAILED.getValue()));
+
+			// edit by zhengying 20171208 电信成功码转义
+			response.setStatusCode(DeliverStatus.SUCCESS.getValue() == response.getStatus() ? 
+					SmgpConstant.COMMON_MT_STATUS_SUCCESS_CODE : String.format("%s:%s", report.getStat(), report.getErrorCode()));
+			
 			response.setDeliverTime(DateUtil.getNow());
 			response.setCreateTime(new Date());
 			response.setRemark(String.format("DestnationId:%s,RecvTime:%s",
