@@ -20,13 +20,22 @@ public class EmailTemplateService implements IEmailTemplateService {
 
 	@Override
 	public EmailTemplate getRegisterVerifyContent(String url) {
-		if (StringUtils.isEmpty(url))
-			throw new RuntimeException("URL参数不正确");
+		if (StringUtils.isEmpty(url)) {
+            {
+                throw new RuntimeException("URL参数不正确");
+            }
+        }
 		EmailTemplate template = emailTemplateMapper.selectByCode(EmailCode.REGISTER_VERIFY.getCode());
-		if (template == null)
-			return null;
-		if(StringUtils.isEmpty(template.getContent()))
-			return null;
+		if (template == null) {
+            {
+                return null;
+            }
+        }
+		if(StringUtils.isEmpty(template.getContent())) {
+            {
+                return null;
+            }
+        }
 		
 		Map<String, String> values =  new HashMap<String,String>();
 		values.put("url", url);
@@ -37,14 +46,23 @@ public class EmailTemplateService implements IEmailTemplateService {
 
 	@Override
 	public EmailTemplate getRegisterSuceessContent(String username, String appkey, String appsecret) {
-		if (StringUtils.isEmpty(username) || StringUtils.isEmpty(appkey) || StringUtils.isEmpty(appsecret))
-			throw new RuntimeException("参数不正确");
+		if (StringUtils.isEmpty(username) || StringUtils.isEmpty(appkey) || StringUtils.isEmpty(appsecret)) {
+            {
+                throw new RuntimeException("参数不正确");
+            }
+        }
 		
 		EmailTemplate template = emailTemplateMapper.selectByCode(EmailCode.REGISTER_SUCCESS.getCode());
-		if(template == null)
-			return null;
-		if(StringUtils.isEmpty(template.getContent()))
-			return null;
+		if(template == null) {
+            {
+                return null;
+            }
+        }
+		if(StringUtils.isEmpty(template.getContent())) {
+            {
+                return null;
+            }
+        }
 		
 		
 		Map<String, String> values =  new HashMap<String,String>();

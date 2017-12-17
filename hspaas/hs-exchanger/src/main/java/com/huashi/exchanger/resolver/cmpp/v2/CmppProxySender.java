@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
-import com.huashi.bill.bill.constant.SmsBillConstant;
+import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.CMCP;
@@ -66,10 +66,11 @@ public class CmppProxySender {
 		CMPPDeliverMessage deliverMsg = (CMPPDeliverMessage) msg;
 		logger.info("回执，{}", JSON.toJSONString(msg));
 		// deliverMsg.getRegisteredDeliver()等于0时，为上行短信；等于1时为状态报告
-		if (deliverMsg.getRegisteredDeliver() == 0)
-			moReceive(deliverMsg);
-		else
-			mtDeliver(deliverMsg);
+		if (deliverMsg.getRegisteredDeliver() == 0) {
+            moReceive(deliverMsg);
+        } else {
+            mtDeliver(deliverMsg);
+        }
 	}
 
 	/**
@@ -171,7 +172,7 @@ public class CmppProxySender {
 			}
 		} else {
 			if(isSignatureBelongtoPointCustomer(feeByWords)){
-				list.add(message.substring(SmsBillConstant.WORDS_SIZE_PER_NUM-feeByWords).getBytes("GBK"));
+				list.add(message.substring(UserBalanceConstant.WORDS_SIZE_PER_NUM-feeByWords).getBytes("GBK"));
 			}else{
 				list.add(message.getBytes("GBK"));
 			}
@@ -188,7 +189,7 @@ public class CmppProxySender {
 	   * @return
 	 */
 	private static boolean isSignatureBelongtoPointCustomer(Integer feeByWords) {
-		return feeByWords != null && feeByWords != SmsBillConstant.WORDS_SIZE_PER_NUM;
+		return feeByWords != null && feeByWords != UserBalanceConstant.WORDS_SIZE_PER_NUM;
 	}
 
 	private byte[] byteAdd(byte[] tpUdhiHead, byte[] messageUCS2, int i, int j, int index, Integer feeByWords)
@@ -196,7 +197,7 @@ public class CmppProxySender {
 
 		// 如果为一客一签并且为第一条短信则预留签名字节数
 		if (isSignatureBelongtoPointCustomer(feeByWords) && index == 0) {
-			int signLength = (SmsBillConstant.WORDS_SIZE_PER_NUM - feeByWords) * 2;
+			int signLength = (UserBalanceConstant.WORDS_SIZE_PER_NUM - feeByWords) * 2;
 			i = i + signLength;
 			// 移动872通道需要 第一段预留 字节,截取去掉 签名字节
 			byte[] msgb = new byte[j - i + 6];
@@ -229,8 +230,9 @@ public class CmppProxySender {
 			String content) {
 		try {
 			TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
-			if (MapUtils.isEmpty(tparameter))
-				throw new RuntimeException("CMPP 参数信息为空");
+			if (MapUtils.isEmpty(tparameter)) {
+                throw new RuntimeException("CMPP 参数信息为空");
+            }
 
 			CmppManageProxy cmppManageProxy = getCmppManageProxy(parameter);
 			if (cmppManageProxy == null) {
@@ -299,12 +301,14 @@ public class CmppProxySender {
 		template.setRetryPolicy(policy);
 
 		String result = template.execute(new RetryCallback<String, Exception>() {
-			public String doWithRetry(RetryContext arg0) throws Exception {
+			@Override
+            public String doWithRetry(RetryContext arg0) throws Exception {
 				System.out.println(arg0.getRetryCount());
 				throw new NullPointerException("nullPointerException");
 			}
 		}, new RecoveryCallback<String>() {
-			public String recover(RetryContext context) throws Exception {
+			@Override
+            public String recover(RetryContext context) throws Exception {
 				return "recovery callback";
 			}
 		});
@@ -428,12 +432,14 @@ public class CmppProxySender {
 	 * @return
 	 */
 	public CmppManageProxy getCmppManageProxy(SmsPassageParameter parameter) {
-		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId()))
-			return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+            return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+        }
 
 		boolean isOk = smsProxyManageService.startProxy(parameter);
-		if (!isOk)
-			return null;
+		if (!isOk) {
+            return null;
+        }
 
 		return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
 	}
@@ -446,8 +452,9 @@ public class CmppProxySender {
 	 * @return
 	 */
 	public void mtDeliver(CMPPDeliverMessage report) {
-		if (report == null)
-			return;
+		if (report == null) {
+            return;
+        }
 
 		try {
 			logger.info("CMPP状态报告数据: {}", report);
@@ -475,8 +482,9 @@ public class CmppProxySender {
 
 			list.add(response);
 
-			if (CollectionUtils.isNotEmpty(list))
-				smsMtDeliverService.doFinishDeliver(list);
+			if (CollectionUtils.isNotEmpty(list)) {
+                smsMtDeliverService.doFinishDeliver(list);
+            }
 
 			// 解析返回结果并返回
 		} catch (Exception e) {
@@ -492,8 +500,9 @@ public class CmppProxySender {
 	 * @param report
 	 */
 	public void moReceive(CMPPDeliverMessage report) {
-		if (report == null)
-			return;
+		if (report == null) {
+            return;
+        }
 
 		try {
 
@@ -524,8 +533,9 @@ public class CmppProxySender {
 
 			list.add(response);
 
-			if (CollectionUtils.isNotEmpty(list))
-				smsMoMessageService.doFinishReceive(list);
+			if (CollectionUtils.isNotEmpty(list)) {
+                smsMoMessageService.doFinishReceive(list);
+            }
 
 		} catch (Exception e) {
 			logger.error("CMPP上行解析失败 {}", JSON.toJSONString(report), e);

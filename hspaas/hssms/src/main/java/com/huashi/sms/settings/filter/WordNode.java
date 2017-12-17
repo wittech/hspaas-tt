@@ -29,8 +29,9 @@ public class WordNode {
 	 * @return 就是传入的subNode
 	 */
 	private WordNode addSubNode(final WordNode subNode){
-		if(subNodes==null)
-			subNodes = new LinkedList<WordNode>();
+		if(subNodes==null) {
+            subNodes = new LinkedList<WordNode>();
+        }
 		subNodes.add(subNode);
 		return subNode;
 	}
@@ -46,8 +47,9 @@ public class WordNode {
 		}
 		for(WordNode subNode : subNodes){
 			if(subNode.value==value){
-				if(!subNode.isLast && isLast)
-					subNode.isLast = true;
+				if(!subNode.isLast && isLast) {
+                    subNode.isLast = true;
+                }
 				return subNode;
 			}
 		}
@@ -59,8 +61,9 @@ public class WordNode {
 			return null;
 		}
 		for(WordNode subNode : subNodes){
-			if(subNode.value==value)
-				return subNode;
+			if(subNode.value==value) {
+                return subNode;
+            }
 		}
 		return null;
 	}

@@ -60,8 +60,9 @@ public class ResCode {
 
 		public static String parse(int code) {
 			for (SmsCode sc : SmsCode.values()) {
-				if (sc.getCode() == code)
-					return sc.getTitle();
+				if (sc.getCode() == code) {
+                    return sc.getTitle();
+                }
 			}
 			return SmsCode.SERVER_ERROR.getTitle();
 		}

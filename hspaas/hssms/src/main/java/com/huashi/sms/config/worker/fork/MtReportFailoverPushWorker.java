@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.AbstractWorker;
+import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.service.ISmsMtPushService;
 
 /**
@@ -16,17 +17,17 @@ import com.huashi.sms.record.service.ISmsMtPushService;
   * @version V1.0   
   * @date 2017年12月5日 下午5:45:18
  */
-public class MtReportFailoverPushWorker extends AbstractWorker implements Runnable {
+public class MtReportFailoverPushWorker extends AbstractWorker<SmsMtMessageDeliver> {
 
 	public MtReportFailoverPushWorker(ApplicationContext applicationContext) {
 		super(applicationContext);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void operate(List list) {
-		if(CollectionUtils.isEmpty(list))
-			return;
+	protected void operate(List<SmsMtMessageDeliver> list) {
+		if(CollectionUtils.isEmpty(list)) {
+            return;
+        }
 		
 		try {
 			getInstance(ISmsMtPushService.class).compareAndPushBody(list);

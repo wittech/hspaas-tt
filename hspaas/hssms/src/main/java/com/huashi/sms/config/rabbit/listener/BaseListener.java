@@ -1,5 +1,7 @@
 package com.huashi.sms.config.rabbit.listener;
 
+import com.alibaba.druid.util.StringUtils;
+import com.huashi.util.HttpClientUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -7,9 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-
-import com.alibaba.druid.util.StringUtils;
-import com.huashi.util.HttpClientUtil;
 
 public class BaseListener {
 

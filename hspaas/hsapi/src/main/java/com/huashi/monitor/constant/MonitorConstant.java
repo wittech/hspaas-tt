@@ -38,8 +38,11 @@ public class MonitorConstant {
 		
 		public static MessageAction parse(int code) {
 			for(MessageAction ma : MessageAction.values()) {
-				if(code == ma.getCode())
-					return ma;
+				if(code == ma.getCode()) {
+                    {
+                        return ma;
+                    }
+                }
 			}
 			
 			return MessageAction.ADD;

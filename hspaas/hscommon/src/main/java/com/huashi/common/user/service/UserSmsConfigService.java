@@ -13,11 +13,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
-import com.huashi.bill.bill.constant.SmsBillConstant;
 import com.huashi.common.config.redis.CommonRedisConstant;
 import com.huashi.common.settings.context.SettingsContext.SystemConfigType;
 import com.huashi.common.settings.domain.SystemConfig;
 import com.huashi.common.settings.service.ISystemConfigService;
+import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.context.UserSettingsContext.SmsReturnRule;
 import com.huashi.common.user.dao.UserSmsConfigMapper;
 import com.huashi.common.user.domain.UserSmsConfig;
@@ -39,8 +39,11 @@ public class UserSmsConfigService implements IUserSmsConfigService{
 	
 	@Override
 	public UserSmsConfig getByUserId(int userId) {
-		if(userId == 0)
-			return null;
+		if(userId == 0) {
+            {
+                return null;
+            }
+        }
 		
 		try {
 			stringRedisTemplate.opsForValue().get(getKey(userId));
@@ -68,10 +71,15 @@ public class UserSmsConfigService implements IUserSmsConfigService{
 		userSmsConfig.setExtNumber(extNumber);
 		if(words == 0) {
 			SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.SMS_WORDS_PER_NUM.name(), SMS_CONFIG_KEY);
-			if(systemConfig == null)
-				userSmsConfig.setSmsWords(SmsBillConstant.WORDS_SIZE_PER_NUM);
-			else
-				userSmsConfig.setSmsWords(Integer.parseInt(systemConfig.getAttrValue()));
+			if(systemConfig == null) {
+                {
+                    userSmsConfig.setSmsWords(UserBalanceConstant.WORDS_SIZE_PER_NUM);
+                }
+            } else {
+                {
+                    userSmsConfig.setSmsWords(Integer.parseInt(systemConfig.getAttrValue()));
+                }
+            }
 			
 		} else {
 			userSmsConfig.setSmsWords(words);
@@ -85,15 +93,23 @@ public class UserSmsConfigService implements IUserSmsConfigService{
 	
 	@Override
 	public boolean save(UserSmsConfig userSmsConfig) {
-		if(userSmsConfig == null)
-			return false;
+		if(userSmsConfig == null) {
+            {
+                return false;
+            }
+        }
 		
 		if(userSmsConfig.getSmsWords() == 0) {
 			SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.SMS_WORDS_PER_NUM.name(), SMS_CONFIG_KEY);
-			if(systemConfig == null)
-				userSmsConfig.setSmsWords(SmsBillConstant.WORDS_SIZE_PER_NUM);
-			else
-				userSmsConfig.setSmsWords(Integer.parseInt(systemConfig.getAttrValue()));
+			if(systemConfig == null) {
+                {
+                    userSmsConfig.setSmsWords(UserBalanceConstant.WORDS_SIZE_PER_NUM);
+                }
+            } else {
+                {
+                    userSmsConfig.setSmsWords(Integer.parseInt(systemConfig.getAttrValue()));
+                }
+            }
 			
 		}
 		
@@ -135,11 +151,31 @@ public class UserSmsConfigService implements IUserSmsConfigService{
 		}
 		
 		stringRedisTemplate.delete(stringRedisTemplate.keys(CommonRedisConstant.RED_USER_SMS_CONFIG + "*"));
-		for(UserSmsConfig hwl : list)
-			pushToRedis(hwl);
+		for(UserSmsConfig hwl : list) {
+            {
+                pushToRedis(hwl);
+            }
+        }
 		
 		return true;
 	}
+
+    @Override
+    public int getSingleChars(int userId) {
+        int wordsPerNum = UserBalanceConstant.WORDS_SIZE_PER_NUM;
+        try {
+            UserSmsConfig userSmsConfig = getByUserId(userId);
+            if (userSmsConfig != null) {
+                {
+                    wordsPerNum = userSmsConfig.getSmsWords();
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.warn("查询用户：{} 短信字数配置失败，将以默认每条字数：{}计费", userId, wordsPerNum, e);
+        }
+        return wordsPerNum;
+    }
 	
 
 }

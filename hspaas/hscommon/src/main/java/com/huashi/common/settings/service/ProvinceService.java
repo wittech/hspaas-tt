@@ -74,16 +74,25 @@ public class ProvinceService implements IProvinceService{
 
 	@Override
 	public Province get(Integer provinceCode) {
-		if(provinceCode == null)
-			return null;
+		if(provinceCode == null) {
+            {
+                return null;
+            }
+        }
 		
-		if(provinceCode == 0)
-			return new Province(Province.PROVINCE_CODE_ALLOVER_COUNTRY, "全国");
+		if(provinceCode == 0) {
+            {
+                return new Province(Province.PROVINCE_CODE_ALLOVER_COUNTRY, "全国");
+            }
+        }
 		
 		try {
 			Object o = stringRedisTemplate.opsForHash().get(CommonRedisConstant.RED_PROVINCE, provinceCode.toString());
-			if(o == null)
-				throw new RuntimeException("Redis查询数据为空");
+			if(o == null) {
+                {
+                    throw new RuntimeException("Redis查询数据为空");
+                }
+            }
 			
 			return new Province(provinceCode, o.toString());
 		} catch (Exception e) {
@@ -95,8 +104,11 @@ public class ProvinceService implements IProvinceService{
 	@Override
 	public Map<Integer, String> findNamesInMap() {
 		List<Province> list = findAvaiable();
-		if(CollectionUtils.isEmpty(list))
-			return null;
+		if(CollectionUtils.isEmpty(list)) {
+            {
+                return null;
+            }
+        }
 		
 		Map<Integer, String> map = new HashMap<Integer, String>();
 		for(Province province : list) {

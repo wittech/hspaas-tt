@@ -74,8 +74,9 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 	@Override
 	public Map<String, Object> batchInsert(SmsMobileWhiteList white) {
 		StringBuilder mobileRepeatReport = new StringBuilder();
-		if (StringUtils.isEmpty(white.getMobile()))
-			return response("-2", "参数不能为空！");
+		if (StringUtils.isEmpty(white.getMobile())) {
+            return response("-2", "参数不能为空！");
+        }
 		
 		int existsCount = 0;
 		List<SmsMobileWhiteList> list = new ArrayList<>();
@@ -84,8 +85,9 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 			String str[] = white.getMobile().split("\n");
 			SmsMobileWhiteList mwl = null;
 			for (int i = 0; i < str.length; i++) {
-				if(StringUtils.isEmpty(str[i]) || StringUtils.isEmpty(str[i].trim()))
-					continue;
+				if(StringUtils.isEmpty(str[i]) || StringUtils.isEmpty(str[i].trim())) {
+                    continue;
+                }
 				
 				// 判断是否重复 重复则不保存
 				int statCount = smsMobileWhiteListMapper.selectByUserIdAndMobile(white.getUserId(), str[i].trim());
@@ -103,15 +105,17 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 			}
 			
 			// 如果手机号码中包含已存在的数据
-			if (existsCount > 0)
-				return response("fail", mobileRepeatReport.toString());
+			if (existsCount > 0) {
+                return response("fail", mobileRepeatReport.toString());
+            }
 			
 			if(CollectionUtils.isNotEmpty(list)) {
 				smsMobileWhiteListMapper.batchInsert(list);
 				
 				// 批量操作无误后添加至缓存REDIS
-				for(SmsMobileWhiteList ml : list)
-					pushToRedis(ml);
+				for(SmsMobileWhiteList ml : list) {
+                    pushToRedis(ml);
+                }
 			}
 				
 			
@@ -142,16 +146,18 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 		params.put("endDate", endDate);
 
 		int totalRecord = smsMobileWhiteListMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<SmsMobileWhiteList> list = smsMobileWhiteListMapper
 				.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            return null;
+        }
 		return new PaginationVo<SmsMobileWhiteList>(list, _currentPage,
 				totalRecord);
 	}
@@ -224,8 +230,9 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 
 	@Override
 	public boolean isMobileWhitelist(int userId, String mobile) {
-		if(userId == 0 || StringUtils.isEmpty(mobile))
-			return false;
+		if(userId == 0 || StringUtils.isEmpty(mobile)) {
+            return false;
+        }
 		
 		try {
 			return stringRedisTemplate.opsForSet().isMember(getKey(userId), mobile);
@@ -242,8 +249,9 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 		} catch (Exception e) {
 			logger.warn("redis 获取手机号码白名单集合失败，将从DB加载", e);
 			List<String> list = smsMobileWhiteListMapper.selectDistinctMobilesByUserId(userId);
-			if(CollectionUtils.isEmpty(list))
-				return null;
+			if(CollectionUtils.isEmpty(list)) {
+                return null;
+            }
 			
 			return new HashSet<String>(list);
 		}

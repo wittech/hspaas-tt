@@ -34,8 +34,11 @@ public class TradeOrderContext {
 		
 		public static TradeType parse(int value){
 			for(TradeType tt : TradeType.values()) {
-				if(tt.getValue() == value)
-					return tt;
+				if(tt.getValue() == value) {
+                    {
+                        return tt;
+                    }
+                }
 			}
 			return TradeType.PRODUCT_COMBO_PAY;
 		}

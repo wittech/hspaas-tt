@@ -77,8 +77,9 @@ public class PassageReachRateReportPullThread extends BaseThread implements Runn
 	@Override
 	public void run() {
 		
-		if(!isServiceAvaiable())
-			return;
+		if(!isServiceAvaiable()) {
+            return;
+        }
 
 		boolean isRunning = true;
 		while (isRunning) {
@@ -104,10 +105,11 @@ public class PassageReachRateReportPullThread extends BaseThread implements Runn
 				
 				for (SmsMtMessageSubmit submit : smsSubmitList) {
 					SmsMtMessageDeliver deliver = submit.getMessageDeliver();
-					if (deliver != null && deliver.getStatus() != null && deliver.getStatus() == TaskContext.MessageSubmitStatus.SUCCESS.getCode())
-						successCount++;
-					else
-						failCount++;
+					if (deliver != null && deliver.getStatus() != null && deliver.getStatus() == TaskContext.MessageSubmitStatus.SUCCESS.getCode()) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
 				}
 
 				SmsPassage passage = smsPassageService.findById(Integer.parseInt(passageId + ""));

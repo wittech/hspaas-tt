@@ -180,8 +180,11 @@ public class HttpClientUtil {
             e.printStackTrace();
         } finally {
             try {
-                if (response != null)
-                    response.close();
+                if (response != null) {
+                    {
+                        response.close();
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -264,8 +267,11 @@ public class HttpClientUtil {
        * @param encoding
      */
     private static void setHttpParameters(HttpPost httpPost, Map<String, Object> params, String encoding){
-    	if (MapUtils.isEmpty(params))
-			return;
+    	if (MapUtils.isEmpty(params)) {
+            {
+                return;
+            }
+        }
     	
     	List<NameValuePair> pairs = new ArrayList<NameValuePair>(params.size());
 		for (String key : params.keySet()) {
@@ -341,8 +347,11 @@ public class HttpClientUtil {
        * @param encoding
      */
     private static void setHttpHeaders(HttpPost httpPost, Map<String, Object> headers, String encoding){
-    	if (MapUtils.isEmpty(headers))
-			return;
+    	if (MapUtils.isEmpty(headers)) {
+            {
+                return;
+            }
+        }
     	
 		for (String key : headers.keySet()) {
 			httpPost.addHeader(new BasicHeader(key, headers.get(key).toString()));
@@ -360,8 +369,11 @@ public class HttpClientUtil {
 	 * @return
 	 */
 	public static String post(String url, Map<String,Object> headers, Map<String, Object> params, Integer maxTotal, Integer maxPerRoute) {
-		if (MapUtils.isEmpty(params))
-			throw new DataEmptyException("用户参数为空");
+		if (MapUtils.isEmpty(params)) {
+            {
+                throw new DataEmptyException("用户参数为空");
+            }
+        }
 
 		long startTime = System.currentTimeMillis();
 		HttpPost httpPost = getHttpPost(url);
@@ -455,8 +467,11 @@ public class HttpClientUtil {
 	 */
 	public static String post(String url, Map<String,Object> headers, Map<String, Object> params, 
 			String encoding, Integer maxTotal, Integer maxPerRoute) {
-		if (MapUtils.isEmpty(params))
-			throw new DataEmptyException("用户参数为空");
+		if (MapUtils.isEmpty(params)) {
+            {
+                throw new DataEmptyException("用户参数为空");
+            }
+        }
 
 		long startTime = System.currentTimeMillis();
 		HttpPost httpPost = getHttpPost(url);
@@ -546,8 +561,11 @@ public class HttpClientUtil {
 	 * @return
 	 */
 	public static String postReport(String url, String content, String encoding, Map<String,Object> headers) {
-		if (StringUtils.isEmpty(content))
-			throw new DataEmptyException("用户参数为空");
+		if (StringUtils.isEmpty(content)) {
+            {
+                throw new DataEmptyException("用户参数为空");
+            }
+        }
 
 		long startTime = System.currentTimeMillis();
 		HttpPost httpPost = getHttpPost(url);

@@ -216,13 +216,19 @@ public class AlipayService implements IAlipayService {
 		// 验证
 		// responsetTxt的结果不是true，与服务器设置问题、合作身份者ID、notify_id一分钟失效有关
 		// mysign与sign不等，与安全校验码、请求时的参数格式（如：带自定义参数等）、编码格式有关
-		if (!mysign.equals(sign) || !responseTxt.equals("true"))
-			return false;
+		if (!mysign.equals(sign) || !responseTxt.equals("true")) {
+            {
+                return false;
+            }
+        }
 
 		// 获取交易状态
 		String tradeStatus = params.get("trade_status");
-		if (tradeStatus.equals("TRADE_FINISHED") || tradeStatus.equals("TRADE_SUCCESS"))
-			return true;
+		if (tradeStatus.equals("TRADE_FINISHED") || tradeStatus.equals("TRADE_SUCCESS")) {
+            {
+                return true;
+            }
+        }
 
 		if (!isTranscoding) {
 			billger.warn("订单号交易失败：{} ", JSON.toJSONString(params));
@@ -315,11 +321,17 @@ public class AlipayService implements IAlipayService {
 	public boolean notifyUpdateOrder(Map<String, String> paramMap) throws AlipayException {
 		String tradeNo = saveAlipayBill(paramMap);
 		
-		if (!isPaySuccess(paramMap, false))
-			return false;
+		if (!isPaySuccess(paramMap, false)) {
+            {
+                return false;
+            }
+        }
 		
-		if(StringUtils.isEmpty(tradeNo))
-			return false;
+		if(StringUtils.isEmpty(tradeNo)) {
+            {
+                return false;
+            }
+        }
 
 		// 更新订单
 		return tradeOrderService.updateOrderPayCompleted(tradeNo);

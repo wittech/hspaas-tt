@@ -117,15 +117,17 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<ProviderSendResponse> sendResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null; 
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE : successCode;
 		
 		Map<String, Object> m = JSON.parseObject(result, new TypeReference<Map<String, Object>>(){});
 		Object code = m.get("code");
-		if (code == null || StringUtils.isEmpty(code.toString()))
-			return null;
+		if (code == null || StringUtils.isEmpty(code.toString())) {
+            return null;
+        }
 		
 		List<ProviderSendResponse> list = new ArrayList<>();
 		ProviderSendResponse response = new ProviderSendResponse();
@@ -151,8 +153,9 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private static String getStatusDes(String code) {
-		if(StringUtils.isEmpty(code))
-			return "99：其他";
+		if(StringUtils.isEmpty(code)) {
+            return "99：其他";
+        }
 		
 		switch(code) {
 			case "1" : return "1:空号";
@@ -176,8 +179,9 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<SmsMtMessageDeliver> deliverResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result) || !result.contains("phone_no"))
-			return null;
+		if (StringUtils.isEmpty(result) || !result.contains("phone_no")) {
+            return null;
+        }
 		
 		logger.info("下行状态报告简码：{} =========={}", code(), result);
 		
@@ -188,12 +192,14 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 			
 			Map<String, Object> m = JSON.parseObject(result, new TypeReference<Map<String, Object>>(){});
 			Object code = m.get("code");
-			if (code == null || StringUtils.isEmpty(code.toString()))
-				return null;
+			if (code == null || StringUtils.isEmpty(code.toString())) {
+                return null;
+            }
 			
 			Object obj = m.get("data");
-			if(obj == null || StringUtils.isEmpty(obj.toString()))
-				return null;
+			if(obj == null || StringUtils.isEmpty(obj.toString())) {
+                return null;
+            }
 			
 			List<Map<String, Object>> data = JSON.parseObject(m.get("data").toString(), new TypeReference<List<Map<String, Object>>>(){});
 			
@@ -246,8 +252,9 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<SmsMoMessageReceive> moResponse(String result, Integer passageId) {
-		if (StringUtils.isEmpty(result) || !result.contains("phone_no"))
-			return null;
+		if (StringUtils.isEmpty(result) || !result.contains("phone_no")) {
+            return null;
+        }
 		
 		logger.info("上行报告简码：{} =========={}", code(), result);
 		
@@ -255,12 +262,14 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 		Map<String, Object> m = JSON.parseObject(result, new TypeReference<Map<String, Object>>(){});
 		
 		Object obj = m.get("data");
-		if(obj == null || StringUtils.isEmpty(obj.toString()))
-			return null;
+		if(obj == null || StringUtils.isEmpty(obj.toString())) {
+            return null;
+        }
 		
 		List<Map<String, Object>> data = JSON.parseObject(m.get("data").toString(), new TypeReference<List<Map<String, Object>>>(){});
-		if(CollectionUtils.isEmpty(data))
-			return null;
+		if(CollectionUtils.isEmpty(data)) {
+            return null;
+        }
 		
 		SmsMoMessageReceive response = null;
 		for(Map<String, Object> my : data) {

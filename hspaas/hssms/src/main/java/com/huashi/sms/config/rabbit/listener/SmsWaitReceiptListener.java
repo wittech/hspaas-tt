@@ -115,8 +115,9 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
 
 		// 回执数据解析后的报文
 		List<SmsMtMessageDeliver> delivers = smsProviderService.doStatusReport(access, jsonObject);
-		if (CollectionUtils.isEmpty(delivers))
-			return null;
+		if (CollectionUtils.isEmpty(delivers)) {
+            return null;
+        }
 		
 		fillMobileWhenMobileMissed(delivers);
 		
@@ -132,8 +133,9 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
 	private void fillMobileWhenMobileMissed(List<SmsMtMessageDeliver> delivers) {
 		SmsMtMessageSubmit submit = null;
 		for(SmsMtMessageDeliver deliver : delivers) {
-			if(StringUtils.isNotBlank(deliver.getMobile()))
-				continue;
+			if(StringUtils.isNotBlank(deliver.getMobile())) {
+                continue;
+            }
 			
 			submit = smsMtSubmitService.getByMsgid(deliver.getMsgId());
 			deliver.setMobile(submit.getMobile());

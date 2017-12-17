@@ -44,8 +44,9 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 
 	@Override
 	public boolean isContainsForbiddenWords(String content) {
-		if (StringUtils.isEmpty(content))
-			return false;
+		if (StringUtils.isEmpty(content)) {
+            return false;
+        }
 
 		try {
 			return SensitiveWordFilter.isContains(content);
@@ -60,11 +61,13 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 	public boolean isContainsForbiddenWords(String content,
 			Set<String> safeWords) {
 		Set<String> words = filterForbiddenWords(content);
-		if (CollectionUtils.isEmpty(words))
-			return false;
+		if (CollectionUtils.isEmpty(words)) {
+            return false;
+        }
 
-		if (CollectionUtils.isEmpty(safeWords))
-			return true;
+		if (CollectionUtils.isEmpty(safeWords)) {
+            return true;
+        }
 
 		// 如果报备的敏感词包含本次检索出来的敏感词，则认为本次无敏感词
 		return !safeWords.containsAll(words);
@@ -72,8 +75,9 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 
 	@Override
 	public Set<String> filterForbiddenWords(String content) {
-		if (StringUtils.isEmpty(content))
-			return null;
+		if (StringUtils.isEmpty(content)) {
+            return null;
+        }
 
 		// 【全棉时代天猫旗舰店】520亲子节，卫生巾化妆棉爆款直降50%OFF！￥品质棉，新生爱￥（复制整段再打开手机淘宝抢先看）退订回N
 		// 过滤内容敏感词
@@ -103,8 +107,9 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 			Set<String> set = stringRedisTemplate.opsForSet().members(
 					SmsRedisConstant.RED_FORBIDDEN_WORDS);
 
-			if (CollectionUtils.isNotEmpty(set))
-				return new ArrayList<>(set);
+			if (CollectionUtils.isNotEmpty(set)) {
+                return new ArrayList<>(set);
+            }
 
 		} catch (Exception e) {
 			logger.warn("Redis敏感词加载失败.", e);
@@ -125,8 +130,9 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 	@Override
 	public boolean saveForbiddenWords(ForbiddenWords word) {
 		if(word == null || StringUtils.isBlank(word.getWord()) 
-				|| StringUtils.isBlank(word.getLabel()))
-			return false;
+				|| StringUtils.isBlank(word.getLabel())) {
+            return false;
+        }
 		
 		try {
 			stringRedisTemplate.opsForSet().add(
@@ -139,8 +145,9 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 		word.setLevel(1);
 		word.setCreateTime(new Date());
 		int result = forbiddenWordsMapper.insertSelective(word);
-		if (result <= 0)
-			return false;
+		if (result <= 0) {
+            return false;
+        }
 
 		return freshForbiddenWords();
 	}
@@ -225,8 +232,9 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 		try {
 			String forbiddenWordsSwitch = stringRedisTemplate.opsForValue()
 					.get(SmsRedisConstant.RED_FORBIDDEN_WORDS_SWITCH);
-			if (StringUtils.isEmpty(forbiddenWordsSwitch))
-				return false;
+			if (StringUtils.isEmpty(forbiddenWordsSwitch)) {
+                return false;
+            }
 
 			return ForbiddenWordsSwitch.isOpen(forbiddenWordsSwitch);
 
@@ -254,8 +262,9 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 
 	@Override
 	public List<ForbiddenWords> getLabelByWords(String words) {
-		if (StringUtils.isEmpty(words))
-			return null;
+		if (StringUtils.isEmpty(words)) {
+            return null;
+        }
 
 		String[] wordsArray = words.split(",");
 		ForbiddenWords forbiddenWords = null;
@@ -263,20 +272,23 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 		List<ForbiddenWords> list = new ArrayList<>();
 		if (wordsArray.length == 1) {
 			// 如果只有一个词汇，并且为空则直接返回空
-			if (StringUtils.isBlank(wordsArray[0]))
-				return null;
+			if (StringUtils.isBlank(wordsArray[0])) {
+                return null;
+            }
 
 			forbiddenWords = forbiddenWordsMapper.selectByWord(wordsArray[0]);
-			if (forbiddenWords == null)
-				return null;
+			if (forbiddenWords == null) {
+                return null;
+            }
 
 			list.add(forbiddenWords);
 			return list;
 		}
 
 		List<ForbiddenWords> wordLib = forbiddenWordsMapper.selectByMultiWord(wordsArray);
-		if(CollectionUtils.isEmpty(wordLib))
-			return null;
+		if(CollectionUtils.isEmpty(wordLib)) {
+            return null;
+        }
 		
 		Map<String, ForbiddenWords> map = new HashMap<>();
 		// 如果存在多个标签，需要判断是否是同一个，如果为同一个标签则只返回一个即可

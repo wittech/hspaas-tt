@@ -29,10 +29,10 @@ public class SwaggerConfiguration {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("华时融合平台RESTful APIS 在线手册")
-                .description("更多华时融合平台接口请查看：http://docs.hspaas.com/swagger.html")
-                .termsOfServiceUrl("http://blog.didispace.com/")
-                .contact(new Contact("tenx", "http://dev.hspaas.com/", "service@hspaas.com"))
-                .version("1.0")
+                .description("更多华时融合平台接口请查看：http://docs.hspaas.cn/swagger.html")
+                .termsOfServiceUrl("http://blog.hspaas.cn/")
+                .contact(new Contact("tenx", "http://api.hspaas.cn/", "service@hspaas.cn"))
+                .version("1.0.1")
                 .build();
     }	
 }

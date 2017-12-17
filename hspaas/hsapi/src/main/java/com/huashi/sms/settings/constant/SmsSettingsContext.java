@@ -23,12 +23,18 @@ public class SmsSettingsContext {
 		}
 
 		public static ForbiddenWordsSwitch parse(String value) {
-			if (StringUtils.isEmpty(value))
-				return null;
+			if (StringUtils.isEmpty(value)) {
+                {
+                    return null;
+                }
+            }
 			
 			for (ForbiddenWordsSwitch as : ForbiddenWordsSwitch.values()) {
-				if (value.equals(as.getValue()))
-					return as;
+				if (value.equals(as.getValue())) {
+                    {
+                        return as;
+                    }
+                }
 			}
 			return null;
 		}
@@ -41,13 +47,19 @@ public class SmsSettingsContext {
 		 * @return
 		 */
 		public static boolean isOpen(String value) {
-			if (StringUtils.isEmpty(value))
-				return true;
+			if (StringUtils.isEmpty(value)) {
+                {
+                    return true;
+                }
+            }
 
 			try {
 				ForbiddenWordsSwitch fws = parse(value);
-				if (fws == null || ForbiddenWordsSwitch.OPEN == fws)
-					return true;
+				if (fws == null || ForbiddenWordsSwitch.OPEN == fws) {
+                    {
+                        return true;
+                    }
+                }
 
 				return false;
 			} catch (Exception e) {

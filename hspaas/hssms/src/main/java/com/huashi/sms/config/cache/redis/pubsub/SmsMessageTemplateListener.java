@@ -24,8 +24,9 @@ public class SmsMessageTemplateListener extends MessageListenerAdapter {
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		try {
-			if(message == null)
-				return;
+			if(message == null) {
+                return;
+            }
 			
 			SmsTemplateService.GLOBAL_MESSAGE_TEMPLATE.clear();
 			

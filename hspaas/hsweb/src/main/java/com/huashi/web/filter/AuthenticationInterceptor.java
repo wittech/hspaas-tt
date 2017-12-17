@@ -26,8 +26,11 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
 			PermissionClear classPermission = controllerObj.getClass().getAnnotation(PermissionClear.class);
 			PermissionClear methodPermission = method
 					.getMethodAnnotation(PermissionClear.class);
-			if (classPermission != null || methodPermission != null)
-				return true;
+			if (classPermission != null || methodPermission != null) {
+                {
+                    return true;
+                }
+            }
 
 			SessionUser user = (SessionUser) request.getSession().getAttribute(
 					WebConstants.LOGIN_USER_SESSION_KEY);

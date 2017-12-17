@@ -213,8 +213,9 @@ public class CmccopenPassageResolver extends AbstractPassageResolver {
 	 */
 	private List<ProviderSendResponse> sendResponse(String result,
 			String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 
 		successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE
 				: successCode;
@@ -227,8 +228,9 @@ public class CmccopenPassageResolver extends AbstractPassageResolver {
 			return null;
 		}
 		
-		if(report.get("code") == null)
-			return null;
+		if(report.get("code") == null) {
+            return null;
+        }
 		
 		List<ProviderSendResponse> list = new ArrayList<>();
 		ProviderSendResponse response = new ProviderSendResponse();
@@ -242,8 +244,9 @@ public class CmccopenPassageResolver extends AbstractPassageResolver {
 		list.add(response);
 		
 		// 如果提交通道方成功，则设置REDIS对应关系
-		if(response.isSuccess())
-			setReportMsgIdWithMobile(response.getSid(), response.getMobile());
+		if(response.isSuccess()) {
+            setReportMsgIdWithMobile(response.getSid(), response.getMobile());
+        }
 		
 		return list;
 	}

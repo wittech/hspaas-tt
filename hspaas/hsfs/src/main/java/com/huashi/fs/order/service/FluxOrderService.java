@@ -30,8 +30,9 @@ public class FluxOrderService implements IFluxOrderService{
 	@Override
 	public PaginationVo<FluxOrder> findPage(int userId, String mobile, String startDate, String endDate,
 			String currentPage) {
-		if (userId<=0)
-			return null;
+		if (userId<=0) {
+            return null;
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
@@ -44,15 +45,17 @@ public class FluxOrderService implements IFluxOrderService{
 		params.put("endDate", endDate);
 		LogUtils.info("入参params="+params);
 		int totalRecord = orderMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<FluxOrder> list = orderMapper.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            return null;
+        }
 		return new PaginationVo<FluxOrder>(list, _currentPage, totalRecord);
 	}
 	

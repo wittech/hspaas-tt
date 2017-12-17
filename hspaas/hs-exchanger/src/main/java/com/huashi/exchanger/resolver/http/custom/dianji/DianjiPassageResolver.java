@@ -89,15 +89,17 @@ public class DianjiPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private static List<ProviderSendResponse> sendResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE : successCode;
 		
 		Map<String, Object> m = JSON.parseObject(result, new TypeReference<Map<String, Object>>(){});
 		Object o = m.get("Rets");
-		if (o == null || StringUtils.isEmpty(o.toString()))
-			return null;
+		if (o == null || StringUtils.isEmpty(o.toString())) {
+            return null;
+        }
 		List<ProviderSendResponse> list = new ArrayList<>();
 		List<String> l = JSON.parseArray(o.toString(), String.class);
 		ProviderSendResponse response = null;

@@ -187,8 +187,11 @@ public class SmsRecordController extends BaseController {
 	@RequestMapping(value = "/read_file", method = RequestMethod.POST)
 	public @ResponseBody Map<String, Object> readFile(String fileName) {
 		String mobleNumbers = ExcelUtil.readExcelFirstColumn(tmpStoreDirectory + fileName);
-		if (StringUtils.isEmpty(mobleNumbers))
-			return null;
+		if (StringUtils.isEmpty(mobleNumbers)) {
+            {
+                return null;
+            }
+        }
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("mobleNumbers", mobleNumbers);
 		map.put("resultCode", "0");

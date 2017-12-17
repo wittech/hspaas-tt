@@ -151,10 +151,16 @@ public class VerifyCodeUtil {
 	}
 
 	private static Color getRandColor(int fc, int bc) {
-		if (fc > 255)
-			fc = 255;
-		if (bc > 255)
-			bc = 255;
+		if (fc > 255) {
+            {
+                fc = 255;
+            }
+        }
+		if (bc > 255) {
+            {
+                bc = 255;
+            }
+        }
 		int r = fc + random.nextInt(bc - fc);
 		int g = fc + random.nextInt(bc - fc);
 		int b = fc + random.nextInt(bc - fc);
@@ -216,8 +222,11 @@ public class VerifyCodeUtil {
 	 * @return 若二者一致，返回true，否则返回false
 	 */
 	public static boolean validate(String randomCode, String inputRandomCode) {
-		if (StringUtils.isBlank(randomCode) || StringUtils.isBlank(inputRandomCode))
-			return false;
+		if (StringUtils.isBlank(randomCode) || StringUtils.isBlank(inputRandomCode)) {
+            {
+                return false;
+            }
+        }
 		try {
 			inputRandomCode = inputRandomCode.toUpperCase();
 			return inputRandomCode.equals(randomCode);

@@ -86,8 +86,9 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
 	@Transactional
 	public Map<String, Object> batchInsert(SmsMobileBlackList black) {
 		StringBuilder mobileRepeatReport = new StringBuilder();
-		if (StringUtils.isEmpty(black.getMobile()))
-			return response("-2", "参数不能为空！");
+		if (StringUtils.isEmpty(black.getMobile())) {
+            return response("-2", "参数不能为空！");
+        }
 		
 		int existsCount = 0;
 		List<SmsMobileBlackList> list = new ArrayList<>();
@@ -96,8 +97,9 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
 			String str[] = black.getMobile().split("\n");
 			SmsMobileBlackList mbl = null;
 			for (int i = 0; i < str.length; i++) {
-				if(StringUtils.isEmpty(str[i]) || StringUtils.isEmpty(str[i].trim()))
-					continue;
+				if(StringUtils.isEmpty(str[i]) || StringUtils.isEmpty(str[i].trim())) {
+                    continue;
+                }
 				
 				// 判断是否重复 重复则不保存
 				if (isMobileBelongtoBlacklist(str[i].trim())) {
@@ -114,15 +116,17 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
 			}
 			
 			// 如果手机号码中包含已存在的数据
-			if (existsCount > 0)
-				return response("fail", mobileRepeatReport.toString());
+			if (existsCount > 0) {
+                return response("fail", mobileRepeatReport.toString());
+            }
 			
 			// 批量添加黑名单
 			if(CollectionUtils.isNotEmpty(list)) {
 				smsMobileBlackListMapper.batchInsert(list);
 				// 批量操作无误后添加至缓存REDIS
-				for(SmsMobileBlackList ml : list)
-					publishToRedis(ml.getMobile(), MessageAction.ADD);
+				for(SmsMobileBlackList ml : list) {
+                    publishToRedis(ml.getMobile(), MessageAction.ADD);
+                }
 			}
 			
 			return  response("success", "成功！");
@@ -146,16 +150,18 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
 		params.put("endDate", endDate);
 
 		int totalRecord = smsMobileBlackListMapper.getCount(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<SmsMobileBlackList> list = smsMobileBlackListMapper
 				.findPageList(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            return null;
+        }
 		return new PaginationVo<SmsMobileBlackList>(list, _currentPage,
 				totalRecord);
 	}
@@ -175,8 +181,9 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
 
 	@Override
 	public boolean isMobileBelongtoBlacklist(String mobile) {
-		if (StringUtils.isEmpty(mobile))
-			return false;
+		if (StringUtils.isEmpty(mobile)) {
+            return false;
+        }
 
 		try {
 			return GLOBAL_MOBILE_BLACKLIST.contains(mobile);
@@ -190,8 +197,9 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
 	@Override
 	public List<String> findAll() {
 		try {
-			if (CollectionUtils.isNotEmpty(GLOBAL_MOBILE_BLACKLIST))
-				return Arrays.asList(GLOBAL_MOBILE_BLACKLIST.toArray(new String[] {}));
+			if (CollectionUtils.isNotEmpty(GLOBAL_MOBILE_BLACKLIST)) {
+                return Arrays.asList(GLOBAL_MOBILE_BLACKLIST.toArray(new String[]{}));
+            }
 
 		} catch (Exception e) {
 			logger.warn("Rdis敏感词加载异常.", e);
@@ -242,8 +250,9 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
 		paramMap.put("end", page.getPageSize());
 		
 		List<SmsMobileBlackList> list = smsMobileBlackListMapper.findList(paramMap);
-		if(CollectionUtils.isEmpty(list))
-			return null;
+		if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 		
 		for(SmsMobileBlackList sbl : list) {
 			sbl.setTypeText(MobileBlacklistType.parse(sbl.getType()));

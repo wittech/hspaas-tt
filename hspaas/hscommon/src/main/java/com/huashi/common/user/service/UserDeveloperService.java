@@ -43,8 +43,11 @@ public class UserDeveloperService implements IUserDeveloperService {
 	public UserDeveloper getByAppkey(String appkey) {
 		try {
 			Object d = stringRedisTemplate.opsForValue().get(String.format("%s:%s", CommonRedisConstant.RED_DEVELOPER_LIST, appkey));
-			if(d != null)
-				return JSON.parseObject(d.toString(), UserDeveloper.class);
+			if(d != null) {
+                {
+                    return JSON.parseObject(d.toString(), UserDeveloper.class);
+                }
+            }
 		} catch (Exception e) {
 			logger.error("REDIS获取开发者数据失败, appkey: {}", appkey, e);
 		}
@@ -53,8 +56,11 @@ public class UserDeveloperService implements IUserDeveloperService {
 
 	@Override
 	public UserDeveloper getByAppkey(String appkey, String appSecret) {
-		if(StringUtils.isEmpty(appkey) || StringUtils.isEmpty(appSecret))
-			return null;
+		if(StringUtils.isEmpty(appkey) || StringUtils.isEmpty(appSecret)) {
+            {
+                return null;
+            }
+        }
 		
 		return userDeveloperMapper.selectByAppkeyAndSecret(appkey, appSecret);
 	}
@@ -107,8 +113,11 @@ public class UserDeveloperService implements IUserDeveloperService {
 		}
 		
 		for (UserDeveloper developer : list) {
-			if(!pushToRedis(developer))
-				return false;
+			if(!pushToRedis(developer)) {
+                {
+                    return false;
+                }
+            }
 		}
 
 		return true;
@@ -161,8 +170,11 @@ public class UserDeveloperService implements IUserDeveloperService {
 		}
 		
 		int result = userDeveloperMapper.updateByPrimaryKey(d);
-		if(result > 0)
-			pushToRedis(d);
+		if(result > 0) {
+            {
+                pushToRedis(d);
+            }
+        }
 		
 		return result > 0;
 	}

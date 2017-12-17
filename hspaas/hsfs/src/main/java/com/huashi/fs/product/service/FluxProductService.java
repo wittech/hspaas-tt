@@ -37,8 +37,11 @@ public class FluxProductService implements IFluxProductService {
 	
 	@Override
 	public Map<String, Object> findListAll(String mobile) {
-		if (StringUtils.isEmpty(mobile))
-			return null;
+		if (StringUtils.isEmpty(mobile)) {
+            {
+                return null;
+            }
+        }
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
@@ -55,8 +58,11 @@ public class FluxProductService implements IFluxProductService {
 	public Map<String, Object> findListByMobile(String mobile) {
 		try {
 			MobileCatagory response = MobileNumberCatagoryUtil.doCatagory(mobile);
-			if(response == null)
-				return null;
+			if(response == null) {
+                {
+                    return null;
+                }
+            }
 			
 			if(!response.isSuccess()) {
 				logger.info("号码分流失败");
@@ -64,14 +70,21 @@ public class FluxProductService implements IFluxProductService {
 			}
 			
 			Map<String, Object> resultMap = new HashMap<String, Object>();
-			if(response.getCmSize() > 0)
-				resultMap.put("mobile_list", productMapper.selectAllist(CMCP.CHINA_MOBILE.getCode()));
+			if(response.getCmSize() > 0) {
+                {
+                    resultMap.put("mobile_list", productMapper.selectAllist(CMCP.CHINA_MOBILE.getCode()));
+                }
+            }
 			
-			if(response.getCtSize() > 0)
-				resultMap.put("telecom_list", productMapper.selectAllist(CMCP.CHINA_TELECOM.getCode()));
+			if(response.getCtSize() > 0) {
+                {
+                    resultMap.put("telecom_list", productMapper.selectAllist(CMCP.CHINA_TELECOM.getCode()));
+                }
+            }
 			
-			if(response.getCuSize() > 0)
-				resultMap.put("unicom_list", productMapper.selectAllist(CMCP.CHINA_UNICOM.getCode()));
+			if(response.getCuSize() > 0) {
+                resultMap.put("unicom_list", productMapper.selectAllist(CMCP.CHINA_UNICOM.getCode()));
+            }
 				
 			resultMap.put("number_report", response);
 				

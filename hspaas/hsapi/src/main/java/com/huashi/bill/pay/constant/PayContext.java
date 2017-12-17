@@ -91,8 +91,11 @@ public class PayContext {
 		}
 
 		public static boolean isAlipay(String code) {
-			if (StringUtils.isEmpty(code))
-				return false;
+			if (StringUtils.isEmpty(code)) {
+                {
+                    return false;
+                }
+            }
 			return PayProvider.ALIPAY.name().equalsIgnoreCase(code);
 		}
 	}

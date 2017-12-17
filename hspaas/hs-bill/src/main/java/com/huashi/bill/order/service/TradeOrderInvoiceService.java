@@ -51,19 +51,28 @@ public class TradeOrderInvoiceService implements ITradeOrderInvoiceService {
 
 	@Override
 	public TradeOrderInvoice getLastest(int userId) {
-		if(userId == 0)
-			return null;
+		if(userId == 0) {
+            {
+                return null;
+            }
+        }
 		
 		TradeOrderInvoice invoice = tradeOrderInvoiceMapper.selectLastest(userId);
-		if(invoice != null)
-			return invoice;
+		if(invoice != null) {
+            {
+                return invoice;
+            }
+        }
 		
 		invoice = new TradeOrderInvoice();
 		invoice.setTitle(getUserInvoiceTitle(userId));
 		
 		AddressBook contact = addressBookService.getDefaultAddress(userId);
-		if(contact == null)
-			return invoice;
+		if(contact == null) {
+            {
+                return invoice;
+            }
+        }
 		
 		invoice.setContactName(contact.getName());
 		invoice.setContactPhone(contact.getMobile());
@@ -81,8 +90,11 @@ public class TradeOrderInvoiceService implements ITradeOrderInvoiceService {
 	 */
 	private String getUserInvoiceTitle(int userId) {
 		UserProfile userProfile = userService.getProfileByUserId(userId);
-		if (userProfile == null)
-			return "";
+		if (userProfile == null) {
+            {
+                return "";
+            }
+        }
 
 		return userProfile.getCompany();
 	}

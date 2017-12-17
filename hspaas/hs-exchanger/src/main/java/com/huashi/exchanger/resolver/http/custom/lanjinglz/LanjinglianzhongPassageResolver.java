@@ -92,14 +92,16 @@ public class LanjinglianzhongPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private static List<ProviderSendResponse> sendResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE : successCode;
 		
 		// 判断接口返回是否为成功
-		if(StringUtils.isEmpty(result))
-			return null;
+		if(StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		String[] report = result.split(":");
 		String sid = null;
@@ -138,8 +140,9 @@ public class LanjinglianzhongPassageResolver extends AbstractPassageResolver{
 		try {
 			logger.info("下行状态报告简码：{} =========={}", code(), report);
 			
-			if(StringUtils.isEmpty(report))
-				return null;
+			if(StringUtils.isEmpty(report)) {
+                return null;
+            }
 			
 			JSONObject jsonobj = JSONObject.parseObject(report);
 			String msgId = jsonobj.getString("mid");

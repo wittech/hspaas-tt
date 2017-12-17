@@ -40,8 +40,9 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 	}
 
 	public String getString(String key) {
-		if (super.get(key) == null)
-			return "";
+		if (super.get(key) == null) {
+            return "";
+        }
 
 		return super.get(key).toString();
 	}

@@ -55,8 +55,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 		Long startTime = DateUtil.getXHourWithMzSzMillis(-2);
 		
 		List<Map<String, Object>> list = smsMtSubmitService.getSubmitStatReport(startTime, endTime);
-		if(CollectionUtils.isEmpty(list))
-			return 0;
+		if(CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
 		
 		List<SmsSubmitHourReport> batchList = new ArrayList<SmsSubmitHourReport>();
 		SmsSubmitHourReport report = null;
@@ -76,11 +77,13 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 			}
 		}
 		
-		if(CollectionUtils.isEmpty(batchList))
-			return 0;
+		if(CollectionUtils.isEmpty(batchList)) {
+            return 0;
+        }
 		
-		if(smsSubmitHourReportMapper.batchInsert(batchList) > 0)
-			return batchList.size();
+		if(smsSubmitHourReportMapper.batchInsert(batchList) > 0) {
+            return batchList.size();
+        }
 		
 		return 0;
 	}
@@ -118,8 +121,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 			List<SmsSubmitHourReport> list = smsSubmitHourReportMapper.selectUserPassageSubmitReport(userId, 
 					parseDateStr2StartLongTime(startDate), parseDateStr2EndLongTime(endDate));
 			
-			if(CollectionUtils.isEmpty(list))
-				return null;
+			if(CollectionUtils.isEmpty(list)) {
+                return null;
+            }
 			
 			Map<Integer, String> passageNameMap = new HashMap<Integer, String>();
 			Map<Integer, UserModel> userModelMap = new HashMap<Integer, UserModel>();
@@ -174,12 +178,14 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 	   * @return
 	 */
 	private UserModel getUserModel(Map<Integer, UserModel> userModelMap, Integer usreId) {
-		if(MapUtils.isNotEmpty(userModelMap) && userModelMap.containsKey(usreId))
-			return userModelMap.get(usreId);
+		if(MapUtils.isNotEmpty(userModelMap) && userModelMap.containsKey(usreId)) {
+            return userModelMap.get(usreId);
+        }
 		
 		UserModel userModel = userService.getByUserId(usreId);
-		if(userModel == null)
-			return new UserModel(usreId, usreId + "(无)", usreId + "(无)");
+		if(userModel == null) {
+            return new UserModel(usreId, usreId + "(无)", usreId + "(无)");
+        }
 		
 		userModelMap.put(usreId, userModel);
 		return userModel;
@@ -194,11 +200,13 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 	   * @return
 	 */
 	private String getPassageName(Map<Integer, String> passageNameMap, Integer passageId) {
-		if(passageId == null || passageId == PassageContext.EXCEPTION_PASSAGE_ID)
-			return "N/A";
+		if(passageId == null || passageId == PassageContext.EXCEPTION_PASSAGE_ID) {
+            return "N/A";
+        }
 		
-		if(MapUtils.isNotEmpty(passageNameMap) && passageNameMap.containsKey(passageId))
-			return passageNameMap.get(passageId);
+		if(MapUtils.isNotEmpty(passageNameMap) && passageNameMap.containsKey(passageId)) {
+            return passageNameMap.get(passageId);
+        }
 		
 		SmsPassage passage = smsPassageService.findById(passageId);
 		if(passage == null) {
@@ -219,11 +227,13 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 	   * @return
 	 */
 	private String getProviceName(Map<Integer, String> provinceNameMap, Integer provinceCode) {
-		if(provinceCode == null)
-			return "G/A";
+		if(provinceCode == null) {
+            return "G/A";
+        }
 		
-		if(MapUtils.isNotEmpty(provinceNameMap) && provinceNameMap.containsKey(provinceCode))
-			return provinceNameMap.get(provinceCode);
+		if(MapUtils.isNotEmpty(provinceNameMap) && provinceNameMap.containsKey(provinceCode)) {
+            return provinceNameMap.get(provinceCode);
+        }
 		
 		Province province = provinceService.get(provinceCode);
 		
@@ -243,8 +253,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 			List<SmsSubmitHourReport> list = smsSubmitHourReportMapper.selectUserSubmitReport(userId, 
 					parseDateStr2StartLongTime(startDate), parseDateStr2EndLongTime(endDate));
 			
-			if(CollectionUtils.isEmpty(list))
-				return null;
+			if(CollectionUtils.isEmpty(list)) {
+                return null;
+            }
 			
 			Map<Integer, UserModel> userModelMap = new HashMap<Integer, UserModel>();
 			
@@ -279,8 +290,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 			List<SmsSubmitHourReport> list = smsSubmitHourReportMapper.selectPassageSubmitReport(passageId, 
 					parseDateStr2StartLongTime(startDate), parseDateStr2EndLongTime(endDate));
 			
-			if(CollectionUtils.isEmpty(list))
-				return null;
+			if(CollectionUtils.isEmpty(list)) {
+                return null;
+            }
 			
 			Map<Integer, String> passageNameMap = new HashMap<Integer, String>();
 			
@@ -308,8 +320,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 			List<SmsSubmitHourReport> list = smsSubmitHourReportMapper.selectProvinceSubmitReport(passageId, 
 					parseDateStr2StartLongTime(startDate), parseDateStr2EndLongTime(endDate));
 			
-			if(CollectionUtils.isEmpty(list))
-				return null;
+			if(CollectionUtils.isEmpty(list)) {
+                return null;
+            }
 			
 			Map<Integer, String> provinceNameMap = new HashMap<Integer, String>();
 			
@@ -339,8 +352,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 	   * @return
 	 */
 	private static long parseDateStr2StartLongTime(String dateStr) {
-		if(StringUtils.isNotEmpty(dateStr))
-			return DateUtil.getSecondDate(dateStr + " 00:00:00").getTime();
+		if(StringUtils.isNotEmpty(dateStr)) {
+            return DateUtil.getSecondDate(dateStr + " 00:00:00").getTime();
+        }
 		
 		return 0L;
 	}
@@ -353,8 +367,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 	   * @return
 	 */
 	private static long parseDateStr2EndLongTime(String dateStr) {
-		if(StringUtils.isNotEmpty(dateStr))
-			return DateUtil.getSecondDate(dateStr + " 23:59:59").getTime();
+		if(StringUtils.isNotEmpty(dateStr)) {
+            return DateUtil.getSecondDate(dateStr + " 23:59:59").getTime();
+        }
 		
 		return System.currentTimeMillis();
 	}
@@ -367,8 +382,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 	 */
 	private static Integer getProvinceCode(Object provinceCode) {
 		try {
-			if(provinceCode == null)
-				return null;
+			if(provinceCode == null) {
+                return null;
+            }
 			
 			return Integer.parseInt(provinceCode.toString());
 		} catch (Exception e) {
@@ -388,8 +404,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 	 */
 	private static void setCmcpData(Object cmcp, CmcpAmount cmcpAmount, ChinessCmcpSubmitReportVo reportVo) {
 		try {
-			if(cmcp == null || StringUtils.isBlank(cmcp.toString()) ||  Province.PROVINCE_CODE_ALLOVER_COUNTRY.equals(cmcp.toString()))
-				return;
+			if(cmcp == null || StringUtils.isBlank(cmcp.toString()) ||  Province.PROVINCE_CODE_ALLOVER_COUNTRY.equals(cmcp.toString())) {
+                return;
+            }
 			
 			Integer _cmcp = Integer.parseInt(cmcp.toString());
 			if(CMCP.CHINA_MOBILE.getCode() == _cmcp) {
@@ -416,8 +433,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 		try {
 			List<Map<String, Object>> list = smsMtSubmitService.getSubmitCmcpReport(parseDateStr2StartLongTime(startDate), parseDateStr2EndLongTime(endDate));
 			
-			if(CollectionUtils.isEmpty(list))
-				return null;
+			if(CollectionUtils.isEmpty(list)) {
+                return null;
+            }
 			
 			Map<Integer, String> provinceMap = provinceService.findNamesInMap();
 			if(MapUtils.isEmpty(provinceMap)) {
@@ -429,8 +447,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService{
 			CmcpAmount cmcpAmount = null;
 			
 			for(Map<String, Object> report : list) {
-				if(report == null || report.get("province_code") == null || StringUtils.isBlank(report.get("province_code").toString()))
-					continue;
+				if(report == null || report.get("province_code") == null || StringUtils.isBlank(report.get("province_code").toString())) {
+                    continue;
+                }
 				
 				cmcpAmount = new CmcpAmount();
 				cmcpAmount.setName(provinceMap.get(getProvinceCode(report.get("province_code"))));

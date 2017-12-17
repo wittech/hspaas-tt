@@ -2,6 +2,7 @@ package com.huashi.exchanger.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +40,7 @@ public class SmsProviderService implements ISmsProviderService {
 	@Autowired
 	private SmgpProxySender smgpProxySender;
 	@Autowired
-	private SmsProxyManageService smsProxyManageService;
+	private ISmsProxyManageService smsProxyManageService;
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	// 网关每个包分包手机号码上限数
@@ -53,11 +54,12 @@ public class SmsProviderService implements ISmsProviderService {
 		validate(parameter);
 		
 		// 判断是否需要限流
-		if(!isNeedLimitSpeed(parameter.getProtocol()))
-			return submitData2Gateway(parameter, mobile, content, extNumber);
+		if(!isNeedLimitSpeed(parameter.getProtocol())) {
+            return submitData2Gateway(parameter, mobile, content, extNumber);
+        }
 
 		// 获取通道对应的流速设置
-		RateLimiter rateLimiter = smsProxyManageService.getRateLimiter(parameter.getPassageId(), parameter.getPacketsSize());
+		RateLimiter rateLimiter = getRateLimiter(parameter.getPassageId(), parameter.getPacketsSize());
 		String[] mobiles =  mobile.split(MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR);
 		
 		// 目前HTTP用途并不是很大（因为取决于HTTP自身的瓶颈）
@@ -69,8 +71,9 @@ public class SmsProviderService implements ISmsProviderService {
 			// 设置acquire 当前分包后的数量
 			rateLimiter.acquire(Integer.parseInt(m[0]));
 			List<ProviderSendResponse> tlist = submitData2Gateway(parameter, m[1], content, extNumber);
-			if(CollectionUtils.isEmpty(tlist))
-				continue;
+			if(CollectionUtils.isEmpty(tlist)) {
+                continue;
+            }
 			
 			list.addAll(tlist);
 		}
@@ -94,12 +97,14 @@ public class SmsProviderService implements ISmsProviderService {
 	 */
 	private static Integer getRateLimiterAmount(String protocol, Integer fee) {
 		// 如果协议类型无法识别或者为空则按照 1次计数
-		if(StringUtils.isEmpty(protocol))
-			return DEFAULT_RATE_LIMITER_TIMES;
+		if(StringUtils.isEmpty(protocol)) {
+            return DEFAULT_RATE_LIMITER_TIMES;
+        }
 		
 		ProtocolType protocolType = ProtocolType.parse(protocol);
-		if(protocolType != null && (protocolType == ProtocolType.CMPP2 || protocolType == ProtocolType.SGIP || protocolType == ProtocolType.SMGP))
-			return fee;
+		if(protocolType != null && (protocolType == ProtocolType.CMPP2 || protocolType == ProtocolType.SGIP || protocolType == ProtocolType.SMGP)) {
+            return fee;
+        }
 		
 		return DEFAULT_RATE_LIMITER_TIMES;
 	}
@@ -111,12 +116,14 @@ public class SmsProviderService implements ISmsProviderService {
 	   * @return
 	 */
 	private boolean isNeedLimitSpeed(String protocol) {
-		if(StringUtils.isEmpty(protocol))
-			return false;
+		if(StringUtils.isEmpty(protocol)) {
+            return false;
+        }
 		
 		ProtocolType protocolType = ProtocolType.parse(protocol);
-		if(protocolType == null || protocolType == ProtocolType.HTTP || protocolType == ProtocolType.WEBSERVICE)
-			return false;
+		if(protocolType == null || protocolType == ProtocolType.HTTP || protocolType == ProtocolType.WEBSERVICE) {
+            return false;
+        }
 		
 		return true;
 	}
@@ -217,11 +224,13 @@ public class SmsProviderService implements ISmsProviderService {
 	   * @throws DataEmptyException
 	 */
 	private void validate(SmsPassageParameter parameter) throws DataEmptyException{
-		if (StringUtils.isEmpty(parameter.getUrl()))
-			throw new DataEmptyException("调用URL或IP为空");
+		if (StringUtils.isEmpty(parameter.getUrl())) {
+            throw new DataEmptyException("调用URL或IP为空");
+        }
 
-		if (StringUtils.isEmpty(parameter.getParams()))
-			throw new DataEmptyException("调用参数为空");
+		if (StringUtils.isEmpty(parameter.getParams())) {
+            throw new DataEmptyException("调用参数为空");
+        }
 
 	}
 
@@ -265,5 +274,29 @@ public class SmsProviderService implements ISmsProviderService {
 			throw new RuntimeException("解析上行数据失败");
 		}
 	}
+	
+	/**
+     * 
+       * TODO  获取限速信息
+       * 
+       * @param passageId
+       * @param speed
+       * @return
+     */
+    private static RateLimiter getRateLimiter(Integer passageId, Integer speed) {
+        RateLimiter limiter = SmsProxyManageService.GLOBAL_RATE_LIMITERS.get(passageId);
+        if (limiter == null) {
+            ReentrantLock reentrantLock = new ReentrantLock();
+            reentrantLock.tryLock();
+            try {
+                limiter = RateLimiter.create((speed == null || speed == 0) ? SmsProxyManageService.DEFAULT_LIMIT_SPEED : speed);
+                SmsProxyManageService.GLOBAL_RATE_LIMITERS.put(passageId, limiter);
+            } finally {
+                reentrantLock.unlock();
+            }
+        }
+
+        return limiter;
+    }
 	
 }

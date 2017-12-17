@@ -44,16 +44,18 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 	
 	@Override
 	public SmsMtMessageDeliver findByMobileAndMsgid(String mobile, String msgId) {
-		if(StringUtils.isEmpty(mobile) || StringUtils.isEmpty(msgId))
-			return null;
+		if(StringUtils.isEmpty(mobile) || StringUtils.isEmpty(msgId)) {
+            return null;
+        }
 		
 		return smsMtMessageDeliverMapper.selectByMobileAndMsgid(msgId, mobile);
 	}
 
 	@Override
 	public int batchInsert(List<SmsMtMessageDeliver> list) {
-		if(CollectionUtils.isEmpty(list))
-			return 0;
+		if(CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
 		
 		return smsMtMessageDeliverMapper.batchInsert(list);
 	}
@@ -72,8 +74,9 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 		
 		try  {
 			
-			if(CollectionUtils.isEmpty(delivers))
-				return 0;
+			if(CollectionUtils.isEmpty(delivers)) {
+                return 0;
+            }
 			
 //			lock.acquire();
 			

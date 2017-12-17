@@ -49,10 +49,15 @@ public class VisitLogAop {
 		logger.info("请求地址 : {}, 调用IP: {}, 调用方式：{}", request.getRequestURL().toString(), 
 				request.getRemoteAddr(), request.getMethod());
 		
-		if(HttpMethod.GET.name().equalsIgnoreCase(request.getMethod()))
-			logger.info("请求参数 : {} ", request.getQueryString());
-		else
-			logger.info("请求参数 : {} ", JSON.toJSONString(request.getParameterMap()));
+		if(HttpMethod.GET.name().equalsIgnoreCase(request.getMethod())) {
+            {
+                logger.info("请求参数 : {} ", request.getQueryString());
+            }
+        } else {
+            {
+                logger.info("请求参数 : {} ", JSON.toJSONString(request.getParameterMap()));
+            }
+        }
 		
 		
 		startTime.set(System.currentTimeMillis());

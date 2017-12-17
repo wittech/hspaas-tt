@@ -29,13 +29,12 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.huashi.bill.bill.model.SmsP2PBillModel;
-import com.huashi.bill.bill.service.IBillService;
 import com.huashi.common.settings.context.SettingsContext.PushConfigStatus;
 import com.huashi.common.settings.domain.Province;
 import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.settings.service.IProvinceService;
 import com.huashi.common.settings.service.IPushConfigService;
+import com.huashi.common.user.model.P2pBalanceResponse;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.user.service.IUserService;
@@ -86,12 +85,12 @@ import com.huashi.sms.template.service.ISmsTemplateService;
 @Service
 public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.ConfirmCallback  {
 
-	@Reference
-	private IBillService billService;
 	@Autowired
 	private IdGenerator idGenerator;
 	@Reference
 	private IUserService userService;
+    @Reference
+    private IUserBalanceService userBalanceService;
 	@Autowired
 	private SmsMtTaskMapper taskMapper;
 	@Autowired
@@ -110,8 +109,6 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	protected ISmsMtProcessFailedService smsMtProcessFailedService;
 	@Autowired
 	protected ISmsMobileBlackListService mobileBlackListService;
-	@Reference
-	private IUserBalanceService userBalanceService;
 	@Resource
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
@@ -152,8 +149,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 		for (SmsMtTask record : dataList) {
 			record.setUserModel(userService.getByUserId(record.getUserId()));
 			
-			if(StringUtils.isBlank(record.getForbiddenWords()))
-				continue;
+			if(StringUtils.isBlank(record.getForbiddenWords())) {
+                continue;
+            }
 			
 			record.setForbiddenWordLabels(forbiddenWordsService.getLabelByWords(record.getForbiddenWords()));
 		}
@@ -171,12 +169,14 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 		String startDate = queryParams.get("startDate") == null ? "" : queryParams.get("startDate").toString();
 		String endDate = queryParams.get("endDate") == null ? "" : queryParams.get("endDate").toString();
 		
-		if (StringUtils.isNotBlank(startDate))
-			queryParams.put("startDate",  DateUtil.getSecondDate(startDate).getTime());
+		if (StringUtils.isNotBlank(startDate)) {
+            queryParams.put("startDate", DateUtil.getSecondDate(startDate).getTime());
+        }
 		
 		
-		if (StringUtils.isNotBlank(endDate))
-			queryParams.put("endDate",  DateUtil.getSecondDate(endDate).getTime());
+		if (StringUtils.isNotBlank(endDate)) {
+            queryParams.put("endDate", DateUtil.getSecondDate(endDate).getTime());
+        }
 		
 	}
 
@@ -202,8 +202,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 			// task.setUserModel(userModel);
 			// }
 			
-			if(task.getProvinceCode() == null)
-				continue;
+			if(task.getProvinceCode() == null) {
+                continue;
+            }
 
 			if(provinceMap.containsKey(task.getProvinceCode())) {
 				task.setProvinceName(provinceMap.get(task.getProvinceCode()));
@@ -361,8 +362,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	 */
 	private SmsPassageParameter getPassageParameter(int passageId) {
 		SmsPassage passage = smsPassageService.findById(passageId);
-		if(passage == null)
-			return null;
+		if(passage == null) {
+            return null;
+        }
 			
 		for (SmsPassageParameter parameter : passage.getParameterList()) {
 			if (parameter.getCallType().intValue() == PassageCallType.DATA_SEND.getCode()) {
@@ -381,12 +383,14 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	 * @return
 	 */
 	private boolean isOnlyContainPassageError(SmsMtTaskPackets packets) {
-		if (StringUtils.isEmpty(packets.getForceActions()))
-			return false;
+		if (StringUtils.isEmpty(packets.getForceActions())) {
+            return false;
+        }
 
 		if (!packets.getForceActions().contains(
-				String.valueOf(PacketsActionActor.BROKEN.getActor())))
-			return false;
+				String.valueOf(PacketsActionActor.BROKEN.getActor()))) {
+            return false;
+        }
 
 		char[] actions = packets.getActions();
 		// 将通道不可用操作符 暂时赋值为 通过
@@ -415,15 +419,17 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	public boolean updateTaskPacketsStatus(long taskPacketsId, int status) {
 		try {
 			int result = taskPacketsMapper.updateStatusById(taskPacketsId, status);
-			if(result <= 0)
-				return false;
+			if(result <= 0) {
+                return false;
+            }
 			
 			SmsMtTaskPackets packets = taskPacketsMapper.selectByPrimaryKey(taskPacketsId);
 			
 			// 查询是否所有的子任务状态均不为“待审批”，否则修改主任务状态为 审批通过
 			int count = taskPacketsMapper.selectWaitingCount(packets.getSid());
-			if(count == 0) 
-				taskMapper.updateApproveStatusBySid(packets.getSid(), status);
+			if(count == 0) {
+                taskMapper.updateApproveStatusBySid(packets.getSid(), status);
+            }
 			
 			if (status == PacketsApproveStatus.HANDLING_COMPLETE.getCode()) {
 				return repeatSendToQueue(packets, null);
@@ -526,8 +532,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 
 	@Override
 	public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-		if(correlationData == null)
-			return;
+		if(correlationData == null) {
+            return;
+        }
 		
 		// add by zhengying 20170313 理论上此处应该做基础数据校准，为了校验是否用户所有的请求都已经发送到队列，防止用户发送请求数据丢失
 //		if (ack) {
@@ -541,18 +548,21 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	@Transactional(rollbackFor = RuntimeException.class)
 	public void batchSave(List<SmsMtTask> tasks, List<SmsMtTaskPackets> taskPackets) throws RuntimeException {
 		try {
-			if (CollectionUtils.isEmpty(tasks))
-				return;
+			if (CollectionUtils.isEmpty(tasks)) {
+                return;
+            }
 
 			int result = 0;
 			if (CollectionUtils.isNotEmpty(tasks)) {
 				result = taskMapper.batchInsert(tasks);
-				if (CollectionUtils.isNotEmpty(taskPackets) && result > 0)
-					result = taskPacketsMapper.batchInsert(taskPackets);
+				if (CollectionUtils.isNotEmpty(taskPackets) && result > 0) {
+                    result = taskPacketsMapper.batchInsert(taskPackets);
+                }
 			}
 
-			if (result == 0)
-				throw new RuntimeException("数据执行失败");
+			if (result == 0) {
+                throw new RuntimeException("数据执行失败");
+            }
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -599,12 +609,14 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 				result = taskMapper.updateApproveStatus(Long.parseLong(taskId), PacketsApproveStatus.REJECT.getCode());
 	
 				List<SmsMtTaskPackets> packets = taskPacketsMapper.findChildBySid(task.getSid());
-				if (CollectionUtils.isEmpty(packets))
-					continue;
+				if (CollectionUtils.isEmpty(packets)) {
+                    continue;
+                }
 	
 				for (SmsMtTaskPackets pt : packets) {
-					if (pt.getStatus() == PacketsApproveStatus.REJECT.getCode())
-						continue;
+					if (pt.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
+                        continue;
+                    }
 	
 					pt.setUserId(task.getUserId());
 					doRejectToQueue(pt);
@@ -627,12 +639,14 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	public boolean doRejectInTaskPackets(long packetsId) {
 		try {
 			SmsMtTaskPackets packets = taskPacketsMapper.selectByPrimaryKey(packetsId);
-			if (packets == null)
-				return false;
+			if (packets == null) {
+                return false;
+            }
 
 			SmsMtTask task = taskMapper.selectBySid(packets.getSid());
-			if (task == null)
-				return false;
+			if (task == null) {
+                return false;
+            }
 
 			packets.setUserId(task.getUserId());
 			packets.setAttach(task.getAttach());
@@ -645,8 +659,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 			
 			// 查询是否所有的子任务状态均不为“待审批”，否则修改主任务状态为 审批通过
 			int count = taskPacketsMapper.selectWaitingCount(packets.getSid());
-			if(count == 0) 
-				updateStatus(packets.getSid(), PacketsApproveStatus.REJECT.getCode());
+			if(count == 0) {
+                updateStatus(packets.getSid(), PacketsApproveStatus.REJECT.getCode());
+            }
 				
 			return result > 0;
 		} catch (Exception e) {
@@ -664,8 +679,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	private void doRejectToQueue(SmsMtTaskPackets packets) {
 		String[] mobiles = packets.getMobile().split(
 				MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR);
-		if (mobiles == null || mobiles.length == 0)
-			return;
+		if (mobiles == null || mobiles.length == 0) {
+            return;
+        }
 
 		for (String m : mobiles) {
 			SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
@@ -706,11 +722,10 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	   * @return
 	 */
 	private String getQueueNameBySubmitType(SmsMtTask task) {
-		if(TaskSubmitType.BATCH_MESSAGE.getCode() == task.getSubmitType())
-			return MQConstant.MQ_SMS_MT_WAIT_PROCESS;
+		if(TaskSubmitType.BATCH_MESSAGE.getCode() == task.getSubmitType()) {
+            return MQConstant.MQ_SMS_MT_WAIT_PROCESS;
+        }
 		
-		// 如果任务是点对点或者模板点对点处理短信内容
-		SmsP2PBillModel model = null;
 		if(StringUtils.isEmpty(task.getContent())) {
 			throw new RuntimeException("点对点短信原报文数据为空，无法执行");
 		}
@@ -721,18 +736,21 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 			throw new RuntimeException("点对点解析计费及短信内容失败");
 		}
 		
+		// 如果任务是点对点或者模板点对点处理短信内容
+        P2pBalanceResponse p2pBalanceResponse = null;
+		
 		if(TaskSubmitType.POINT_TO_POINT.getCode() == task.getSubmitType()) {
-			model = billService.getSmsFeeInP2P(task.getUserId(), JSON.parseObject(task.getContent(), new TypeReference<List<JSONObject>>(){}));
+		    p2pBalanceResponse = userBalanceService.calculateP2pSmsAmount(task.getUserId(), JSON.parseObject(task.getContent(), new TypeReference<List<JSONObject>>(){}));
 		}else if(TaskSubmitType.TEMPLATE_POINT_TO_POINT.getCode() == task.getSubmitType()) {
-			model = billService.getSmsFeeInP2P(task.getUserId(), JSON.parseObject(task.getContent(), new TypeReference<List<JSONObject>>(){}));
+		    p2pBalanceResponse = userBalanceService.calculateP2pSmsAmount(task.getUserId(), JSON.parseObject(task.getContent(), new TypeReference<List<JSONObject>>(){}));
 		}
 		
-		if(model == null || CollectionUtils.isEmpty(model.getP2pBodies())) {
+		if(p2pBalanceResponse == null || CollectionUtils.isEmpty(p2pBalanceResponse.getP2pBodies())) {
 			throw new RuntimeException("点对点解析计费及短信内容失败");
 		}
 		
 		task.setP2pBody(task.getContent());
-		task.setP2pBodies(model.getP2pBodies());
+		task.setP2pBodies(p2pBalanceResponse.getP2pBodies());
 		
 		return MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
 	}
@@ -806,14 +824,16 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 			params.put("content", content);
 		}
 		int totalRecord = taskMapper.findCount(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		params.put("start", PaginationVo.getStartPage(_currentPage));
 		params.put("end", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 		List<SmsMtTask> list = taskMapper.findList(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            return null;
+        }
 
 		return new PaginationVo<SmsMtTask>(list, _currentPage, totalRecord);
 	}
@@ -828,16 +848,19 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	public ResponseMessage doForcePass(String taskIds) {
 		Long sid = null;
 		try {
-			if(StringUtils.isEmpty(taskIds))
-				return new ResponseMessage(ResponseMessage.ERROR_CODE, "操作数据为空", false);
+			if(StringUtils.isEmpty(taskIds)) {
+                return new ResponseMessage(ResponseMessage.ERROR_CODE, "操作数据为空", false);
+            }
 			
             String[] idArray = taskIds.split(",");
-            if(idArray == null || idArray.length == 0)
-            	return new ResponseMessage(ResponseMessage.ERROR_CODE, "操作数据为空", false);
+            if(idArray == null || idArray.length == 0) {
+                return new ResponseMessage(ResponseMessage.ERROR_CODE, "操作数据为空", false);
+            }
             
             List<SmsMtTask> tasks = taskMapper.selectTaskByIds(Arrays.asList(idArray));
-            if(CollectionUtils.isEmpty(tasks))
-            	return new ResponseMessage(ResponseMessage.ERROR_CODE, "任务数据为空", false);
+            if(CollectionUtils.isEmpty(tasks)) {
+                return new ResponseMessage(ResponseMessage.ERROR_CODE, "任务数据为空", false);
+            }
             
             return doTaskBatchApproved(tasks);
         }catch (Exception e) {
@@ -856,20 +879,23 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	 */
 	private ResponseMessage doTaskBatchApproved(List<SmsMtTask> tasks) {
 		for(SmsMtTask task : tasks){
-            if(task == null)
-            	continue;
+            if(task == null) {
+                continue;
+            }
             
             boolean isHasError = isTaskChildrenHasPassageError(task.getSid());
-            if(isHasError)
-            	return new ResponseMessage(ResponseMessage.ERROR_CODE, String.format("SID:%d 包含通道不可用数据", task.getSid()), false);
+            if(isHasError) {
+                return new ResponseMessage(ResponseMessage.ERROR_CODE, String.format("SID:%d 包含通道不可用数据", task.getSid()), false);
+            }
             
             List<SmsMtTaskPackets> packetsList = findChildTaskBySid(task.getSid());
             int result = 0;
             boolean isOk = false;
             for(SmsMtTaskPackets packets : packetsList) {
             	if(packets.getStatus() == PacketsApproveStatus.AUTO_COMPLETE.getCode()
-            			|| packets.getStatus() == PacketsApproveStatus.HANDLING_COMPLETE.getCode())
-            		continue;
+            			|| packets.getStatus() == PacketsApproveStatus.HANDLING_COMPLETE.getCode()) {
+                    continue;
+                }
             	
             	// 根据子任务ID更新状态为“手动完成”
             	result = taskPacketsMapper.updateStatusById(packets.getId(), PacketsApproveStatus.HANDLING_COMPLETE.getCode());
@@ -882,9 +908,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
             	
             	// 根据通道ID查询通道信息
             	SmsPassage passage = smsPassageService.findById(packets.getFinalPassageId());
-            	if(passage == null)
-            		return new ResponseMessage(ResponseMessage.ERROR_CODE, String.format("SID:%d 更新子任务状态失败, 通道: %d 数据为空", 
-            				task.getSid(), packets.getId()), false);
+            	if(passage == null) {
+                    return new ResponseMessage(ResponseMessage.ERROR_CODE, String.format("SID:%d 更新子任务状态失败, 通道: %d 数据为空", task.getSid(), packets.getId()), false);
+                }
             	
             	packets.setPassageCode(passage.getCode());
             	packets.setPassageSpeed(passage.getPacketsSize());
@@ -916,28 +942,33 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 
 	@Override
 	public int doPassWithSameContent(String content, boolean isLikePattern) {
-		if(StringUtils.isEmpty(content))
-			return 0;
+		if(StringUtils.isEmpty(content)) {
+            return 0;
+        }
 		
 		List<SmsMtTask> list = taskMapper.selectWaitDealTaskList();
-		if(CollectionUtils.isEmpty(list))
-			return 0;
+		if(CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
 		
 		List<SmsMtTask> tasks = new ArrayList<>();
 		for(SmsMtTask task : list) {
-			if(!isContentMatched(task.getFinalContent(), content, isLikePattern))
-				continue;
+			if(!isContentMatched(task.getFinalContent(), content, isLikePattern)) {
+                continue;
+            }
 			
 			tasks.add(task);
 		}
 		
-		if(CollectionUtils.isEmpty(tasks))
-			return 0;
+		if(CollectionUtils.isEmpty(tasks)) {
+            return 0;
+        }
 		
 		try {
 			ResponseMessage response = doTaskBatchApproved(tasks);
-			if(!response.getOk())
-				return 0;
+			if(!response.getOk()) {
+                return 0;
+            }
 			
 		} catch (Exception e) {
 			logger.error("批量审核错误", e);
@@ -962,8 +993,9 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	private static boolean isContentMatched(String sourceContent, 
 			String targetContent, boolean isLikePattern) {
 		
-		if(StringUtils.isEmpty(sourceContent))
-			return false;
+		if(StringUtils.isEmpty(sourceContent)) {
+            return false;
+        }
 		
 		return isLikePattern ? sourceContent.contains(targetContent) : sourceContent.equals(targetContent);
 		
@@ -994,12 +1026,14 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 			boolean isOk = false;
 			// 迭代主任务数据
 			for (String taskId : taskIdsArray) {
-				if(StringUtils.isEmpty(taskId))
-					continue;
+				if(StringUtils.isEmpty(taskId)) {
+                    continue;
+                }
 				
 				SmsMtTask task = findById(Long.valueOf(taskId));
-				if(task == null)
-					continue;
+				if(task == null) {
+                    continue;
+                }
 				
 				List<SmsMtTaskPackets> packetsList = findChildTaskBySid(task.getSid());
 				for (SmsMtTaskPackets packets : packetsList) {

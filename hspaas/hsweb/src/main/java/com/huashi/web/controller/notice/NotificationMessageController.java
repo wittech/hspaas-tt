@@ -73,8 +73,11 @@ public class NotificationMessageController extends BaseController {
 	@ResponseBody
 	public int getUnReadList() {
 		List<NotificationMessage> list = notificationMessageService.findUnReadList(getCurrentUserId());
-		if (CollectionUtils.isEmpty(list))
-			return 0;
+		if (CollectionUtils.isEmpty(list)) {
+            {
+                return 0;
+            }
+        }
 		return list.size();
 	}
 	

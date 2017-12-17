@@ -97,8 +97,11 @@ public class TradeOrderService implements ITradeOrderService {
 		} else {
 			// 产品套餐购买
 			Combo combo = comboService.findById(model.getComboId());
-			if (combo == null)
-				throw new RuntimeException("套餐数据有误");
+			if (combo == null) {
+                {
+                    throw new RuntimeException("套餐数据有误");
+                }
+            }
 			
 			tradeOrder.setProductComboId(model.getComboId());
 			tradeOrder.setProductName(combo.getName());
@@ -116,15 +119,21 @@ public class TradeOrderService implements ITradeOrderService {
 		tradeOrder.setPayType(PayType.ALIPAY.getValue());
 		try {
 			int result = tradeOrderMapper.insertSelective(tradeOrder);
-			if (result == 0)
-				throw new OrderBuilderException("订单生成失败");
+			if (result == 0) {
+                {
+                    throw new OrderBuilderException("订单生成失败");
+                }
+            }
 			
 			// 如果需要开发票，则直接自动生成开票记录和 订单关联的开票信息
 			if (tradeOrder.getInvoiceFlag()) {
 				boolean isSuccess = tradeOrderInvoiceService.save(tradeOrder.getId(), model.getInvoiceTitle(), model.getName(),
 						model.getMobile(), model.getAddress());
-				if(!isSuccess)
-					throw new OrderBuilderException("订单生成失败");
+				if(!isSuccess) {
+                    {
+                        throw new OrderBuilderException("订单生成失败");
+                    }
+                }
 			}
 			
 			return alipay(model, tradeOrder);
@@ -147,8 +156,11 @@ public class TradeOrderService implements ITradeOrderService {
 		try {
 			if (tradeOrder.getInvoiceFlag()) {
 				TradeOrderInvoice orderInvoice = tradeOrderInvoiceService.getByOrderId(tradeOrder.getId());
-				if(orderInvoice == null)
-					throw new RuntimeException("订单发票信息为空");
+				if(orderInvoice == null) {
+                    {
+                        throw new RuntimeException("订单发票信息为空");
+                    }
+                }
 				
 				InvoiceRecord invoiceRecord = new InvoiceRecord();
 				invoiceRecord.setAddress(orderInvoice.getAddress());
@@ -199,8 +211,11 @@ public class TradeOrderService implements ITradeOrderService {
 		tradeOrder.setPayType(PayType.OFFLINE_TRANSFER.getValue());
 		try {
 			int result = tradeOrderMapper.insertSelective(tradeOrder);
-			if (result == 0)
-				throw new OrderBuilderException("订单生成失败");
+			if (result == 0) {
+                {
+                    throw new OrderBuilderException("订单生成失败");
+                }
+            }
 
 			if (tradeOrder.getInvoiceFlag()) {
 				tradeOrderInvoiceService.save(tradeOrder.getId(), model.getInvoiceTitle(), model.getName(),
@@ -219,15 +234,24 @@ public class TradeOrderService implements ITradeOrderService {
 	public boolean updateOrderPayCompleted(String tradeNo) {
 		synchronized (lock) {
 			TradeOrder tradeOrder = tradeOrderMapper.selectByTradeNo(tradeNo);
-			if(tradeOrder == null)
-				throw new TradeUpdateException("订单无效");
+			if(tradeOrder == null) {
+                {
+                    throw new TradeUpdateException("订单无效");
+                }
+            }
 			
-			if(tradeOrder.getStatus() != null &&tradeOrder.getStatus() == TradeOrderStatus.COMPLETED.getValue())
-				return true;
+			if(tradeOrder.getStatus() != null &&tradeOrder.getStatus() == TradeOrderStatus.COMPLETED.getValue()) {
+                {
+                    return true;
+                }
+            }
 			
 			int result = tradeOrderMapper.updateOrder2Comoplte(tradeOrder.getId());
-			if(result == 0)
-				throw new TradeUpdateException("订单更新失败");
+			if(result == 0) {
+                {
+                    throw new TradeUpdateException("订单更新失败");
+                }
+            }
 			
 			if(TradeType.ACCOUNT_MONEY_CHARGE.getValue() == tradeOrder.getTradeType()) {
 				// 交易类型为站内充值
@@ -237,8 +261,11 @@ public class TradeOrderService implements ITradeOrderService {
 			} else {
 				// 产品套餐购买
 				List<Product> products = productService.getProductListByComboId(tradeOrder.getProductComboId());
-				if(CollectionUtils.isEmpty(products))
-					throw new TradeUpdateException("订单中无套餐包数据");
+				if(CollectionUtils.isEmpty(products)) {
+                    {
+                        throw new TradeUpdateException("订单中无套餐包数据");
+                    }
+                }
 				
 				try {
 					for(Product product : products) {
@@ -282,15 +309,21 @@ public class TradeOrderService implements ITradeOrderService {
 			params.put("payType", payType);
 		}
 		int totalRecord = tradeOrderMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            {
+                return null;
+            }
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<TradeOrder> list = tradeOrderMapper.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            {
+                return null;
+            }
+        }
 		return new PaginationVo<TradeOrder>(list, _currentPage, totalRecord);
 	}
 

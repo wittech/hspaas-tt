@@ -16,17 +16,20 @@ import javax.servlet.http.HttpServletRequest;
 
 public class XssFilter implements Filter {
 
-	public void destroy() {
+	@Override
+    public void destroy() {
 		// TODO Auto-generated method stub
 
 	}
 
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+	@Override
+    public void doFilter(ServletRequest request, ServletResponse response,
+                         FilterChain chain) throws IOException, ServletException {
 		 chain.doFilter(new XssHttpServletRequestWraper((HttpServletRequest) request), response);
 	}
 
-	public void init(FilterConfig arg0) throws ServletException {
+	@Override
+    public void init(FilterConfig arg0) throws ServletException {
 
 	}
 

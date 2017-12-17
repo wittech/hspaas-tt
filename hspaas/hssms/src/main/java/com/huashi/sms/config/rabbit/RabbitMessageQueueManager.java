@@ -108,8 +108,9 @@ public class RabbitMessageQueueManager {
 			container.afterPropertiesSet();
 
 //	        container.addQueueNames(queueName);
-	        if(!container.isRunning())
-	        	container.start();
+	        if(!container.isRunning()) {
+                container.start();
+            }
 			
 		} catch (Exception e) {
 			logger.error("创建队列：{}失败", queueName, e);
@@ -144,12 +145,14 @@ public class RabbitMessageQueueManager {
 	   * @return
 	 */
 	public int getMessageCount(String queueName) {
-		if(StringUtils.isEmpty(queueName))
-			return 0;
+		if(StringUtils.isEmpty(queueName)) {
+            return 0;
+        }
 		
 		Properties properties = rabbitAdmin.getQueueProperties(queueName);
-		if(MapUtils.isEmpty(properties))
-			return 0;
+		if(MapUtils.isEmpty(properties)) {
+            return 0;
+        }
 		
 		return Integer.parseInt(properties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
 		

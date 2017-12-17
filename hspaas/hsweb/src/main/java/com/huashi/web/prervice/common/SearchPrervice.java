@@ -54,8 +54,11 @@ public class SearchPrervice {
 	   * @return
 	 */
 	public Object quickSearch(int userId, String content, int platformType, int quickType) {
-		if (StringUtils.isEmpty(content))
-			return null;
+		if (StringUtils.isEmpty(content)) {
+            {
+                return null;
+            }
+        }
 
 		// 手机记录查询
 		if (quickType == QUICK_SEARCH_STATUS) {

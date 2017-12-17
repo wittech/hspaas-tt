@@ -75,8 +75,11 @@ public class SmsPrervice {
 		try {
 
 			long sid = doSubmitTask(task);
-			if (sid != 0l)
-				return new SmsSendResponse(model.getTotalFee(), sid);
+			if (sid != 0L) {
+				{
+					return new SmsSendResponse(model.getTotalFee(), sid);
+				}
+			}
 
 		} catch (QueueProcessException e) {
 			logger.error("发送短信至队列错误， {}", e);
@@ -104,8 +107,11 @@ public class SmsPrervice {
 		try {
 
 			long sid = doSubmitTask(task);
-			if (sid != 0l)
-				return new SmsSendResponse(model.getTotalFee(), sid);
+			if (sid != 0L) {
+				{
+					return new SmsSendResponse(model.getTotalFee(), sid);
+				}
+			}
 
 		} catch (QueueProcessException e) {
 			logger.error("发送短信至队列错误， {}", e);
@@ -131,8 +137,11 @@ public class SmsPrervice {
 		try {
 
 			long sid = doSubmitTask(task);
-			if (sid != 0l)
-				return new SmsSendResponse(model.getTotalFee(), sid);
+			if (sid != 0L) {
+				{
+					return new SmsSendResponse(model.getTotalFee(), sid);
+				}
+			}
 
 		} catch (QueueProcessException e) {
 			logger.error("发送短信至队列错误， {}", e);

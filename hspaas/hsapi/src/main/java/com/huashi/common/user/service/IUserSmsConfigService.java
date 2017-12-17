@@ -20,6 +20,15 @@ public interface IUserSmsConfigService {
 	 * @return
 	 */
 	UserSmsConfig getByUserId(int userId);
+	
+	/**
+	 * 
+	   * TODO 根据用户查询单条计费字数
+	   * 
+	   * @param userId
+	   * @return
+	 */
+	int getSingleChars(int userId);
 
 	/**
 	 * 

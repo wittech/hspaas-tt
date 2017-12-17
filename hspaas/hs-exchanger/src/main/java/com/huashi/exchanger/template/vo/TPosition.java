@@ -32,12 +32,14 @@ public class TPosition extends HashMap<String, Object> implements
 
 	public Integer getPosition(String key) {
 		Object obj = this.get(key);
-		if (obj == null)
-			throw new DataParseException("坐标位置解析失败");
+		if (obj == null) {
+            throw new DataParseException("坐标位置解析失败");
+        }
 
 		// 如果节点值为空，则无需解析此数据
-		if (StringUtils.isEmpty(obj.toString()))
-			return null;
+		if (StringUtils.isEmpty(obj.toString())) {
+            return null;
+        }
 
 		try {
 			return Integer.parseInt(obj.toString());

@@ -35,8 +35,11 @@ public class SmsReportController extends BaseController {
 	@ViewMenu(code = MenuCode.MENU_CODE_9001001)
 	public void user_passage_send_report() {
 		String startDate = getPara("startDate");
-		if(StringUtils.isEmpty(startDate))
-			startDate = DateUtil.getCurrentDate();
+		if(StringUtils.isEmpty(startDate)) {
+            {
+                startDate = DateUtil.getCurrentDate();
+            }
+        }
 		
 		String endDate = getPara("endDate");
 		
@@ -55,8 +58,11 @@ public class SmsReportController extends BaseController {
 	@ViewMenu(code = MenuCode.MENU_CODE_9001002)
 	public void user_send_report() {
 		String startDate = getPara("startDate");
-		if(StringUtils.isEmpty(startDate))
-			startDate = DateUtil.getCurrentDate();
+		if(StringUtils.isEmpty(startDate)) {
+            {
+                startDate = DateUtil.getCurrentDate();
+            }
+        }
 		
 		String endDate = getPara("endDate");
 		
@@ -75,8 +81,11 @@ public class SmsReportController extends BaseController {
 	@ViewMenu(code = MenuCode.MENU_CODE_9001003)
 	public void passage_send_report() {
 		String startDate = getPara("startDate");
-		if(StringUtils.isEmpty(startDate))
-			startDate = DateUtil.getCurrentDate();
+		if(StringUtils.isEmpty(startDate)) {
+            {
+                startDate = DateUtil.getCurrentDate();
+            }
+        }
 		
 		String endDate = getPara("endDate");
 		
@@ -95,8 +104,11 @@ public class SmsReportController extends BaseController {
 	@ViewMenu(code = MenuCode.MENU_CODE_9001004)
 	public void province_send_report() {
 		String startDate = getPara("startDate");
-		if(StringUtils.isEmpty(startDate))
-			startDate = DateUtil.getCurrentDate();
+		if(StringUtils.isEmpty(startDate)) {
+            {
+                startDate = DateUtil.getCurrentDate();
+            }
+        }
 		
 		String endDate = getPara("endDate");
 		

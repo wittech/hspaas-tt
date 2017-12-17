@@ -55,9 +55,9 @@ public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareM
 			
 			retryResponse = post(report.getPushUrl(), pushContent, retryTimes,  1);
 			
-			if(logger.isDebugEnabled())
-				logger.debug("处理结果：{}, 尝试次数 : {}, 异常信息: {}", retryResponse.getResult(), retryResponse.getAttemptTimes(), 
-						retryResponse.getLastThrowable().getMessage());
+			if(logger.isDebugEnabled()) {
+                logger.debug("处理结果：{}, 尝试次数 : {}, 异常信息: {}", retryResponse.getResult(), retryResponse.getAttemptTimes(), retryResponse.getLastThrowable().getMessage());
+            }
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);

@@ -95,14 +95,16 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private static List<ProviderSendResponse> sendResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE : successCode;
 		
 		JSONObject jsonObject = JSON.parseObject(result);
-		if(jsonObject == null)
-			return null;
+		if(jsonObject == null) {
+            return null;
+        }
 		
 		List<ProviderSendResponse> list = new ArrayList<>();
 		ProviderSendResponse response = new ProviderSendResponse();
@@ -114,8 +116,9 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
 		// 如果状态码返回正确的才能解析到sid信息
 		if(response.isSuccess()) {
 			JSONObject taskJson = jsonObject.getJSONObject("data");
-			if(MapUtils.isNotEmpty(taskJson) && taskJson.containsKey("taskid"))
-				response.setSid(taskJson.getString("taskid"));
+			if(MapUtils.isNotEmpty(taskJson) && taskJson.containsKey("taskid")) {
+                response.setSid(taskJson.getString("taskid"));
+            }
 		}
 		list.add(response);
 		return list;
@@ -135,14 +138,16 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
 			logger.info("下行状态报告简码：{} =========={}", code(), report);
 			
 			JSONArray array = JSON.parseArray(report);
-			if(CollectionUtils.isEmpty(array))
-				return null;
+			if(CollectionUtils.isEmpty(array)) {
+                return null;
+            }
 			
 			List<SmsMtMessageDeliver> list = new ArrayList<>();
 			SmsMtMessageDeliver response = null;
 			for(Object object : array) {
-				if(object == null)
-					continue;
+				if(object == null) {
+                    continue;
+                }
 				
 				JSONObject jsonobj = (JSONObject)object;
 				response = new SmsMtMessageDeliver();
@@ -185,8 +190,9 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
 			logger.info("上行报告简码：{} =========={}", code(), report);
 			
 			JSONArray array = JSON.parseArray(report);
-			if(CollectionUtils.isEmpty(array))
-				return null;
+			if(CollectionUtils.isEmpty(array)) {
+                return null;
+            }
 			
 			List<SmsMoMessageReceive> list = new ArrayList<>();
 			SmsMoMessageReceive response = null;

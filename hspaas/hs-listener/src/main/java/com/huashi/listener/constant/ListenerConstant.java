@@ -34,12 +34,18 @@ public class ListenerConstant {
 		 * @return
 		 */
 		public static String parse(String code) {
-			if (StringUtils.isEmpty(code))
-				return ParameterEncoding.UTF8.getEncoding();
+			if (StringUtils.isEmpty(code)) {
+                {
+                    return ParameterEncoding.UTF8.getEncoding();
+                }
+            }
 
 			for (ParameterEncoding pf : ParameterEncoding.values()) {
-				if (pf.getShortCode().equalsIgnoreCase(code))
-					return pf.getEncoding();
+				if (pf.getShortCode().equalsIgnoreCase(code)) {
+                    {
+                        return pf.getEncoding();
+                    }
+                }
 			}
 			return ParameterEncoding.UTF8.getEncoding();
 		}

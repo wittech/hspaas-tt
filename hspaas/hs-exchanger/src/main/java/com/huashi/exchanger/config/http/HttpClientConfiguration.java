@@ -88,7 +88,8 @@ public class HttpClientConfiguration {
 		// 请求重试
 		final int retryTime = this.retryTimes;
 		return new HttpRequestRetryHandler() {
-			public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+			@Override
+            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
 				// Do not retry if over max retry
 				// count,如果重试次数超过了retryTime,则不再重试请求
 				if (executionCount >= retryTime) {
@@ -145,7 +146,8 @@ public class HttpClientConfiguration {
 	public ConnectionKeepAliveStrategy connectionKeepAliveStrategy() {
 		return new ConnectionKeepAliveStrategy() {
 
-			public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+			@Override
+            public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
 				// Honor 'keep-alive' header
 				HeaderElementIterator it = new BasicHeaderElementIterator(
 						response.headerIterator(HTTP.CONN_KEEP_ALIVE));

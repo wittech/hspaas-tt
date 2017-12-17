@@ -46,15 +46,18 @@ public class UserBalanceCheckTask {
 	@Scheduled(cron = "0 0/10 * * * ?")
 	public void execute() {
 		List<UserBalance> list = userBalanceService.findAvaibleUserBalace();
-		if(CollectionUtils.isEmpty(list))
-			return;
+		if(CollectionUtils.isEmpty(list)) {
+            return;
+        }
 		
 		for(UserBalance ub : list) {
-			if(!isNeedAndReachWarning(ub))
-				continue;
+			if(!isNeedAndReachWarning(ub)) {
+                continue;
+            }
 			
-			if(!sendMessage(ub.getUserId(), ub.getBalance(), ub.getMobile()))
-				continue;
+			if(!sendMessage(ub.getUserId(), ub.getBalance(), ub.getMobile())) {
+                continue;
+            }
 			
 			//更新余额状态为高警中
 			updateBalanceStatus(ub.getId());
@@ -69,17 +72,20 @@ public class UserBalanceCheckTask {
 	   * @return
 	 */
 	private static boolean isNeedAndReachWarning(UserBalance userBalance) {
-		if(userBalance == null)
-			return false;
+		if(userBalance == null) {
+            return false;
+        }
 		
 		// 如果未设置或者设置为0不告警， 如果手机号码为空也不告警
 		if(userBalance.getThreshold() == null || userBalance.getThreshold() == 0 
-				|| StringUtils.isBlank(userBalance.getMobile()))
-			return false;
+				|| StringUtils.isBlank(userBalance.getMobile())) {
+            return false;
+        }
 		
 		// 如果余额大于预设的阈值，则不告警
-		if(userBalance.getBalance() > userBalance.getThreshold())
-			return false;
+		if(userBalance.getBalance() > userBalance.getThreshold()) {
+            return false;
+        }
 		
 		return true;
 	}

@@ -147,8 +147,9 @@ public class SgipProxySender {
 		try {
 			TParameter tparameter = RequestTemplateHandler.parse(parameter
 					.getParams());
-			if (MapUtils.isEmpty(tparameter))
-				throw new RuntimeException("SGIP 参数信息为空");
+			if (MapUtils.isEmpty(tparameter)) {
+                throw new RuntimeException("SGIP 参数信息为空");
+            }
 
 			SgipManageProxy sgipManageProxy = getSgipManageProxy(parameter);
 			if (sgipManageProxy == null) {
@@ -358,12 +359,14 @@ public class SgipProxySender {
 	 * @return
 	 */
 	public SgipManageProxy getSgipManageProxy(SmsPassageParameter parameter) {
-		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId()))
-			return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+            return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+        }
 
 		boolean isOk = smsProxyManageService.startProxy(parameter);
-		if (!isOk)
-			return null;
+		if (!isOk) {
+            return null;
+        }
 
 		return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
 	}
@@ -376,8 +379,9 @@ public class SgipProxySender {
 	 * @return
 	 */
 	public void mtDeliver(SGIPReportMessage report) {
-		if (report == null)
-			return;
+		if (report == null) {
+            return;
+        }
 
 		try {
 			logger.info("SGIP状态报告数据: {}", report);
@@ -410,8 +414,9 @@ public class SgipProxySender {
 
 			list.add(response);
 
-			if (CollectionUtils.isNotEmpty(list))
-				smsMtDeliverService.doFinishDeliver(list);
+			if (CollectionUtils.isNotEmpty(list)) {
+                smsMtDeliverService.doFinishDeliver(list);
+            }
 
 			// 解析返回结果并返回
 		} catch (Exception e) {
@@ -427,8 +432,9 @@ public class SgipProxySender {
 	 * @param report
 	 */
 	public void moReceive(SGIPDeliverMessage report) {
-		if (report == null)
-			return;
+		if (report == null) {
+            return;
+        }
 
 		SGIPDeliverMessage deliverMsg = (SGIPDeliverMessage) report;
 		try {
@@ -460,8 +466,9 @@ public class SgipProxySender {
 
 			list.add(response);
 
-			if (CollectionUtils.isNotEmpty(list))
-				smsMoMessageService.doFinishReceive(list);
+			if (CollectionUtils.isNotEmpty(list)) {
+                smsMoMessageService.doFinishReceive(list);
+            }
 
 		} catch (Exception e) {
 			logger.error("SGIP上行解析失败 {}", JSON.toJSONString(report), e);

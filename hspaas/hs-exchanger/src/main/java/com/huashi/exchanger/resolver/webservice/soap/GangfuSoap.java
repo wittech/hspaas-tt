@@ -33,8 +33,9 @@ public class GangfuSoap {
 		
 		Set<String> nameSet = prams.keySet();
 		for (String name : nameSet) {
-			if(StringUtils.isEmpty(name))
-				continue;
+			if(StringUtils.isEmpty(name)) {
+                continue;
+            }
 			
 			soapRequestData.append(String.format("<%s xsi:type=\"xsd:string\">%s</%s>", name, prams.get(name), name));
 		}
@@ -64,11 +65,13 @@ public class GangfuSoap {
 //			NodeList envelope = root.getChildNodes();
 			
 			Element e = (Element)root.getLastChild();
-			if(e == null)
-				return "解析数据异常";
+			if(e == null) {
+                return "解析数据异常";
+            }
 			
-			if(StringUtils.isEmpty(e.getTextContent()))
-				return "解析数据为空";
+			if(StringUtils.isEmpty(e.getTextContent())) {
+                return "解析数据为空";
+            }
 			
 			// 回执信息包含SUCCESS:XXXX,需要去除前面的SUCCESS:
 			return e.getTextContent().substring(e.getTextContent().indexOf(":") + 1);

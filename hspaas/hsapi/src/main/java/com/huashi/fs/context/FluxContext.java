@@ -83,11 +83,17 @@ public class FluxContext {
 		}
 
 		public static TelecomCompany parse(String name) {
-			if (StringUtils.isEmpty(name))
-				return null;
+			if (StringUtils.isEmpty(name)) {
+                {
+                    return null;
+                }
+            }
 			for (TelecomCompany tc : TelecomCompany.values()) {
-				if (name.contains(tc.getTitle()))
-					return tc;
+				if (name.contains(tc.getTitle())) {
+                    {
+                        return tc;
+                    }
+                }
 			}
 			return TelecomCompany.OTHER;
 		}
@@ -120,11 +126,17 @@ public class FluxContext {
 		}
 
 		public static TelecomCompany parse(String name) {
-			if (StringUtils.isEmpty(name))
-				return null;
+			if (StringUtils.isEmpty(name)) {
+                {
+                    return null;
+                }
+            }
 			for (TelecomCompany tc : TelecomCompany.values()) {
-				if (name.contains(tc.getTitle()))
-					return tc;
+				if (name.contains(tc.getTitle())) {
+                    {
+                        return tc;
+                    }
+                }
 			}
 			return TelecomCompany.OTHER;
 		}
@@ -214,8 +226,11 @@ public class FluxContext {
 		
 		public static TradeStatus parse(int value){
 			for(TradeStatus ts : TradeStatus.values()){
-				if(ts.getValue() == value)
-					return ts;
+				if(ts.getValue() == value) {
+                    {
+                        return ts;
+                    }
+                }
 			}
 			return null;
 		}
@@ -262,8 +277,11 @@ public class FluxContext {
 		
 		public static FeeType parse(int value){
 			for(FeeType ft : FeeType.values()){
-				if(ft.getValue() == value)
-					return ft;
+				if(ft.getValue() == value) {
+                    {
+                        return ft;
+                    }
+                }
 			}
 			return null;
 		}

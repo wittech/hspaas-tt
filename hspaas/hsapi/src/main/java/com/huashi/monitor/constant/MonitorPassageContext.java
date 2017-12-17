@@ -32,8 +32,11 @@ public class MonitorPassageContext {
 
 		public static String parse(int code) {
 			for(PassagePullRunnintStatus ma : PassagePullRunnintStatus.values()) {
-				if(code == ma.getCode())
-					return ma.getTitle();
+				if(code == ma.getCode()) {
+                    {
+                        return ma.getTitle();
+                    }
+                }
 			}
 			
 			return PassagePullRunnintStatus.NO.getTitle();

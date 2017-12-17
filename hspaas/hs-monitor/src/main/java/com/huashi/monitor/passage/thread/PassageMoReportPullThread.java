@@ -32,7 +32,8 @@ public class PassageMoReportPullThread extends BaseThread implements Runnable {
 		this.passageMonitorService = passageMonitorService;
 	}
 
-	public void run() {
+	@Override
+    public void run() {
 		String key = Thread.currentThread().getName();
 		Boolean isGo = PASSAGES_IN_RUNNING.get(key);
 		if(isGo == null) {
@@ -45,8 +46,9 @@ public class PassageMoReportPullThread extends BaseThread implements Runnable {
 			return;
 		}
 		
-		if(!isServiceAvaiable())
-			return;
+		if(!isServiceAvaiable()) {
+            return;
+        }
 		
 		while (PASSAGES_IN_RUNNING.get(key)) {
 			try {
@@ -90,14 +92,16 @@ public class PassageMoReportPullThread extends BaseThread implements Runnable {
 	 * @return
 	 */
 	private int getSleepTime(SmsPassageAccess smsPassageAccess) {
-		if (smsPassageAccess == null || StringUtils.isEmpty(smsPassageAccess.getParams()))
-			return SLEEP_TIME;
+		if (smsPassageAccess == null || StringUtils.isEmpty(smsPassageAccess.getParams())) {
+            return SLEEP_TIME;
+        }
 
 		try {
 			JSONObject jsonObject = JSON.parseObject(smsPassageAccess.getParams());
 			String str = jsonObject.getString(INTERVAL_KEY);
-			if (StringUtils.isEmpty(str))
-				return SLEEP_TIME;
+			if (StringUtils.isEmpty(str)) {
+                return SLEEP_TIME;
+            }
 
 			return Integer.parseInt(str);
 

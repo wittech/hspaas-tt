@@ -41,25 +41,40 @@ import com.huashi.exchanger.exception.DataEmptyException;
 
 public class HttpClientUtil {
 
-	// 从连接池获取连接的timeout
-	public static final int CONNECTION_REQUEST_TIMEOUT = 5 * 1000;
-	// 和服务器建立连接的timeout
-	public static final int CONNECTION_TIMEOUT = 10 * 1000;
-	// 从服务器读取数据的timeout
-	public static final int SOCKET_TIMEOUT = 60 * 1000;
+	/**
+	 * 从连接池获取连接的timeout
+	 */
+	private static final int CONNECTION_REQUEST_TIMEOUT = 5 * 1000;
+
+	/**
+	 * 和服务器建立连接的timeout
+	 */
+	private static final int CONNECTION_TIMEOUT = 10 * 1000;
+
+	/**
+	 * 从服务器读取数据的timeout
+	 */
+	private static final int SOCKET_TIMEOUT = 60 * 1000;
 	
     
     private volatile static Map<String, CloseableHttpClient> LOCAL_HTTP_CLIENT_FACTORY = new HashMap<String, CloseableHttpClient>();
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
     
-    // 默认最大连接池数量（针对整个域名主机）
+	/**
+	 * 默认最大连接池数量（针对整个域名主机）
+	 */
     public static final Integer DEFAULT_MAX_TOTAL = 300;
-    // 每个路由最大连接数（真正限制）
+
+	/**
+	 * 每个路由最大连接数（真正限制）
+	 */
     public static final Integer DEFAULT_MAX_PER_ROUTE = 300;
 
-    private final static Object syncLock = new Object();
-    // 默认编码
-    public static final String ENCODING_UTF_8 = "UTF-8";
+    private final static Object SYNC_LOCK = new Object();
+	/**
+	 * 默认编码
+	 */
+    private static final String ENCODING_UTF_8 = "UTF-8";
     
     /**
      * 获取HttpClient对象
@@ -80,7 +95,7 @@ public class HttpClientUtil {
         String key = String.format("%s_%d", hostname, port);
     	
     	if(!LOCAL_HTTP_CLIENT_FACTORY.containsKey(key)) {
-    		synchronized (syncLock) {
+    		synchronized (SYNC_LOCK) {
    			   LOCAL_HTTP_CLIENT_FACTORY.put(key, createHttpClient(maxTotal, maxPerRoute));
    			   logger.info("URL:{} 连接池初始化", url);
    			   logger.info("KEY：{} 连接池初始化成功，连接池：{} 连接数： {}", url, key, maxTotal, maxPerRoute);
@@ -182,8 +197,9 @@ public class HttpClientUtil {
             e.printStackTrace();
         } finally {
             try {
-                if (response != null)
+                if (response != null) {
                     response.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -266,8 +282,9 @@ public class HttpClientUtil {
        * @param encoding
      */
     private static void setHttpParameters(HttpPost httpPost, Map<String, Object> params, String encoding){
-    	if (MapUtils.isEmpty(params))
+    	if (MapUtils.isEmpty(params)) {
 			return;
+		}
     	
     	List<NameValuePair> pairs = new ArrayList<NameValuePair>(params.size());
 		for (String key : params.keySet()) {
@@ -290,8 +307,9 @@ public class HttpClientUtil {
        * @param encoding
      */
     private static void setHttpJsonBody(HttpPost httpPost, String jsonBody, String encoding){
-    	if (StringUtils.isBlank(jsonBody))
+    	if (StringUtils.isBlank(jsonBody)) {
 			return;
+		}
     	
     	httpPost.setEntity(new StringEntity(jsonBody, Charset.forName(encoding)));
     }
@@ -300,7 +318,7 @@ public class HttpClientUtil {
      * 
        * TODO 设置HTTP头信息
        * @param httpPost
-       * @param params
+       * @param headers
      */
     private static void setHttpHeaders(HttpPost httpPost, Map<String, Object> headers){
     	setHttpHeaders(httpPost, headers, ENCODING_UTF_8);
@@ -320,7 +338,7 @@ public class HttpClientUtil {
      * 
        * TODO 获取HttpPost
        * @param url
-       * @param readTimeout
+       * @param socketTimeout
        * @return
      */
     public static HttpPost getHttpPost(String url, int socketTimeout) {
@@ -331,9 +349,9 @@ public class HttpClientUtil {
      * 
        * TODO 获取HttpPost
        * @param url
-       * @param conectionTimeout
+       * @param connectionRequestTimeout
        * 		连接URL超时时间
-       * @param readTimeout
+       * @param connectionTimeout
        * 		服务处理超时时间
        * @param socketTimeout
        * 		发送数据超时时间
@@ -342,17 +360,17 @@ public class HttpClientUtil {
     public static HttpPost getHttpPost(String url, int connectionRequestTimeout, int connectionTimeout, int socketTimeout) {
     	HttpPost httpPost = new HttpPost(url);
     	
-    	if(connectionRequestTimeout == 0)
-    		connectionRequestTimeout = CONNECTION_REQUEST_TIMEOUT;
+    	if(connectionRequestTimeout == 0) {
+			connectionRequestTimeout = CONNECTION_REQUEST_TIMEOUT;
+		}
     	
-    	if(connectionTimeout == 0)
-    		connectionTimeout = CONNECTION_TIMEOUT;
+    	if(connectionTimeout == 0) {
+			connectionTimeout = CONNECTION_TIMEOUT;
+		}
     	
-    	if(socketTimeout == 0)
-    		socketTimeout = SOCKET_TIMEOUT;
-		
-//		RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(connectionRequestTimeout)
-//                .setConnectTimeout(connectionTimeout).setSocketTimeout(socketTimeout).build();
+    	if(socketTimeout == 0) {
+			socketTimeout = SOCKET_TIMEOUT;
+		}
 		
 		RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(connectionRequestTimeout)
                 .setConnectTimeout(connectionTimeout).build();
@@ -369,22 +387,24 @@ public class HttpClientUtil {
        * @param encoding
      */
     private static void setHttpHeaders(HttpPost httpPost, Map<String, Object> headers, String encoding){
-    	if (MapUtils.isEmpty(headers))
+    	if (MapUtils.isEmpty(headers)) {
 			return;
+		}
     	
 		for (String key : headers.keySet()) {
 			httpPost.addHeader(new BasicHeader(key, headers.get(key).toString()));
 		}
     }
-    
-    /**
-	 * 
+
+	/**
 	 * TODO HTTP 发送
-	 * 
+	 *
 	 * @param url
-	 *            网络URL
-	 * @param bulider
-	 * 
+	 * @param headers
+	 * @param params
+	 * @param maxTotal
+	 * @param maxPerRoute
+	 * @param socketTimeout
 	 * @return
 	 */
 	public static String post(String url, Map<String,Object> headers, Map<String, Object> params, 
@@ -440,25 +460,28 @@ public class HttpClientUtil {
             }
 		}
 	}
-	
+
 	/**
-     * 
-       * TODO POST请求（默认连接数）
-       * @param url
-       * @param params
-       * @return
-     */
+	 * TODO POST请求（默认连接数）
+	 *
+	 * @param url
+	 * @param headers
+	 * @param jsonBody
+	 * @return
+	 */
     public static String postJson(String url, Map<String,Object> headers, String jsonBody) {
     	return postJson(url, headers, jsonBody, DEFAULT_MAX_TOTAL, DEFAULT_MAX_PER_ROUTE);
     }
-	
+
 	/**
-     * 
-       * TODO POST请求（默认连接数）
-       * @param url
-       * @param params
-       * @return
-     */
+	 * TODO POST请求（默认连接数）
+	 *
+	 * @param url
+	 * @param headers
+	 * @param jsonBody
+	 * @param maxPerRoute
+	 * @return
+	 */
     public static String postJson(String url, Map<String,Object> headers, String jsonBody, Integer maxPerRoute) {
     	return postJson(url, headers, jsonBody, DEFAULT_MAX_TOTAL, maxPerRoute);
     }
@@ -475,8 +498,9 @@ public class HttpClientUtil {
 	   * @return
 	 */
 	public static String postJson(String url, Map<String,Object> headers, String jsonBody, Integer maxTotal, Integer maxPerRoute) {
-		if (StringUtils.isEmpty(jsonBody))
+		if (StringUtils.isEmpty(jsonBody)) {
 			throw new DataEmptyException("用户JSON报文为空");
+		}
 
 		long startTime = System.currentTimeMillis();
 		HttpPost httpPost = getHttpPost(url);
@@ -534,7 +558,6 @@ public class HttpClientUtil {
 	 * 
 	   * TODO 调用连接池大小
 	   * @param url
-	   * @param headers
 	   * @param params
 	   * @param encoding
 	   
@@ -569,8 +592,9 @@ public class HttpClientUtil {
 	 */
 	public static String post(String url, Map<String,Object> headers, Map<String, Object> params, 
 			String encoding, Integer maxTotal, Integer maxPerRoute) {
-		if (MapUtils.isEmpty(params))
+		if (MapUtils.isEmpty(params)) {
 			throw new DataEmptyException("用户参数为空");
+		}
 
 		long startTime = System.currentTimeMillis();
 		HttpPost httpPost = getHttpPost(url);
@@ -622,14 +646,13 @@ public class HttpClientUtil {
             }
 		}
 	}
-	
+
 	/**
-	 * 
-	   * TODO 发送报文信息
-	   * @param url
-	   * @param content
-	   * @param headers
-	   * @return
+	 * TODO 发送报文信息
+	 *
+	 * @param url
+	 * @param content
+	 * @return
 	 */
 	public static String postReport(String url, String content) {
 		return postReport(url, content, ENCODING_UTF_8, null);
@@ -660,8 +683,9 @@ public class HttpClientUtil {
 	 * @return
 	 */
 	public static String postReport(String url, String content, String encoding, Map<String,Object> headers) {
-		if (StringUtils.isEmpty(content))
-			throw new DataEmptyException("用户参数为空");
+		if (StringUtils.isEmpty(content)) {
+            throw new DataEmptyException("用户参数为空");
+        }
 
 		long startTime = System.currentTimeMillis();
 		HttpPost httpPost = getHttpPost(url);

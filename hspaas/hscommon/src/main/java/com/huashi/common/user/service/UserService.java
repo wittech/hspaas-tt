@@ -83,8 +83,11 @@ public class UserService implements IUserService {
 		String password = user.getPassword();
 		
 		// 如果 用户名称为空（主要针对前台）则插入用户的开户手机号码
-		if(StringUtils.isEmpty(user.getUserName()))
-			user.setUserName(user.getMobile());
+		if(StringUtils.isEmpty(user.getUserName())) {
+            {
+                user.setUserName(user.getMobile());
+            }
+        }
 		
 		user.setSalt(SecurityUtil.salt());
 		user.setPassword(SecurityUtil.encode(password, user.getSalt()));
@@ -95,17 +98,29 @@ public class UserService implements IUserService {
 		logger.info("New UserId is {}", user.getId());
 		boolean isSuccess = row > 0;
 		if (isSuccess) {
-			if (profile == null)
-				profile = new UserProfile();
+			if (profile == null) {
+                {
+                    profile = new UserProfile();
+                }
+            }
 			
 			// 设置用户基础信息
 			profile.setUserId(user.getId());
-			if (StringUtils.isEmpty(profile.getFullName()))
-				profile.setFullName(user.getName());
-			if (StringUtils.isEmpty(profile.getCompany()))
-				profile.setCompany(user.getName());
-			if (StringUtils.isEmpty(profile.getMobile()))
-				profile.setMobile(user.getMobile());
+			if (StringUtils.isEmpty(profile.getFullName())) {
+                {
+                    profile.setFullName(user.getName());
+                }
+            }
+			if (StringUtils.isEmpty(profile.getCompany())) {
+                {
+                    profile.setCompany(user.getName());
+                }
+            }
+			if (StringUtils.isEmpty(profile.getMobile())) {
+                {
+                    profile.setMobile(user.getMobile());
+                }
+            }
 
 			profile.setCreateTime(new Date());
 			isSuccess = userProfileMapper.insertSelective(profile) > 0;
@@ -113,8 +128,11 @@ public class UserService implements IUserService {
 
 		// 设置开发者信息
 		UserDeveloper developer = userDeveloperService.saveWithReturn(user.getId());
-		if (developer == null)
-			throw new RuntimeException("开发者数据生成失败");
+		if (developer == null) {
+            {
+                throw new RuntimeException("开发者数据生成失败");
+            }
+        }
 
 		// 设置用户账户信息
 		isSuccess = userAccountService.save(user.getId());
@@ -145,22 +163,31 @@ public class UserService implements IUserService {
 
 	@Override
 	public boolean isUserExistsByEmail(String email) {
-		if (StringUtils.isEmpty(email))
-			return false;
+		if (StringUtils.isEmpty(email)) {
+            {
+                return false;
+            }
+        }
 		return userMapper.selectCountByEmail(email.trim()) > 0;
 	}
 
 	@Override
 	public boolean isUserExistsByMobile(String mobile) {
-		if (StringUtils.isEmpty(mobile))
-			return false;
+		if (StringUtils.isEmpty(mobile)) {
+            {
+                return false;
+            }
+        }
 		return userMapper.selectCountByMobile(mobile.trim()) > 0;
 	}
 
 	@Override
 	public User getByUsername(String username) {
-		if (StringUtils.isEmpty(username))
-			return null;
+		if (StringUtils.isEmpty(username)) {
+            {
+                return null;
+            }
+        }
 		return userMapper.getByUsername(username);
 	}
 
@@ -176,8 +203,11 @@ public class UserService implements IUserService {
 
 	@Override
 	public boolean verify(String username, String password) {
-		if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
-			return false;
+		if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            {
+                return false;
+            }
+        }
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("username", username.trim());
 		params.put("password", password.trim());
@@ -247,10 +277,16 @@ public class UserService implements IUserService {
 	   * @param alarmUserId
 	 */
 	private void setUserProfileLabel(UserProfile up, Integer testUserId, Integer alarmUserId) {
-		if(testUserId != null && up.getUserId() == testUserId)
-			up.setLabel(SystemConfigType.PASSAGE_TEST_USER.name());
-		if(alarmUserId != null && up.getUserId() == alarmUserId)
-			up.setLabel(SystemConfigType.SMS_ALARM_USER.name());
+		if(testUserId != null &&  up.getUserId().equals(testUserId)) {
+            {
+                up.setLabel(SystemConfigType.PASSAGE_TEST_USER.name());
+            }
+        }
+		if(alarmUserId != null && up.getUserId().equals(alarmUserId)) {
+            {
+                up.setLabel(SystemConfigType.SMS_ALARM_USER.name());
+            }
+        }
 	}
 	
 	/**
@@ -261,12 +297,18 @@ public class UserService implements IUserService {
 	public boolean changeStatus(int userId, String status) {
 		try {
 			int result = userMapper.updateUserState(userId, status);
-			if(result > 0)
-				result = userProfileMapper.updateUserProfileState(userId, status);
+			if(result > 0) {
+                {
+                    result = userProfileMapper.updateUserProfileState(userId, status);
+                }
+            }
 			
 			// 刷新REDIS
-			if(result > 0)
-				saveUserModel(userMapper.selectMappingByUserId(userId));
+			if(result > 0) {
+                {
+                    saveUserModel(userMapper.selectMappingByUserId(userId));
+                }
+            }
 			
 			return result > 0;
 		} catch (Exception e) {
@@ -307,7 +349,11 @@ public class UserService implements IUserService {
 			int result = userProfileMapper.updateUserProfileInfo(userProfile);
 			if(result > 0)
 				// 更新REDIS
-				saveUserModel(userMapper.selectMappingByUserId(userProfile.getUserId()));
+            {
+                {
+                    saveUserModel(userMapper.selectMappingByUserId(userProfile.getUserId()));
+                }
+            }
 			return result > 0;
 		} catch (Exception e) {
 			logger.error("更新用户基础信息失败", e);
@@ -366,12 +412,18 @@ public class UserService implements IUserService {
 	@Override
 	public boolean updatePasword(int userId, String plainPassword, String newPassword) {
 		User user = getById(userId);
-		if (user == null)
-			throw new RuntimeException("用户数据异常");
+		if (user == null) {
+            {
+                throw new RuntimeException("用户数据异常");
+            }
+        }
 
 		boolean isSuccess = SecurityUtil.verify(user.getPassword(), plainPassword, user.getSalt());
-		if (!isSuccess)
-			throw new RuntimeException("用户原密码校验失败");
+		if (!isSuccess) {
+            {
+                throw new RuntimeException("用户原密码校验失败");
+            }
+        }
 
 		user.setSalt(SecurityUtil.salt());
 		user.setPassword(SecurityUtil.encode(newPassword, user.getSalt()));
@@ -383,8 +435,11 @@ public class UserService implements IUserService {
 	@Override
 	public boolean passwordExists(int userId, String password) {
 		User user = getById(userId);
-		if (user == null)
-			throw new RuntimeException("用户数据异常");
+		if (user == null) {
+            {
+                throw new RuntimeException("用户数据异常");
+            }
+        }
 		return SecurityUtil.encode(password, user.getSalt()).equals(user.getPassword());
 	}
 
@@ -397,8 +452,11 @@ public class UserService implements IUserService {
 	public UserModel getByUserId(int userId) {
 		try {
 			Object obj = stringRedisTemplate.opsForHash().get(CommonRedisConstant.RED_USER_LIST, userId + "");
-			if (obj != null)
-				return JSON.parseObject(obj.toString(), UserModel.class);
+			if (obj != null) {
+                {
+                    return JSON.parseObject(obj.toString(), UserModel.class);
+                }
+            }
 		} catch (Exception e) {
 			logger.warn("REDIS 加载失败，将于DB加载", e);
 		}
@@ -421,8 +479,11 @@ public class UserService implements IUserService {
 
 		stringRedisTemplate.delete(stringRedisTemplate.keys(CommonRedisConstant.RED_USER_LIST + "*"));
 		for (UserModel userModel : list) {
-			if(!pushToRedis(userModel))
-				return false;
+			if(!pushToRedis(userModel)) {
+                {
+                    return false;
+                }
+            }
 		}
 
 		return true;
@@ -447,8 +508,11 @@ public class UserService implements IUserService {
 	@Override
 	public Set<Integer> findAvaiableUserIds() {
 		List<UserModel> list = findUserModels();
-		if (CollectionUtils.isEmpty(list))
-			return null;
+		if (CollectionUtils.isEmpty(list)) {
+            {
+                return null;
+            }
+        }
 
 		Set<Integer> set = new HashSet<>();
 		for (UserModel um : list) {

@@ -34,8 +34,9 @@ public class SmsMobileBlacklistListener extends MessageListenerAdapter {
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		try {
-			if(message == null)
-				return;
+			if(message == null) {
+                return;
+            }
 			
 			String[] report = message.toString().split(":");
 			if(report==null || report.length==0){

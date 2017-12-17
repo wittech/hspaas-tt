@@ -40,8 +40,11 @@ public class NotificationMessageService implements INotificationMessageService {
 
 	@Override
 	public PaginationVo<NotificationMessage> findUserPage(int userId, String currentPage,int status) {
-		if (userId == 0)
-			return null;
+		if (userId == 0) {
+            {
+                return null;
+            }
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
@@ -51,14 +54,20 @@ public class NotificationMessageService implements INotificationMessageService {
 			params.put("status", status);
 		}
 		int totalRecord = notificationMessageMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            {
+                return null;
+            }
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 		List<NotificationMessage> list = notificationMessageMapper.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            {
+                return null;
+            }
+        }
 
 		return new PaginationVo<NotificationMessage>(list, _currentPage, totalRecord);
 	}
@@ -122,16 +131,22 @@ public class NotificationMessageService implements INotificationMessageService {
 
 	@Override
 	public List<NotificationMessage> findUnReadList(int userId) {
-		if (userId == 0)
-			return null;
+		if (userId == 0) {
+            {
+                return null;
+            }
+        }
 
 		return notificationMessageMapper.findUnReadByUserId(userId);
 	}
 
 	@Override
 	public boolean updateToRead(int userId) {
-		if(userId == 0)
-			return false;
+		if(userId == 0) {
+            {
+                return false;
+            }
+        }
 		try {
 			notificationMessageMapper.updateToRead(userId);
 			return true;

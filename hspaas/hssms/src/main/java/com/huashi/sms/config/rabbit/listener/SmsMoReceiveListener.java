@@ -105,8 +105,9 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 
 		// 回执数据解析后的报文
 		List<SmsMoMessageReceive> receives = smsProviderService.doMoReport(access, jsonObject);
-		if (CollectionUtils.isEmpty(receives))
-			return null;
+		if (CollectionUtils.isEmpty(receives)) {
+            return null;
+        }
 		
 		return receives;
 	}

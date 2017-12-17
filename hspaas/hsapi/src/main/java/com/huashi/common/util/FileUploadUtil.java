@@ -91,8 +91,11 @@ public final class FileUploadUtil {
 	// }
 
 	public static void directory(String path) {
-		if (StringUtils.isEmpty(path))
-			return;
+		if (StringUtils.isEmpty(path)) {
+			{
+				return;
+			}
+		}
 		File f = new File(path);
 		if (!f.exists() || (!f.isDirectory())) {
 			f.mkdir();
@@ -104,7 +107,7 @@ public final class FileUploadUtil {
 		String realPath = "";
 		String fullPath = "";
 		String diskPath = "";
-		long availableSize = 0l;
+		long availableSize = 0L;
 		try {
 			InputStream is = new FileInputStream(file);
 			String ext = filename.substring(filename.indexOf("."), filename.length());
@@ -147,7 +150,7 @@ public final class FileUploadUtil {
 		String realPath = "";
 		String fullPath = "";
 		String diskPath = "";
-		long availableSize = 0l;
+		long availableSize = 0L;
 		try {
 			String ext = filename.substring(filename.indexOf("."), filename.length());
 			imgName = getRandFileName();
@@ -189,7 +192,7 @@ public final class FileUploadUtil {
 		String realPath = "";
 		String fullPath = "";
 		String diskPath = "";
-		long availableSize = 0l;
+		long availableSize = 0L;
 		try {
 			String ext = filename.substring(filename.indexOf("."), filename.length());
 			imgName = getRandFileName();
@@ -270,14 +273,20 @@ public final class FileUploadUtil {
 	}
 
 	public static String parsePathToDiskMode(String fileName) {
-		if (StringUtils.isEmpty(fileName))
-			return "";
+		if (StringUtils.isEmpty(fileName)) {
+			{
+				return "";
+			}
+		}
 		return fileName.replaceAll("/", "\\" + File.separator);
 	}
 
 	public static String parsePathToUrlMode(String fileName) {
-		if (StringUtils.isEmpty(fileName))
-			return "";
+		if (StringUtils.isEmpty(fileName)) {
+			{
+				return "";
+			}
+		}
 		return fileName.replaceAll("\\" + File.separator, "/");
 	}
 

@@ -56,11 +56,15 @@ public class ExchangeOrderService implements IExchangeOrderService {
 			
 			try {
 				boolean isSuccess = false;
-				if (ExchangeType.ACCOUNT_MONEY == model.getExchangeType())
-					isSuccess = userAccountService.exchange(model.getUserId(), model.getFromUserId(), model.getProductFee());
-				else
-					isSuccess = userBalanceService.exchange(model.getUserId(), model.getFromUserId(), model.getPlatformType().getCode(),
-							model.getProductFee().intValue());
+				if (ExchangeType.ACCOUNT_MONEY == model.getExchangeType()) {
+                    {
+                        isSuccess = userAccountService.exchange(model.getUserId(), model.getFromUserId(), model.getProductFee());
+                    }
+                } else {
+                    {
+                        isSuccess = userBalanceService.exchange(model.getUserId(), model.getFromUserId(), model.getPlatformType().getCode(), model.getProductFee().intValue());
+                    }
+                }
 				
 				if(isSuccess) {
 					exchangeOrder.setStatus(ExchangeStatus.COMPLETED.getValue());

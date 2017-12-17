@@ -30,8 +30,11 @@ public class TemplateContext {
 
 		public static ApproveStatus parse(int value) {
 			for (ApproveStatus as : ApproveStatus.values()) {
-				if (as.getValue() == value)
-					return as;
+				if (as.getValue() == value) {
+                    {
+                        return as;
+                    }
+                }
 			}
 			return null;
 		}

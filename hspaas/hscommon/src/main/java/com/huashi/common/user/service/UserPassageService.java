@@ -42,8 +42,11 @@ public class UserPassageService implements IUserPassageService {
 
 	@Override
 	public UserPassage getByUserIdAndType(int userId, int type) {
-		if (userId == 0 || type == 0)
-			return null;
+		if (userId == 0 || type == 0) {
+            {
+                return null;
+            }
+        }
 
 		return userPassageMapper.selectByUserIdAndType(userId, type);
 	}
@@ -92,17 +95,27 @@ public class UserPassageService implements IUserPassageService {
 				// 如果传递的用户通道集合为空，则根据系统参数配置查询平台所有业务的默认可用通道信息，插入值用户通道关系表中
 				List<SystemConfig> systemConfigs = systemConfigService.findByType(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name());
 				
-				if(CollectionUtils.isEmpty(systemConfigs))
-					throw new RuntimeException("没有可用默认通道组，请配置");
+				if(CollectionUtils.isEmpty(systemConfigs)) {
+                    {
+                        throw new RuntimeException("没有可用默认通道组，请配置");
+                    }
+                }
 				
 				Integer type = null;
 				for(SystemConfig config : systemConfigs) {
-					if(UserDefaultPassageGroupKey.SMS_DEFAULT_PASSAGE_GROUP.name().equalsIgnoreCase(config.getAttrKey()))
-						type = PlatformType.SEND_MESSAGE_SERVICE.getCode();
-					else if(UserDefaultPassageGroupKey.FS_DEFAULT_PASSAGE_GROUP.name().equalsIgnoreCase(config.getAttrKey()))
-						type = PlatformType.FLUX_SERVICE.getCode();
-					else if(UserDefaultPassageGroupKey.VS_DEFAULT_PASSAGE_GROUP.name().equalsIgnoreCase(config.getAttrKey()))
-						type = PlatformType.VOICE_SERVICE.getCode();
+					if(UserDefaultPassageGroupKey.SMS_DEFAULT_PASSAGE_GROUP.name().equalsIgnoreCase(config.getAttrKey())) {
+                        {
+                            type = PlatformType.SEND_MESSAGE_SERVICE.getCode();
+                        }
+                    } else if(UserDefaultPassageGroupKey.FS_DEFAULT_PASSAGE_GROUP.name().equalsIgnoreCase(config.getAttrKey())) {
+                        {
+                            type = PlatformType.FLUX_SERVICE.getCode();
+                        }
+                    } else if(UserDefaultPassageGroupKey.VS_DEFAULT_PASSAGE_GROUP.name().equalsIgnoreCase(config.getAttrKey())) {
+                        {
+                            type = PlatformType.VOICE_SERVICE.getCode();
+                        }
+                    }
 					
 					save(StringUtils.isEmpty(config.getAttrValue()) ? null : Integer.parseInt(config.getAttrValue()), userId, type);
 				}
@@ -117,14 +130,20 @@ public class UserPassageService implements IUserPassageService {
 			}
 			
 			// busiCodes 为空则表明，传递的通道集合包含平台所有业务的通道信息，无需补齐
-			if(CollectionUtils.isEmpty(busiCodes))
-				return true;
+			if(CollectionUtils.isEmpty(busiCodes)) {
+                {
+                    return true;
+                }
+            }
 			
 			// 如果此值不为空，则表明该业务没有设置通道，需要查询是否存在默认通道
 			for(Integer code : busiCodes){
 				String key = UserDefaultPassageGroupKey.key(code);
-				if(StringUtils.isEmpty(key))
-					continue;
+				if(StringUtils.isEmpty(key)) {
+                    {
+                        continue;
+                    }
+                }
 				
 				SystemConfig config = systemConfigService.findByTypeAndKey(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name(), key);
 				if(config == null) {
@@ -144,8 +163,11 @@ public class UserPassageService implements IUserPassageService {
 	@Override
 	@Transactional(readOnly = false, rollbackFor = RuntimeException.class)
 	public boolean save(int userId, List<UserPassage> userPassages) {
-		if(CollectionUtils.isEmpty(userPassages))
-			return false;
+		if(CollectionUtils.isEmpty(userPassages)) {
+            {
+                return false;
+            }
+        }
 		
 		try {
 			for(UserPassage userPassage : userPassages) {

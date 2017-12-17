@@ -55,8 +55,11 @@ public class MessageTemplateController extends BaseController {
 		try {
 			template.setAppType(AppType.WEB.getCode());
 			template.setUserId(getCurrentUserId());
-			if(smsMessageTemplateService.save(template))
-				return new HttpResponse(true);
+			if(smsMessageTemplateService.save(template)) {
+                {
+                    return new HttpResponse(true);
+                }
+            }
 			
 			return new HttpResponse(false, "操作失败");
 		} catch (Exception e) {

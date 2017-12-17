@@ -139,8 +139,11 @@ public class HostWhiteListService implements IHostWhiteListService {
 	@Override
 	public PaginationVo<HostWhiteList> findPage(int userId, String ip,
 			String startDate, String endDate, String currentPage) {
-		if (userId <= 0)
-			return null;
+		if (userId <= 0) {
+            {
+                return null;
+            }
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
@@ -153,15 +156,21 @@ public class HostWhiteListService implements IHostWhiteListService {
 		params.put("endDate", endDate);
 
 		int totalRecord = hostWhiteListMapper.selectCount(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            {
+                return null;
+            }
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<HostWhiteList> list = hostWhiteListMapper.findPageList(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            {
+                return null;
+            }
+        }
 		return new PaginationVo<HostWhiteList>(list, _currentPage, totalRecord);
 	}
 	
@@ -194,8 +203,11 @@ public class HostWhiteListService implements IHostWhiteListService {
 		try {
 			Object ips = stringRedisTemplate.opsForHash().get(CommonRedisConstant.RED_USER_WHITE_HOST, 
 					String.valueOf(userId));
-			if(ips != null)
-				return ips.toString().contains(ip);
+			if(ips != null) {
+                {
+                    return ips.toString().contains(ip);
+                }
+            }
 			
 		} catch (Exception e) {
 			logger.warn("REDIS 操作用户服务器IP配置失败", e);
@@ -239,8 +251,11 @@ public class HostWhiteListService implements IHostWhiteListService {
 		}
 			
 		stringRedisTemplate.delete(CommonRedisConstant.RED_USER_WHITE_HOST);
-		for(HostWhiteList hwl : list)
-			pushToRedis(hwl.getUserId(), hwl.getIp());
+		for(HostWhiteList hwl : list) {
+            {
+                pushToRedis(hwl.getUserId(), hwl.getIp());
+            }
+        }
 		
 		return true;
 	}

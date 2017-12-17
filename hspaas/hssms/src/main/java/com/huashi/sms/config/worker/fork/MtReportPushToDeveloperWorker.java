@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.context.ApplicationContext;
 
+import com.alibaba.fastjson.JSONObject;
 import com.huashi.sms.config.worker.AbstractWorker;
 import com.huashi.sms.record.service.ISmsMtPushService;
 
@@ -15,7 +16,7 @@ import com.huashi.sms.record.service.ISmsMtPushService;
   * @version V1.0   
   * @date 2017年12月5日 下午5:46:12
  */
-public class MtReportPushToDeveloperWorker extends AbstractWorker implements Runnable {
+public class MtReportPushToDeveloperWorker extends AbstractWorker<JSONObject> {
 
 	private String developerPushQueueName;
 	
@@ -28,11 +29,11 @@ public class MtReportPushToDeveloperWorker extends AbstractWorker implements Run
 		this.developerPushQueueName = developerPushQueueName;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void operate(List list) {
-		if(CollectionUtils.isEmpty(list))
-			return;
+	protected void operate(List<JSONObject> list) {
+		if(CollectionUtils.isEmpty(list)) {
+            return;
+        }
 		
 		try {
 			getInstance(ISmsMtPushService.class).pushMessageBodyToDeveloper(list);

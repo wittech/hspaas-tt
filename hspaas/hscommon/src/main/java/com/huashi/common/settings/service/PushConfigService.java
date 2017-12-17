@@ -42,8 +42,11 @@ public class PushConfigService implements IPushConfigService {
 
 	@Override
 	public boolean update(PushConfig record) {
-		if(record.getId() == null)
-			return false;
+		if(record.getId() == null) {
+            {
+                return false;
+            }
+        }
 		
 		record.setModifyTime(new Date());
 		pushToRedis(record.getUserId(), record.getType(), record);
@@ -70,8 +73,11 @@ public class PushConfigService implements IPushConfigService {
 	public PushConfig getByUserId(int userId, int type) {
 		try {
 			Object object = stringRedisTemplate.opsForValue().get(getAssistKey(userId, type));
-			if(object != null)
-				return JSON.parseObject(object.toString(), PushConfig.class);
+			if(object != null) {
+                {
+                    return JSON.parseObject(object.toString(), PushConfig.class);
+                }
+            }
 			
 		} catch (Exception e) {
 			logger.warn("REDIS 查询推送配置失败", e);
@@ -83,11 +89,17 @@ public class PushConfigService implements IPushConfigService {
 	public PushConfig getPushUrl(int userId, int callbackUrlType,
 			String customUrl) {
 		PushConfig config = getByUserId(userId, callbackUrlType);
-		if(config == null)
-			return null;
+		if(config == null) {
+            {
+                return null;
+            }
+        }
 		
-		if(config.getStatus() == PushConfigStatus.YES_WITH_POST.getCode())
-			config.setUrl(customUrl);
+		if(config.getStatus() == PushConfigStatus.YES_WITH_POST.getCode()) {
+            {
+                config.setUrl(customUrl);
+            }
+        }
 		
 		return config;
 	}
@@ -139,8 +151,11 @@ public class PushConfigService implements IPushConfigService {
 			
 			//查询修改后数据存储到缓存中
 			PushConfig cf = pushConfigMapper.selectByUserIdAndType(pushConFig.getUserId(),pushConFig.getType());
-			if(cf == null)
-				return 0;
+			if(cf == null) {
+                {
+                    return 0;
+                }
+            }
 			
 			pushToRedis(cf.getUserId(), cf.getType(), cf);
 		} catch (Exception e) {

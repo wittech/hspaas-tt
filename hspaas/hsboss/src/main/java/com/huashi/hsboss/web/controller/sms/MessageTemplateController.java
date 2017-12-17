@@ -109,10 +109,15 @@ public class MessageTemplateController extends BaseController {
             	String forbiddenWords = task.getForbiddenWords().replaceAll(",", "|");
             	
             	// 如果原有模板已经有敏感词需要追加本次 导白敏感词，没有则直接加入本次导白敏感词
-            	if(StringUtils.isBlank(messageTemplate.getWhiteWord()))
-                 	messageTemplate.setWhiteWord(forbiddenWords);
-                else
-                	messageTemplate.setWhiteWord(messageTemplate.getWhiteWord() + "|" + forbiddenWords);
+            	if(StringUtils.isBlank(messageTemplate.getWhiteWord())) {
+                    {
+                        messageTemplate.setWhiteWord(forbiddenWords);
+                    }
+                } else {
+                    {
+                        messageTemplate.setWhiteWord(messageTemplate.getWhiteWord() + "|" + forbiddenWords);
+                    }
+                }
             }
         }
         

@@ -58,12 +58,18 @@ public class OpenApiCode {
 		}
 		
 		public static CommonApiCode parse(String code) {
-			if(StringUtils.isEmpty(code))
-				return null;
+			if(StringUtils.isEmpty(code)) {
+                {
+                    return null;
+                }
+            }
 			 
 			for(CommonApiCode api : CommonApiCode.values()) {
-				if(api.getCode().equalsIgnoreCase(code))
-					return api;
+				if(api.getCode().equalsIgnoreCase(code)) {
+                    {
+                        return api;
+                    }
+                }
 			}
 			return null;
 		}
@@ -105,12 +111,18 @@ public class OpenApiCode {
 		}
 		
 		public static FluxApiCode parse(String code) {
-			if(StringUtils.isEmpty(code))
-				return null;
+			if(StringUtils.isEmpty(code)) {
+                {
+                    return null;
+                }
+            }
 			 
 			for(FluxApiCode api : FluxApiCode.values()) {
-				if(api.getCode().equalsIgnoreCase(code))
-					return api;
+				if(api.getCode().equalsIgnoreCase(code)) {
+                    {
+                        return api;
+                    }
+                }
 			}
 			return null;
 		}
@@ -151,12 +163,18 @@ public class OpenApiCode {
 		}
 		
 		public static VoiceApiCode parse(String code) {
-			if(StringUtils.isEmpty(code))
-				return null;
+			if(StringUtils.isEmpty(code)) {
+                {
+                    return null;
+                }
+            }
 			 
 			for(VoiceApiCode api : VoiceApiCode.values()) {
-				if(api.getCode().equalsIgnoreCase(code))
-					return api;
+				if(api.getCode().equalsIgnoreCase(code)) {
+                    {
+                        return api;
+                    }
+                }
 			}
 			return null;
 		}
@@ -215,12 +233,18 @@ public class OpenApiCode {
 		}
 		
 		public static SmsPushCode parse(String code) {
-			if(StringUtils.isEmpty(code))
-				return null;
+			if(StringUtils.isEmpty(code)) {
+                {
+                    return null;
+                }
+            }
 			 
 			for(SmsPushCode api : SmsPushCode.values()) {
-				if(api.getCode().equalsIgnoreCase(code))
-					return api;
+				if(api.getCode().equalsIgnoreCase(code)) {
+                    {
+                        return api;
+                    }
+                }
 			}
 			return null;
 		}

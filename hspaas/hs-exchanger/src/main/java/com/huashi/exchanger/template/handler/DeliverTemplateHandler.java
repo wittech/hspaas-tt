@@ -45,11 +45,13 @@ public class DeliverTemplateHandler {
 //			}
 
 			String rport = report.getString(ParameterFilterContext.PARAMETER_NAME_IN_STREAM);
-			if (StringUtils.isEmpty(rport))
-				return null;
+			if (StringUtils.isEmpty(rport)) {
+                return null;
+            }
 			List<JSONObject> array = JSON.parseObject(rport, new TypeReference<List<JSONObject>>(){});
-			if(CollectionUtils.isEmpty(array))
-				return null;
+			if(CollectionUtils.isEmpty(array)) {
+                return null;
+            }
 			
 			SmsMtMessageDeliver response = null;
 			for(JSONObject prameterReport : array) {

@@ -65,8 +65,11 @@ public class EmailSendUtil {
 			}
 			helper.setFrom(new InternetAddress(nick + " <" + sendEmailAddress + ">"));
 			helper.setTo(to.split(";"));
-			if (StringUtils.isNotEmpty(cc))
-				helper.setCc(cc.split(";"));
+			if (StringUtils.isNotEmpty(cc)) {
+                {
+                    helper.setCc(cc.split(";"));
+                }
+            }
 			helper.setSubject(subject);
 			helper.setText(content, true);// true为支持html类型
 			mailSender.send(mimeMessage);
@@ -127,10 +130,16 @@ public class EmailSendUtil {
 			logger.info("收件人邮箱为空");
 			throw new SendException("收件人邮箱为空");
 		}
-		if (StringUtils.isEmpty(subject))
-			logger.info("邮件主题主题为空");
-		if (StringUtils.isEmpty(content))
-			logger.info("邮件内容为空");
+		if (StringUtils.isEmpty(subject)) {
+            {
+                logger.info("邮件主题主题为空");
+            }
+        }
+		if (StringUtils.isEmpty(content)) {
+            {
+                logger.info("邮件内容为空");
+            }
+        }
 		emailPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
 	}
 	
@@ -139,10 +148,16 @@ public class EmailSendUtil {
 			logger.info("收件人邮箱为空");
 			throw new SendException("收件人邮箱为空");
 		}
-		if (StringUtils.isEmpty(subject))
-			logger.info("邮件主题主题为空");
-		if (StringUtils.isEmpty(content))
-			logger.info("邮件内容为空");
+		if (StringUtils.isEmpty(subject)) {
+            {
+                logger.info("邮件主题主题为空");
+            }
+        }
+		if (StringUtils.isEmpty(content)) {
+            {
+                logger.info("邮件内容为空");
+            }
+        }
 		emailPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
 	}
 

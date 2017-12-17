@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="bf7a43fb-aa36-4714-b119-959b9bbaa41c" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/validator/ValidateContext.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/config/PassageInitializeRunner.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/config/SchedulingRunner.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/config/SchedulingRunner.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/bill/constant/SmsBillConstant.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/bill/model/SmsP2PBillModel.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/target/classes/com/huashi/developer/config/ApplicationConfiguration.class" afterPath="$PROJECT_DIR$/hspaas/hs-developer/target/classes/com/huashi/developer/config/ApplicationConfiguration.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/target/classes/com/huashi/developer/util/ApiUtil.class" afterPath="$PROJECT_DIR$/hspaas/hs-developer/target/classes/com/huashi/developer/util/ApiUtil.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/target/classes/com/huashi/developer/util/IpUtil.class" afterPath="$PROJECT_DIR$/hspaas/hs-developer/target/classes/com/huashi/developer/util/IpUtil.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/bill/service/BillService.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/bill/service/BillService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/order/service/ExchangeOrderService.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/order/service/ExchangeOrderService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/order/service/TradeOrderInvoiceService.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/order/service/TradeOrderInvoiceService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/order/service/TradeOrderService.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/order/service/TradeOrderService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/pay/service/AlipayService.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/pay/service/AlipayService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/pay/service/HttpUtil.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/pay/service/HttpUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/pay/service/MD5Util.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/pay/service/MD5Util.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/product/service/ComboService.java" afterPath="$PROJECT_DIR$/hspaas/hs-bill/src/main/java/com/huashi/bill/product/service/ComboService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/api/BasicApiSupport.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/api/BasicApiSupport.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/api/SmsApi.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/api/SmsApi.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/config/SwaggerConfiguration.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/config/SwaggerConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/exception/BaseGlobalExceptionHandler.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/exception/BaseGlobalExceptionHandler.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/prervice/PassportPervice.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/prervice/PassportPervice.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/prervice/SmsPrervice.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/prervice/SmsPrervice.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/util/EncodingUtil.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/util/EncodingUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/validator/SmsP2PTemplateValidator.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/validator/SmsP2PTemplateValidator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/validator/SmsP2PValidator.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/validator/SmsP2PValidator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/validator/Validator.java" afterPath="$PROJECT_DIR$/hspaas/hs-developer/src/main/java/com/huashi/developer/validator/Validator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/config/RedisObjectSerializer.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/config/RedisObjectSerializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/config/VisitLogAop.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/config/VisitLogAop.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/config/http/HttpClientConfiguration.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/config/http/HttpClientConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/cmpp/v2/CmppProxySender.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/cmpp/v2/CmppProxySender.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/HttpClientUtil.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/HttpClientUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/HttpResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/HttpResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/AbstractPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/AbstractPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/cmccopen/CmccopenPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/cmccopen/CmccopenPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/dianji/DianjiPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/dianji/DianjiPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/huashi/HspaasPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/huashi/HspaasPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/huaxin/HuaxinPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/huaxin/HuaxinPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/kuanxin/KuanxinPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/kuanxin/KuanxinPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/lanjinglz/LanjinglianzhongPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/lanjinglz/LanjinglianzhongPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/maiyuan/MaiyuanPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/maiyuan/MaiyuanPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/wukong/WukongPassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/wukong/WukongPassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/yescloudtree/YescloudtreePassageResolver.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/http/custom/yescloudtree/YescloudtreePassageResolver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/sgip/SgipProxySender.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/sgip/SgipProxySender.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/smgp/SmgpProxySender.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/smgp/SmgpProxySender.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/webservice/soap/GangfuSoap.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/webservice/soap/GangfuSoap.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/webservice/util/SoapUtil.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/resolver/webservice/util/SoapUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/service/SmsProviderService.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/service/SmsProviderService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/service/SmsProxyManageService.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/service/SmsProxyManageService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/handler/DeliverTemplateHandler.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/handler/DeliverTemplateHandler.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/handler/RequestTemplateHandler.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/handler/RequestTemplateHandler.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/handler/ResponseTemplateHandler.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/handler/ResponseTemplateHandler.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/vo/TParameter.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/vo/TParameter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/vo/TPosition.java" afterPath="$PROJECT_DIR$/hspaas/hs-exchanger/src/main/java/com/huashi/exchanger/template/vo/TPosition.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/config/AuthenticateInterceptor.java" afterPath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/config/AuthenticateInterceptor.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/config/VisitLogAop.java" afterPath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/config/VisitLogAop.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/constant/ListenerConstant.java" afterPath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/constant/ListenerConstant.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/task/PassageMoReportPullTask.java" afterPath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/task/PassageMoReportPullTask.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/task/PassageStatusReportPullTask.java" afterPath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/task/PassageStatusReportPullTask.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/util/ParameterUtil.java" afterPath="$PROJECT_DIR$/hspaas/hs-listener/src/main/java/com/huashi/listener/util/ParameterUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/config/redis/RedisConfiguration.java" afterPath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/config/redis/RedisConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/config/redis/RedisObjectSerializer.java" afterPath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/config/redis/RedisObjectSerializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/service/PassageMonitorService.java" afterPath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/service/PassageMonitorService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/task/UserBalanceCheckTask.java" afterPath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/task/UserBalanceCheckTask.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/thread/PassageMoReportPullThread.java" afterPath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/thread/PassageMoReportPullThread.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/thread/PassageMtReportPullThread.java" afterPath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/thread/PassageMtReportPullThread.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/thread/PassageReachRateReportPullThread.java" afterPath="$PROJECT_DIR$/hspaas/hs-monitor/src/main/java/com/huashi/monitor/passage/thread/PassageReachRateReportPullThread.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/bill/service/IBillService.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/bill/service/IBillService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/order/constant/TradeOrderContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/order/constant/TradeOrderContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/pay/constant/PayContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/bill/pay/constant/PayContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/service/context/OpinionFeedBackContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/service/context/OpinionFeedBackContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/settings/context/SettingsContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/settings/context/SettingsContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/third/util/MobileLocalUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/third/util/MobileLocalUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/user/service/IUserBalanceService.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/user/service/IUserBalanceService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/user/service/IUserSmsConfigService.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/user/service/IUserSmsConfigService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/DateUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/DateUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/FileUploadUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/FileUploadUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/MobileNumberCatagoryUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/MobileNumberCatagoryUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/PatternUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/PatternUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/SecurityUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/SecurityUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/VerifyCodeUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/util/VerifyCodeUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/vo/BossPaginationVo.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/vo/BossPaginationVo.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/vo/PaginationVo.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/common/vo/PaginationVo.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/constants/CommonContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/constants/CommonContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/constants/OpenApiCode.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/constants/OpenApiCode.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/exchanger/constant/ParameterFilterContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/exchanger/constant/ParameterFilterContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/fs/context/FluxContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/fs/context/FluxContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/monitor/constant/MonitorConstant.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/monitor/constant/MonitorConstant.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/monitor/constant/MonitorPassageContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/monitor/constant/MonitorPassageContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/passage/domain/SmsPassageReachrateSettings.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/passage/domain/SmsPassageReachrateSettings.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/settings/constant/MobileBlacklistType.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/settings/constant/MobileBlacklistType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/settings/constant/SmsSettingsContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/settings/constant/SmsSettingsContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/task/context/MQConstant.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/task/context/MQConstant.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/task/context/TaskContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/task/context/TaskContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/template/context/TemplateContext.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/sms/template/context/TemplateContext.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/util/HttpClientUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/util/HttpClientUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/util/IDCardUtil.java" afterPath="$PROJECT_DIR$/hspaas/hsapi/src/main/java/com/huashi/util/IDCardUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/config/InitConfig.java" afterPath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/config/InitConfig.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/config/plugin/spring/IocInterceptor.java" afterPath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/config/plugin/spring/IocInterceptor.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/config/plugin/spring/SpringPlugin.java" afterPath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/config/plugin/spring/SpringPlugin.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/util/CaptcharRender.java" afterPath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/util/CaptcharRender.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/web/controller/report/SmsReportController.java" afterPath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/web/controller/report/SmsReportController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/web/controller/sms/MessageTemplateController.java" afterPath="$PROJECT_DIR$/hspaas/hsboss/src/main/java/com/huashi/hsboss/web/controller/sms/MessageTemplateController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsboss/target/m2e-wtp/web-resources/META-INF/maven/com.huashi/hsboss/pom.properties" afterPath="$PROJECT_DIR$/hspaas/hsboss/target/m2e-wtp/web-resources/META-INF/maven/com.huashi/hsboss/pom.properties" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/config/datasource/DruidConfiguration.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/config/datasource/DruidConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/config/email/EmailConfiguration.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/config/email/EmailConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/config/redis/RedisObjectSerializer.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/config/redis/RedisObjectSerializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/finance/service/InvoiceRecordService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/finance/service/InvoiceRecordService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/EmailSendService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/EmailSendService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/EmailTemplateService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/EmailTemplateService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/EmailVerifyService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/EmailVerifyService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/MessageSendService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/MessageSendService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/MessageTemplateService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/MessageTemplateService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/NotificationMessageService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/service/NotificationMessageService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/util/EmailSendUtil.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/util/EmailSendUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/util/MessageSendUtil.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/notice/util/MessageSendUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/service/service/OpinionFeedBackService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/service/service/OpinionFeedBackService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/AddressBookService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/AddressBookService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/HostWhiteListService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/HostWhiteListService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/ProvinceService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/ProvinceService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/PushConfigService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/PushConfigService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/SystemConfigService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/settings/service/SystemConfigService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/third/service/MobileLocalService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/third/service/MobileLocalService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/LoginService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/LoginService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/RegisterService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/RegisterService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserAccountService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserAccountService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserBalanceService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserBalanceService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserDeveloperService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserDeveloperService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserPassageService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserPassageService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserSmsConfigService.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/service/UserSmsConfigService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/util/ExcelUtil.java" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/java/com/huashi/common/user/util/ExcelUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hscommon/src/main/resources/application.properties" afterPath="$PROJECT_DIR$/hspaas/hscommon/src/main/resources/application.properties" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsfs/src/main/java/com/huashi/fs/order/service/FluxOrderService.java" afterPath="$PROJECT_DIR$/hspaas/hsfs/src/main/java/com/huashi/fs/order/service/FluxOrderService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsfs/src/main/java/com/huashi/fs/product/service/FluxProductService.java" afterPath="$PROJECT_DIR$/hspaas/hsfs/src/main/java/com/huashi/fs/product/service/FluxProductService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/HsSmsApplication.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/HsSmsApplication.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/VisitLogAop.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/VisitLogAop.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/constant/SmsRedisConstant.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/constant/SmsRedisConstant.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/pubsub/SmsMessageTemplateListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/pubsub/SmsMessageTemplateListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/pubsub/SmsMobileBlacklistListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/pubsub/SmsMobileBlacklistListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/serializer/RedisObjectSerializer.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/cache/redis/serializer/RedisObjectSerializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/converter/FastJsonMessageConverter.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/converter/FastJsonMessageConverter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/datasource/DruidConfiguration.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/datasource/DruidConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/RabbitMessageQueueManager.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/RabbitMessageQueueManager.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/RabbitMqConfiguration.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/RabbitMqConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/BaseListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/BaseListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsMoReceiveListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsMoReceiveListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsWaitMoPushListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsWaitMoPushListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsWaitReceiptListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsWaitReceiptListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsWaitSubmitListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/SmsWaitSubmitListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/packets/SmsP2PWaitPacketsListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/packets/SmsP2PWaitPacketsListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/packets/SmsWaitPacketsListener.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/rabbit/listener/packets/SmsWaitPacketsListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/runner/SmsInitializeRunner.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/runner/SmsInitializeRunner.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/AbstractWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/AbstractWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsDeliverPersistenceWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsDeliverPersistenceWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsMoPersistenceWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsMoPersistenceWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsMoPushPersistenceWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsMoPushPersistenceWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsMtPushPersistenceWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsMtPushPersistenceWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsSubmitPersistenceWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsSubmitPersistenceWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsTaskPersistenceWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/db/SmsTaskPersistenceWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/fork/MtReportFailoverPushWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/fork/MtReportFailoverPushWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/fork/MtReportPushToDeveloperWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/fork/MtReportPushToDeveloperWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/hook/ShutdownHookWorker.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/config/worker/hook/ShutdownHookWorker.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageAccessService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageAccessService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageMessageTemplateService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageMessageTemplateService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageReachrateSettingsService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageReachrateSettingsService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/passage/service/SmsPassageService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/context/ResCode.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/context/ResCode.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsApiFailedRecordService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsApiFailedRecordService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMoMessageService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMoMessageService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMtDeliverService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMtDeliverService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMtPushService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMtPushService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMtSubmitService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/record/service/SmsMtSubmitService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/report/service/SmsSubmitHourReportService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/report/service/SmsSubmitHourReportService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/filter/SensitiveWordFilter.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/filter/SensitiveWordFilter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/filter/WordFilterSet.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/filter/WordFilterSet.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/filter/WordNode.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/filter/WordNode.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/ForbiddenWordsService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/ForbiddenWordsService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/SmsMobileBlackListService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/SmsMobileBlackListService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/SmsMobileTablesService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/SmsMobileTablesService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/SmsMobileWhiteListService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/settings/service/SmsMobileWhiteListService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/signature/service/SignatureExtNoService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/signature/service/SignatureExtNoService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/task/model/SmsRoutePassage.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/task/model/SmsRoutePassage.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/task/service/SmsMtTaskService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/task/service/SmsMtTaskService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/template/service/SmsTemplateService.java" afterPath="$PROJECT_DIR$/hspaas/hssms/src/main/java/com/huashi/sms/template/service/SmsTemplateService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsvs/src/main/java/com/huashi/vs/record/service/RecordService.java" afterPath="$PROJECT_DIR$/hspaas/hsvs/src/main/java/com/huashi/vs/record/service/RecordService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/BaseController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/BaseController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/IndexController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/IndexController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/RegisterController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/RegisterController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/VerifyCodeController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/VerifyCodeController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/fs/recharge/RechargeController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/fs/recharge/RechargeController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/notice/NotificationMessageController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/notice/NotificationMessageController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/sms/record/SmsRecordController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/sms/record/SmsRecordController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/sms/template/MessageTemplateController.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/controller/sms/template/MessageTemplateController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/filter/AuthenticationInterceptor.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/filter/AuthenticationInterceptor.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/filter/XssFilter.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/filter/XssFilter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/prervice/common/SearchPrervice.java" afterPath="$PROJECT_DIR$/hspaas/hsweb/src/main/java/com/huashi/web/prervice/common/SearchPrervice.java" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="10" />
+    <option name="y" value="20" />
+    <option name="width" value="1346" />
+    <option name="height" value="688" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="hspaas" type="b2602c69:ProjectViewProjectNode" />
+              <item name="hspaas" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="hspaas" type="b2602c69:ProjectViewProjectNode" />
+              <item name="hspaas" type="462c0819:PsiDirectoryNode" />
+              <item name="hspaas" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
+      <pane id="AndroidView" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="settings.editor.selected.configurable" value="EclipseFormatter" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/hspaas" />
+    <property name="nodejs_interpreter_path" value="C:/Program Files/nodejs/node" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <module />
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file id="idea.log" enabled="true" />
+    </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+    </configuration>
+    <configuration default="true" type="TestNG" factoryName="TestNG">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+    </configuration>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bf7a43fb-aa36-4714-b119-959b9bbaa41c" name="Default" comment="" />
+      <created>1513344635384</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1513344635384</updated>
+      <workItem from="1513344636940" duration="14000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="14000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
+    <layout>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24962178" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

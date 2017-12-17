@@ -46,8 +46,11 @@ public class ParameterUtil {
 
 		for (String key : properties.keySet()) {
 			if (properties.get(key) == null || properties.get(key).length == 0
-					|| StringUtils.isEmpty(properties.get(key)[0]))
-				continue;
+					|| StringUtils.isEmpty(properties.get(key)[0])) {
+                {
+                    continue;
+                }
+            }
 
 			dto.put(key, java.net.URLDecoder.decode(properties.get(key)[0], ParameterEncoding.parse(encoding)));
 		}
@@ -68,8 +71,11 @@ public class ParameterUtil {
 	 */
 	public static JSONObject transformInGetMode(String qureyString, String encoding)
 			throws UnsupportedEncodingException {
-		if(StringUtils.isEmpty(qureyString))
-			return null;
+		if(StringUtils.isEmpty(qureyString)) {
+            {
+                return null;
+            }
+        }
 		
 		String queryStr = java.net.URLDecoder.decode(qureyString , ParameterEncoding.parse(encoding));
 		
@@ -136,8 +142,11 @@ public class ParameterUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> getParameterMapInGetMethod(String parameterLocation) {
-		if (StringUtils.isEmpty(parameterLocation))
-			return null;
+		if (StringUtils.isEmpty(parameterLocation)) {
+            {
+                return null;
+            }
+        }
 
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		try {
@@ -146,11 +155,17 @@ public class ParameterUtil {
 				String param[] = pair.split("[=]");
 				String key = null;
 				String value = null;
-				if (param.length > 0)
-					key = param[0];
+				if (param.length > 0) {
+                    {
+                        key = param[0];
+                    }
+                }
 
-				if (param.length > 1)
-					value = param[1];
+				if (param.length > 1) {
+                    {
+                        value = param[1];
+                    }
+                }
 
 				if (parameters.containsKey(key)) {
 					Object obj = parameters.get(key);

@@ -76,8 +76,11 @@ public class BaseController {
 	 * @return
 	 */
 	protected int getCurrentUserId() {
-		if (getSessionUser() == null)
-			throw new RuntimeException("当前登录人信息为空，无法获取UserId.");
+		if (getSessionUser() == null) {
+            {
+                throw new RuntimeException("当前登录人信息为空，无法获取UserId.");
+            }
+        }
 
 		return getSessionUser().getId();
 	}

@@ -22,8 +22,11 @@ public class BaseGlobalExceptionHandler {
 
 	protected ModelAndView handleError(HttpServletRequest req, HttpServletResponse rsp, Exception e, String viewName,
 			HttpStatus status) throws Exception {
-		if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null)
-			throw e;
+		if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
+            {
+                throw e;
+            }
+        }
 
 		String errorMsg = e instanceof ValidateException ? e.getMessage() : DEFAULT_ERROR_MESSAGE;
 		String errorStack = Throwables.getStackTraceAsString(e);

@@ -96,8 +96,9 @@ public class SmsMobileTablesService implements ISmsMobileTablesService {
 			int maxSpeed, int maxLimit) {
 		
 		// 如果提交频率为0并且一天内上限大于等于9999则不限制提交任何（也无需记录用户访问轨迹） edit by 20170813
-		if(maxSpeed == 0 && maxLimit >= 9999)
-			return NICE_PASSED;
+		if(maxSpeed == 0 && maxLimit >= 9999) {
+            return NICE_PASSED;
+        }
 		
 		Integer _sendTotalCount = null;
 		try {
@@ -113,12 +114,14 @@ public class SmsMobileTablesService implements ISmsMobileTablesService {
 			_sendTotalCount = Integer.parseInt(sendTotalCount.toString()) + 1;
 
 			// 如果上限次数为0，则不允许提交任何
-			if(maxLimit == 0)
-				return MOBILE_BEYOND_TIMES;
+			if(maxLimit == 0) {
+                return MOBILE_BEYOND_TIMES;
+            }
 			
 			// 判断手机号码一天内发送总量是否已超过预设值
-			if(_sendTotalCount >= maxLimit)
-				return MOBILE_BEYOND_TIMES;
+			if(_sendTotalCount >= maxLimit) {
+                return MOBILE_BEYOND_TIMES;
+            }
 			
 			// 如果提交频率为0，则不限制提交任何
 			if(maxSpeed == 0) {
@@ -128,8 +131,9 @@ public class SmsMobileTablesService implements ISmsMobileTablesService {
 			
 			// 判断	手机号码上次发送时间距离当前时间否已超过预设值
 			Object lastSendMillis = map.get(MOBILE_LAST_SEND_MILLIS);
-			if(System.currentTimeMillis() - Long.parseLong(lastSendMillis.toString()) < maxSpeed * 1000)
-				return MOBILE_BEYOND_SPEED;
+			if(System.currentTimeMillis() - Long.parseLong(lastSendMillis.toString()) < maxSpeed * 1000) {
+                return MOBILE_BEYOND_SPEED;
+            }
 			
 			setMobileSendRecord(userId, templateId, mobile, _sendTotalCount == null ? 0 : _sendTotalCount.intValue());
 		} catch (Exception e) {

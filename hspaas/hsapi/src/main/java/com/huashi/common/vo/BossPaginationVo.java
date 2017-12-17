@@ -246,11 +246,17 @@ public class BossPaginationVo<T> implements Serializable {
 	}
 
 	public int getStartPosition() {
-		if (currentPage == 0)
-			currentPage = 1;
+		if (currentPage == 0) {
+            {
+                currentPage = 1;
+            }
+        }
 
-		if (pageSize <= 0)
-			pageSize = DEFAULT_PAGE_SIZE;
+		if (pageSize <= 0) {
+            {
+                pageSize = DEFAULT_PAGE_SIZE;
+            }
+        }
 
 		return (currentPage - 1) * pageSize;
 	}

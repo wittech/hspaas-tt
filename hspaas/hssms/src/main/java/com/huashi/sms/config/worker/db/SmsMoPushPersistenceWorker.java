@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.AbstractWorker;
+import com.huashi.sms.record.domain.SmsMoMessagePush;
 import com.huashi.sms.record.service.ISmsMoPushService;
 
 /**
@@ -17,18 +18,18 @@ import com.huashi.sms.record.service.ISmsMoPushService;
  * @version V1.0
  * @date 2016年12月10日 下午6:03:39
  */
-public class SmsMoPushPersistenceWorker extends AbstractWorker {
+public class SmsMoPushPersistenceWorker extends AbstractWorker<SmsMoMessagePush> {
 
 	public SmsMoPushPersistenceWorker(ApplicationContext applicationContext) {
 		super(applicationContext);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	protected void operate(List list) {
+	protected void operate(List<SmsMoMessagePush> list) {
 		try {
-			if (CollectionUtils.isEmpty(list))
-				return;
+			if (CollectionUtils.isEmpty(list)) {
+                return;
+            }
 
 			long startTime = System.currentTimeMillis();
 			getInstance(ISmsMoPushService.class).savePushMessage(list);
@@ -45,5 +46,5 @@ public class SmsMoPushPersistenceWorker extends AbstractWorker {
 	protected String redisKey() {
 		return SmsRedisConstant.RED_DB_MESSAGE_MO_PUSH_LIST;
 	}
-
+	
 }

@@ -21,20 +21,36 @@ import com.huashi.sms.task.service.ISmsMtTaskService;
  * @version V1.0
  * @date 2016年12月10日 下午6:03:39
  */
-public class SmsTaskPersistenceWorker extends AbstractWorker{
+public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 
 	public SmsTaskPersistenceWorker(ApplicationContext applicationContext) {
 		super(applicationContext);
 	}
 
 	@Override
-	public void execute() {
+	public void run() {
 		List<SmsMtTask> tasks = new ArrayList<>();
 		List<SmsMtTaskPackets> taskPackets = new ArrayList<>();
-		while (!isStop()) {
+		while (true) {
+			if(isStop()) {
+				logger.info("JVM关闭事件已发起，执行自定义线程池停止...");
+				if(CollectionUtils.isNotEmpty(tasks)) {
+					logger.info("JVM关闭事件---当前线程处理数据不为空，执行最后一次后关闭线程...");
+					operate(tasks, taskPackets);
+				}
+				break;
+			}
+			
 			try {
-				if (timer.get() == 0)
-					timer.set(System.currentTimeMillis());
+                Thread.sleep(1L);//先释放资源，避免cpu占用过高
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+			
+			try {
+				if (timer.get() == 0) {
+                    timer.set(System.currentTimeMillis());
+                }
 
 				// 如果本次量达到批量取值数据，则跳出
 				if (tasks.size() >= scanSize()) {
@@ -44,7 +60,7 @@ public class SmsTaskPersistenceWorker extends AbstractWorker{
 				}
 
 				// 如果本次循环时间超过5秒则跳出
-				if (System.currentTimeMillis() - timer.get() >= timeout()) {
+				if (CollectionUtils.isNotEmpty(tasks) && System.currentTimeMillis() - timer.get() >= timeout()) {
 					operate(tasks, taskPackets);
 					continue;
 				}
@@ -62,8 +78,9 @@ public class SmsTaskPersistenceWorker extends AbstractWorker{
 				
 				SmsMtTask task = JSON.parseObject(o.toString(), SmsMtTask.class);
 				tasks.add(task);
-				if(CollectionUtils.isNotEmpty(task.getPackets()))
-					taskPackets.addAll(task.getPackets());
+				if(CollectionUtils.isNotEmpty(task.getPackets())) {
+                    taskPackets.addAll(task.getPackets());
+                }
 
 			} catch (Exception e) {
 				logger.error("任务数据入库失败，数据为：{}", getStringRedisTemplate().opsForList().leftPop(redisKey()), e);
@@ -81,8 +98,9 @@ public class SmsTaskPersistenceWorker extends AbstractWorker{
 	 * @param taskPackets
 	 */
 	private void operate(List<SmsMtTask> tasks, List<SmsMtTaskPackets> taskPackets) {
-		if (CollectionUtils.isEmpty(tasks))
-			return;
+		if (CollectionUtils.isEmpty(tasks)) {
+            return;
+        }
 		
 		try {
 			getInstance(ISmsMtTaskService.class).batchSave(tasks, taskPackets);
@@ -96,9 +114,8 @@ public class SmsTaskPersistenceWorker extends AbstractWorker{
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	protected void operate(List list) {}
+	protected void operate(List<SmsMtTask> list) {}
 
 	@Override
 	protected String redisKey() {

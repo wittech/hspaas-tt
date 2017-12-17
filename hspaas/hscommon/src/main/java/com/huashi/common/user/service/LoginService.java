@@ -25,8 +25,11 @@ public class LoginService implements ILoginService {
 		}
 
 		boolean isAvaiable = userService.verify(username, SecurityUtil.decode(password, user.getSalt()));
-		if (isAvaiable)
-			return new SessionUser(user.getId(), user.getEmail(), user.getMobile());
+		if (isAvaiable) {
+            {
+                return new SessionUser(user.getId(), user.getEmail(), user.getMobile());
+            }
+        }
 
 		throw new LoginException("用户名密码认证失败");
 	}

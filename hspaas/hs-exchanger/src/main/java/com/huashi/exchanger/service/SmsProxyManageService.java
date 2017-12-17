@@ -38,14 +38,29 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	@Autowired
 	private SmgpProxySender smgpProxySender;
 
-	// CMPP/SGIP/SMGP通道代理发送实例
+	/**
+	 * CMPP/SGIP/SMGP通道代理发送实例
+	 */
 	public volatile static Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
-	// 通道PROXY 发送错误次数计数器 add by 20170903
-	public volatile static Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
+	//
+
+	/**
+	 * 通道PROXY 发送错误次数计数器 add by 20170903
+	 */
+	private volatile static Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
 	
 	public volatile static Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS = new HashMap<>();
-	// 默认限流速度
+
+	/**
+	 * 默认限流速度
+	 */
 	public static final int DEFAULT_LIMIT_SPEED = 500;
+
+	/**
+	 * 联通重连超时时间
+	 */
+	private static final int SGIP_RECONNECT_TIMEOUT = 60 * 1000;
+
 
 	@Override
 	public boolean startProxy(SmsPassageParameter parameter) {
@@ -61,8 +76,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 		}
 
 		ProtocolType protocolType = getPassageProtocolType(parameter);
-		if (protocolType == null)
+		if (protocolType == null) {
 			return false;
+		}
 
 		try {
 
@@ -101,8 +117,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	 * @return
 	 */
 	private void initManageProxy(ProtocolType protocolType, Integer passageId, TParameter tparameter, Integer speed) {
-		if (passageId == null)
+		if (passageId == null) {
 			return;
+		}
 
 		synchronized (lock) {
 			Object proxy = null;
@@ -125,8 +142,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 				return;
 			}
 
-			if (proxy == null)
+			if (proxy == null) {
 				return;
+			}
 
 			// 加载通道代理类信息
 			GLOBAL_PROXIES.put(passageId, proxy);
@@ -165,8 +183,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 			return cmppManageProxy;
 		} catch (Exception e) {
-			if(cmppManageProxy != null && cmppManageProxy.getConn() != null)
+			if(cmppManageProxy != null && cmppManageProxy.getConn() != null) {
 				cmppManageProxy.getConn().close();
+			}
 			
 			logger.error("获取CMPP代理失败", e);
 			return null;
@@ -251,8 +270,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 			return smgpManageProxy;
 		} catch (Exception e) {
-			if(smgpManageProxy != null && smgpManageProxy.getConn() != null)
+			if(smgpManageProxy != null && smgpManageProxy.getConn() != null) {
 				smgpManageProxy.getConn().close();
+			}
 			
 			logger.error("获取SMGP代理失败", e);
 			return null;
@@ -261,12 +281,14 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	
 	@Override
 	public boolean isProxyAvaiable(Integer passageId) {
-		if (MapUtils.isEmpty(GLOBAL_PROXIES) || GLOBAL_PROXIES.get(passageId) == null)
+		if (MapUtils.isEmpty(GLOBAL_PROXIES) || GLOBAL_PROXIES.get(passageId) == null) {
 			return false;
+		}
 
 		Object passage = GLOBAL_PROXIES.get(passageId);
-		if(passage == null)
+		if(passage == null) {
 			return false;
+		}
 		
 		if (passage instanceof CmppManageProxy) {
 			CmppManageProxy prxoy = (CmppManageProxy) passage;
@@ -285,8 +307,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 			
 			logger.info("SGIP 状态：{}, 上次时间：{}， 时间差：{} ms", prxoy.getConnState(), lastSendTime,
 					lastSendTime == null ? null : System.currentTimeMillis() - lastSendTime);
-			if(lastSendTime != null && (System.currentTimeMillis() - lastSendTime > 60 * 1000))
+			if(lastSendTime != null && (System.currentTimeMillis() - lastSendTime > SGIP_RECONNECT_TIMEOUT)) {
 				return false;
+			}
 			
 			if (StringUtils.isNotEmpty(prxoy.getConnState())) {
 				logger.error("SGIP连接错误，错误信息：{} ", prxoy.getConnState());
@@ -302,8 +325,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 		
 		logger.info("当前通道ID： {} 发送错误次数：{}", passageId, GLOBAL_PROXIES_ERROR_COUNTER.get(passageId));
 		// 判断该通道发送错误是否累计3次，如果累计三次，返回FALSE，需要重连 add by 20170903
-		if(GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) != null && GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) >= 3)
-			return false;
+		if(GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) != null && GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) >= 3) {
+            return false;
+        }
 
 		return true;
 	}
@@ -319,29 +343,11 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 		return GLOBAL_PROXIES.get(passageId);
 	}
 
-	/**
-	 * 
-	 * TODO 获取限速信息
-	 * 
-	 * @param passageId
-	 * @return
-	 */
-	public RateLimiter getRateLimiter(Integer passageId, Integer speed) {
-		RateLimiter limiter = GLOBAL_RATE_LIMITERS.get(passageId);
-		if (limiter == null) {
-			synchronized (lock) {
-				limiter = RateLimiter.create((speed == null || speed == 0) ? DEFAULT_LIMIT_SPEED : speed);
-				GLOBAL_RATE_LIMITERS.put(passageId, limiter);
-			}
-		}
-
-		return limiter;
-	}
-
 	@Override
 	public boolean stopProxy(Integer passageId) {
-		if(!isProxyAvaiable(passageId))
+		if(!isProxyAvaiable(passageId)) {
 			return true;
+		}
 		
 		try {
 			Object passage = GLOBAL_PROXIES.get(passageId);
@@ -369,8 +375,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	@Override
 	public void plusSendErrorTimes(Integer passageId) {
 		Integer counter = GLOBAL_PROXIES_ERROR_COUNTER.get(passageId);
-		if(counter == null) 
+		if(counter == null) {
 			counter = 0;
+		}
 		
 		logger.info("当前通道 passageId : {} 代理失败次数 {}", passageId, counter+1);
 		GLOBAL_PROXIES_ERROR_COUNTER.put(passageId, counter+1);
@@ -379,8 +386,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	@Override
 	public void clearSendErrorTimes(Integer passageId) {
 		Integer counter = GLOBAL_PROXIES_ERROR_COUNTER.get(passageId);
-		if(counter == null) 
+		if(counter == null) {
 			return;
+		}
 		
 		GLOBAL_PROXIES_ERROR_COUNTER.remove(passageId);
 	}

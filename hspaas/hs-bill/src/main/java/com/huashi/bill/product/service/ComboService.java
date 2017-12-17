@@ -127,14 +127,20 @@ public class ComboService implements IComboService {
 
 		Map<String, Object> params =  new HashMap<String,Object>();
 		int totalRecord = comboMapper.getCountNum(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            {
+                return null;
+            }
+        }
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<Combo> list = comboMapper.findPageList(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            {
+                return null;
+            }
+        }
 		return new PaginationVo<Combo>(list, _currentPage, totalRecord);
 	}
 

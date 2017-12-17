@@ -91,8 +91,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 		params.put("ExtCode", extNumber == null ? "" : extNumber);
 
 		// 判断群发选项是否为空，不为空则设置
-		if (StringUtils.isNotEmpty(tparameter.getString("is_p2p")))
-			params.put("IsP2p", tparameter.getString("is_p2p"));
+		if (StringUtils.isNotEmpty(tparameter.getString("is_p2p"))) {
+            params.put("IsP2p", tparameter.getString("is_p2p"));
+        }
 
 		return params;
 	}
@@ -127,8 +128,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	 * @return
 	 */
 	private List<ProviderSendResponse> sendResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE : successCode;
 
@@ -151,8 +153,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 			Namespace ns = root.getNamespace();
 			ProviderSendResponse response = null;
 			for (Element et : data) {
-				if (et.getChild("Id", ns) == null)
-					continue;
+				if (et.getChild("Id", ns) == null) {
+                    continue;
+                }
 
 				response = new ProviderSendResponse();
 				response.setMobile(et.getChild("Mobile", ns).getText());
@@ -182,8 +185,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	 */
 	private List<SmsMtMessageDeliver> deliverResponse(String result, String successCode) {
 		// 保证有数据才解析
-		if (StringUtils.isEmpty(result) && !result.contains("Mobile"))
-			return null;
+		if (StringUtils.isEmpty(result) && !result.contains("Mobile")) {
+            return null;
+        }
 
 		logger.info("下行状态报告简码：{} =========={}", code(), result);
 
@@ -207,8 +211,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 			Namespace ns = root.getNamespace();
 			SmsMtMessageDeliver response = null;
 			for (Element et : data) {
-				if (et.getChild("Id", ns) == null)
-					continue;
+				if (et.getChild("Id", ns) == null) {
+                    continue;
+                }
 				
 				response = new SmsMtMessageDeliver();
 				response.setMsgId(et.getChild("Id", ns).getText());
@@ -260,8 +265,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	 */
 	private List<SmsMoMessageReceive> moResponse(String result, Integer passageId) {
 		// 保证有数据才解析
-		if (StringUtils.isEmpty(result) && !result.contains("Mobile"))
-			return null;
+		if (StringUtils.isEmpty(result) && !result.contains("Mobile")) {
+            return null;
+        }
 
 		logger.info("上行报告简码：{} =========={}", code(), result);
 		
@@ -284,8 +290,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 			Namespace ns = root.getNamespace();
 			SmsMoMessageReceive response = null;
 			for (Element et : data) {
-				if (et.getChild("Mobile", ns) == null)
-					continue;
+				if (et.getChild("Mobile", ns) == null) {
+                    continue;
+                }
 
 				response = new SmsMoMessageReceive();
 				response.setPassageId(passageId);
@@ -358,8 +365,9 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	   * @return
 	 */
 	public static YescloudtreeResponse parseReport(String report) {
-		if (StringUtils.isEmpty(report))
-			return null;
+		if (StringUtils.isEmpty(report)) {
+            return null;
+        }
 
 		if (!report.contains(REPORT_SPLIT_CHARACTER)) {
 			return null;

@@ -33,7 +33,8 @@ public class FastJsonMessageConverter extends AbstractMessageConverter {
 				: DEFAULT_CHARSET;                
 	}
 
-	public Object fromMessage(Message message)
+	@Override
+    public Object fromMessage(Message message)
 			throws MessageConversionException {
 		return null;
 	}
@@ -49,8 +50,9 @@ public class FastJsonMessageConverter extends AbstractMessageConverter {
 		});
 	}
 
-	protected Message createMessage(Object objectToConvert,
-			MessageProperties messageProperties)
+	@Override
+    protected Message createMessage(Object objectToConvert,
+                                    MessageProperties messageProperties)
 			throws MessageConversionException {
 		byte[] bytes = null;
 		try {

@@ -33,14 +33,20 @@ public class MobileNumberCatagoryUtil {
 	 * @return
 	 */
 	public static MobileCatagory doCatagory(String mobileNumber) {
-		if (StringUtils.isEmpty(mobileNumber))
-			return null;
+		if (StringUtils.isEmpty(mobileNumber)) {
+            {
+                return null;
+            }
+        }
 
 		MobileCatagory response = new MobileCatagory();
 		try {
 			String[] numbers = mobileNumber.split(DATA_SPLIT_CHARCATOR);
-			if (numbers.length == 0)
-				return null;
+			if (numbers.length == 0) {
+                {
+                    return null;
+                }
+            }
 
 			// 移动号码
 			StringBuilder cmNumbers = new StringBuilder();
@@ -98,8 +104,11 @@ public class MobileNumberCatagoryUtil {
 	 * @return
 	 */
 	public static MobileCatagory doCatagory(List<String> mobiles) {
-		if (CollectionUtils.isEmpty(mobiles))
-			return null;
+		if (CollectionUtils.isEmpty(mobiles)) {
+            {
+                return null;
+            }
+        }
 
 		MobileCatagory response = new MobileCatagory();
 		try {
@@ -159,8 +168,11 @@ public class MobileNumberCatagoryUtil {
 	   * @return
 	 */
 	private static String cutTail(String mobile) {
-		if(StringUtils.isEmpty(mobile))
-			return "";
+		if(StringUtils.isEmpty(mobile)) {
+            {
+                return "";
+            }
+        }
 		
 		return mobile.substring(0, mobile.length() - 1);
 	}

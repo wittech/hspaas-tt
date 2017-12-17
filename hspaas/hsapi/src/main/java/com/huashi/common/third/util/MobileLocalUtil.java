@@ -78,8 +78,11 @@ public class MobileLocalUtil {
 	 */
 	public static String carrier(String mobile){
 		MobileLocation location = local(mobile);
-		if(location == null)
-			return "";
+		if(location == null) {
+            {
+                return "";
+            }
+        }
 		return location.getCarrier();
 	}
 	
@@ -90,17 +93,26 @@ public class MobileLocalUtil {
 	 */
 	public static String catName(String mobile){
 		MobileLocation location = local(mobile);
-		if(location == null)
-			return "";
+		if(location == null) {
+            {
+                return "";
+            }
+        }
 		return location.getCatName();
 	}
 	
 	public static MobileLocation parse(String respnoseResult){
-		if(StringUtils.isEmpty(respnoseResult))
-			return null;
+		if(StringUtils.isEmpty(respnoseResult)) {
+            {
+                return null;
+            }
+        }
 		respnoseResult = respnoseResult.split("=")[1];
-		if(StringUtils.isEmpty(respnoseResult))
-			return null;
+		if(StringUtils.isEmpty(respnoseResult)) {
+            {
+                return null;
+            }
+        }
 		
 		return JSON.parseObject(respnoseResult, MobileLocation.class);
 	}

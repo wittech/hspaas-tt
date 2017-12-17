@@ -112,8 +112,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<ProviderSendResponse> sendResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		System.out.println("---------" + result);
 		
@@ -155,8 +156,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<SmsMtMessageDeliver> deliverResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result) || !result.contains("taskid"))
-			return null;
+		if (StringUtils.isEmpty(result) || !result.contains("taskid")) {
+            return null;
+        }
 		
 		logger.info("下行状态报告简码：{} =========={}", code(), result);
 		
@@ -179,8 +181,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 			Namespace ns = root.getNamespace();
 			SmsMtMessageDeliver response = null;
 			for(Element et : data) {
-				if(et.getChild("taskid", ns) == null)
-					continue;
+				if(et.getChild("taskid", ns) == null) {
+                    continue;
+                }
 				
 				response = new SmsMtMessageDeliver();
 				response.setMsgId(et.getChild("taskid", ns).getText());
@@ -223,8 +226,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<SmsMoMessageReceive> moResponse(String result, Integer passageId) {
-		if (StringUtils.isEmpty(result) || !result.contains("taskid"))
-			return null;
+		if (StringUtils.isEmpty(result) || !result.contains("taskid")) {
+            return null;
+        }
 		
 		logger.info("上行报告简码：{} =========={}", code(), result);
 		

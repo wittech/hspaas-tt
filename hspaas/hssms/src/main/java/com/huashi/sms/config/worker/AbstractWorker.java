@@ -1,5 +1,7 @@
 package com.huashi.sms.config.worker;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,7 +23,7 @@ import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
   * @version V1.0   
   * @date 2017年11月30日 上午9:59:26
  */
-public abstract class AbstractWorker implements Runnable{
+public abstract class AbstractWorker<E extends Object> implements Runnable {
 
 	protected ApplicationContext applicationContext;
 
@@ -60,8 +62,7 @@ public abstract class AbstractWorker implements Runnable{
 	   * 
 	   * @param list
 	 */
-	@SuppressWarnings("rawtypes")
-	protected abstract void operate(List list);
+	protected abstract void operate(List<E> list);
 	
 	/**
 	 * 
@@ -78,8 +79,7 @@ public abstract class AbstractWorker implements Runnable{
 	   * 		本次失败数量
 	   * 
 	 */
-	@SuppressWarnings("rawtypes")
-	protected void backupIfFailed(String failedRedisKey, List list) {
+	protected void backupIfFailed(String failedRedisKey, List<E> list) {
 		try {
 			getStringRedisTemplate().opsForList().rightPushAll(failedRedisKey, JSON.toJSONString(list));
 			logger.error("源数据队列：{} 处理失败，加入失败队列完成：{}，共{}条", redisKey(), failedRedisKey, list.size());
@@ -139,10 +139,20 @@ public abstract class AbstractWorker implements Runnable{
 	protected <T> T getInstance(String name, Class<T> clazz) {
 		return applicationContext.getBean(name, clazz);
 	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected void execute() {
-		List list = new ArrayList();
+	
+	@SuppressWarnings("unchecked")
+	private Class<E> getClildType() {
+		Class<? extends Object> clazz = this.getClass();
+        ParameterizedType type = (ParameterizedType) clazz.getGenericSuperclass();
+        // 3返回实际参数类型(泛型可以写多个)
+        Type[] types = type.getActualTypeArguments();
+        // 4 获取第一个参数(泛型的具体类) Person.class
+        return (Class<E>) types[0];
+	}
+	
+	@Override
+	public void run() {
+		List<E> list = new ArrayList<E>();
 		while (true) {
 			if(isStop()) {
 				logger.info("JVM关闭事件已发起，执行自定义线程池停止...");
@@ -155,8 +165,15 @@ public abstract class AbstractWorker implements Runnable{
 			}
 			
 			try {
-				if (timer.get() == 0)
-					timer.set(System.currentTimeMillis());
+                 Thread.sleep(1L);//先释放资源，避免cpu占用过高
+            } catch (Exception e1) {
+                 e1.printStackTrace();
+            }
+			
+			try {
+				if (timer.get() == 0) {
+                    timer.set(System.currentTimeMillis());
+                }
 
 				// 如果本次量达到批量取值数据，则跳出
 				if (list.size() >= scanSize()) {
@@ -166,7 +183,7 @@ public abstract class AbstractWorker implements Runnable{
 				}
 
 				// 如果本次循环时间超过5秒则跳出
-				if (System.currentTimeMillis() - timer.get() >= timeout()) {
+				if (CollectionUtils.isNotEmpty(list) && System.currentTimeMillis() - timer.get() >= timeout()) {
 					operate(list);
 					continue;
 				}
@@ -182,22 +199,17 @@ public abstract class AbstractWorker implements Runnable{
 					continue;
 				}
 				
-				Object value = JSON.parseObject(o.toString());
+				Object value = JSON.parse(o.toString());
 				if(value instanceof List) {
-					list.addAll((List) value);
+					list.addAll(JSON.parseArray(o.toString(), getClildType()));
 				} else {
-					list.add(value);
+					list.add(JSON.parseObject(o.toString(), getClildType()));
 				}
 
 			} catch (Exception e) {
 				logger.error("自定义监听线程过程处理失败，数据为：{}", JSON.toJSONString(list), e);
 			}
 		}
-	}
-	
-	@Override
-	public void run() {
-		execute();
 	}
 
 }

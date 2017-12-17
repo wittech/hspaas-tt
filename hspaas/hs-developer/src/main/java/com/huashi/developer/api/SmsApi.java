@@ -124,8 +124,11 @@ public class SmsApi extends BasicApiSupport {
 		} catch (Exception e) {
 			logger.error("用户模板点对点短信发送失败", e);
 			
-			if(e instanceof ValidateException)
-				return saveInvokeFailedRecord(e.getMessage());
+			if(e instanceof ValidateException) {
+                {
+                    return saveInvokeFailedRecord(e.getMessage());
+                }
+            }
 			
 			return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
 		}
@@ -151,8 +154,11 @@ public class SmsApi extends BasicApiSupport {
 			String code = CommonApiCode.COMMON_SERVER_EXCEPTION.getCode();
 			if(e instanceof ValidateException) {
 				SmsSendResponse response = saveInvokeFailedRecord(e.getMessage());
-				if(response != null)
-					code = response.getCode();
+				if(response != null) {
+                    {
+                        code = response.getCode();
+                    }
+                }
 			}
 			return new SmsBalanceResponse(code);
 		}

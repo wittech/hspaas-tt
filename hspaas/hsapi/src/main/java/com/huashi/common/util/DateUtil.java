@@ -135,7 +135,9 @@ public class DateUtil {
 	public static String getDayGoXday(int x) {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, x);
-		return DAY.format(cal.getTime());
+		synchronized(DAY) {
+			return DAY.format(cal.getTime());
+		}
 	}
 
 	public static String getMonthXDay(int x) {
@@ -227,8 +229,11 @@ public class DateUtil {
 	}
 
 	private static Date addOrSub(Date date, int type, int offset) {
-		if (date == null)
-			return null;
+		if (date == null) {
+            {
+                return null;
+            }
+        }
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		cal.get(type);
@@ -248,8 +253,11 @@ public class DateUtil {
 	}
 
 	private static Date getDate(String dateStr, SimpleDateFormat format) {
-		if ("".equals(dateStr) || dateStr == null)
-			return null;
+		if ("".equals(dateStr) || dateStr == null) {
+            {
+                return null;
+            }
+        }
 		try {
 			return format.parse(dateStr);
 		} catch (ParseException e) {
@@ -270,10 +278,15 @@ public class DateUtil {
 		if (!StringUtils.isNotBlank(toCheck)) {
 			return false;
 		}
-		if (toCheck.trim().matches("([0-1][0-9]|2[0-3]):[0-5][0-9]|24:00"))
-			return true;
-		else
-			return false;
+		if (toCheck.trim().matches("([0-1][0-9]|2[0-3]):[0-5][0-9]|24:00")) {
+            {
+                return true;
+            }
+        } else {
+            {
+                return false;
+            }
+        }
 	}
 
 	/**
@@ -296,12 +309,21 @@ public class DateUtil {
 	 * @return
 	 */
 	public static int betweenHHmmInString(String ts, String start, String end) {
-		if (compareHHmmInString(start, end) >= 0)
-			return -1;
-		if (compareHHmmInString(ts, start) < 0)
-			return 0;
-		if (compareHHmmInString(end, ts) <= 0)
-			return 0;
+		if (compareHHmmInString(start, end) >= 0) {
+            {
+                return -1;
+            }
+        }
+		if (compareHHmmInString(ts, start) < 0) {
+            {
+                return 0;
+            }
+        }
+		if (compareHHmmInString(end, ts) <= 0) {
+            {
+                return 0;
+            }
+        }
 		return 1;
 	}
 
@@ -313,8 +335,11 @@ public class DateUtil {
 	 * @return
 	 */
 	public static boolean equalsInTimeString(String ts1, String ts2) {
-		if (ts1.equals(ts2))
-			return true;
+		if (ts1.equals(ts2)) {
+            {
+                return true;
+            }
+        }
 		if (ts1.equals("00:00") || ts1.equals("24:00")) {
 			if (ts2.equals("00:00") || ts2.equals("24:00")) {
 				return true;
@@ -330,14 +355,24 @@ public class DateUtil {
 		if (cal.get(Calendar.HOUR_OF_DAY) > c.get(Calendar.HOUR_OF_DAY)) {
 			return 1;
 		} else if (cal.get(Calendar.HOUR_OF_DAY) == c.get(Calendar.HOUR_OF_DAY)) {
-			if (cal.get(Calendar.MINUTE) > c.get(Calendar.MINUTE))
-				return 1;
-			else if (cal.get(Calendar.MINUTE) == c.get(Calendar.MINUTE))
-				return 0;
-			else
-				return -1;
-		} else
-			return -1;
+			if (cal.get(Calendar.MINUTE) > c.get(Calendar.MINUTE)) {
+                {
+                    return 1;
+                }
+            } else if (cal.get(Calendar.MINUTE) == c.get(Calendar.MINUTE)) {
+                {
+                    return 0;
+                }
+            } else {
+                {
+                    return -1;
+                }
+            }
+		} else {
+            {
+                return -1;
+            }
+        }
 	}
 
 	/**
@@ -349,12 +384,21 @@ public class DateUtil {
 	 * @return
 	 */
 	public static int betweenHHmm(Calendar cal, Calendar start, Calendar end) {
-		if (compareHHmm(start, end) != -1)
-			return -1;
-		if (compareHHmm(cal, start) == -1)
-			return 0;
-		if (compareHHmm(end, cal) == -1)
-			return 0;
+		if (compareHHmm(start, end) != -1) {
+            {
+                return -1;
+            }
+        }
+		if (compareHHmm(cal, start) == -1) {
+            {
+                return 0;
+            }
+        }
+		if (compareHHmm(end, cal) == -1) {
+            {
+                return 0;
+            }
+        }
 		return 1;
 	}
 
@@ -363,10 +407,15 @@ public class DateUtil {
 	 */
 	public static boolean compareDay(Calendar cal, Calendar c) {
 		if (cal.get(Calendar.MONTH) == c.get(Calendar.MONTH)
-				&& cal.get(Calendar.DAY_OF_MONTH) == c.get(Calendar.DAY_OF_MONTH))
-			return true;
-		else
-			return false;
+				&& cal.get(Calendar.DAY_OF_MONTH) == c.get(Calendar.DAY_OF_MONTH)) {
+            {
+                return true;
+            }
+        } else {
+            {
+                return false;
+            }
+        }
 	}
 
 	/**
@@ -377,8 +426,11 @@ public class DateUtil {
 	 * @throws Exception
 	 */
 	public static Calendar string2calendar(String timeString) throws Exception {
-		if (!DateUtil.isTimeString(timeString))
-			throw new Exception("Wrong argument : timeString format error " + timeString);
+		if (!DateUtil.isTimeString(timeString)) {
+            {
+                throw new Exception("Wrong argument : timeString format error " + timeString);
+            }
+        }
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.HOUR_OF_DAY, getHour(timeString));
 		cal.set(Calendar.MINUTE, getMinute(timeString));
@@ -429,16 +481,21 @@ public class DateUtil {
 			return false;
 		}
 		try {
-			MINUTE_ONLY.parse(str);
-			return true;
+			synchronized (MINUTE_ONLY) {
+				MINUTE_ONLY.parse(str);
+				return true;
+			}
 		} catch (Exception e) {
 		}
 		return false;
 	}
 
 	public static long getMiniteDate(Date date, String str) {
-		if (str == null)
-			return 0;
+		if (str == null) {
+            {
+                return 0;
+            }
+        }
 		return getMinuteDate(getDayStr(date) + " " + str).getTime();
 	}
 
@@ -466,12 +523,20 @@ public class DateUtil {
 	}
 
 	public static boolean isDateString(String toCheck) {
-		if (toCheck == null)
-			return false;
-		if (toCheck.trim().matches("(0[0-9]|1[0-2]):([0-2][0-9]|3[0-1])"))
-			return true;
-		else
-			return false;
+		if (toCheck == null) {
+            {
+                return false;
+            }
+        }
+		if (toCheck.trim().matches("(0[0-9]|1[0-2]):([0-2][0-9]|3[0-1])")) {
+            {
+                return true;
+            }
+        } else {
+            {
+                return false;
+            }
+        }
 	}
 
 	public static Date[] getIntervalDate(Date start, Date end) {
@@ -500,11 +565,17 @@ public class DateUtil {
 	 */
 	public static boolean isBeyond24Hour(Date start, Date end) {
 		long cha = end.getTime() - start.getTime();
-		if (cha < 0)
-			return false;
+		if (cha < 0) {
+            {
+                return false;
+            }
+        }
 		double result = cha * 1.0 / (1000 * 60 * 60);
-		if (result <= 24)
-			return true;
+		if (result <= 24) {
+            {
+                return true;
+            }
+        }
 		return false;
 	}
 

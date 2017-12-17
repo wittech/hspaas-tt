@@ -35,8 +35,11 @@ public class RecordService implements IRecordService{
 	@Override
 	public PaginationVo<Record> findPage(int userId, String phoneNumber, String startDate, String endDate,
 			String currentPage, String status,String type) {
-		if (userId<=0)
-			return null;
+		if (userId<=0) {
+            {
+                return null;
+            }
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
@@ -50,15 +53,21 @@ public class RecordService implements IRecordService{
 		params.put("receiveStatus", status);
 		params.put("type", type);
 		int totalRecord = recordMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            {
+                return null;
+            }
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<Record> list = recordMapper.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            {
+                return null;
+            }
+        }
 		return new PaginationVo<Record>(list, _currentPage, totalRecord);
 	}
 

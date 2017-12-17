@@ -17,8 +17,11 @@ public class MessageTemplateService implements IMessageTemplateService {
 	public String getVerifyContent(String code) {
 		// 根据短信模板查询 短信动态码模板内容
 		SmsTemplate template = smsTemplateMapper.selectByCode(SmsCode.VERIFY_CODE.getCode());
-		if(template == null)
-			return null;
+		if(template == null) {
+            {
+                return null;
+            }
+        }
 		
 		return String.format(template.getContent(), code);
 	}

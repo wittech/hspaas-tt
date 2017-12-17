@@ -28,20 +28,29 @@ public class UserAccountService implements IUserAccountService{
 
 	@Override
 	public UserAccount getByUserId(int userId) {
-		if(userId == 0)
-			return null;
+		if(userId == 0) {
+            {
+                return null;
+            }
+        }
 		
 		return userAccountMapper.selectByUserId(userId);
 	}
 	
 	@Override
 	public double getAccountByUserId(int userId) {
-		if (userId == 0)
-			return 0d;
+		if (userId == 0) {
+            {
+                return 0d;
+            }
+        }
 
 		UserAccount account = getByUserId(userId);
-		if (account == null)
-			return 0d;
+		if (account == null) {
+            {
+                return 0d;
+            }
+        }
 
 		return account.getMoney();
 	}
@@ -85,9 +94,11 @@ public class UserAccountService implements IUserAccountService{
 		try {
 			boolean isOk = updateAccount(userId, money, PaySource.USER_ACCOUNT_EXCHANGE.getValue(), 
 					PayType.HSUSER_EXCHANGE.getValue());
-			if (isOk)
-				return updateAccount(fromUserId, -money, PaySource.USER_ACCOUNT_EXCHANGE.getValue(), 
-						PayType.HSUSER_EXCHANGE.getValue());
+			if (isOk) {
+                {
+                    return updateAccount(fromUserId, -money, PaySource.USER_ACCOUNT_EXCHANGE.getValue(), PayType.HSUSER_EXCHANGE.getValue());
+                }
+            }
 			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -96,15 +107,24 @@ public class UserAccountService implements IUserAccountService{
 	}
 	
 	private void validate(int userId, int fromUserId, Double money) {
-		if(userId == 0 || fromUserId == 0)
-			throw new ExchangeException("用户ID和转存人ID为空");
+		if(userId == 0 || fromUserId == 0) {
+            {
+                throw new ExchangeException("用户ID和转存人ID为空");
+            }
+        }
 		
-		if(money == 0d)
-			throw new ExchangeException("转存额度为0");
+		if(money == 0d) {
+            {
+                throw new ExchangeException("转存额度为0");
+            }
+        }
 		
 		Double accountBalance = getAccountByUserId(fromUserId);
-		if(accountBalance < money)
-			throw new ExchangeException(String.format("用户平台额度不足，当前余额 : %d ", accountBalance));
+		if(accountBalance < money) {
+            {
+                throw new ExchangeException(String.format("用户平台额度不足，当前余额 : %d ", accountBalance));
+            }
+        }
 		
 	}
 

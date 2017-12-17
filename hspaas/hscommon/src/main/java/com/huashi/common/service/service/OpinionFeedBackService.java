@@ -34,8 +34,11 @@ public class OpinionFeedBackService implements IOpinionFeedBackService {
 	@Override
 	public boolean insert(OpinionFeedBack opinionFeedBack) {
 		try {
-			if (opinionFeedBack.getTitle().isEmpty() || opinionFeedBack.getContent().isEmpty())
-				return false;
+			if (opinionFeedBack.getTitle().isEmpty() || opinionFeedBack.getContent().isEmpty()) {
+                {
+                    return false;
+                }
+            }
 			opinionFeedBack.setCreateTime(new Date());
 			return opinionFeedBackMapper.insert(opinionFeedBack) > 0;
 		} catch (Exception e) {

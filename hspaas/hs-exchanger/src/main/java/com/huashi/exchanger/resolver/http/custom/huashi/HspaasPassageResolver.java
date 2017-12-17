@@ -93,14 +93,16 @@ public class HspaasPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private static List<ProviderSendResponse> sendResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            return null;
+        }
 		
 		successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE : successCode;
 		
 		JSONObject jsonObject = JSON.parseObject(result);
-		if(jsonObject == null)
-			return null;
+		if(jsonObject == null) {
+            return null;
+        }
 		
 		List<ProviderSendResponse> list = new ArrayList<>();
 		ProviderSendResponse response = new ProviderSendResponse();
@@ -120,14 +122,16 @@ public class HspaasPassageResolver extends AbstractPassageResolver{
 			logger.info("下行状态报告简码：{} =========={}", code(), report);
 			
 			JSONArray array = JSON.parseArray(report);
-			if(CollectionUtils.isEmpty(array))
-				return null;
+			if(CollectionUtils.isEmpty(array)) {
+                return null;
+            }
 			
 			List<SmsMtMessageDeliver> list = new ArrayList<>();
 			SmsMtMessageDeliver response = null;
 			for(Object object : array) {
-				if(object == null)
-					continue;
+				if(object == null) {
+                    continue;
+                }
 				
 				JSONObject jsonobj = (JSONObject)object;
 				response = new SmsMtMessageDeliver();

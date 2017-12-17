@@ -2,9 +2,11 @@ package com.huashi.common.user.service;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
 import com.huashi.bill.pay.constant.PayContext.PaySource;
 import com.huashi.bill.pay.constant.PayContext.PayType;
 import com.huashi.common.user.domain.UserBalance;
+import com.huashi.common.user.model.P2pBalanceResponse;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext.PlatformType;
 
@@ -152,4 +154,41 @@ public interface IUserBalanceService {
 	   * @return
 	 */
 	boolean updateStatus(Integer id, Integer status);
+	
+
+    /**
+     * 
+     * TODO 根据用户传递的短信内容计算短信计费数
+     * 
+     * @param userId
+     *      用户ID
+     * @param content
+     *      短信内容
+     * @return
+     */
+    int calculateSmsAmount(int userId, String content);
+
+    /**
+     * 
+     * TODO 计算用户点对点短信计费条数
+     * 
+     * @param userId
+     * @param p2pBody
+     *            点对点短信报文
+     * @return
+     */
+    P2pBalanceResponse calculateP2pSmsAmount(int userId, List<JSONObject> p2pBody);
+    
+    /**
+     * 
+     * TODO 计算用户模板点对点短信计费条数
+     * 
+     * @param userId
+     * @param content   
+     *              模板内容
+     * @param p2pBody
+     *            点对点短信报文
+     * @return
+     */
+    P2pBalanceResponse calculateP2ptSmsAmount(int userId, String content, List<JSONObject> p2pBody);
 }

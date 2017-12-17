@@ -21,12 +21,12 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
-import com.huashi.bill.bill.constant.SmsBillConstant;
 import com.huashi.common.settings.context.SettingsContext.PushConfigStatus;
 import com.huashi.common.settings.domain.ProvinceLocal;
 import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.settings.service.IPushConfigService;
 import com.huashi.common.third.service.IMobileLocalService;
+import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.service.IUserSmsConfigService;
 import com.huashi.constants.CommonContext.CMCP;
@@ -96,8 +96,9 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 	 * @param model
 	 */
 	private void doTransport(SmsMtTaskPackets model) {
-		if (StringUtils.isEmpty(model.getMobile()))
-			throw new RuntimeException("手机号码数据包为空，无法解析");
+		if (StringUtils.isEmpty(model.getMobile())) {
+            throw new RuntimeException("手机号码数据包为空，无法解析");
+        }
 
 		if (model.getStatus() == PacketsApproveStatus.WAITING.getCode()
 				|| model.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
@@ -123,8 +124,9 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 					extNumber);
 
 			// 解析调用上家接口结果
-			if (CollectionUtils.isEmpty(responses))
-				throw new RuntimeException("调用上家接口回执数据为空");
+			if (CollectionUtils.isEmpty(responses)) {
+                throw new RuntimeException("调用上家接口回执数据为空");
+            }
 
 			// ProviderSendResponse response = list.iterator().next();
 			List<SmsMtMessageSubmit> list = buildSubmitMessage(model, responses, extNumber);
@@ -156,26 +158,32 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 
 		// 签名扩展号码（1对1），优先级最高，add by 20170709
 		String signExtNumber = signatureExtNoService.getExtNumber(userId, content);
-		if (signExtNumber == null)
-			signExtNumber = "";
+		if (signExtNumber == null) {
+            signExtNumber = "";
+        }
 
 		// 如果短信模板扩展名不为空，则按照此扩展号码为主（忽略用户短信配置的扩展号码）
-		if (StringUtils.isNotEmpty(templateExtNumber))
-			return signExtNumber + templateExtNumber + (StringUtils.isEmpty(extNumber) ? "" : extNumber);
+		if (StringUtils.isNotEmpty(templateExtNumber)) {
+            return signExtNumber + templateExtNumber + (StringUtils.isEmpty(extNumber) ? "" : extNumber);
+        }
 
 		// 如果签名扩展号码不为空，并且模板扩展号码为空，则以扩展号码为主（忽略用户短信配置的扩展号码）
-		if (StringUtils.isNotEmpty(signExtNumber))
-			return signExtNumber + (StringUtils.isEmpty(extNumber) ? "" : extNumber);
+		if (StringUtils.isNotEmpty(signExtNumber)) {
+            return signExtNumber + (StringUtils.isEmpty(extNumber) ? "" : extNumber);
+        }
 
-		if (userId == null)
-			return extNumber;
+		if (userId == null) {
+            return extNumber;
+        }
 
 		UserSmsConfig userSmsConfig = userSmsConfigService.getByUserId(userId);
-		if (userSmsConfig == null)
-			return extNumber;
+		if (userSmsConfig == null) {
+            return extNumber;
+        }
 
-		if (StringUtils.isEmpty(userSmsConfig.getExtNumber()))
-			return extNumber;
+		if (StringUtils.isEmpty(userSmsConfig.getExtNumber())) {
+            return extNumber;
+        }
 
 		return userSmsConfig.getExtNumber() + (StringUtils.isEmpty(extNumber) ? "" : extNumber);
 	}
@@ -190,16 +198,16 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 	 *            通道信息
 	 */
 	private String cutExtNumberBenyondLimitLength(String extNumber, SmsPassage smsPassage) {
-		if (StringUtils.isEmpty(extNumber))
-			return extNumber;
+		if (StringUtils.isEmpty(extNumber)) {
+            return extNumber;
+        }
 
 		// 如果扩展号码
-		if (smsPassage == null || PASSAGE_EXT_NUMBER_LENGTH_ENDLESS == smsPassage.getExtNumber())
-			return extNumber;
-
-		else if (PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED == smsPassage.getExtNumber())
-			return "";
-		else {
+		if (smsPassage == null || PASSAGE_EXT_NUMBER_LENGTH_ENDLESS == smsPassage.getExtNumber()) {
+            return extNumber;
+        } else if (PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED == smsPassage.getExtNumber()) {
+            return "";
+        } else {
 			// add by zhengying 2017-2-50
 			// 如果当前扩展号码总长度小于扩展号长度上限则在直接返回，否则按照扩展号上限截取
 			return extNumber.length() < smsPassage.getExtNumber() ? extNumber
@@ -219,31 +227,35 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 	 * @param packet
 	 */
 	private static String changeMessageContentBySignMode(String content, Integer signMode) {
-		if (StringUtils.isEmpty(content))
-			return null;
+		if (StringUtils.isEmpty(content)) {
+            return null;
+        }
 
-		if (signMode == null || PassageSignMode.IGNORED.getValue() == signMode)
-			return content;
+		if (signMode == null || PassageSignMode.IGNORED.getValue() == signMode) {
+            return content;
+        }
 
 		if (PassageSignMode.SIGNATURE_AUTO_PREPOSITION.getValue() == signMode) {
 			// 自动前置
-			if (content.endsWith(MESSAGE_SIGNATURE_SUFFIX))
-				return content.substring(content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX))
-						+ content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
+			if (content.endsWith(MESSAGE_SIGNATURE_SUFFIX)) {
+                return content.substring(content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX)) + content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
+            }
 
 		} else if (PassageSignMode.SIGNATURE_AUTO_POSTPOSITION.getValue() == signMode) {
 			// 自动后置
-			if (content.startsWith(MESSAGE_SIGNATURE_PRIFIX))
-				return content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length())
-						+ content.substring(0, content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1);
+			if (content.startsWith(MESSAGE_SIGNATURE_PRIFIX)) {
+                return content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length()) + content.substring(0, content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1);
+            }
 
 		} else if (PassageSignMode.REMOVE_SIGNATURE.getValue() == signMode) {
 			// 自动去签名
-			if (content.startsWith(MESSAGE_SIGNATURE_PRIFIX))
-				content = content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length());
+			if (content.startsWith(MESSAGE_SIGNATURE_PRIFIX)) {
+                content = content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length());
+            }
 
-			if (content.endsWith(MESSAGE_SIGNATURE_SUFFIX))
-				content = content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
+			if (content.endsWith(MESSAGE_SIGNATURE_SUFFIX)) {
+                content = content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
+            }
 
 		}
 
@@ -276,15 +288,17 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 		parameter.setPassageId(packets.getFinalPassageId());
 		parameter.setPacketsSize(packets.getPassageSpeed());
 
-		if (smsPassage == null)
-			return parameter;
+		if (smsPassage == null) {
+            return parameter;
+        }
 
 		// add by 20170831 加入最大连接数和连接超时时间限制（目前主要用于HTTP请求）
 		parameter.setConnectionSize(smsPassage.getConnectionSize());
 		parameter.setReadTimeout(smsPassage.getReadTimeout());
 
-		if (smsPassage.getWordNumber() != null && smsPassage.getWordNumber() != SmsBillConstant.WORDS_SIZE_PER_NUM)
-			parameter.setFeeByWords(smsPassage.getWordNumber());
+		if (smsPassage.getWordNumber() != null && smsPassage.getWordNumber() != UserBalanceConstant.WORDS_SIZE_PER_NUM) {
+            parameter.setFeeByWords(smsPassage.getWordNumber());
+        }
 
 		// add by 20170918 判断通道是否为强制参数模式
 		if (smsPassage.getSmsTemplateParam() == null
@@ -375,8 +389,9 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 			SmsMtMessageSubmit _submit = new SmsMtMessageSubmit();
 
 			for (ProviderSendResponse response : responses) {
-				if (StringUtils.isNotEmpty(response.getMobile()) && !mobile.equals(response.getMobile()))
-					continue;
+				if (StringUtils.isNotEmpty(response.getMobile()) && !mobile.equals(response.getMobile())) {
+                    continue;
+                }
 
 				submit.setStatus(response.isSuccess() ? MessageSubmitStatus.SUCCESS.getCode()
 						: MessageSubmitStatus.FAILED.getCode());

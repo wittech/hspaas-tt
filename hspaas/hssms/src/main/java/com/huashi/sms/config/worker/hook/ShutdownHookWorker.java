@@ -1,16 +1,11 @@
 package com.huashi.sms.config.worker.hook;
 
-import java.util.Map;
-
-import org.apache.commons.collections.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import com.alibaba.fastjson.TypeReference;
+import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.alibaba.fastjson.JSON;
-import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
+import java.util.List;
 
 /**
  * 
@@ -24,10 +19,10 @@ public class ShutdownHookWorker implements Runnable {
 	
 	private final Object startupShutdownMonitor = new Object();
 	
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+//	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-	private ApplicationContext applicationContext;
+	ApplicationContext applicationContext;
 
 	public ShutdownHookWorker(ApplicationContext applicationContext,
 			ThreadPoolTaskExecutor threadPoolTaskExecutor) {
@@ -55,4 +50,9 @@ public class ShutdownHookWorker implements Runnable {
 		
 	}
 
+	public static void main(String[] args) {
+		
+		
+		System.out.println(new TypeReference<List<String>>(){}.getType());
+	}
 }

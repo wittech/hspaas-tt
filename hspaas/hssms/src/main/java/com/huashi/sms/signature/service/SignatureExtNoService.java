@@ -46,12 +46,14 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 		condition.put("end", page.getPageSize());
 		
 		List<SignatureExtNo> list = signatureExtNoMapper.findList(condition);
-		if(CollectionUtils.isEmpty(list))
-			return null;
+		if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 		
 		for (SignatureExtNo t : list) {
-			if (t == null)
-				continue;
+			if (t == null) {
+                continue;
+            }
 			
 			t.setUserModel(userService.getByUserId(t.getUserId()));
 		}
@@ -68,8 +70,9 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 		}
 		
 		int result = signatureExtNoMapper.insert(signatureExtNo);
-		if(result <= 0)
-			return false;
+		if(result <= 0) {
+            return false;
+        }
 
 		pushToRedis(signatureExtNo);
 		
@@ -86,8 +89,9 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 		
 		signatureExtNo.setCreateTime(new Date());
 		int result = signatureExtNoMapper.updateByPrimaryKey(signatureExtNo);
-		if(result > 0) 
-			pushToRedis(signatureExtNo);
+		if(result > 0) {
+            pushToRedis(signatureExtNo);
+        }
 		
 		return result > 0;
 	}
@@ -140,8 +144,9 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 	}
 	
 	private void pushToRedis(SignatureExtNo signatureExtNo) {
-		if(signatureExtNo == null)
-			return;
+		if(signatureExtNo == null) {
+            return;
+        }
 		
 		try {
 			stringRedisTemplate.opsForHash().put(getKey(signatureExtNo.getUserId()), 
@@ -161,14 +166,16 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 	 */
 	private String getFromDb(Integer userId, String content) {
 		List<SignatureExtNo> list = signatureExtNoMapper.selectByUserId(userId);
-		if(CollectionUtils.isEmpty(list))
-			return null;
+		if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 		
 		for(SignatureExtNo signatureExtNo : list) {
 			// 根据内容匹配用户的扩展号码
 			String extNumber = getExtNumber(signatureExtNo, content);
-			if(extNumber == null)
-				continue;
+			if(extNumber == null) {
+                continue;
+            }
 			
 			return extNumber;
 		}
@@ -185,21 +192,24 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 	private String getFromRedis(Integer userId, String content) {
 		try {
 			Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(getKey(userId));
-			if(MapUtils.isEmpty(map))
-				return null;
+			if(MapUtils.isEmpty(map)) {
+                return null;
+            }
 			
 			SignatureExtNo signatureExtNo = null;
 			for(Object key : map.keySet()) {
 				Object obj = map.get(key);
-				if(obj == null)
-					continue;
+				if(obj == null) {
+                    continue;
+                }
 				
 				signatureExtNo = JSON.parseObject(obj.toString(), SignatureExtNo.class);
 				
 				// 根据内容匹配用户的扩展号码
 				String extNumber = getExtNumber(signatureExtNo, content);
-				if(extNumber == null)
-					continue;
+				if(extNumber == null) {
+                    continue;
+                }
 				
 				return extNumber;
 			}
@@ -219,15 +229,18 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 	   * @return
 	 */
 	private static String getExtNumber(SignatureExtNo signatureExtNo, String content) {
-		if(signatureExtNo == null)
-			return null;
+		if(signatureExtNo == null) {
+            return null;
+        }
 		
 		String signature = buildSignaturePattern(signatureExtNo.getSignature());
-		if(StringUtils.isEmpty(signature))
-			return null;
+		if(StringUtils.isEmpty(signature)) {
+            return null;
+        }
 		
-		if(content.startsWith(signature) || content.endsWith(signature))
-			return signatureExtNo.getExtNumber();
+		if(content.startsWith(signature) || content.endsWith(signature)) {
+            return signatureExtNo.getExtNumber();
+        }
 		
 		return null;
 	}
@@ -240,8 +253,9 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 	   * @return
 	 */
 	private static String buildSignaturePattern(String signature) {
-		if(StringUtils.isEmpty(signature))
-			return null;
+		if(StringUtils.isEmpty(signature)) {
+            return null;
+        }
 		
 		return String.format("【%s】", signature);
 	}
@@ -257,8 +271,9 @@ public class SignatureExtNoService implements ISignatureExtNoService{
 	@Override
 	public String getExtNumber(Integer userId, String content) {
 		if(StringUtils.isEmpty(content) || (!PatternUtil.isContainsSignature(content))
-				|| userId == null)
-			return null;
+				|| userId == null) {
+            return null;
+        }
 		
 		try {
 			return getFromRedis(userId, content);

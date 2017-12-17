@@ -18,8 +18,9 @@ public class WordFilterSet{
 	}
 	
 	public void add(final int... no) {
-		for(int currNo : no)
-			elements[currNo >>> 6] |= (1L << (currNo & 63));
+		for(int currNo : no) {
+            elements[currNo >>> 6] |= (1L << (currNo & 63));
+        }
 	}
 	
 	public void remove(final int no) {
@@ -61,11 +62,14 @@ public class WordFilterSet{
     }
 
 	public boolean containsAll(final int... no) {
-		if(no.length==0)
-			return true;
-		for(int currNo : no)
-			if((elements[currNo >>> 6] & (1L << (currNo & 63))) == 0)
-				return false;
+		if(no.length==0) {
+            return true;
+        }
+		for(int currNo : no) {
+            if ((elements[currNo >>> 6] & (1L << (currNo & 63))) == 0) {
+                return false;
+            }
+        }
 		return true;
 	}
 	
@@ -80,9 +84,11 @@ public class WordFilterSet{
 			elements[currNo >>> 6] |= (1L << (currNo & 63));
 		}//这一步执行完跟循环调用contains差不多了
 		
-		for (int i = 0; i < elements.length; i++)
-			if ((elements[i] & ~this.elements[i]) != 0)
-				return false;
+		for (int i = 0; i < elements.length; i++) {
+            if ((elements[i] & ~this.elements[i]) != 0) {
+                return false;
+            }
+        }
 		return true;
 	}
 	
@@ -92,8 +98,9 @@ public class WordFilterSet{
 	 */
 	public int size() {
 		int size = 0;
-		for (long element : elements)
-			size += Long.bitCount(element);
+		for (long element : elements) {
+            size += Long.bitCount(element);
+        }
 		return size;
 	}
 	

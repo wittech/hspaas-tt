@@ -86,13 +86,15 @@ public class SmsPassageService implements ISmsPassageService {
 	@Override
 	@Transactional
 	public Map<String,Object> create(SmsPassage passage, String provinceCodes) {
-		if(StringUtils.isEmpty(passage.getCode()))
-			return response(false, "通道编码为空");
+		if(StringUtils.isEmpty(passage.getCode())) {
+            return response(false, "通道编码为空");
+        }
 		
 		try {
             SmsPassage originPassage = smsPassageMapper.getPassageByCode(passage.getCode().trim());
-            if(originPassage != null)
+            if(originPassage != null) {
                 return response(false, "通道编码已存在");
+            }
             
 			smsPassageMapper.insert(passage);
 			String sendProtocol = null;
@@ -101,8 +103,9 @@ public class SmsPassageService implements ISmsPassageService {
 				parameter.setCreateTime(new Date());
 				parameterMapper.insertSelective(parameter);
 				
-				if(PassageCallType.DATA_SEND.getCode() == parameter.getCallType())
-					sendProtocol = parameter.getProtocol();
+				if(PassageCallType.DATA_SEND.getCode() == parameter.getCallType()) {
+                    sendProtocol = parameter.getProtocol();
+                }
 				
 				// add by zhengying 20170502 针对通道类型为CMPP等协议类型需要创建PROXY
 				loadPassageProxy(parameter, passage.getPacketsSize());
@@ -138,15 +141,18 @@ public class SmsPassageService implements ISmsPassageService {
 	 */
 	private boolean loadPassageProxy(SmsPassageParameter parameter, Integer packetsSize) {
 		try {
-			if(parameter.getCallType() != PassageCallType.DATA_SEND.getCode())
-				return true;
+			if(parameter.getCallType() != PassageCallType.DATA_SEND.getCode()) {
+                return true;
+            }
 			
-			if(StringUtils.isEmpty(parameter.getProtocol()))
-				return true;
+			if(StringUtils.isEmpty(parameter.getProtocol())) {
+                return true;
+            }
 			
 			// 是否需要出发通道代理逻辑(目前主要针对CMPP,SGIP,SGMP等直连协议),通道未使用中不无加载,后续会延迟加载(发短信逻辑初始发现无代理会初始化相关代理)
-			if(!smsProxyManageService.isProxyAvaiable(parameter.getPassageId()))
-				return true;
+			if(!smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+                return true;
+            }
 			
 			// 重新刷新代理信息
 			parameter.setPacketsSize(packetsSize);
@@ -162,8 +168,9 @@ public class SmsPassageService implements ISmsPassageService {
 	@Override
 	@Transactional
 	public Map<String,Object> update(SmsPassage passage, String provinceCode) {
-		if(passage == null)
-			return response(false, "通道数据异常");
+		if(passage == null) {
+            return response(false, "通道数据异常");
+        }
 		
 		try {
 			// 根据传递的通道代码查询是否存在，如果存在判断是否是本次编辑的通道ID，不是则提示'通道编码已存在'
@@ -173,8 +180,9 @@ public class SmsPassageService implements ISmsPassageService {
 //	            return response(false, "通道编码已存在");
 	        
 	        SmsPassage originPassage = findById(passage.getId());
-	        if(originPassage == null)
-				return response(false, "数据异常");
+	        if(originPassage == null) {
+                return response(false, "数据异常");
+            }
 			
 	        passage.setStatus(originPassage.getStatus());
 	        passage.setCreateTime(originPassage.getCreateTime());
@@ -243,12 +251,14 @@ public class SmsPassageService implements ISmsPassageService {
 	   * @return
 	 */
 	private void refreshProvincePassage(SmsPassage passage, String provinceCode) {
-		if(StringUtils.isEmpty(provinceCode))
-			return;
+		if(StringUtils.isEmpty(provinceCode)) {
+            return;
+        }
 		
 		String[] provinceCodes = provinceCode.split(",");
-		if(provinceCodes.length == 0)
-			return;
+		if(provinceCodes.length == 0) {
+            return;
+        }
 		
 		try {
 			smsPassageProvinceMapper.deleteByPassageId(passage.getId());
@@ -269,24 +279,29 @@ public class SmsPassageService implements ISmsPassageService {
 	public boolean deleteById(int id) {
 		try {
 			SmsPassage passage = smsPassageMapper.selectByPrimaryKey(id);
-			if(passage == null)
-				throw new RuntimeException("查询通道ID：" + id + "数据为空");
+			if(passage == null) {
+                throw new RuntimeException("查询通道ID：" + id + "数据为空");
+            }
 			
 			int result = smsPassageMapper.deleteByPrimaryKey(id);
-			if(result == 0)
-				throw new RuntimeException("删除通道失败");
+			if(result == 0) {
+                throw new RuntimeException("删除通道失败");
+            }
 			
 			result = parameterMapper.deleteByPassageId(id);
-			if(result == 0)
-				throw new RuntimeException("删除通道参数失败");
+			if(result == 0) {
+                throw new RuntimeException("删除通道参数失败");
+            }
 			
 			result = smsPassageProvinceMapper.deleteByPassageId(id);
-			if(result == 0)
-				throw new RuntimeException("删除通道省份关系数据失败");
+			if(result == 0) {
+                throw new RuntimeException("删除通道省份关系数据失败");
+            }
             
             boolean isOk = smsPassageAccessService.deletePassageAccess(id);
-			if(!isOk)
-				throw new RuntimeException("删除可用通道失败");
+			if(!isOk) {
+                throw new RuntimeException("删除可用通道失败");
+            }
             
             smsMtSubmitService.removeSubmitMessageQueue(passage.getCode());
             
@@ -304,20 +319,23 @@ public class SmsPassageService implements ISmsPassageService {
 		try {
 			// 是否需要出发通道代理逻辑(目前主要针对CMPP,SGIP,SGMP等直连协议)
 			if(smsProxyManageService.isProxyAvaiable(passageId)) {
-				if(!smsProxyManageService.stopProxy(passageId))
-					return false;
+				if(!smsProxyManageService.stopProxy(passageId)) {
+                    return false;
+                }
 			}
 			
 			SmsPassage passage = new SmsPassage();
 			passage.setId(passageId);
 			passage.setStatus(status);
 			int result = smsPassageMapper.updateByPrimaryKeySelective(passage);
-			if(result == 0)
-				throw new RuntimeException("更新通道状态失败");
+			if(result == 0) {
+                throw new RuntimeException("更新通道状态失败");
+            }
 			
 			boolean isOk = smsPassageAccessService.updateAccessStatus(passageId, status);
-			if(!isOk)
-				throw new RuntimeException("更新可用通道状态失败");
+			if(!isOk) {
+                throw new RuntimeException("更新可用通道状态失败");
+            }
 			
 			logger.info("更新通道：{} 状态：{} 成功", passageId, status);
 			return isOk;
@@ -357,8 +375,9 @@ public class SmsPassageService implements ISmsPassageService {
 				map.forEach((k,v) -> {
 					
 					SmsPassage smsPassage = JSON.parseObject(v.toString(), SmsPassage.class);
-					if(passages.contains(smsPassage))
-						return;
+					if(passages.contains(smsPassage)) {
+                        return;
+                    }
 					
 					passages.add(smsPassage);
 				});
@@ -375,8 +394,9 @@ public class SmsPassageService implements ISmsPassageService {
 	public SmsPassage findById(int id) {
 		try {
 			Object obj = stringRedisTemplate.opsForHash().get(SmsRedisConstant.RED_SMS_PASSAGE, id+"");
-			if(obj != null)
-				return JSON.parseObject(obj.toString(), SmsPassage.class);
+			if(obj != null) {
+                return JSON.parseObject(obj.toString(), SmsPassage.class);
+            }
 		} catch (Exception e) {
 			logger.warn("REDIS 加载失败，将于DB加载", e);
 		}
@@ -400,8 +420,9 @@ public class SmsPassageService implements ISmsPassageService {
 		
 		// 此逻辑需要结合REDIS判断
 		
-		if(CollectionUtils.isEmpty(list))
-			return null;
+		if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 		
 		SmsPassage passage = list.iterator().next();
 		passage.setParameterList(parameterMapper.findByPassageId(passage.getId()));
@@ -556,19 +577,22 @@ public class SmsPassageService implements ISmsPassageService {
 	@Override
 	public boolean isPassageBelongtoDirect(String protocol, String passageCode) {
 		if(StringUtils.isNotEmpty(protocol)) {
-			if(ProtocolType.isBelongtoDirect(protocol))
-				return true;
+			if(ProtocolType.isBelongtoDirect(protocol)) {
+                return true;
+            }
 		
 			return false;
 		}
 		
 		SmsPassage passage = smsPassageMapper.getPassageByCode(passageCode.trim());
-		if(passage == null)
-			return false;
+		if(passage == null) {
+            return false;
+        }
 		
 		SmsPassageParameter parameter = parameterMapper.selectSendProtocol(passage.getId());
-		if(parameter == null)
-			return false;
+		if(parameter == null) {
+            return false;
+        }
 		 
 		return ProtocolType.isBelongtoDirect(parameter.getProtocol());
 	}

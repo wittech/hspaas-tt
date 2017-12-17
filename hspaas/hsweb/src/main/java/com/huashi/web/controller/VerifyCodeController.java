@@ -56,10 +56,16 @@ public class VerifyCodeController extends BaseController {
 	@RequestMapping(value = "/validate", method = RequestMethod.POST)
 	public @ResponseBody boolean validate(String code) {
 		Object o = session.getAttribute(DEFAULT_CAPTCHA_MD5_CODE_KEY);
-		if (o == null)
-			return false;
-		if(StringUtils.isEmpty(code))
-			return false;
+		if (o == null) {
+            {
+                return false;
+            }
+        }
+		if(StringUtils.isEmpty(code)) {
+            {
+                return false;
+            }
+        }
 		return o.toString().equalsIgnoreCase(code.trim());
 	}
 	
@@ -72,14 +78,23 @@ public class VerifyCodeController extends BaseController {
 	 */
 	@RequestMapping(value = "/mcode", method = RequestMethod.POST)
 	public @ResponseBody int getMessageCode(String mobile, String code) {
-		if(!CMCP.isAvaiableMobile(mobile))
-			return MobileCodeValidate.MOBILE_INVALID.getValue();
+		if(!CMCP.isAvaiableMobile(mobile)) {
+            {
+                return MobileCodeValidate.MOBILE_INVALID.getValue();
+            }
+        }
 		
-		if(!validate(code))
-			return MobileCodeValidate.IMAGE_CODE_ERROR.getValue();
+		if(!validate(code)) {
+            {
+                return MobileCodeValidate.IMAGE_CODE_ERROR.getValue();
+            }
+        }
 		
-		if(!isAllowedSms())
-			return MobileCodeValidate.SMS_FREQUENCY_LIMIT.getValue();
+		if(!isAllowedSms()) {
+            {
+                return MobileCodeValidate.SMS_FREQUENCY_LIMIT.getValue();
+            }
+        }
 		
 		// 调用发送短信记录前校验 图形验证码是否正确
 		String smsCode = RandomUtil.getRandomNum();

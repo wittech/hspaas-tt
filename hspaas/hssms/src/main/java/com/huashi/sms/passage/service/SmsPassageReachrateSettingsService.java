@@ -43,8 +43,9 @@ public class SmsPassageReachrateSettingsService implements ISmsPassageReachrateS
 	public Integer create(SmsPassageReachrateSettings data) {
         try {
             int result = smsPassageReachrateSettingsMapper.insert(data);
-            if(result > 0)
-            	return data.getId();
+            if(result > 0) {
+                return data.getId();
+            }
         } catch (Exception e){
             LOG.error("添加通道监控轮询异常！",e);
         }

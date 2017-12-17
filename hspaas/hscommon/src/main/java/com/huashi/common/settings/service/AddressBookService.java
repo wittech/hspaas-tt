@@ -71,24 +71,33 @@ public class AddressBookService implements IAddressBookService {
 	@Override
 	public List<AddressBook> findList(int userId) {
 		List<AddressBook> list = addressBookMapper.findListByUserId(userId);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            {
+                return null;
+            }
+        }
 		return list;
 	}
 
 	@Override
 	public PaginationVo<AddressBook> findPage(int userId, String mobile, String startDate, String endDate,
 			String currentPage) {
-		if (userId<=0)
-			return null;
+		if (userId<=0) {
+            {
+                return null;
+            }
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
 		Map<String, Object> params =  new HashMap<String,Object>();
 		params.put("userId", userId);
 		int totalRecord = addressBookMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            {
+                return null;
+            }
+        }
 		params.put("startDate", startDate);
 		params.put("endDate", endDate);
 		params.put("mobile", mobile);
@@ -97,8 +106,11 @@ public class AddressBookService implements IAddressBookService {
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<AddressBook> list = addressBookMapper.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            {
+                return null;
+            }
+        }
 		return new PaginationVo<AddressBook>(list, _currentPage, totalRecord);
 	}
 

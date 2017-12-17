@@ -79,8 +79,11 @@ public class RegisterService implements IRegisterService {
 	@Override
 //	@Transactional(readOnly = false, rollbackFor = Exception.class)
 	public boolean register(RegisterModel model) {
-		if (!validate(model))
-			return false;
+		if (!validate(model)) {
+            {
+                return false;
+            }
+        }
 
 		try {
 			UserDeveloper developer = userService.save(model.getUser(), model.getUserProfile());
@@ -89,30 +92,54 @@ public class RegisterService implements IRegisterService {
 				return false;
 			}
 			
-			if(!saveUserBalance(model.getUserBalances(), developer.getUserId()))
-				return false;
+			if(!saveUserBalance(model.getUserBalances(), developer.getUserId())) {
+                {
+                    return false;
+                }
+            }
 			
-			if(!saveFluxDiscount(model.getUserFluxDiscount(), developer.getUserId()))
-				return false;
+			if(!saveFluxDiscount(model.getUserFluxDiscount(), developer.getUserId())) {
+                {
+                    return false;
+                }
+            }
 			
-			if(!saveUserSmsConfig(model.getUserSmsConfig(), developer.getUserId()))
-				return false;
+			if(!saveUserSmsConfig(model.getUserSmsConfig(), developer.getUserId())) {
+                {
+                    return false;
+                }
+            }
 			
-			if(!userPassageService.initUserPassage(developer.getUserId(), model.getPassageList()))
-				return false;
+			if(!userPassageService.initUserPassage(developer.getUserId(), model.getPassageList())) {
+                {
+                    return false;
+                }
+            }
 			
-			if(!iSmsPassageAccessService.updateByModifyUser(developer.getUserId()))
-				return false;
+			if(!iSmsPassageAccessService.updateByModifyUser(developer.getUserId())) {
+                {
+                    return false;
+                }
+            }
 			
-			if(!userPushCallbackConfig(model.getPushConfigs(), developer.getUserId()))
-				return false;
+			if(!userPushCallbackConfig(model.getPushConfigs(), developer.getUserId())) {
+                {
+                    return false;
+                }
+            }
 			
-			if(!addRegisterFinishedNotificationMessage(developer.getUserId()))
-				return false;
+			if(!addRegisterFinishedNotificationMessage(developer.getUserId())) {
+                {
+                    return false;
+                }
+            }
 			
 			// 如果发送邮件开关打开，则需要发送邮件 
-			if(model.isSendEmail())
-				sendEmail(model.getUser(), developer);
+			if(model.isSendEmail()) {
+                {
+                    sendEmail(model.getUser(), developer);
+                }
+            }
 
 			return true;
 		} catch (Exception e) {
@@ -135,24 +162,40 @@ public class RegisterService implements IRegisterService {
 	private boolean saveFluxDiscount(UserFluxDiscount discount, int userId) {
 		if (discount == null) {
 			List<SystemConfig> configs = systemConfigService.findByType(SystemConfigType.USER_REGISTER_FLUX_DISCOUNT.name());
-			if (CollectionUtils.isEmpty(configs))
-				throw new RuntimeException("用户流量折扣默认值信息为空，无法初始化");
+			if (CollectionUtils.isEmpty(configs)) {
+                {
+                    throw new RuntimeException("用户流量折扣默认值信息为空，无法初始化");
+                }
+            }
 
 			//  设置流量计费折扣（本地移动，本地联通，本地电信，全国移动，全国联通，全国电信）
 			double localcm = 1.0d, localcu = 1.0d, localct = 1.0d, globalcm = 1.0d, globalcu = 1.0d, globalct = 1.0d;
 			for (SystemConfig config : configs) {
-				if(config.getAttrKey().contains("local_cm"))
-					localcm = Double.parseDouble(config.getAttrValue());
-				else if(config.getAttrKey().contains("local_cu"))
-					localcu = Double.parseDouble(config.getAttrValue());
-				else if(config.getAttrKey().contains("local_ct"))
-					localct = Double.parseDouble(config.getAttrValue());
-				else if(config.getAttrKey().contains("global_cm"))
-					globalcm = Double.parseDouble(config.getAttrValue());
-				else if(config.getAttrKey().contains("global_cu"))
-					globalcu = Double.parseDouble(config.getAttrValue());
-				else if(config.getAttrKey().contains("global_ct"))
-					globalct = Double.parseDouble(config.getAttrValue());
+				if(config.getAttrKey().contains("local_cm")) {
+                    {
+                        localcm = Double.parseDouble(config.getAttrValue());
+                    }
+                } else if(config.getAttrKey().contains("local_cu")) {
+                    {
+                        localcu = Double.parseDouble(config.getAttrValue());
+                    }
+                } else if(config.getAttrKey().contains("local_ct")) {
+                    {
+                        localct = Double.parseDouble(config.getAttrValue());
+                    }
+                } else if(config.getAttrKey().contains("global_cm")) {
+                    {
+                        globalcm = Double.parseDouble(config.getAttrValue());
+                    }
+                } else if(config.getAttrKey().contains("global_cu")) {
+                    {
+                        globalcu = Double.parseDouble(config.getAttrValue());
+                    }
+                } else if(config.getAttrKey().contains("global_ct")) {
+                    {
+                        globalct = Double.parseDouble(config.getAttrValue());
+                    }
+                }
 			}
 			discount = new UserFluxDiscount();
 			discount.setUserId(userId);
@@ -216,8 +259,11 @@ public class RegisterService implements IRegisterService {
 			if (CollectionUtils.isEmpty(balances)) {
 				List<SystemConfig> configs = systemConfigService
 						.findByType(SystemConfigType.USER_REGISTER_BALANCE.name());
-				if (CollectionUtils.isEmpty(configs))
-					throw new RuntimeException("用户余额默认值信息为空，无法初始化");
+				if (CollectionUtils.isEmpty(configs)) {
+                    {
+                        throw new RuntimeException("用户余额默认值信息为空，无法初始化");
+                    }
+                }
 
 				UserBalance balance = null;
 				for (SystemConfig config : configs) {
@@ -252,8 +298,11 @@ public class RegisterService implements IRegisterService {
      */
 	private boolean userPushCallbackConfig(List<PushConfig> pushConfigs, int usreId) {
 		try {
-			if(CollectionUtils.isEmpty(pushConfigs))
-				return true;
+			if(CollectionUtils.isEmpty(pushConfigs)) {
+                {
+                    return true;
+                }
+            }
 				
 			for(PushConfig pushConfig : pushConfigs){
 				pushConfig.setUserId(usreId);
@@ -305,8 +354,11 @@ public class RegisterService implements IRegisterService {
 		// 7、异步发送短信和邮件（邮件中需将 接口账号和密码发送，并将接口协议文档作为附件发送[后台可配置开关]）
 		try {
 			// 邮箱为空则不发送
-			if(StringUtils.isEmpty(user.getEmail()))
-				return;
+			if(StringUtils.isEmpty(user.getEmail())) {
+                {
+                    return;
+                }
+            }
 			
 			// 用户名默认以手机号为准，如果手机号为空则以邮箱
 			EmailTemplate template = emailTemplateService.getRegisterSuceessContent(

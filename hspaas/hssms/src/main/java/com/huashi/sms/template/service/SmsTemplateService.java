@@ -75,15 +75,17 @@ public class SmsTemplateService implements ISmsTemplateService {
 			params.put("content", content);
 		}
 		int totalRecord = messageTemplateMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<MessageTemplate> list = messageTemplateMapper.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            return null;
+        }
 		
 		return new PaginationVo<MessageTemplate>(list, _currentPage, totalRecord);
 	}
@@ -122,8 +124,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 			if(MapUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE) || CollectionUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE.get(userId))) {
 				synchronized (lock) {
 					Set<String> set = stringRedisTemplate.opsForZSet().reverseRangeByScore(getKey(userId), 0, 1000);
-					if(CollectionUtils.isEmpty(set))
-						return null;
+					if(CollectionUtils.isEmpty(set)) {
+                        return null;
+                    }
 					
 					GLOBAL_MESSAGE_TEMPLATE.put(userId, set);
 				}
@@ -148,11 +151,13 @@ public class SmsTemplateService implements ISmsTemplateService {
 			
 			for(String s : set) {
 				MessageTemplate jt = JSON.parseObject(s, MessageTemplate.class);
-				if(jt == null)
-					continue;
+				if(jt == null) {
+                    continue;
+                }
 				
-				if(template.getContent().equals(jt.getContent()))
-					stringRedisTemplate.opsForZSet().remove(getKey(template.getUserId()), s);
+				if(template.getContent().equals(jt.getContent())) {
+                    stringRedisTemplate.opsForZSet().remove(getKey(template.getUserId()), s);
+                }
 			}
 			
 			// 订阅发布模式订阅
@@ -174,8 +179,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 		template.setRegexValue(parseContent2Regex(template.getContent()));
 		template.setCreateTime(td.getCreateTime());
 		int result = messageTemplateMapper.updateByPrimaryKey(template);
-		if(result > 0) 
-			reloadUserTemplate(template.getUserId());
+		if(result > 0) {
+            reloadUserTemplate(template.getUserId());
+        }
 		return result > 0;
 	}
 
@@ -215,12 +221,14 @@ public class SmsTemplateService implements ISmsTemplateService {
 		paramMap.put("end", page.getPageSize());
 		
 		List<MessageTemplate> list = messageTemplateMapper.findList(paramMap);
-		if(CollectionUtils.isEmpty(list))
-			return null;
+		if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 		
 		for (MessageTemplate t : list) {
-			if (t == null)
-				continue;
+			if (t == null) {
+                continue;
+            }
 			
 			t.setUserModel(userService.getByUserId(t.getUserId()));
 			t.setApptypeText(AppType.parse(t.getAppType()).getName());
@@ -250,8 +258,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 						continue;
 					}
 
-					if (StringUtils.isEmpty(template.getRegexValue()))
-						continue;
+					if (StringUtils.isEmpty(template.getRegexValue())) {
+                        continue;
+                    }
 
 					if (TEMPLATE_SUPER_REGEX.equalsIgnoreCase(template.getRegexValue())) {
 						superTemplate = template;
@@ -259,15 +268,17 @@ public class SmsTemplateService implements ISmsTemplateService {
 					}
 
 					// 如果普通短信模板存在，则以普通模板为主
-					if (PatternUtil.isRight(template.getRegexValue(), content))
-						return template;
+					if (PatternUtil.isRight(template.getRegexValue(), content)) {
+                        return template;
+                    }
 					
 				}
 			}
 
 			// 如果普通短信模板未找到，判断是否找到超级模板，有则直接返回
-			if (superTemplate != null)
-				return superTemplate;
+			if (superTemplate != null) {
+                return superTemplate;
+            }
 		} catch (Exception e) {
 			logger.error("短信模板REDIS查询失败", e);
 		}
@@ -278,12 +289,14 @@ public class SmsTemplateService implements ISmsTemplateService {
 		// REDIS没查到
 //		MessageTemplate superTemplate = null;
 		List<MessageTemplate> list = messageTemplateMapper.findAvaiableByUserId(userId);
-		if (CollectionUtils.isEmpty(list))
-			return null;
+		if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 
 		for (MessageTemplate template : list) {
-			if (StringUtils.isEmpty(template.getRegexValue()))
-				continue;
+			if (StringUtils.isEmpty(template.getRegexValue())) {
+                continue;
+            }
 
 //			if (TEMPLATE_SUPER_REGEX.equalsIgnoreCase(template.getRegexValue())) {
 //				superTemplate = template;
@@ -291,8 +304,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 //			}
 
 			// 如果普通短信模板存在，则以普通模板为主
-			if (PatternUtil.isRight(template.getRegexValue(), content))
-				return template;
+			if (PatternUtil.isRight(template.getRegexValue(), content)) {
+                return template;
+            }
 		}
 
 		// 如果普通短信模板未找到，判断是否找到超级模板，有则直接返回
@@ -305,16 +319,18 @@ public class SmsTemplateService implements ISmsTemplateService {
 	@Override
 	public MessageTemplate getByContent(int userId, String content) {
 		MessageTemplate template = getTemplateFromRedis(userId, content);
-		if (template != null)
-			return template;
+		if (template != null) {
+            return template;
+        }
 
 		return getTemplateFromDb(userId, content);
 	}
 
 	@Override
 	public boolean save(MessageTemplate template) {
-		if (StringUtils.isEmpty(template.getContent()))
-			throw new RuntimeException("模板内容不能为空");
+		if (StringUtils.isEmpty(template.getContent())) {
+            throw new RuntimeException("模板内容不能为空");
+        }
 
 		if (forbiddenWordsService.isContainsForbiddenWords(template.getContent())) {
 			Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
@@ -327,8 +343,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 		}
 		template.setRegexValue(parseContent2Regex(template.getContent()));
 		
-		if(template.getStatus() == ApproveStatus.SUCCESS.getValue())
-			pushToRedis(template.getUserId(), template);
+		if(template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
+            pushToRedis(template.getUserId(), template);
+        }
 
 		return messageTemplateMapper.insertSelective(template) > 0;
 	}
@@ -341,8 +358,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 			throw new RuntimeException(String.format("模板内容包含敏感词：%s", words));
 		}
 
-		if (AppType.WEB.getCode() == template.getAppType())
-			template.setStatus(ApproveStatus.WAITING.getValue());
+		if (AppType.WEB.getCode() == template.getAppType()) {
+            template.setStatus(ApproveStatus.WAITING.getValue());
+        }
 
 		Set<String> set = new HashSet<String>();
 		CollectionUtils.addAll(set, contents);
@@ -359,8 +377,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 				break;
 			}
 			
-			if(template.getStatus() == ApproveStatus.SUCCESS.getValue())
-				pushToRedis(template.getUserId(), template);
+			if(template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
+                pushToRedis(template.getUserId(), template);
+            }
 		}
 		if (!allResult) {
 			// 非全部成功的，全部回滚
@@ -396,10 +415,11 @@ public class SmsTemplateService implements ISmsTemplateService {
 		template.setApproveUser(operator);
 		template.setApproveTime(new Date());
 
-		if (ApproveStatus.SUCCESS.getValue() == approveStatus)
-			pushToRedis(template.getUserId(), template);
-		else
-			removeRedis(template);
+		if (ApproveStatus.SUCCESS.getValue() == approveStatus) {
+            pushToRedis(template.getUserId(), template);
+        } else {
+            removeRedis(template);
+        }
 
 		return messageTemplateMapper.updateByPrimaryKeySelective(template) > 0;
 	}
@@ -407,8 +427,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 	@Override
 	public boolean isContentMatched(long id, String content) {
 		MessageTemplate template = get(id);
-		if (template == null)
-			return false;
+		if (template == null) {
+            return false;
+        }
 
 		return PatternUtil.isRight(template.getRegexValue(), content);
 	}
@@ -416,8 +437,9 @@ public class SmsTemplateService implements ISmsTemplateService {
 	private void reloadUserTemplate(int userId) {
 		List<MessageTemplate> list = messageTemplateMapper.findAvaiableByUserId(userId);
 		stringRedisTemplate.delete(getKey(userId));
-		if(CollectionUtils.isEmpty(list))
-			return;
+		if(CollectionUtils.isEmpty(list)) {
+            return;
+        }
 		
 		for(MessageTemplate t : list) {
 			stringRedisTemplate.opsForZSet().add(getKey(userId), JSON.toJSONString(t), t.getPriority().doubleValue());

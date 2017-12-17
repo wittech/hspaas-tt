@@ -89,8 +89,11 @@ public class RegisterController extends BaseController {
 	@RequestMapping(value = "/fill_message", method = RequestMethod.GET)
 	public String fillMessage(Model model) {
 		Object email = session.getAttribute(EMAIL_VERIFY_PASSED);
-		if (email == null)
-			return fillEmail(model);
+		if (email == null) {
+            {
+                return fillEmail(model);
+            }
+        }
 		return "/member/register/fill_message";
 	}
 
@@ -130,10 +133,16 @@ public class RegisterController extends BaseController {
 	public boolean register(User user) {
 //		if (result.hasErrors())
 //			return false;
-		if (StringUtils.isEmpty(user.getEmail()))
-			return false;
-		if(session.getAttribute(EMAIL_VERIFY_UID) == null)
-			return false;
+		if (StringUtils.isEmpty(user.getEmail())) {
+            {
+                return false;
+            }
+        }
+		if(session.getAttribute(EMAIL_VERIFY_UID) == null) {
+            {
+                return false;
+            }
+        }
 		
 		user.setRegistIp(getClientIp());
 		
@@ -161,8 +170,11 @@ public class RegisterController extends BaseController {
 	@RequestMapping(value = "/complete", method = RequestMethod.GET)
 	public String complete(Model model, HttpSession session) {
 		Object email = session.getAttribute(EMAIL_VERIFY_PASSED);
-		if (email == null)
-			return fillEmail(model);
+		if (email == null) {
+            {
+                return fillEmail(model);
+            }
+        }
 		
 		model.addAttribute("email", email);
 		session.removeAttribute(EMAIL_VERIFY_PASSED);

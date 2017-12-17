@@ -43,14 +43,20 @@ public class EmailSendService implements IEmailSendService {
 		String uid = java.util.UUID.randomUUID().toString().replaceAll("-", "");
 		String url = buildUrlByEmail(uid); // 激活URL
 		EmailTemplate template = emailTemplateService.getRegisterVerifyContent(url);
-		if (template == null)
-			return false;
+		if (template == null) {
+            {
+                return false;
+            }
+        }
 		
 		try {
 			emailSendUtil.sendEmail(email, template.getSubject(), template.getContent());
 			boolean isOK = emailVerifyService.saveEmailVerify(url, uid, email);
-			if(isOK)
-				this.saveSendRecord(new EmailSendRecord(email, template.getSubject(), template.getContent()));
+			if(isOK) {
+                {
+                    this.saveSendRecord(new EmailSendRecord(email, template.getSubject(), template.getContent()));
+                }
+            }
 		} catch (SendException e) {
 			throw e;
 		}

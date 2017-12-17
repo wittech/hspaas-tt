@@ -29,8 +29,9 @@ public class RequestTemplateHandler {
 	}
 
 	private static void validate(String parameter) {
-		if (StringUtils.isEmpty(parameter))
-			throw new DataEmptyException("参数数据为空");
+		if (StringUtils.isEmpty(parameter)) {
+            throw new DataEmptyException("参数数据为空");
+        }
 	}
 		
 }

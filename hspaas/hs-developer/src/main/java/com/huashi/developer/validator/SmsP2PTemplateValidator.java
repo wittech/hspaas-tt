@@ -13,8 +13,8 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.huashi.bill.bill.model.SmsP2PBillModel;
 import com.huashi.bill.bill.service.IBillService;
+import com.huashi.common.user.model.P2pBalanceResponse;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
@@ -56,38 +56,52 @@ public class SmsP2PTemplateValidator extends Validator {
 		
 		// 点对点短信如果内容为空，则返回错误码
 		String body = model.getBody();
-		if(StringUtils.isEmpty(body))
-			throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+		if(StringUtils.isEmpty(body)) {
+            {
+                throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+            }
+        }
 
 		List<JSONObject> p2pBodies = JSON.parseObject(body, new TypeReference<List<JSONObject>>(){});
 		
 		// 移除节点为空数据
 		removeElementWhenNodeIsEmpty(p2pBodies);
 		
-		if(CollectionUtils.isEmpty(p2pBodies))
-			throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+		if(CollectionUtils.isEmpty(p2pBodies)) {
+            {
+                throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+            }
+        }
 		
-		SmsP2PBillModel smsP2PBillModel = null;
+		P2pBalanceResponse p2pBalanceResponse = null;
 		try {
 			// 获取本次短信内容计费条数
-			smsP2PBillModel = billService.getSmsFeeInP2PTemplate(passportModel.getUserId(), paramMap.get("content")[0], p2pBodies);
-			if (smsP2PBillModel == null || smsP2PBillModel.getTotalFee() == 0)
-				throw new ValidateException(CommonApiCode.COMMON_BALANCE_EXCEPTION);
+			p2pBalanceResponse = userBalanceService.calculateP2ptSmsAmount(passportModel.getUserId(),
+			    paramMap.get("content")[0], p2pBodies);
+			
+			if (p2pBalanceResponse == null || p2pBalanceResponse.getTotalFee() == 0) {
+                {
+                    throw new ValidateException(CommonApiCode.COMMON_BALANCE_EXCEPTION);
+                }
+            }
 		} catch (Exception e) {
 			throw new ValidateException(CommonApiCode.COMMON_BALANCE_EXCEPTION);
 		}
 		
 		// f.用户余额不足（通过计费微服务判断，结合4.1.6中的用户计费规则）
 		boolean balanceEnough = userBalanceService.isBalanceEnough(passportModel.getUserId(),
-				PlatformType.SEND_MESSAGE_SERVICE, (double) smsP2PBillModel.getTotalFee());
-		if (!balanceEnough)
-			throw new ValidateException(CommonApiCode.COMMON_BALANCE_NOT_ENOUGH);
+				PlatformType.SEND_MESSAGE_SERVICE, (double) p2pBalanceResponse.getTotalFee());
+		if (!balanceEnough) {
+            {
+                throw new ValidateException(CommonApiCode.COMMON_BALANCE_NOT_ENOUGH);
+            }
+        }
 		
-		model.setFee(smsP2PBillModel.getTotalFee());
-		model.setTotalFee(smsP2PBillModel.getTotalFee());
+		model.setFee(p2pBalanceResponse.getTotalFee());
+		model.setTotalFee(p2pBalanceResponse.getTotalFee());
 		model.setIp(ip);
 		model.setUserId(passportModel.getUserId());
-		model.setP2pBodies(smsP2PBillModel.getP2pBodies());
+		model.setP2pBodies(p2pBalanceResponse.getP2pBodies());
 
 		return model;
 	}
@@ -100,8 +114,11 @@ public class SmsP2PTemplateValidator extends Validator {
 	 * @throws ValidateException 
 	 */
 	private void removeElementWhenNodeIsEmpty(List<JSONObject> p2pBodies) throws ValidateException {
-		if(CollectionUtils.isEmpty(p2pBodies))
-			throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+		if(CollectionUtils.isEmpty(p2pBodies)) {
+            {
+                throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+            }
+        }
 		
 		List<JSONObject> removeBodies = new ArrayList<>();
 		for(JSONObject obj : p2pBodies) {
@@ -111,8 +128,11 @@ public class SmsP2PTemplateValidator extends Validator {
 			}
 		}
 		
-		if(CollectionUtils.isNotEmpty(removeBodies))
-			p2pBodies.removeAll(removeBodies);
+		if(CollectionUtils.isNotEmpty(removeBodies)) {
+            {
+                p2pBodies.removeAll(removeBodies);
+            }
+        }
 	}
 	
 }

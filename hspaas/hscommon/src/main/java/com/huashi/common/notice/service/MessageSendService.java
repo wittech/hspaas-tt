@@ -33,16 +33,22 @@ public class MessageSendService implements IMessageSendService {
 
 	@Override
 	public boolean sendVerifyCode(String code, String mobile) {
-		if (StringUtils.isEmpty(mobile) || StringUtils.isEmpty(code))
-			return false;
+		if (StringUtils.isEmpty(mobile) || StringUtils.isEmpty(code)) {
+            {
+                return false;
+            }
+        }
 		String content = messageTemplateService.getVerifyContent(code);
 		logger.info("手机号码：{}， 对应短信动态码为 ：{}", mobile, code);
 
 		try {
 			boolean isSuccess = MessageSendUtil.smsWithStatus(url, appkey, appsecret, mobile.trim(), content);
 
-			if (isSuccess)
-				smsMtRecordMapper.insertSelective(new SmsMtRecord(null, mobile, content, new Date()));
+			if (isSuccess) {
+                {
+                    smsMtRecordMapper.insertSelective(new SmsMtRecord(null, mobile, content, new Date()));
+                }
+            }
 
 			// 解析发送短信结果
 			return isSuccess;
@@ -55,14 +61,20 @@ public class MessageSendService implements IMessageSendService {
 
 	@Override
 	public SmsResponse sendSystemMessage(String mobile, String content) {
-		if (StringUtils.isEmpty(content) || StringUtils.isEmpty(mobile))
-			return null;
+		if (StringUtils.isEmpty(content) || StringUtils.isEmpty(mobile)) {
+            {
+                return null;
+            }
+        }
 
 		try {
 			SmsResponse resp = MessageSendUtil.sms(url, appkey, appsecret, mobile, content);
 
-			if (resp != null)
-				smsMtRecordMapper.insertSelective(new SmsMtRecord(null, mobile, content, new Date()));
+			if (resp != null) {
+                {
+                    smsMtRecordMapper.insertSelective(new SmsMtRecord(null, mobile, content, new Date()));
+                }
+            }
 
 			return resp;
 		} catch (Exception e) {
@@ -73,8 +85,11 @@ public class MessageSendService implements IMessageSendService {
 
 	@Override
 	public SmsResponse sendCustomMessage(String appkey, String appsecret, String mobile, String content) {
-		if (StringUtils.isEmpty(content) || StringUtils.isEmpty(mobile))
-			return null;
+		if (StringUtils.isEmpty(content) || StringUtils.isEmpty(mobile)) {
+            {
+                return null;
+            }
+        }
 
 		try {
 			return MessageSendUtil.sms(url, appkey, appsecret, mobile, content);

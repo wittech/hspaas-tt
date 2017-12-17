@@ -58,8 +58,9 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 			passageMessageTemplate.setCreateTime(new Date());
 			
 			int result = smsPassageMessageTemplateMapper.insert(passageMessageTemplate);
-			if(result == 0)
-				return false;
+			if(result == 0) {
+                return false;
+            }
 			
 			pushToRedis(passageMessageTemplate);
 			
@@ -77,8 +78,9 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 			passageMessageTemplate.setParamNames(parseVariableName(passageMessageTemplate.getTemplateContent()));
 			passageMessageTemplate.setStatus(PassageMessageTemplateStatus.AVAIABLE.getValue());
 			int result = smsPassageMessageTemplateMapper.updateByPrimaryKeySelective(passageMessageTemplate);
-			if(result == 0)
-				return false;
+			if(result == 0) {
+                return false;
+            }
 			
 			pushToRedis(passageMessageTemplate);
 			
@@ -103,8 +105,9 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 	   * @return
 	 */
 	public static String[] pickupValuesByRegex(String content, String regex, int paramSize) {
-		if(StringUtils.isEmpty(content))
-			return null;
+		if(StringUtils.isEmpty(content)) {
+            return null;
+        }
 		
         try {
         	Pattern p = Pattern.compile(regex);
@@ -137,14 +140,16 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
         Matcher m = p.matcher(content);
         StringBuilder variableNames = new StringBuilder();
         while(m.find()) {
-        	if(StringUtils.isEmpty(m.group()))
-        		continue;
+        	if(StringUtils.isEmpty(m.group())) {
+                continue;
+            }
         	
             variableNames.append(m.group().replaceAll("#", "")).append(",");
         }
         
-        if(variableNames.length() == 0)
-        	return null;
+        if(variableNames.length() == 0) {
+            return null;
+        }
         
         return variableNames.substring(0, variableNames.length() - 1);
 	}
@@ -180,15 +185,17 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 		BossPaginationVo<SmsPassageMessageTemplate> page = new BossPaginationVo<SmsPassageMessageTemplate>();
 		page.setCurrentPage(Integer.parseInt(params.getOrDefault("currentPage", 1).toString()));
 		int total = smsPassageMessageTemplateMapper.selectCount(params);
-		if (total <= 0)
-			return page;
+		if (total <= 0) {
+            return page;
+        }
 		
 		page.setTotalCount(total);
 		params.put("start", page.getStartPosition());
 		params.put("end", page.getPageSize());
 		List<SmsPassageMessageTemplate> dataList = smsPassageMessageTemplateMapper.selectList(params);
-		if (CollectionUtils.isEmpty(dataList))
-			return page;
+		if (CollectionUtils.isEmpty(dataList)) {
+            return page;
+        }
 		
 		Map<Integer, String> passageMap = new HashMap<Integer, String>();
 		for(SmsPassageMessageTemplate template : dataList) {
@@ -198,8 +205,9 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 			}
 			
 			SmsPassage smsPassage = smsPassageService.findById(template.getPassageId());
-			if(smsPassage == null)
-				continue;
+			if(smsPassage == null) {
+                continue;
+            }
 			
 			template.setPassageName(smsPassage.getName());
 			passageMap.put(template.getPassageId(), smsPassage.getName());
@@ -253,8 +261,9 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 	@Override
 	public boolean reloadToRedis() {
 		List<SmsPassageMessageTemplate> list = smsPassageMessageTemplateMapper.selectAvaiable();
-		if (CollectionUtils.isEmpty(list))
-			return false;
+		if (CollectionUtils.isEmpty(list)) {
+            return false;
+        }
 		
 		stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_USER_PASSAGE_MESSAGE_TEMPLATE + "*"));
 		
@@ -279,12 +288,14 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 						continue;
 					}
 
-					if (StringUtils.isEmpty(template.getRegexValue()))
-						continue;
+					if (StringUtils.isEmpty(template.getRegexValue())) {
+                        continue;
+                    }
 
 					// 如果普通短信模板存在，则以普通模板为主
-					if (PatternUtil.isRight(template.getRegexValue(), messageContent))
-						return template;
+					if (PatternUtil.isRight(template.getRegexValue(), messageContent)) {
+                        return template;
+                    }
 					
 				}
 			}
@@ -298,8 +309,9 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 	@Override
 	public boolean isContentMatched(Long id, String content) {
 		SmsPassageMessageTemplate smsPassageMessageTemplate = get(id);
-		if(smsPassageMessageTemplate == null)
-			return false;
+		if(smsPassageMessageTemplate == null) {
+            return false;
+        }
 		
 		return PatternUtil.isRight(smsPassageMessageTemplate.getRegexValue(), content);
 	}

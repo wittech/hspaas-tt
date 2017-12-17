@@ -146,8 +146,11 @@ public class IndexController extends BaseController {
 	 */
 	@RequestMapping(value = "/console", method = RequestMethod.GET)
 	public String console(Model model) {
-		if (!super.isLogin())
-			return login();
+		if (!super.isLogin()) {
+            {
+                return login();
+            }
+        }
 
 		model.addAttribute("accountBalance", userAccountService.getAccountByUserId(getCurrentUserId()));
 		model.addAttribute("developer", userDeveloperService.getByUserId(getCurrentUserId()));
@@ -166,18 +169,31 @@ public class IndexController extends BaseController {
 	 */
 	private void balance(Model model) {
 		List<UserBalance> list = userBalanceService.findByUserId(getCurrentUserId());
-		if (CollectionUtils.isEmpty(list))
-			return;
+		if (CollectionUtils.isEmpty(list)) {
+            {
+                return;
+            }
+        }
 
 		for (UserBalance balance : list) {
-			if (balance == null)
-				continue;
-			if (PlatformType.SEND_MESSAGE_SERVICE.getCode() == balance.getType())
-				model.addAttribute("messageBalance", balance.getBalance());
-			else if (PlatformType.FLUX_SERVICE.getCode() == balance.getType())
-				model.addAttribute("fluxBalance", balance.getBalance());
-			else if (PlatformType.VOICE_SERVICE.getCode() == balance.getType())
-				model.addAttribute("voiceBalance", balance.getBalance());
+			if (balance == null) {
+                {
+                    continue;
+                }
+            }
+			if (PlatformType.SEND_MESSAGE_SERVICE.getCode() == balance.getType()) {
+                {
+                    model.addAttribute("messageBalance", balance.getBalance());
+                }
+            } else if (PlatformType.FLUX_SERVICE.getCode() == balance.getType()) {
+                {
+                    model.addAttribute("fluxBalance", balance.getBalance());
+                }
+            } else if (PlatformType.VOICE_SERVICE.getCode() == balance.getType()) {
+                {
+                    model.addAttribute("voiceBalance", balance.getBalance());
+                }
+            }
 		}
 	}
 

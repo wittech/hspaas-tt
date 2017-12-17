@@ -28,27 +28,42 @@ public class EmailVerifyService implements IEmailVerifyService {
 
 	@Override
 	public String isAvaiable(String uid) throws Exception {
-		if (StringUtils.isEmpty(uid))
-			throw new Exception("链接无效，请重新输入邮箱");
+		if (StringUtils.isEmpty(uid)) {
+            {
+                throw new Exception("链接无效，请重新输入邮箱");
+            }
+        }
 		
 		EmailVerify ev = emailVerifyMapper.selectByUid(uid);
 		
-		if (ev == null || ev.getSendTime() == null)
-			throw new Exception("链接无效，请重新输入邮箱");
+		if (ev == null || ev.getSendTime() == null) {
+            {
+                throw new Exception("链接无效，请重新输入邮箱");
+            }
+        }
 		
-		if (!DateUtil.isBeyond24Hour(ev.getSendTime(), new Date()))
-			throw new Exception("链接已过期，请重新输入邮箱");
+		if (!DateUtil.isBeyond24Hour(ev.getSendTime(), new Date())) {
+            {
+                throw new Exception("链接已过期，请重新输入邮箱");
+            }
+        }
 		
-		if(ev.getValidTime() != null)
-			throw new Exception("链接已激活，无法重复使用");
+		if(ev.getValidTime() != null) {
+            {
+                throw new Exception("链接已激活，无法重复使用");
+            }
+        }
 		
 		return ev.getEmail();
 	}
 
 	@Override
 	public void activeEmail(String uid) {
-		if (StringUtils.isEmpty(uid))
-			return;
+		if (StringUtils.isEmpty(uid)) {
+            {
+                return;
+            }
+        }
 		emailVerifyMapper.updateByUid(uid);
 	}
 

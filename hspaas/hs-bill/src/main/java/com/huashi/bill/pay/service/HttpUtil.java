@@ -25,12 +25,18 @@ public class HttpUtil {
 			conn.setDoOutput(true);
 			conn.setConnectTimeout(CONNECT_TIMEOUT);
 			conn.setReadTimeout(CONNECT_TIMEOUT);
-			if (contentType != null)
-				conn.setRequestProperty("content-type", contentType);
+			if (contentType != null) {
+                {
+                    conn.setRequestProperty("content-type", contentType);
+                }
+            }
 			OutputStreamWriter writer = new OutputStreamWriter(
 					conn.getOutputStream(), DEFAULT_ENCODING);
-			if (data == null)
-				data = "";
+			if (data == null) {
+                {
+                    data = "";
+                }
+            }
 			writer.write(data);
 			writer.flush();
 			writer.close();
@@ -51,8 +57,11 @@ public class HttpUtil {
 					+ e.getMessage());
 		} finally {
 			try {
-				if (reader != null)
-					reader.close();
+				if (reader != null) {
+                    {
+                        reader.close();
+                    }
+                }
 			} catch (IOException e) {
 			}
 		}

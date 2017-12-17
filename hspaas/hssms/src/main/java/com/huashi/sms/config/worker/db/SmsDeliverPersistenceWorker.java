@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.AbstractWorker;
+import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.service.ISmsMtDeliverService;
 
 /**
@@ -17,18 +18,18 @@ import com.huashi.sms.record.service.ISmsMtDeliverService;
  * @version V1.0
  * @date 2016年12月10日 下午6:03:39
  */
-public class SmsDeliverPersistenceWorker extends AbstractWorker {
+public class SmsDeliverPersistenceWorker extends AbstractWorker<SmsMtMessageDeliver> {
 	
 	public SmsDeliverPersistenceWorker(ApplicationContext applicationContext) {
 		super(applicationContext);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void operate(List list) {
+	protected void operate(List<SmsMtMessageDeliver> list) {
 		try {
-			if (CollectionUtils.isEmpty(list))
-				return;
+			if (CollectionUtils.isEmpty(list)) {
+                return;
+            }
 
 			long startTime = System.currentTimeMillis();
 			getInstance(ISmsMtDeliverService.class).batchInsert(list);

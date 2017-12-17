@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -66,8 +65,8 @@ public class SmsMtPushService implements ISmsMtPushService {
 	private int pushThreadPoolSize;
 	@Autowired
 	private ApplicationContext applicationContext;
-	@Resource
-	private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+//	@Resource
+//	private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
@@ -132,20 +131,21 @@ public class SmsMtPushService implements ISmsMtPushService {
 		
 		else{
 			try {
-				body = getWaitPushBodyArgs(deliver.getMsgId(), deliver.getMobile());
-				if(body != null) {
-					cachedPushArgs.put(deliver.getMsgId(), body);
-					return true;
-				} 
-				else {
+				JSONObject redisArgs = getWaitPushBodyArgs(deliver.getMsgId(), deliver.getMobile());
+				if(redisArgs == null) {
 					// 如果数据生成时间超过5分钟则舍弃，不再重新补偿
 //					if(System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 5 * 60 * 1000 )
-//						continue;
-					
-					logger.info("deliver提交时间：{} 计算结果：{}", deliver.getCreateTime().getTime(), 
-							System.currentTimeMillis() - deliver.getCreateTime().getTime());
+						
+					if(System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 20 * 1000 ) {
+                        return false;
+                    }
 					
 					failoverDeliversQueue.add(deliver);
+				} else {
+					body.putAll(redisArgs);
+					cachedPushArgs.put(deliver.getMsgId(), body);
+					return true;
+					
 				}
 			} catch (IllegalStateException e) {
 				logger.warn(e.getMessage());
@@ -195,8 +195,9 @@ public class SmsMtPushService implements ISmsMtPushService {
 
 	@Override
 	public boolean compareAndPushBody(List<SmsMtMessageDeliver> delivers) {
-		if(CollectionUtils.isEmpty(delivers))
-			return false;
+		if(CollectionUtils.isEmpty(delivers)) {
+            return false;
+        }
 		
 		JSONObject body = new JSONObject();
 		Map<String, JSONObject> cachedPushArgs = new HashMap<>();
@@ -207,20 +208,24 @@ public class SmsMtPushService implements ISmsMtPushService {
 		
 		try {
 			for(SmsMtMessageDeliver deliver : delivers) {
-				if(deliver == null)
-					continue;
+				if(deliver == null) {
+                    continue;
+                }
 				
-				if(!assembleBody(body, deliver, cachedPushArgs, failoverDeliversQueue))
-					continue;
+				if(!assembleBody(body, deliver, cachedPushArgs, failoverDeliversQueue)) {
+                    continue;
+                }
 				
 				removeReadyMtPushConfig(deliver.getMsgId(), deliver.getMobile());
 				
 				// 如果用户推送地址为空则表明不需要推送
-				if(StringUtils.isEmpty(body.getString(PUSH_BODY_SUBPACKAGE_KEY)))
-					continue;
+				if(StringUtils.isEmpty(body.getString(PUSH_BODY_SUBPACKAGE_KEY))) {
+                    continue;
+                }
 				
-				if(!subQueue(body, deliver, userBodies))
-					continue;
+				if(!subQueue(body, deliver, userBodies)) {
+                    continue;
+                }
 			}
 			
 			// 如果针对上家已回执我方未入库数据存在则保存至REDIS
@@ -258,7 +263,6 @@ public class SmsMtPushService implements ISmsMtPushService {
 					JSON.toJSONString(failoverDeliversQueue, new SimplePropertyPreFilter("msgId", "mobile", "statusCode", 
 							"deliverTime", "remark", "status", "createTime")));
 //			stringRedisTemplate.expire(SmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 5, TimeUnit.MINUTES);
-			logger.warn("deliver failover count : {}" , failoverDeliversQueue.size());
 		} catch (Exception e) {
 			logger.error("针对上家回执数据已回但我方回执数据未入库情况需要 推送集合数据失败", e);
 		}
@@ -274,14 +278,16 @@ public class SmsMtPushService implements ISmsMtPushService {
 	   * @param mobile
 	   * @return
 	 */
-	public JSONObject getWaitPushBodyArgs(String msgId, String mobile) {
+	@Override
+    public JSONObject getWaitPushBodyArgs(String msgId, String mobile) {
 		// 首先在REDIS查询是否存在数据
 		try {
 			HashOperations<String, String, String> hashOperations = stringRedisTemplate.opsForHash();
 			if(hashOperations.hasKey(getMtPushConfigKey(msgId), mobile)) {
 				Object o = hashOperations.get(getMtPushConfigKey(msgId), mobile);
-				if(o != null)
-					return JSON.parseObject(o.toString());
+				if(o != null) {
+                    return JSON.parseObject(o.toString());
+                }
 				
 			}
 		} catch (Exception e) {
@@ -301,12 +307,14 @@ public class SmsMtPushService implements ISmsMtPushService {
 	   * @return
 	 */
 	private JSONObject getUserPushConfigFromDB(String msgId, String mobile) {
-		if(StringUtils.isEmpty(msgId) || StringUtils.isEmpty(mobile))
-			return null;
+		if(StringUtils.isEmpty(msgId) || StringUtils.isEmpty(mobile)) {
+            return null;
+        }
 		
 		SmsMtMessagePush push = smsMtMessagePushMapper.findByMobileAndMsgid(mobile, msgId);
-		if(push != null)
-			throw new IllegalStateException("msgId:" + msgId +", mobile:" + mobile + "推送记录已存在，忽略");
+		if(push != null) {
+            throw new IllegalStateException("msgId:" + msgId + ", mobile:" + mobile + "推送记录已存在，忽略");
+        }
 		
 		// 此处需要查询数据库是否需要有推送设置，无则不推送
 		SmsMtMessageSubmit submit = smsMtSubmitService.getByMsgidAndMobile(msgId, mobile);
@@ -332,7 +340,8 @@ public class SmsMtPushService implements ISmsMtPushService {
 	   * @param msgId
 	   * @return
 	 */
-	public String getMtPushConfigKey(String msgId) {
+	@Override
+    public String getMtPushConfigKey(String msgId) {
 		return String.format("%s:%s", SmsRedisConstant.RED_READY_MT_PUSH_CONFIG, msgId);
 	}
 
@@ -367,7 +376,8 @@ public class SmsMtPushService implements ISmsMtPushService {
 	public boolean addUserMtPushListener(Integer userId) {
 		try {
 			for (int i = 0; i < pushThreadPoolSize; i++) {
-				threadPoolTaskExecutor.execute(new MtReportPushToDeveloperWorker(applicationContext, getUserPushQueueName(userId)));
+				Thread thread = new Thread(new MtReportPushToDeveloperWorker(applicationContext, getUserPushQueueName(userId)));
+				thread.start();
 			}
 			return true;
 		} catch (Exception e) {
@@ -383,11 +393,13 @@ public class SmsMtPushService implements ISmsMtPushService {
 		String urlKey = null;
 		
 		for(JSONObject body : bodies) {
-			if(MapUtils.isEmpty(body))
-				continue;
+			if(MapUtils.isEmpty(body)) {
+                continue;
+            }
 			
-			if(StringUtils.isEmpty(body.getString(PUSH_BODY_SUBPACKAGE_KEY)))
-				continue;
+			if(StringUtils.isEmpty(body.getString(PUSH_BODY_SUBPACKAGE_KEY))) {
+                continue;
+            }
 			
 			urlKey = body.getString(PUSH_BODY_SUBPACKAGE_KEY);
 			

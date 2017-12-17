@@ -118,15 +118,17 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 		BossPaginationVo<SmsMtMessageSubmit> page = new BossPaginationVo<SmsMtMessageSubmit>();
 		page.setCurrentPage(Integer.parseInt(queryParams.getOrDefault("currentPage", 1).toString()));
 		int total = smsMtMessageSubmitMapper.findCount(queryParams);
-		if (total <= 0)
-			return page;
+		if (total <= 0) {
+            return page;
+        }
 		
 		page.setTotalCount(total);
 		queryParams.put("start", page.getStartPosition());
 		queryParams.put("end", page.getPageSize());
 		List<SmsMtMessageSubmit> dataList = smsMtMessageSubmitMapper.findList(queryParams);
-		if (CollectionUtils.isEmpty(dataList))
-			return page;
+		if (CollectionUtils.isEmpty(dataList)) {
+            return page;
+        }
 
 		joinRecordFascade(dataList);
 
@@ -145,12 +147,14 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 		String startDate = queryParams.get("startDate") == null ? "" : queryParams.get("startDate").toString();
 		String endDate = queryParams.get("endDate") == null ? "" : queryParams.get("endDate").toString();
 		
-		if (StringUtils.isNotBlank(startDate))
-			queryParams.put("startDate",  DateUtil.getSecondDate(startDate).getTime());
+		if (StringUtils.isNotBlank(startDate)) {
+            queryParams.put("startDate", DateUtil.getSecondDate(startDate).getTime());
+        }
 		
 		
-		if (StringUtils.isNotBlank(endDate))
-			queryParams.put("endDate",  DateUtil.getSecondDate(endDate).getTime());
+		if (StringUtils.isNotBlank(endDate)) {
+            queryParams.put("endDate", DateUtil.getSecondDate(endDate).getTime());
+        }
 		
 	}
 
@@ -196,10 +200,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 			// }
 			// }
 			if (record.getPassageId() != null) {
-				if (record.getPassageId() == PassageContext.EXCEPTION_PASSAGE_ID)
-					record.setPassageName(PassageContext.EXCEPTION_PASSAGE_NAME);
-
-				else {
+				if (record.getPassageId() == PassageContext.EXCEPTION_PASSAGE_ID) {
+                    record.setPassageName(PassageContext.EXCEPTION_PASSAGE_NAME);
+                } else {
 					if (passageMap.containsKey(record.getUserId())) {
 						record.setPassageName(passageMap.get(record.getPassageId()));
 					} else {
@@ -220,8 +223,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 	@Override
 	public PaginationVo<SmsMtMessageSubmit> findPage(int userId, String mobile, String startDate, String endDate,
 			String currentPage, String sid) {
-		if (userId <= 0)
-			return null;
+		if (userId <= 0) {
+            return null;
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
@@ -244,8 +248,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 		paramMap.put("status", -1);
 		paramMap.put("passageName", "");
 		int totalRecord = smsMtMessageSubmitMapper.findCount(paramMap);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		paramMap.put("start", PaginationVo.getStartPage(_currentPage));
 		paramMap.put("end", PaginationVo.DEFAULT_RECORD_PER_PAGE);
@@ -269,8 +274,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 	@Override
 	public List<ConsumptionReport> getConsumeMessageInYestday() {
 		Set<Integer> userList = userService.findAvaiableUserIds();
-		if (CollectionUtils.isEmpty(userList))
-			throw new RuntimeException("用户数据异常，请检修");
+		if (CollectionUtils.isEmpty(userList)) {
+            throw new RuntimeException("用户数据异常，请检修");
+        }
 
 		List<ConsumptionReport> list = new ArrayList<>();
 
@@ -353,8 +359,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
 	@Override
 	public int batchInsertSubmit(List<SmsMtMessageSubmit> list) {
-		if (CollectionUtils.isEmpty(list))
-			return 0;
+		if (CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
 
 		return smsMtMessageSubmitMapper.batchInsert(list);
 //		SqlSession session = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
@@ -503,8 +510,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
 	@Override
 	public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-		if (correlationData == null)
-			return;
+		if (correlationData == null) {
+            return;
+        }
 
 		// if (ack) {
 		// logger.error("=================待提交消息队列处理成功：{}",
@@ -586,12 +594,14 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 	public List<Map<String, Object>> getSubmitStatReport(Long startTime,
 			Long endTime) {
 		
-		if(startTime == null || endTime == null)
-			return null;
+		if(startTime == null || endTime == null) {
+            return null;
+        }
 		
 		List<Map<String, Object>> list = smsMtMessageSubmitMapper.selectSubmitReport(startTime, endTime);
-		if(CollectionUtils.isEmpty(list))
-			return null;
+		if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
 		
 		return list;
 	}
@@ -609,8 +619,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 	@Override
 	public List<Map<String, Object>> getSubmitCmcpReport(Long startTime,
 			Long endTime) {
-		if(startTime == null || endTime == null)
-			return null;
+		if(startTime == null || endTime == null) {
+            return null;
+        }
 		
 		return smsMtMessageSubmitMapper.selectCmcpReport(startTime, endTime);
 	}

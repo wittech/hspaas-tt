@@ -62,12 +62,18 @@ public class CommonContext {
 		   * @return
 		 */
 		public static CMCP local(String mobileNumber) {
-			if(StringUtils.isEmpty(mobileNumber))
-				return CMCP.UNRECOGNIZED;
+			if(StringUtils.isEmpty(mobileNumber)) {
+                {
+                    return CMCP.UNRECOGNIZED;
+                }
+            }
 			
 			for(CMCP cmcp : CMCP.values()) {
-				if(PatternUtil.isRight(cmcp.getLocalRegex(), mobileNumber))
-					return cmcp;
+				if(PatternUtil.isRight(cmcp.getLocalRegex(), mobileNumber)) {
+                    {
+                        return cmcp;
+                    }
+                }
 			}
 			return CMCP.UNRECOGNIZED;
 		}
@@ -79,8 +85,11 @@ public class CommonContext {
 		   * @return
 		 */
 		public static boolean isAvaiableMobile(String mobileNumber) {
-			if(StringUtils.isEmpty(mobileNumber))
-				return false;
+			if(StringUtils.isEmpty(mobileNumber)) {
+                {
+                    return false;
+                }
+            }
 			
 			return PatternUtil.isRight(CMCP.GLOBAL.getLocalRegex(), mobileNumber);
 		}
@@ -121,8 +130,11 @@ public class CommonContext {
 
 		public static PlatformType parse(int code) {
 			for(PlatformType pt : PlatformType.values()) {
-				if(pt.getCode() == code)	
-					return pt;
+				if(pt.getCode() == code) {
+                    {
+                        return pt;
+                    }
+                }
 			}
 			return null;
 		}
@@ -136,8 +148,11 @@ public class CommonContext {
 		public static List<Integer> allCodes() {
 			List<Integer> all = new ArrayList<Integer>();
 			for(PlatformType pt : PlatformType.values()) {
-				if(pt == PlatformType.UNDEFINED)
-					continue;
+				if(pt == PlatformType.UNDEFINED) {
+                    {
+                        continue;
+                    }
+                }
 				all.add(pt.getCode());
 			}
 			return all;
@@ -174,8 +189,11 @@ public class CommonContext {
 
 		public static PlatformType parse(int code) {
 			for(PlatformType pt : PlatformType.values()) {
-				if(pt.getCode() == code)
-					return pt;
+				if(pt.getCode() == code) {
+                    {
+                        return pt;
+                    }
+                }
 			}
 			return null;
 		}
@@ -211,8 +229,11 @@ public class CommonContext {
 
 		public static PassageCallType parse(int code) {
 			for(PassageCallType pt : PassageCallType.values()) {
-				if(pt.getCode() == code)
-					return pt;
+				if(pt.getCode() == code) {
+                    {
+                        return pt;
+                    }
+                }
 			}
 			return null;
 		}
@@ -247,8 +268,11 @@ public class CommonContext {
 
 		public static AppType parse(int code) {
 			for(AppType at : AppType.values()) {
-				if(at.getCode() == code)
-					return at;
+				if(at.getCode() == code) {
+                    {
+                        return at;
+                    }
+                }
 			}
 			return AppType.WEB;
 		}
@@ -295,12 +319,18 @@ public class CommonContext {
 		SMPP;
 
 		public static ProtocolType parse(String name) {
-			if(StringUtils.isEmpty(name))
-				return null;
+			if(StringUtils.isEmpty(name)) {
+                {
+                    return null;
+                }
+            }
 			
 			for(ProtocolType pt : ProtocolType.values()) {
-				if(pt.name().equals(name))
-					return pt;
+				if(pt.name().equals(name)) {
+                    {
+                        return pt;
+                    }
+                }
 			}
 			return null;
 		}
@@ -313,8 +343,11 @@ public class CommonContext {
 		   * @return
 		 */
 		public static boolean isBelongtoDirect(String protocol) {
-			if(StringUtils.isEmpty(protocol))
-				return false;
+			if(StringUtils.isEmpty(protocol)) {
+                {
+                    return false;
+                }
+            }
 			
 			return !protocol.equalsIgnoreCase(ProtocolType.HTTP.name()) 
 					&& !protocol.equalsIgnoreCase(ProtocolType.WEBSERVICE.name());

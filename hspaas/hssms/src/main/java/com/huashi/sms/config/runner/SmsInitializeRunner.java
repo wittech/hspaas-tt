@@ -115,10 +115,11 @@ public class SmsInitializeRunner implements CommandLineRunner {
 	 */
 	private boolean initUserMtReportPushConfigQueue() {
 		boolean isSuccess = smsMtPushService.doListenerAllUser();
-		if (isSuccess)
-			logger.info("用户下行状态报告推送队列初始化完成");
-		else
-			logger.info("用户下行状态报告推送队列初始化失败");
+		if (isSuccess) {
+            logger.info("用户下行状态报告推送队列初始化完成");
+        } else {
+            logger.info("用户下行状态报告推送队列初始化失败");
+        }
 		return isSuccess;
 	}
 

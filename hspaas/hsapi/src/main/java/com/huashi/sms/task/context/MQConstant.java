@@ -103,13 +103,19 @@ public class MQConstant {
 		   * @return
 		 */
 		public static int getLevel(String content) {
-			if(StringUtils.isEmpty(content))
-				return WordsPriority.DEFAULT.getLevel();
+			if(StringUtils.isEmpty(content)) {
+                {
+                    return WordsPriority.DEFAULT.getLevel();
+                }
+            }
 			
 			for(WordsPriority wp : WordsPriority.values()) {
 				for(String w : wp.getWords()) {
-					if(content.contains(w))
-						return wp.getLevel();
+					if(content.contains(w)) {
+                        {
+                            return wp.getLevel();
+                        }
+                    }
 				}
 				
 			}

@@ -38,8 +38,11 @@ public class SecurityUtil {
 	   * @return
 	 */
 	public static String decode(String password, String salt){
-		if(StringUtils.isEmpty(salt))
-			throw new RuntimeException("解密失败");
+		if(StringUtils.isEmpty(salt)) {
+            {
+                throw new RuntimeException("解密失败");
+            }
+        }
 		return md5Hex(md5Hex(password) + salt);
 	}
 

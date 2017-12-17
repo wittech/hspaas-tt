@@ -31,8 +31,11 @@ public class TaskContext {
 
 		public static PacketsProcessStatus parse(int code) {
 			for (PacketsProcessStatus pt : PacketsProcessStatus.values()) {
-				if (pt.getCode() == code)
-					return pt;
+				if (pt.getCode() == code) {
+                    {
+                        return pt;
+                    }
+                }
 			}
 			return PROCESS_EXCEPTION;
 		}
@@ -67,8 +70,11 @@ public class TaskContext {
 
 		public static PacketsApproveStatus parse(int code) {
 			for (PacketsApproveStatus pt : PacketsApproveStatus.values()) {
-				if (pt.getCode() == code)
-					return pt;
+				if (pt.getCode() == code) {
+                    {
+                        return pt;
+                    }
+                }
 			}
 			return WAITING;
 		}
@@ -103,8 +109,11 @@ public class TaskContext {
 
 		public static MessageSubmitStatus parse(int code) {
 			for (MessageSubmitStatus pt : MessageSubmitStatus.values()) {
-				if (pt.getCode() == code)
-					return pt;
+				if (pt.getCode() == code) {
+                    {
+                        return pt;
+                    }
+                }
 			}
 			return FAILED;
 		}

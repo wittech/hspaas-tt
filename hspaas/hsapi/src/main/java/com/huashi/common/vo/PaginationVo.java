@@ -76,8 +76,11 @@ public class PaginationVo<T> implements Serializable {
 	}
 
 	public static int getStartPage(int currentPage) {
-		if (currentPage == 0)
-			currentPage = 1;
+		if (currentPage == 0) {
+            {
+                currentPage = 1;
+            }
+        }
 		return (currentPage - 1) * DEFAULT_RECORD_PER_PAGE;
 	}
 

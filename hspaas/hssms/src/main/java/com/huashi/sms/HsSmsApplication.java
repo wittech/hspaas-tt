@@ -9,7 +9,7 @@ import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
 @ServletComponentScan
-//@EnableTransactionManagement
+// @EnableTransactionManagement
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsSmsApplication {
 

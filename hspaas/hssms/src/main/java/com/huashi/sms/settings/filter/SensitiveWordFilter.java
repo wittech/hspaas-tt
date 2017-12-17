@@ -61,8 +61,9 @@ public class SensitiveWordFilter {
 				WORD_NODES.put(fchar, fnode);
 			} else {
 				fnode = WORD_NODES.get(fchar);
-				if (!fnode.isLast() && chs.length == 1)
-					fnode.setLast(true);
+				if (!fnode.isLast() && chs.length == 1) {
+                    fnode.setLast(true);
+                }
 			}
 			lastIndex = chs.length - 1;
 			for (int i = 1; i < chs.length; i++) {
@@ -92,7 +93,9 @@ public class SensitiveWordFilter {
 			// k=i;//日 2
 			node = WORD_NODES.get(currc);// 日 2
 			if (node == null)// 其实不会发生，习惯性写上了
-				continue;
+            {
+                continue;
+            }
 			boolean couldMark = false;
 			int markNum = -1;
 			if (node.isLast()) {// 单字匹配（日）
@@ -105,7 +108,9 @@ public class SensitiveWordFilter {
 			for (; ++k < length;) {
 				node = node.querySub(chs[k]);
 				if (node == null)// 没有了
-					break;
+                {
+                    break;
+                }
 				if (node.isLast()) {
 					couldMark = true;
 					markNum = k - i;// 3-2
@@ -146,7 +151,9 @@ public class SensitiveWordFilter {
 			// k=i;//日 2
 			node = WORD_NODES.get(currc);// 日 2
 			if (node == null)// 其实不会发生，习惯性写上了
-				continue;
+            {
+                continue;
+            }
 			boolean couldMark = false;
 			int markNum = -1;
 			if (node.isLast()) {// 单字匹配（日）
@@ -159,7 +166,9 @@ public class SensitiveWordFilter {
 			for (; ++k < length;) {
 				node = node.querySub(chs[k]);
 				if (node == null)// 没有了
-					break;
+                {
+                    break;
+                }
 				if (node.isLast()) {
 					couldMark = true;
 					markNum = k - i;// 3-2
@@ -171,8 +180,9 @@ public class SensitiveWordFilter {
 					for (k = 0; k <= markNum; k++) {
 						fword.append(chs[k + i]);
 					}
-					if (StringUtils.isNotEmpty(fword))
-						words.add(fword.toString());
+					if (StringUtils.isNotEmpty(fword)) {
+                        words.add(fword.toString());
+                    }
 				}
 				i = i + markNum;
 			}
@@ -200,7 +210,9 @@ public class SensitiveWordFilter {
 			// k=i;//日 2
 			node = WORD_NODES.get(currc);// 日 2
 			if (node == null)// 其实不会发生，习惯性写上了
-				continue;
+            {
+                continue;
+            }
 			if (node.isLast()) {// 单字匹配（日）
 				return true;
 			}
@@ -210,7 +222,9 @@ public class SensitiveWordFilter {
 			for (; ++k < length;) {
 				node = node.querySub(chs[k]);
 				if (node == null)// 没有了
-					break;
+                {
+                    break;
+                }
 				if (node.isLast()) {
 					return true;
 				}

@@ -42,16 +42,22 @@ public class SystemConfigService implements ISystemConfigService {
 
 	@Override
 	public List<SystemConfig> findByType(String type) {
-		if (StringUtils.isEmpty(type))
-			return null;
+		if (StringUtils.isEmpty(type)) {
+            {
+                return null;
+            }
+        }
 
 		return systemConfigMapper.findByType(type);
 	}
 
 	@Override
 	public SystemConfig findByTypeAndKey(String type, String key) {
-		if (StringUtils.isEmpty(type) || StringUtils.isEmpty(key))
-			return null;
+		if (StringUtils.isEmpty(type) || StringUtils.isEmpty(key)) {
+            {
+                return null;
+            }
+        }
 
 		return systemConfigMapper.findByTypeAndKey(type, key);
 	}
@@ -70,18 +76,26 @@ public class SystemConfigService implements ISystemConfigService {
 			SystemConfig source = systemConfigMapper.findByTypeAndKey(systemConfig.getType(),
 					systemConfig.getAttrKey());
 
-			if (source != null && !source.getId().equals(systemConfig.getId()))
-				return resultMap;
+			if (source != null && !source.getId().equals(systemConfig.getId())) {
+                {
+                    return resultMap;
+                }
+            }
 
 			systemConfigMapper.updateByPrimaryKeySelective(systemConfig);
 			
 			// edit by 2017-06-19 判断是否加入REDIS缓存
 			if(checkPushRedis(systemConfig.getType(), systemConfig.getAttrKey())) {
 				
-				if(SystemConfigType.REGULAR_EXPRESSION.name().equals(systemConfig.getType()))
-					pushSettingsToRedis(getCmcpRedisName(systemConfig.getAttrKey()), systemConfig.getAttrValue());
-				else
-					pushSettingsToRedis(systemConfig.getAttrKey(), systemConfig.getAttrValue());
+				if(SystemConfigType.REGULAR_EXPRESSION.name().equals(systemConfig.getType())) {
+                    {
+                        pushSettingsToRedis(getCmcpRedisName(systemConfig.getAttrKey()), systemConfig.getAttrValue());
+                    }
+                } else {
+                    {
+                        pushSettingsToRedis(systemConfig.getAttrKey(), systemConfig.getAttrValue());
+                    }
+                }
 				
 			}
 
@@ -107,8 +121,11 @@ public class SystemConfigService implements ISystemConfigService {
 	@Override
 	public Integer getUserIdByTypeName(SystemConfigType type) {
 		SystemConfig systemConfig = findByTypeAndKey(type.name(), SettingsContext.USER_ID_KEY_NAME);
-		if (systemConfig == null)
-			return null;
+		if (systemConfig == null) {
+            {
+                return null;
+            }
+        }
 
 		try {
 			return Integer.parseInt(systemConfig.getAttrValue());
@@ -122,8 +139,11 @@ public class SystemConfigService implements ISystemConfigService {
 	public String[] getBlacklistWords() {
 		try {
 			String value = stringRedisTemplate.opsForValue().get(SystemConfigType.WORDS_LIBRARY.name());
-			if(StringUtils.isEmpty(value))
-				return null;
+			if(StringUtils.isEmpty(value)) {
+                {
+                    return null;
+                }
+            }
 			
 			return value.split(",");
 		} catch (Exception e) {
@@ -140,8 +160,11 @@ public class SystemConfigService implements ISystemConfigService {
 			return null;
 		}
 		
-		if(cmcp == CMCP.GLOBAL)
-			return CMCP.GLOBAL.getLocalRegex();
+		if(cmcp == CMCP.GLOBAL) {
+            {
+                return CMCP.GLOBAL.getLocalRegex();
+            }
+        }
 		
 		return null;
 	}
@@ -157,14 +180,23 @@ public class SystemConfigService implements ISystemConfigService {
 	   * @return
 	 */
 	private boolean checkPushRedis(String type, String key) {
-		if(StringUtils.isEmpty(type))
-			return false;
+		if(StringUtils.isEmpty(type)) {
+            {
+                return false;
+            }
+        }
 		
-		if(SystemConfigType.REGULAR_EXPRESSION.name().equals(type))
-			return true;
+		if(SystemConfigType.REGULAR_EXPRESSION.name().equals(type)) {
+            {
+                return true;
+            }
+        }
 		
-		if(SystemConfigType.WORDS_LIBRARY.name().equals(type))
-			return true;
+		if(SystemConfigType.WORDS_LIBRARY.name().equals(type)) {
+            {
+                return true;
+            }
+        }
 		
 		return false;
 	}
@@ -198,8 +230,11 @@ public class SystemConfigService implements ISystemConfigService {
 			return false;
 		}
 
-		if (StringUtils.isEmpty(config.getAttrValue()))
-			return false;
+		if (StringUtils.isEmpty(config.getAttrValue())) {
+            {
+                return false;
+            }
+        }
 
 		return pushSettingsToRedis(CommonRedisConstant.RED_BLACKLIST_WORDS, config.getAttrValue());
 	}
@@ -213,8 +248,11 @@ public class SystemConfigService implements ISystemConfigService {
 		List<SystemConfig> list = findByType(SystemConfigType.REGULAR_EXPRESSION.name());
 		if (CollectionUtils.isNotEmpty(list)) {
 			for(SystemConfig sc : list) {
-				if(!pushSettingsToRedis(getCmcpRedisName(sc.getAttrKey()), sc.getAttrValue()))
-					return false;
+				if(!pushSettingsToRedis(getCmcpRedisName(sc.getAttrKey()), sc.getAttrValue())) {
+                    {
+                        return false;
+                    }
+                }
 			}
 			
 			return true;
@@ -222,8 +260,11 @@ public class SystemConfigService implements ISystemConfigService {
 		
 		logger.warn("运营商黑名单词库未设置，将采用默认正则表达式 ");
 		for(CMCP c : CMCP.values()) {
-			if(!pushSettingsToRedis(getCmcpRedisName(c.name()), c.getLocalRegex()))
-				return false;
+			if(!pushSettingsToRedis(getCmcpRedisName(c.name()), c.getLocalRegex())) {
+                {
+                    return false;
+                }
+            }
 		}
 		
 		return true;

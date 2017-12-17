@@ -54,13 +54,13 @@ public class EmailConfiguration {
 		ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
 
 		// 线程池所使用的缓冲队列
-		poolTaskExecutor.setQueueCapacity(25); // 队列大一点，以应对峰值压力
+		poolTaskExecutor.setQueueCapacity(25);
 		// 线程池维护线程的最少数量
-		poolTaskExecutor.setCorePoolSize(5); // 处理签名合成，并处理邮件和短信发送,pdf图片转换
+		poolTaskExecutor.setCorePoolSize(5);
 		// 线程池维护线程的最大数量
-		poolTaskExecutor.setMaxPoolSize(10); // 该值不能太大，tomcat 默认最大线程为200.
+		poolTaskExecutor.setMaxPoolSize(10);
 		// 线程池维护线程所允许的空闲时间
-		poolTaskExecutor.setKeepAliveSeconds(10000); // 10分
+		poolTaskExecutor.setKeepAliveSeconds(10000);
 
 		// rejection-policy：当pool已经达到max size的时候，如何处理新任务
 		// CALLER_RUNS：不在新线程中执行任务，而是由调用者所在的线程来执行

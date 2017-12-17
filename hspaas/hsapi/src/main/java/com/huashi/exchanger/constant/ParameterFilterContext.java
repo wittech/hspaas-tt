@@ -38,12 +38,18 @@ public class ParameterFilterContext {
 		 * @return
 		 */
 		public static ParameterFilter parse(Integer filterCode) {
-			if (filterCode == null || filterCode == 0)
-				return ParameterFilter.PARAMETER_MAP;
+			if (filterCode == null || filterCode == 0) {
+                {
+                    return ParameterFilter.PARAMETER_MAP;
+                }
+            }
 
 			for (ParameterFilter pf : ParameterFilter.values()) {
-				if (pf.getCode() == filterCode)
-					return pf;
+				if (pf.getCode() == filterCode) {
+                    {
+                        return pf;
+                    }
+                }
 			}
 
 			return ParameterFilter.PARAMETER_MAP;

@@ -146,8 +146,8 @@ public class SmsPassageReachrateSettings {
 
 	public static void main(String[] args) {
 		SmsPassageReachrateSettings settings = new SmsPassageReachrateSettings();
-		settings.setStartTime(300l);
-		settings.setTimeLength(300l);
+		settings.setStartTime(300L);
+		settings.setTimeLength(300L);
 		settings.setCountPoint(10);
 		settings.setRateThreshold(67);
 

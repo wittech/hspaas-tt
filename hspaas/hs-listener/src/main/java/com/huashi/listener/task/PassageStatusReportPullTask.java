@@ -34,7 +34,8 @@ public class PassageStatusReportPullTask implements Runnable {
 		this.smsProviderService = smsProviderService;
 	}
 
-	public void run() {
+	@Override
+    public void run() {
 		while (true) {
 			try {
 				List<SmsMtMessageDeliver> list = smsProviderService.doPullStatusReport(smsPassageAccess);
@@ -62,14 +63,20 @@ public class PassageStatusReportPullTask implements Runnable {
 	 * @return
 	 */
 	private int getSleepTime(SmsPassageAccess smsPassageAccess) {
-		if (smsPassageAccess == null || StringUtils.isEmpty(smsPassageAccess.getParams()))
-			return SLEEP_TIME;
+		if (smsPassageAccess == null || StringUtils.isEmpty(smsPassageAccess.getParams())) {
+            {
+                return SLEEP_TIME;
+            }
+        }
 
 		try {
 			JSONObject jsonObject = JSON.parseObject(smsPassageAccess.getParams());
 			String str = jsonObject.getString(INTERVAL_KEY);
-			if (StringUtils.isEmpty(str))
-				return SLEEP_TIME;
+			if (StringUtils.isEmpty(str)) {
+                {
+                    return SLEEP_TIME;
+                }
+            }
 
 			return Integer.parseInt(str);
 

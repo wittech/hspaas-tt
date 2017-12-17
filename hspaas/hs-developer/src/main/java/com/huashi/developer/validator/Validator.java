@@ -67,34 +67,52 @@ public class Validator {
 	private Map<String, String> parseAnotation(Class<?> clazz,
 			Map<String, String[]> paramMap) throws ValidateException {
 		Field[]  fields = getClassFiled(clazz);	
-		if (fields == null || fields.length == 0)
-			return null;
+		if (fields == null || fields.length == 0) {
+            {
+                return null;
+            }
+        }
 
 		Map<String, String> param = new HashMap<>();
 		Set<String> keys = paramMap.keySet();
 		for (Field field : fields) {
 			ValidateField vf = field.getAnnotation(ValidateField.class);
-			if (vf == null)
-				continue;
+			if (vf == null) {
+                {
+                    continue;
+                }
+            }
 
 			// 参数中不包含必要的参数，抛错误码
-			if (vf.necessary() && !keys.contains(vf.value()))
-				throw new ValidateException(CommonApiCode.COMMON_REQUEST_EXCEPTION);
+			if (vf.necessary() && !keys.contains(vf.value())) {
+                {
+                    throw new ValidateException(CommonApiCode.COMMON_REQUEST_EXCEPTION);
+                }
+            }
 
 			// 如果参数要求是UTF-8编码，需要验证
-			if (vf.utf8() && !EncodingUtil.isUtf8(paramMap.get(vf.value())[0]))
-				throw new ValidateException(CommonApiCode.COMMON_REQUEST_ENCODING_ERROR);
+			if (vf.utf8() && !EncodingUtil.isUtf8(paramMap.get(vf.value())[0])) {
+                {
+                    throw new ValidateException(CommonApiCode.COMMON_REQUEST_ENCODING_ERROR);
+                }
+            }
 			
 			// 内容不能为空
-			if(vf.notEmpty() && StringUtils.isEmpty(paramMap.get(vf.value())[0]))
-				throw new ValidateException(CommonApiCode.COMMON_REQUEST_EXCEPTION);
+			if(vf.notEmpty() && StringUtils.isEmpty(paramMap.get(vf.value())[0])) {
+                {
+                    throw new ValidateException(CommonApiCode.COMMON_REQUEST_EXCEPTION);
+                }
+            }
 
 			// 数字暂不校验
 //			if (vf.number())
 //				continue;
 			
-			if(paramMap.get(vf.value()) == null)
-				continue;
+			if(paramMap.get(vf.value()) == null) {
+                {
+                    continue;
+                }
+            }
 			
 			param.put(vf.value(), paramMap.get(vf.value())[0]);
 		}

@@ -76,8 +76,9 @@ public class SmsMoMessageService implements ISmsMoMessageService {
 	public PaginationVo<SmsMoMessageReceive> findPage(int userId,
 			String phoneNumber, String startDate, String endDate,
 			String currentPage) {
-		if (userId <= 0)
-			return null;
+		if (userId <= 0) {
+            return null;
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
@@ -90,16 +91,18 @@ public class SmsMoMessageService implements ISmsMoMessageService {
 		params.put("endDate", DateUtil.getStringTurnDate(endDate));
 
 		int totalRecord = moMessageReceiveMapper.getCountByUserId(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<SmsMoMessageReceive> list = moMessageReceiveMapper
 				.findPageListByUserId(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            return null;
+        }
 
 		return new PaginationVo<SmsMoMessageReceive>(list, _currentPage,
 				totalRecord);
@@ -203,13 +206,15 @@ public class SmsMoMessageService implements ISmsMoMessageService {
 	private void doMobileJoinBlacklist(String mobile, String content, String remark) {
 		// 判断回复内容是否包含 黑名单词库内容，如果包括则直接加入黑名单
 		String[] words = systemConfigService.getBlacklistWords();
-		if(words == null || words.length == 0)
-			words = BLACKLIST_WORDS;
+		if(words == null || words.length == 0) {
+            words = BLACKLIST_WORDS;
+        }
 		
 		boolean isContains = false;
 		for(String wd : words) {
-			if(StringUtils.isEmpty(wd))
-				continue;
+			if(StringUtils.isEmpty(wd)) {
+                continue;
+            }
 			
 			if(content.toUpperCase().contains(wd.toUpperCase())) {
 				isContains = true;
@@ -217,8 +222,9 @@ public class SmsMoMessageService implements ISmsMoMessageService {
 			}
 		}
 		
-		if(!isContains)
-			return;
+		if(!isContains) {
+            return;
+        }
 		
 		SmsMobileBlackList blacklist = new SmsMobileBlackList();
 		blacklist.setMobile(mobile);
@@ -234,8 +240,9 @@ public class SmsMoMessageService implements ISmsMoMessageService {
 
 	@Override
 	public int batchInsert(List<SmsMoMessageReceive> list) {
-		if(CollectionUtils.isEmpty(list))
-			return 0;
+		if(CollectionUtils.isEmpty(list)) {
+            return 0;
+        }
 		
 		return moMessageReceiveMapper.batchInsert(list);
 	}

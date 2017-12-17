@@ -46,8 +46,9 @@ public class ResponseTemplateHandler {
 		List<ProviderSendResponse> list = new ArrayList<>();
 		ProviderSendResponse response = null;
 		List<Map<String, Object>> array = JSON.parseObject(result, new TypeReference<List<Map<String, Object>>>(){});
-		if(array == null || array.size() == 0)
-			return null;
+		if(array == null || array.size() == 0) {
+            return null;
+        }
 		
 		for(Map<String, Object> ojb : array) {
 			response = new ProviderSendResponse();
@@ -75,14 +76,17 @@ public class ResponseTemplateHandler {
 	   * @param position
 	 */
 	static void validate(String result, String format, String position) {
-		if (StringUtils.isEmpty(result))
-			throw new DataEmptyException("结果数据为空");
+		if (StringUtils.isEmpty(result)) {
+            throw new DataEmptyException("结果数据为空");
+        }
 
-		if (StringUtils.isEmpty(format))
-			throw new DataEmptyException("格式化模板数据为空");
+		if (StringUtils.isEmpty(format)) {
+            throw new DataEmptyException("格式化模板数据为空");
+        }
 
-		if (StringUtils.isEmpty(position))
-			throw new DataEmptyException("格式化模板定位数据为空");
+		if (StringUtils.isEmpty(position)) {
+            throw new DataEmptyException("格式化模板定位数据为空");
+        }
 	}
 
 	static List<ProviderSendResponse> parseResult(String result, String format,
@@ -123,8 +127,9 @@ public class ResponseTemplateHandler {
 	private static TPosition getPosition(String position) {
 		try {
 			TPosition tposition = JSON.parseObject(position, TPosition.class);
-			if (MapUtils.isEmpty(tposition))
-				throw new DataEmptyException(position);
+			if (MapUtils.isEmpty(tposition)) {
+                throw new DataEmptyException(position);
+            }
 
 			return tposition;
 
@@ -140,8 +145,9 @@ public class ResponseTemplateHandler {
 	   * @return
 	 */
 	private static String getRespVal(String o) {
-		if(StringUtils.isEmpty(o))
-			return null;
+		if(StringUtils.isEmpty(o)) {
+            return null;
+        }
 		
 		return o.replaceAll("\"","");
 	}
@@ -156,11 +162,13 @@ public class ResponseTemplateHandler {
 	   * @return
 	 */
 	public static boolean isSuccess(String statusCode, String temlateSuccessCode) {
-		if(StringUtils.isEmpty(statusCode))
-			return false;
+		if(StringUtils.isEmpty(statusCode)) {
+            return false;
+        }
 		
-		if(StringUtils.isNotEmpty(temlateSuccessCode))
-			return temlateSuccessCode.equalsIgnoreCase(statusCode);
+		if(StringUtils.isNotEmpty(temlateSuccessCode)) {
+            return temlateSuccessCode.equalsIgnoreCase(statusCode);
+        }
 		
 		// 如果没有配置模板状态码，则解析常量中所有成功状态码是否包含（后期改至REDIS）
 		List<String> list = Arrays.asList(ExchangerConstant.SUCCESS_CODE_ARRAY);

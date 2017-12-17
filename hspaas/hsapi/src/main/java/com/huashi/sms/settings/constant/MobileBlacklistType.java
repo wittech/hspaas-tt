@@ -20,8 +20,11 @@ public enum MobileBlacklistType {
 	
 	public static String parse(int code) {
 		for(MobileBlacklistType mbt : MobileBlacklistType.values()) {
-			if(mbt.code == code)
-				return mbt.getTitle();
+			if(mbt.code == code) {
+                {
+                    return mbt.getTitle();
+                }
+            }
 		}
 		return MobileBlacklistType.NORMAL.getTitle();
 	}

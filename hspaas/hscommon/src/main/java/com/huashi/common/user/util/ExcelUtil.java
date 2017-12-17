@@ -45,15 +45,23 @@ public final class ExcelUtil {
 	 * @return
 	 */
 	public static Workbook createWorkBook(String filename) {
-		if (StringUtils.isEmpty(filename))
-			return null;
+		if (StringUtils.isEmpty(filename)) {
+            {
+                return null;
+            }
+        }
 
 		Workbook workbook = null;
 		try {
-			if (filename.trim().toLowerCase().endsWith(VERSION_2007))
-				workbook = new XSSFWorkbook(filename);
-			else
-				workbook = new HSSFWorkbook(new FileInputStream(filename));
+			if (filename.trim().toLowerCase().endsWith(VERSION_2007)) {
+                {
+                    workbook = new XSSFWorkbook(filename);
+                }
+            } else {
+                {
+                    workbook = new HSSFWorkbook(new FileInputStream(filename));
+                }
+            }
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -77,15 +85,21 @@ public final class ExcelUtil {
 			Workbook workBook = createWorkBook(directory + filename);
 			Sheet sheet = workBook.getSheetAt(0);
 			int rows = sheet.getPhysicalNumberOfRows(); // 获得行数
-			if (rows == 0)
-				return list;
+			if (rows == 0) {
+                {
+                    return list;
+                }
+            }
 
 			// EXCEL前1行为总标题和列标题，因此在第2行开始读取数据
 			// 遍历行
 			for (int r = 1; r < rows; r++) {
 				Row row = sheet.getRow(r);
-				if (row == null)
-					continue;
+				if (row == null) {
+                    {
+                        continue;
+                    }
+                }
 
 				// 获得列数
 				int cells = row.getLastCellNum();
@@ -93,8 +107,11 @@ public final class ExcelUtil {
 				// 遍历列
 				for (int c = 0; c < cells; c++) {
 					Cell cell = row.getCell(c);
-					if (cell == null)
-						continue;
+					if (cell == null) {
+                        {
+                            continue;
+                        }
+                    }
 					array[c] = getCellValue(cell);
 				}
 				list.add(array);
@@ -122,21 +139,30 @@ public final class ExcelUtil {
 			Workbook workBook = createWorkBook(filename);
 			Sheet sheet = workBook.getSheetAt(0);
 			int rows = sheet.getPhysicalNumberOfRows(); // 获得行数
-			if (rows == 0)
-				return null;
+			if (rows == 0) {
+                {
+                    return null;
+                }
+            }
 			
 			StringBuilder values = new StringBuilder();
 			// EXCEL前1行为总标题和列标题，因此在第2行开始读取数据
 			// 遍历行
 			for (int r = 1; r < rows; r++) {
 				Row row = sheet.getRow(r);
-				if (row == null)
-					continue;
+				if (row == null) {
+                    {
+                        continue;
+                    }
+                }
 
 				// 获取第一列数据
 				Cell cell = row.getCell(0);
-				if (cell == null)
-					continue;
+				if (cell == null) {
+                    {
+                        continue;
+                    }
+                }
 				
 				values.append(getCellValue(cell)).append(DATA_SPLIT_CHARCATOR);
 			}
@@ -186,8 +212,11 @@ public final class ExcelUtil {
 	 * @return
 	 */
 	public static String getCellValue(Cell cell) {
-		if (cell == null)
-			return "";
+		if (cell == null) {
+            {
+                return "";
+            }
+        }
 		String value = null;
 		switch (cell.getCellType()) {
 		case Cell.CELL_TYPE_NUMERIC: // 数值型

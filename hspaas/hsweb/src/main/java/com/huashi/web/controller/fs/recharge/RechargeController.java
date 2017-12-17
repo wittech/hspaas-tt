@@ -139,8 +139,11 @@ public class RechargeController extends BaseController{
 	@RequestMapping(value = "/get_product", method = RequestMethod.POST)
 	public @ResponseBody Map<String,Object> getProduct(String filename){
 		String mobleNumbers = ExcelUtil.readExcelFirstColumn(tmpStoreDirectory + filename);
-		if(StringUtils.isEmpty(mobleNumbers))
-			return null;
+		if(StringUtils.isEmpty(mobleNumbers)) {
+            {
+                return null;
+            }
+        }
 		
 		return fluxProductService.findListByMobile(mobleNumbers);
 	}

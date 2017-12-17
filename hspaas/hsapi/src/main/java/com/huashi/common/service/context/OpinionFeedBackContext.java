@@ -40,8 +40,11 @@ public class OpinionFeedBackContext {
 
 		public static FeedbackType parse(int value) {
 			for (FeedbackType as : FeedbackType.values()) {
-				if (as.getValue() == value)
-					return as;
+				if (as.getValue() == value) {
+                    {
+                        return as;
+                    }
+                }
 			}
 			return null;
 		}

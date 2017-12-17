@@ -43,15 +43,24 @@ public class BasicApiSupport {
 	 */
 	protected int getAppType() {
 		String appType = request.getHeader("apptype");
-		if(StringUtils.isEmpty(appType))
-			return AppType.DEVELOPER.getCode();
+		if(StringUtils.isEmpty(appType)) {
+            {
+                return AppType.DEVELOPER.getCode();
+            }
+        }
 		
 		try {
-			if(String.valueOf(AppType.WEB.getCode()).equals(appType))
-				return AppType.WEB.getCode();
+			if(String.valueOf(AppType.WEB.getCode()).equals(appType)) {
+                {
+                    return AppType.WEB.getCode();
+                }
+            }
 			
-			if(String.valueOf(AppType.BOSS.getCode()).equals(appType))
-				return AppType.BOSS.getCode();
+			if(String.valueOf(AppType.BOSS.getCode()).equals(appType)) {
+                {
+                    return AppType.BOSS.getCode();
+                }
+            }
 		} catch (Exception e) {
 		}
 			

@@ -108,8 +108,9 @@ public abstract class AbstractPassageResolver {
 	 * @return
 	 */
 	protected static String unixtimeStamp2Date(Object timestampString) {
-		if(timestampString == null || StringUtils.isEmpty(timestampString.toString()))
-			return DateUtil.getNow();
+		if(timestampString == null || StringUtils.isEmpty(timestampString.toString())) {
+            return DateUtil.getNow();
+        }
 		
 		try {
 			Long timestamp = Long.parseLong(timestampString.toString()) * 1000;
@@ -127,8 +128,9 @@ public abstract class AbstractPassageResolver {
 	   * @return
 	 */
 	protected static String dateNumberFormat(Object dataNumber) {
-		if(dataNumber == null || StringUtils.isEmpty(dataNumber.toString()))
-			return DateUtil.getNow();
+		if(dataNumber == null || StringUtils.isEmpty(dataNumber.toString())) {
+            return DateUtil.getNow();
+        }
 		
 		try {
 			SimpleDateFormat ff =  new java.text.SimpleDateFormat("yyyyMMddHHmmss");

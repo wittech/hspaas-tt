@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.AbstractWorker;
+import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 
 /**
@@ -17,18 +18,18 @@ import com.huashi.sms.record.service.ISmsMoMessageService;
   * @version V1.0   
   * @date 2016年12月23日 上午10:14:30
  */
-public class SmsMoPersistenceWorker extends AbstractWorker {
+public class SmsMoPersistenceWorker extends AbstractWorker<SmsMoMessageReceive> {
 
 	public SmsMoPersistenceWorker(ApplicationContext applicationContext) {
 		super(applicationContext);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	protected void operate(List list) {
+	protected void operate(List<SmsMoMessageReceive> list) {
 		try {
-			if (CollectionUtils.isEmpty(list))
-				return;
+			if (CollectionUtils.isEmpty(list)) {
+                return;
+            }
 
 			long startTime = System.currentTimeMillis();
 			getInstance(ISmsMoMessageService.class).batchInsert(list);
@@ -46,5 +47,5 @@ public class SmsMoPersistenceWorker extends AbstractWorker {
 	protected String redisKey() {
 		return SmsRedisConstant.RED_DB_MESSAGE_MO_RECEIVE_LIST;
 	}
-
+	
 }

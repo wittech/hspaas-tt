@@ -161,7 +161,7 @@ public final class IdGenerator {
 		return idGenerator.generate();
 	}
 
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 
 		IdGenerator idGenerator = new IdGenerator(1);
 		

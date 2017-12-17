@@ -99,8 +99,9 @@ public class SmsRoutePassage implements Serializable {
 	}
 	
 	public void addUnknownMobiles(String mobile) {
-		if(StringUtils.isEmpty(mobile))
-			return;
+		if(StringUtils.isEmpty(mobile)) {
+            return;
+        }
 		
 		this.unkonwnMobiles.addAll(Arrays.asList(mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 	}

@@ -38,14 +38,20 @@ public class MobileLocalService implements IMobileLocalService {
 
 	@Override
 	public MobileCatagory doCatagory(String mobileNumber) {
-		if (StringUtils.isEmpty(mobileNumber))
-			return null;
+		if (StringUtils.isEmpty(mobileNumber)) {
+            {
+                return null;
+            }
+        }
 
 		MobileCatagory response = new MobileCatagory();
 		try {
 			String[] numbers = mobileNumber.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
-			if (numbers.length == 0)
-				return null;
+			if (numbers.length == 0) {
+                {
+                    return null;
+                }
+            }
 
 			return doCatagory(Arrays.asList(numbers));
 		} catch (Exception e) {
@@ -158,8 +164,11 @@ public class MobileLocalService implements IMobileLocalService {
 	 * @return
 	 */
 	private static String cutTail(String mobile) {
-		if (StringUtils.isEmpty(mobile))
-			return "";
+		if (StringUtils.isEmpty(mobile)) {
+            {
+                return "";
+            }
+        }
 
 		return mobile.substring(0, mobile.length() - 1);
 	}
@@ -172,8 +181,11 @@ public class MobileLocalService implements IMobileLocalService {
 	 * @return
 	 */
 	private String pickupMobileLocal(String mobile) {
-		if (StringUtils.isEmpty(mobile))
-			return null;
+		if (StringUtils.isEmpty(mobile)) {
+            {
+                return null;
+            }
+        }
 
 		try {
 			return mobile.trim().substring(0, 7);
@@ -191,11 +203,17 @@ public class MobileLocalService implements IMobileLocalService {
 	 * @return
 	 */
 	private boolean isInvalidMobile(String mobile) {
-		if (StringUtils.isEmpty(mobile))
-			return true;
+		if (StringUtils.isEmpty(mobile)) {
+            {
+                return true;
+            }
+        }
 
-		if (mobile.trim().length() != 11)
-			return true;
+		if (mobile.trim().length() != 11) {
+            {
+                return true;
+            }
+        }
 
 		return false;
 	}
@@ -216,8 +234,11 @@ public class MobileLocalService implements IMobileLocalService {
 		// 判断手机号码中是否已经重复
 		Collection<String> values = mobiles.values();
 		for (String marray : values) {
-			if (marray.contains(mobile))
-				return true;
+			if (marray.contains(mobile)) {
+                {
+                    return true;
+                }
+            }
 		}
 
 		if (mobiles.containsKey(provinceCode)) {
@@ -251,30 +272,45 @@ public class MobileLocalService implements IMobileLocalService {
 
 	@Override
 	public ProvinceLocal getByMobile(String mobile) {
-		if(StringUtils.isEmpty(mobile))
-			return null;
+		if(StringUtils.isEmpty(mobile)) {
+            {
+                return null;
+            }
+        }
 		
 		String area = pickupMobileLocal(mobile);
-		if (area == null)
-			return null;
+		if (area == null) {
+            {
+                return null;
+            }
+        }
 
 		ProvinceLocal pl = GLOBAL_MOBILE_LOCATION.get(area);
-		if(pl == null)
-			return new ProvinceLocal(Province.PROVINCE_CODE_ALLOVER_COUNTRY, CMCP.local(mobile).getCode());
+		if(pl == null) {
+            {
+                return new ProvinceLocal(Province.PROVINCE_CODE_ALLOVER_COUNTRY, CMCP.local(mobile).getCode());
+            }
+        }
 		
 		return pl;
 	}
 
 	@Override
 	public Map<String, ProvinceLocal> getByMobiles(String[] mobiles) {
-		if(mobiles == null || mobiles.length == 0)
-			return null;
+		if(mobiles == null || mobiles.length == 0) {
+            {
+                return null;
+            }
+        }
 		
 		Map<String, ProvinceLocal> mobileLocal = new HashMap<String, ProvinceLocal>();
 		for(String mobile : mobiles) {
 			ProvinceLocal pl = getByMobile(mobile);
-			if(pl == null)
-				continue;
+			if(pl == null) {
+                {
+                    continue;
+                }
+            }
 			
 			mobileLocal.put(mobile, pl);
 		}

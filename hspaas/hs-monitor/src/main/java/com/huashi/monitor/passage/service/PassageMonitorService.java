@@ -372,17 +372,20 @@ public class PassageMonitorService implements IPassageMonitorService{
 			if(passageId == null) {
 				// 查询所有符合条件的KEYS
 				Set<String> keys = stringRedisTemplate.keys(MonitorRedisConstant.RED_PASSAGE_REACHRATE_REPORT + "*");
-				if(CollectionUtils.isEmpty(keys))
-					return null;
+				if(CollectionUtils.isEmpty(keys)) {
+                    return null;
+                }
 				
 				for(String key : keys) {
 					passageId = pickPassageIdFromKey(key);
-					if(passageId == null)
-						continue;
+					if(passageId == null) {
+                        continue;
+                    }
 					
 					list = getReachrateReport(key);
-					if(CollectionUtils.isEmpty(list))
-						continue;
+					if(CollectionUtils.isEmpty(list)) {
+                        continue;
+                    }
 					
 					report.put(passageId, list);
 				}
@@ -391,8 +394,9 @@ public class PassageMonitorService implements IPassageMonitorService{
 			}
 			
 			list = getReachrateReport(String.format("%s:%d", MonitorRedisConstant.RED_PASSAGE_REACHRATE_REPORT, passageId));
-			if(CollectionUtils.isEmpty(list))
-				return null;
+			if(CollectionUtils.isEmpty(list)) {
+                return null;
+            }
 			
 			report.put(passageId, list);
 			
@@ -406,8 +410,9 @@ public class PassageMonitorService implements IPassageMonitorService{
 	private List<PassageReachRateReport> getReachrateReport(String key) {
 		try {
 			Set<String> container = stringRedisTemplate.opsForZSet().reverseRangeByScore(key, 0, System.currentTimeMillis());
-			if(CollectionUtils.isEmpty(container))
-				return null;
+			if(CollectionUtils.isEmpty(container)) {
+                return null;
+            }
 			
 			List<PassageReachRateReport> list = new ArrayList<PassageReachRateReport>(container.size());
 			for(String report : container) {

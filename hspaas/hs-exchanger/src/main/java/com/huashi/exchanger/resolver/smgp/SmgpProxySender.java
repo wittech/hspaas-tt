@@ -58,8 +58,9 @@ public class SmgpProxySender {
 	 * @param msg
 	 */
 	public void doProcessDeliverMessage(SMGPDeliverMessage msg) {
-		if (msg == null)
-			return;
+		if (msg == null) {
+            return;
+        }
 
 		if (msg.getIsReport() == 0) {
 			// 上行报告
@@ -168,8 +169,9 @@ public class SmgpProxySender {
 		try {
 			TParameter tparameter = RequestTemplateHandler.parse(parameter
 					.getParams());
-			if (MapUtils.isEmpty(tparameter))
-				throw new RuntimeException("SMGP 参数信息为空");
+			if (MapUtils.isEmpty(tparameter)) {
+                throw new RuntimeException("SMGP 参数信息为空");
+            }
 
 			SmgpManageProxy smgpManageProxy = getSmgpManageProxy(parameter);
 			if (smgpManageProxy == null) {
@@ -337,12 +339,14 @@ public class SmgpProxySender {
 	 * @return
 	 */
 	public SmgpManageProxy getSmgpManageProxy(SmsPassageParameter parameter) {
-		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId()))
-			return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+            return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+        }
 		
 		boolean isOk = smsProxyManageService.startProxy(parameter);
-		if (!isOk)
-			return null;
+		if (!isOk) {
+            return null;
+        }
 
 		return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
 	}
@@ -355,8 +359,9 @@ public class SmgpProxySender {
 	 * @return
 	 */
 	private void mtDeliver(SMGPDeliverMessage report) {
-		if (report == null)
-			return;
+		if (report == null) {
+            return;
+        }
 
 		try {
 			logger.info("SMGP状态报告数据: {}", report);
@@ -388,8 +393,9 @@ public class SmgpProxySender {
 
 			list.add(response);
 
-			if (CollectionUtils.isNotEmpty(list))
-				smsMtDeliverService.doFinishDeliver(list);
+			if (CollectionUtils.isNotEmpty(list)) {
+                smsMtDeliverService.doFinishDeliver(list);
+            }
 
 			// 解析返回结果并返回
 		} catch (Exception e) {
@@ -405,8 +411,9 @@ public class SmgpProxySender {
 	 * @param report
 	 */
 	public void moReceive(SMGPDeliverMessage report) {
-		if (report == null)
-			return;
+		if (report == null) {
+            return;
+        }
 
 		try {
 
@@ -437,8 +444,9 @@ public class SmgpProxySender {
 
 			list.add(response);
 
-			if (CollectionUtils.isNotEmpty(list))
-				smsMoMessageService.doFinishReceive(list);
+			if (CollectionUtils.isNotEmpty(list)) {
+                smsMoMessageService.doFinishReceive(list);
+            }
 
 		} catch (Exception e) {
 			logger.error("SMGP上行解析失败 {}", JSON.toJSONString(report), e);

@@ -114,16 +114,22 @@ public class MessageSendUtil {
 	 * @return
 	 */
 	public static SmsResponse parse(String mobile, String result) {
-		if (StringUtils.isEmpty(result))
-			return null;
+		if (StringUtils.isEmpty(result)) {
+            {
+                return null;
+            }
+        }
 
 		Map<String, Object> m = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {
 		});
 		
 		logger.info("手机号码：{}， 回执信息：{}", mobile, m);
 		Object o = m.get("code");
-		if (o == null || StringUtils.isEmpty(o.toString()))
-			return null;
+		if (o == null || StringUtils.isEmpty(o.toString())) {
+            {
+                return null;
+            }
+        }
 
 		return new SmsResponse(mobile, m.get("code").toString(), m.get("message").toString());
 	}

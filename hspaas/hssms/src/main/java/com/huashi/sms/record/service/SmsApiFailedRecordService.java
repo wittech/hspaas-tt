@@ -41,8 +41,9 @@ public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
 	@Override
 	public PaginationVo<SmsApiFailedRecord> findPage(int userId, String phoneNumber, String startDate, String endDate,
 			String currentPage) {
-		if (userId<=0)
-			return null;
+		if (userId<=0) {
+            return null;
+        }
 
 		int _currentPage = PaginationVo.parse(currentPage);
 
@@ -55,15 +56,17 @@ public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
 		params.put("endDate", endDate);
 
 		int totalRecord = smsApiFailedRecordMapper.selectCount(params);
-		if (totalRecord == 0)
-			return null;
+		if (totalRecord == 0) {
+            return null;
+        }
 
 		params.put("startPage", PaginationVo.getStartPage(_currentPage));
 		params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
 		List<SmsApiFailedRecord> list = smsApiFailedRecordMapper.selectPageList(params);
-		if (list == null || list.isEmpty())
-			return null;
+		if (list == null || list.isEmpty()) {
+            return null;
+        }
 
 		for (SmsApiFailedRecord mr : list) {
 			CommonApiCode code = CommonApiCode.parse(mr.getRespCode());
