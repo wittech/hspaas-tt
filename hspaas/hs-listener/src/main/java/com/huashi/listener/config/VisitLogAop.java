@@ -18,6 +18,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.util.DateUtil;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * 
   * TODO 开发者用户调用日志切面设置
@@ -31,8 +33,8 @@ import com.huashi.common.util.DateUtil;
 @Component
 public class VisitLogAop {
 
-	ThreadLocal<Long> startTime = new ThreadLocal<Long>();
-	Logger logger = LoggerFactory.getLogger(getClass());
+	private AtomicLong startTime = new AtomicLong();
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Pointcut("execution(public * com.huashi.listener.controller..*.*(..))")
 	public void pointcut() {

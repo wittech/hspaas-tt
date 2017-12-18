@@ -1,7 +1,7 @@
 package com.huashi.monitor.passage.thread;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public abstract class BaseThread {
 //	private static final int SERVICE_INJECT_FAILED_ALARM_COUNT = 50;
 
 	// 运行中的全部通道
-	public volatile static Map<String, Boolean> PASSAGES_IN_RUNNING = new HashMap<String, Boolean>();
+	public volatile static Map<String, Boolean> PASSAGES_IN_RUNNING = new ConcurrentHashMap<String, Boolean>();
 	
 	// DUBBO服务注入失败次数（主要针对其他依赖服务可能重启或者断开了）
 	protected AtomicInteger serviceInjectFailedCount = new AtomicInteger(0);

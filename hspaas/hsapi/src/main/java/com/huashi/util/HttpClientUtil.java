@@ -1,13 +1,6 @@
 package com.huashi.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.huashi.exchanger.exception.DataEmptyException;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -35,29 +28,52 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.huashi.exchanger.exception.DataEmptyException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author tenx
+ */
 public class HttpClientUtil {
 
-	// 从连接池中获取连接时间
-	public static final int CONNECTION_REQUEST_TIMEOUT = 3 * 1000;
-	// 建立连接时间
-	public static final int CONNECTION_TIMEOUT = 8 * 1000;
-	// 数据响应超时时间
-	public static final int SOCKET_READ_TIMEOUT = 8 * 1000;
+	/**
+	 * 从连接池中获取连接时间
+	 */
+	private static final int CONNECTION_REQUEST_TIMEOUT = 3 * 1000;
+	/**
+	 * 建立连接时间
+	 */
+	private static final int CONNECTION_TIMEOUT = 8 * 1000;
+	/**
+	 * 数据响应超时时间
+	 */
+	private static final int SOCKET_READ_TIMEOUT = 8 * 1000;
 	
-    // 本次HTTP连接池
-    private static volatile  Map<String, CloseableHttpClient> LOCAL_HTTP_CLIENT_FACTORY = new ConcurrentHashMap<String, CloseableHttpClient>();
+	/**
+	 * 本次HTTP连接池
+	 */
+    private static volatile  Map<String, CloseableHttpClient> LOCAL_HTTP_CLIENT_FACTORY = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
     
-    // 默认最大连接池数量（针对整个域名主机）
-    public static final Integer DEFAULT_MAX_TOTAL = 200;
-    // 每个路由最大连接数（真正限制）
-    public static final Integer DEFAULT_MAX_PER_ROUTE = 100;
+	/**
+	 * 默认最大连接池数量（针对整个域名主机）
+	 */
+    private static final Integer DEFAULT_MAX_TOTAL = 200;
+	/**
+	 * 每个路由最大连接数（真正限制）
+	 */
+	private static final Integer DEFAULT_MAX_PER_ROUTE = 100;
 
-    private final static Object syncLock = new Object();
-    // 默认编码
-    public static final String ENCODING_UTF_8 = "UTF-8";
+    private final static Object SYN_LOCK = new Object();
+	/**
+	 * 默认编码
+	 */
+	private static final String ENCODING_UTF_8 = "UTF-8";
     
     /**
      * 获取HttpClient对象
@@ -66,7 +82,7 @@ public class HttpClientUtil {
      * @author SHANHY
      * @create 2015年12月18日
      */
-    public static CloseableHttpClient getHttpClient(String url, Integer maxTotal, Integer maxPerRoute) {
+    private static CloseableHttpClient getHttpClient(String url, Integer maxTotal, Integer maxPerRoute) {
         String hostname = url.split("/")[2];
         int port = 80;
         if (hostname.contains(":")) {
@@ -78,7 +94,7 @@ public class HttpClientUtil {
         String key = String.format("%s_%d", hostname, port);
     	
     	if(!LOCAL_HTTP_CLIENT_FACTORY.containsKey(key)) {
-    		synchronized (syncLock) {
+    		synchronized (SYN_LOCK) {
    			   LOCAL_HTTP_CLIENT_FACTORY.put(key, createHttpClient(maxTotal, maxPerRoute));
    			   logger.info("URL:{} 连接池初始化", url);
    			   logger.info("KEY：{} 连接池初始化成功，连接池：{} 连接数： {}", url, key, maxTotal, maxPerRoute);
@@ -95,7 +111,7 @@ public class HttpClientUtil {
      * @author SHANHY
      * @create 2015年12月18日
      */
-    public static CloseableHttpClient createHttpClient(int maxTotal, int maxPerRoute) {
+    private static CloseableHttpClient createHttpClient(int maxTotal, int maxPerRoute) {
         ConnectionSocketFactory plainsf = PlainConnectionSocketFactory.getSocketFactory();
         LayeredConnectionSocketFactory sslsf = SSLConnectionSocketFactory.getSocketFactory();
         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create().register("http", plainsf)
@@ -290,7 +306,7 @@ public class HttpClientUtil {
      * 
        * TODO 设置HTTP头信息
        * @param httpPost
-       * @param params
+       * @param headers
      */
     private static void setHttpHeaders(HttpPost httpPost, Map<String, Object> headers){
     	setHttpHeaders(httpPost, headers, ENCODING_UTF_8);
@@ -310,7 +326,7 @@ public class HttpClientUtil {
      * 
        * TODO 获取HttpPost
        * @param url
-       * @param readTimeout
+       * @param connectionTimeout
        * @return
      */
     public static HttpPost getHttpPost(String url, int connectionTimeout) {
@@ -357,15 +373,14 @@ public class HttpClientUtil {
 			httpPost.addHeader(new BasicHeader(key, headers.get(key).toString()));
 		}
     }
-    
-    /**
-	 * 
-	 * TODO HTTP 发送
-	 * 
+
+	/**
+	 * 发送
 	 * @param url
-	 *            网络URL
-	 * @param bulider
-	 * 
+	 * @param headers
+	 * @param params
+	 * @param maxTotal
+	 * @param maxPerRoute
 	 * @return
 	 */
 	public static String post(String url, Map<String,Object> headers, Map<String, Object> params, Integer maxTotal, Integer maxPerRoute) {
@@ -432,7 +447,6 @@ public class HttpClientUtil {
 	 * 
 	   * TODO 调用连接池大小
 	   * @param url
-	   * @param headers
 	   * @param params
 	   * @param encoding
 	   
@@ -523,14 +537,12 @@ public class HttpClientUtil {
             }
 		}
 	}
-	
+
 	/**
-	 * 
-	   * TODO 发送报文信息
-	   * @param url
-	   * @param content
-	   * @param headers
-	   * @return
+	 * 发送报文信息
+	 * @param url
+	 * @param content
+	 * @return
 	 */
 	public static String postReport(String url, String content) {
 		return postReport(url, content, ENCODING_UTF_8, null);

@@ -380,7 +380,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 		}
 		
 		logger.info("当前通道 passageId : {} 代理失败次数 {}", passageId, counter+1);
-		GLOBAL_PROXIES_ERROR_COUNTER.put(passageId, counter+1);
+		synchronized (GLOBAL_PROXIES_ERROR_COUNTER) {
+		    GLOBAL_PROXIES_ERROR_COUNTER.put(passageId, counter+1);
+        }
 	}
 	
 	@Override
@@ -390,7 +392,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 			return;
 		}
 		
-		GLOBAL_PROXIES_ERROR_COUNTER.remove(passageId);
+		synchronized (GLOBAL_PROXIES_ERROR_COUNTER) {
+		    GLOBAL_PROXIES_ERROR_COUNTER.remove(passageId);
+        }
 	}
 
 }

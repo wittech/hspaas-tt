@@ -1,8 +1,6 @@
 package com.huashi.developer.config;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.aspectj.lang.JoinPoint;
+import com.alibaba.fastjson.JSON;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -14,7 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.alibaba.fastjson.JSON;
+import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 
@@ -29,15 +28,15 @@ import com.alibaba.fastjson.JSON;
 @Component
 public class DeveloperInvokeLogAop {
 
-	ThreadLocal<Long> startTime = new ThreadLocal<>();
-	Logger logger = LoggerFactory.getLogger(getClass());
+	private AtomicLong startTime = new AtomicLong();
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Pointcut("execution(public * com.huashi.developer.api..*.*(..))")
 	public void apiPointcut() {
 	}
 
 	@Before("apiPointcut()")
-	public void doBefore(JoinPoint joinPoint) throws Throwable {
+	public void doBefore() throws Throwable {
 		// 接收到请求，记录请求内容
 		ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
 				.getRequestAttributes();

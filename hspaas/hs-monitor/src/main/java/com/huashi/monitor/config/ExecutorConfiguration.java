@@ -1,4 +1,4 @@
-package com.huashi.sms.config.worker.config;
+package com.huashi.monitor.config;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -17,7 +17,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Configuration
 @Order(1)
-public class TaskExecutorConfiguration {
+public class ExecutorConfiguration {
 	
 	/**
 	 * 配置线程池
@@ -32,12 +32,12 @@ public class TaskExecutorConfiguration {
 		// 线程池所使用的缓冲队列
 		poolTaskExecutor.setQueueCapacity(200);
 		// 线程池维护线程的最少数量
-		poolTaskExecutor.setCorePoolSize(20);
+		poolTaskExecutor.setCorePoolSize(30);
 		// 线程池维护线程的最大数量
 		poolTaskExecutor.setMaxPoolSize(200);
 		// 线程池维护线程所允许的空闲时间
 		poolTaskExecutor.setKeepAliveSeconds(10000);
-
+		
 		// rejection-policy：当pool已经达到max size的时候，如何处理新任务
 		// CALLER_RUNS：不在新线程中执行任务，而是由调用者所在的线程来执行
 		poolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());

@@ -10,7 +10,7 @@ package com.huashi.bill.pay.service;
  * @date 2016年9月15日 上午12:36:27
  */
 //@Service
-public abstract class WxpayService implements IWxpayService {
+public abstract class AbstractWxpayService implements IWxpayService {
 
 //	@Value("${wxpay.key}")
 //	private String key = "";

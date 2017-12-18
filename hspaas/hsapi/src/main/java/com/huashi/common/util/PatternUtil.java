@@ -102,9 +102,7 @@ public class PatternUtil {
 		try {
 			Double.parseDouble(value);
 			if (value.contains(".")) {
-                {
-                    return true;
-                }
+                return true;
             }
 			return false;
 		} catch (NumberFormatException e) {
@@ -123,9 +121,7 @@ public class PatternUtil {
 	public static boolean isRight(String reg, String value) {
 		try {
 			if(StringUtils.isEmpty(value) || StringUtils.isEmpty(reg)) {
-                {
-                    return false;
-                }
+                return false;
             }
 			
 			Pattern pattern = Pattern.compile(reg);
@@ -151,9 +147,7 @@ public class PatternUtil {
 		Matcher matcher = pattern.matcher(content);
 		if (matcher.find()) {
 			if(StringUtils.isNotEmpty(matcher.group(2))) {
-                {
-                    return true;
-                }
+                return true;
             }
 		}
 		return false;
@@ -206,21 +200,15 @@ public class PatternUtil {
 	 */
 	public static boolean isSignatureAvaiable(String content, String signature) {
 		if(!isContainsSignature(content)) {
-            {
-                throw new RuntimeException("短信内容不包含签名内容");
-            }
+            throw new RuntimeException("短信内容不包含签名内容");
         }
 		
 		if(isMultiSignatures(content)) {
-            {
-                throw new RuntimeException("短信内容包含多个签名内容");
-            }
+            throw new RuntimeException("短信内容包含多个签名内容");
         }
 		
 		if(!isSignatureMatched(content, signature)) {
-            {
-                throw new RuntimeException("短信报备签名和本次签名内容不一致");
-            }
+            throw new RuntimeException("短信报备签名和本次签名内容不一致");
         }
 		
 		return true;

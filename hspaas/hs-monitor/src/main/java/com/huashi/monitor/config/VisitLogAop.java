@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * 
  * TODO 调用日志切面设置
@@ -25,8 +27,8 @@ import com.alibaba.fastjson.JSON;
 @Component
 public class VisitLogAop {
 
-	ThreadLocal<Long> startTime = new ThreadLocal<Long>();
-	Logger logger = LoggerFactory.getLogger(getClass());
+	private AtomicLong startTime = new AtomicLong();
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Pointcut("execution(public * com.huashi.common.*.service..*.*(..))")
 	public void pointcut() {

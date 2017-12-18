@@ -32,7 +32,7 @@ public class VisitLogAop {
 
 //	@Pointcut("execution(public * com.huashi.sms.*.service..*.*(..))")
 	
-	@Pointcut("execution(public * com.huashi.sms.*.service..*.*(..))")
+	@Pointcut("execution(* com.huashi.sms.config.rabbit.listener.SmsWaitSubmitListener.*(..))")
 	public void pointcut() {
 	}
 

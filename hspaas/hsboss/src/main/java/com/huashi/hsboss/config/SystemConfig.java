@@ -3,13 +3,12 @@ package com.huashi.hsboss.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
 import com.huashi.hsboss.config.handler.ViewConstantHandler;
 import com.huashi.hsboss.config.plugin.spring.IocInterceptor;
 import com.huashi.hsboss.config.plugin.spring.SpringPlugin;
+import com.huashi.hsboss.constant.SystemConstant;
 import com.huashi.hsboss.model.base.BaseModel;
 import com.huashi.hsboss.web.interceptor.AuthInterceptor;
 import com.huashi.hsboss.web.interceptor.ViewContextInterceptor;
@@ -35,8 +34,11 @@ import com.jfinal.render.ViewType;
  */
 public class SystemConfig extends JFinalConfig {
 
-	
-	public static final String BASE_VIEW_PATH = "/WEB-INF/views";   //视图加载路径
+	/**
+	 * 视图加载路径
+	 */
+	private static final String BASE_VIEW_PATH = "/WEB-INF/views";
+
 	@Override
 	public void configConstant(Constants constants) {
 		constants.setViewType(ViewType.FREE_MARKER);
@@ -69,8 +71,8 @@ public class SystemConfig extends JFinalConfig {
 //		DruidPlugin druidPlugin = new DruidPlugin(prop.get("jdbc.connection.url"), prop.get("jdbc.connection.username"), prop.get("jdbc.connection.password"));
 //		druidPlugin.setMaxPoolPreparedStatementPerConnectionSize(prop.getInt("maxPoolPreparedStatementPerConnectionSize"));
 //		plugins.add(druidPlugin);
-		
-		DataSource dataSource = (DataSource)SpringBeanManager.getBean("proxyDataSource",TransactionAwareDataSourceProxy.class);
+
+		TransactionAwareDataSourceProxy dataSource = SpringBeanManager.getBean("proxyDataSource",TransactionAwareDataSourceProxy.class);
 		
 		AutoTableBindPlugin autoTable = new AutoTableBindPlugin(dataSource);
 		
@@ -89,14 +91,12 @@ public class SystemConfig extends JFinalConfig {
 		interceptors.add(new ViewContextInterceptor());
 	}
 
-	@SuppressWarnings("static-access")
 	@Override
 	public void configHandler(Handlers handlers) {
 		handlers.add(new ContextPathHandler("BASE_PATH"));
 		
-		InitConfig config = SpringBeanManager.getBean("initConfig", InitConfig.class);
 		Map<String, Object> constantMap = new HashMap<String,Object>();
-		constantMap.put("STATIC_VISIT_ADDR", config.getFileStaticAddr());
+		constantMap.put("STATIC_VISIT_ADDR", SystemConstant.STATIC_VISIT_ADDR);
 		handlers.add(new ViewConstantHandler(constantMap));
 		
 		handlers.add(new RenderingTimeHandler());

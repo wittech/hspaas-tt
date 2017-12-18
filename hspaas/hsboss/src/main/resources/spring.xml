@@ -54,10 +54,5 @@
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
-	<bean id="initConfig" class="com.huashi.hsboss.config.InitConfig">
-		<property name="fileSaveRoot" value="${file.save.root}" />
-		<property name="fileStaticAddr" value="${file.static.addr}" />
-	</bean>
-
 	<import resource="spring-dubbo-consumer.xml" />
 </beans>

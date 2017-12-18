@@ -150,6 +150,19 @@ public abstract class AbstractWorker<E extends Object> implements Runnable {
         return (Class<E>) types[0];
 	}
 	
+	/**
+	 * 
+	   * TODO 执行任务并统计耗时
+	   * @param list
+	 */
+	private void executeWithTimeCost(List<E> list) {
+	    long startTime = System.currentTimeMillis();
+	    long utilTime = startTime - timer.get();
+	    operate(list);
+	    logger.info("执行operate耗时：{} ms，距离上次清零时间间隔：{}  ms", System.currentTimeMillis() - startTime, 
+	                utilTime);
+	}
+	
 	@Override
 	public void run() {
 		List<E> list = new ArrayList<E>();
@@ -174,17 +187,18 @@ public abstract class AbstractWorker<E extends Object> implements Runnable {
 				if (timer.get() == 0) {
                     timer.set(System.currentTimeMillis());
                 }
-
+				
 				// 如果本次量达到批量取值数据，则跳出
 				if (list.size() >= scanSize()) {
 					logger.info("-----------获取size:{}", list.size());
-					operate(list);
+					executeWithTimeCost(list);
 					continue;
 				}
 
 				// 如果本次循环时间超过5秒则跳出
 				if (CollectionUtils.isNotEmpty(list) && System.currentTimeMillis() - timer.get() >= timeout()) {
-					operate(list);
+				    logger.info("-----------由于超时：size:{}", list.size());
+				    executeWithTimeCost(list);
 					continue;
 				}
 				
@@ -192,8 +206,8 @@ public abstract class AbstractWorker<E extends Object> implements Runnable {
 				// 执行到redis中没有数据为止
 				if (o == null) {
 					if (CollectionUtils.isNotEmpty(list)) {
-						logger.info("-----------取完，获取size:{}, 耗时：{}ms", list.size(), System.currentTimeMillis() - timer.get());
-						operate(list);
+						logger.info("-----------取完，获取size:{}", list.size());
+						executeWithTimeCost(list);
 					}
 
 					continue;

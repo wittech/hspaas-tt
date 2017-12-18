@@ -332,8 +332,8 @@ public class UserBalanceService implements IUserBalanceService {
 
         // 长短信计费按照67字计费
         return realTotalWords % UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM == 0 ? 
-                    realTotalWords / UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM : realTotalWords
-                                                                                                                                                             + 1;
+                    realTotalWords / UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM : 
+                        realTotalWords / UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM + 1;
     }
 
     @Override

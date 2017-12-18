@@ -118,7 +118,10 @@ public class CmppProxySender {
 		return sb.toString();
 	}
 
-	private AtomicInteger LONG_MESSGE_CONTENT_COUNTER = new AtomicInteger(1);
+	/**
+	 * 长短信计数器
+	 */
+	private AtomicInteger longTextCounter = new AtomicInteger(1);
 
 	/**
 	 * 短信内容转换为 字节数。普通短信 GBK编码。长短信 UCS2编码
@@ -148,11 +151,11 @@ public class CmppProxySender {
 			tp_udhiHead[0] = 0x05;
 			tp_udhiHead[1] = 0x00;
 			tp_udhiHead[2] = 0x03;
-			tp_udhiHead[3] = (byte) LONG_MESSGE_CONTENT_COUNTER.get();// 0x0A
+			tp_udhiHead[3] = (byte) longTextCounter.get();// 0x0A
 			tp_udhiHead[4] = (byte) messageUCS2Count;
 			tp_udhiHead[5] = 0x01;// 默认为第一条
-			if (LONG_MESSGE_CONTENT_COUNTER.incrementAndGet() == 256) {
-				LONG_MESSGE_CONTENT_COUNTER.set(1);
+			if (longTextCounter.incrementAndGet() == 256) {
+				longTextCounter.set(1);
 			}
 
 			for (int i = 0; i < messageUCS2Count; i++) {

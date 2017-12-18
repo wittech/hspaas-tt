@@ -114,7 +114,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 			// 获取通道信息
 			SmsPassage smsPassage = smsPassageService.findById(model.getFinalPassageId());
 
-			extNumber = cutExtNumberBenyondLimitLength(extNumber, smsPassage);
+			extNumber = resizeExtNumber(extNumber, smsPassage);
 
 			// add by zhengying 20179610 加入签名自动前置后置等逻辑
 			model.setContent(changeMessageContentBySignMode(model.getContent(), model.getPassageSignMode()));
@@ -197,7 +197,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 	 * @param smsPassage
 	 *            通道信息
 	 */
-	private String cutExtNumberBenyondLimitLength(String extNumber, SmsPassage smsPassage) {
+	private String resizeExtNumber(String extNumber, SmsPassage smsPassage) {
 		if (StringUtils.isEmpty(extNumber)) {
             return extNumber;
         }
@@ -222,9 +222,12 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 
 	/**
 	 * 
-	 * TODO 根据签名模式调整短信内容（主要针对签名位置）
-	 * 
-	 * @param packet
+	   * TODO 根据签名模式调整短信内容（主要针对签名位置）
+	   * @param content
+	   *       短信内容
+	   * @param signMode
+	   *       签名模型
+	   * @return
 	 */
 	private static String changeMessageContentBySignMode(String content, Integer signMode) {
 		if (StringUtils.isEmpty(content)) {

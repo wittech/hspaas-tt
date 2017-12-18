@@ -79,7 +79,7 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 		// 双方协商的版本号(大于0，小于256)，其值的计算方法为：主版本号*16+副版本号 例如：版本1.2的值为0x12
 		attrs.put("version", getOrDefault("version", CmppConstant.DEFAULT_VERSION));
 		// 是否属于调试状态,true表示属于调试状态，所有的消息被打印输出到屏幕，false表示不属于调试状态，所有的消息不被输出
-		attrs.put("debug", getOrDefault("debug", false));
+		attrs.put("debug", getOrDefault("debug", "true"));
 				
 		// 心跳信息发送间隔时间(单位：秒)
 		attrs.put("heartbeat-interval", getOrDefault("heartbeat_interval", 10));
@@ -88,7 +88,7 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 		// 需要重连时，连续发出心跳而没有接收到响应的个数（单位：个)
 		attrs.put("heartbeat-noresponseout", getOrDefault("heartbeat_noresponseout", 5));
 		// 操作超时时间(单位：秒)
-		attrs.put("transaction-timeout", getOrDefault("transaction_timeout", 60));
+		attrs.put("transaction-timeout", getOrDefault("transaction_timeout", 10));
 		
 		return attrs;
 	}
@@ -113,7 +113,7 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 		// shared-secret由中国移动与ICP事先商定，移动提供的密码
 		attrs.put("login-pass", get("password"));
 		// 是否属于调试状态,true表示属于调试状态，所有的消息被打印输出到屏幕，false表示不属于调试状态，所有的消息不被输出
-		attrs.put("debug", getOrDefault("debug", false));
+		attrs.put("debug", getOrDefault("debug", "false"));
 		
 		// 心跳信息发送间隔时间(单位：秒)
 		attrs.put("heartbeat-interval", getOrDefault("heartbeat_interval", 10));
@@ -145,8 +145,7 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 		attrs.put("shared-secret", get("password"));
 		attrs.put("version", getOrDefault("version", SmgpConstant.DEFAULT_VERSION));
 		// 是否属于调试状态,true表示属于调试状态，所有的消息被打印输出到屏幕，false表示不属于调试状态，所有的消息不被输出
-		attrs.put("debug", getOrDefault("debug", false));
-		
+		attrs.put("debug", getOrDefault("debug", "false"));
 		// 心跳信息发送间隔时间(单位：秒)
 		attrs.put("heartbeat-interval", getOrDefault("heartbeat_interval", 10));
 		// 连接中断时重连间隔时间(单位：秒)
