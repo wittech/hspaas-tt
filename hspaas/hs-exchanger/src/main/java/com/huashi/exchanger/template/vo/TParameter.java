@@ -3,16 +3,12 @@ package com.huashi.exchanger.template.vo;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-
 import com.huashi.exchanger.resolver.cmpp.constant.CmppConstant;
 import com.huashi.exchanger.resolver.smgp.constant.SmgpConstant;
-import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 
 /**
  * 
- * TODO 请求参数组装
+ * TODO 请求参数组装,通道模板参数设置相关
  * 
  * @author zhengying
  * @version V1.0
@@ -47,21 +43,6 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 		return super.get(key).toString();
 	}
 	
-	@Test
-	public void test() {
-		String s = "{\"password\":\"TUgwkRmn\",\"msg_fmt\":\"15\",\"port\":\"7890\",\"ip\":\"121.196.204.71\",\"service_id\":null,\"mobile\":null,\"spid\":\"C000001\",\"version\":\"32\",\"src_terminal_id\":null,\"username\":\"100031\"}";
-		
-		String extNumber = "222";
-		
-		TParameter parameter = RequestTemplateHandler.parse(s);
-		
-		// 接入号码（如果扩展号码不为空，则加入扩展号码）
-		String srcTerminalId = parameter.getString("src_terminal_id") 
-				+ (StringUtils.isEmpty(extNumber) ? "" : extNumber);
-		
-		System.out.println(srcTerminalId);
-	}
-	
 	/**
 	 * 组装CMPP连接需要的属性信息
 	 * @return
@@ -79,7 +60,7 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 		// 双方协商的版本号(大于0，小于256)，其值的计算方法为：主版本号*16+副版本号 例如：版本1.2的值为0x12
 		attrs.put("version", getOrDefault("version", CmppConstant.DEFAULT_VERSION));
 		// 是否属于调试状态,true表示属于调试状态，所有的消息被打印输出到屏幕，false表示不属于调试状态，所有的消息不被输出
-		attrs.put("debug", getOrDefault("debug", "true"));
+		attrs.put("debug", getOrDefault("debug", "false"));
 				
 		// 心跳信息发送间隔时间(单位：秒)
 		attrs.put("heartbeat-interval", getOrDefault("heartbeat_interval", 10));

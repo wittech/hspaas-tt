@@ -85,7 +85,7 @@ public class DruidConfiguration {
         servletRegistrationBean.addUrlMappings("/druid/*");  
         Map<String, String> initParameters = new HashMap<String, String>();  
 		initParameters.put("loginUsername", "hspaas");
-		initParameters.put("loginPassword", "123456");
+		initParameters.put("loginPassword", "20171221supermanWall!@#");
 
 		// 禁用HTML页面上的“Reset All”功能
         initParameters.put("resetEnable", "false");

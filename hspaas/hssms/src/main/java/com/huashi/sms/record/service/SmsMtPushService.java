@@ -71,7 +71,7 @@ public class SmsMtPushService implements ISmsMtPushService {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
 	// 推送分包分割主键（根据推送地址进行切割）
-	private static final String PUSH_BODY_SUBPACKAGE_KEY = "puthUrl";
+	private static final String PUSH_BODY_SUBPACKAGE_KEY = "pushUrl";
 
 	@Override
 	@Transactional
@@ -175,7 +175,7 @@ public class SmsMtPushService implements ISmsMtPushService {
 		body.put("errorMsg", deliver.getStatus() == DeliverStatus.SUCCESS.getValue() ? "" : deliver.getStatusCode());
 		
 		try {
-			// 如果本次处理的用户ID已经包含在山下文处理集合中，则直接追加即可
+			// 如果本次处理的用户ID已经包含在上下文处理集合中，则直接追加即可
 			if(MapUtils.isNotEmpty(userBodies) && userBodies.containsKey(body.getInteger("userId"))){
 				userBodies.get(body.getInteger("userId")).add(body);
 			} 
@@ -183,7 +183,7 @@ public class SmsMtPushService implements ISmsMtPushService {
 			else {
 //				List<JSONObject> ds = new ArrayList<>();
 //				ds.add(body);
-				userBodies.put(body.getInteger("userId"), Arrays.asList(body));
+				userBodies.put(body.getInteger("userId"), new ArrayList<>(Arrays.asList(body)));
 			}
 			
 			return true;
@@ -408,7 +408,7 @@ public class SmsMtPushService implements ISmsMtPushService {
 				if(MapUtils.isNotEmpty(urlBodies) && urlBodies.containsKey(urlKey)){
 					urlBodies.get(urlKey).add(body);
 				} else {
-					urlBodies.put(urlKey, Arrays.asList(body));
+					urlBodies.put(urlKey, new ArrayList<>(Arrays.asList(body)));
 				}
 			} catch (Exception e) {
 				logger.error("解析推送数据报文异常:{}", body.toJSONString(), e);

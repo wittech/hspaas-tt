@@ -3,10 +3,22 @@
 <#macro getReportDes remark>
 	<#assign report = remark>
 	<#if remark?? && remark != ''>
-		<#assign report = report?replace("\\", "&quot;")>
-		<#assign report = report?replace("'", "&#39;") >
-		<#assign report = report?replace("<", "&lt;") >
-		<#assign report = report?replace(">", "&gt;") >
+		<#if remark?index_of("\\") != -1>
+			<#assign report = report?replace("\\", "&quot;")>
+		</#if>
+		
+		<#if remark?index_of("'") != -1>
+			<#assign report = report?replace("'", "&#39;")>
+		</#if>
+		
+		<#if remark?index_of("<") != -1>
+			<#assign report = report?replace("<", "&lt;")>
+		</#if>
+		
+		<#if remark?index_of(">") != -1>
+			<#assign report = report?replace(">", "&gt;")>
+		</#if>
+		
 	</#if>
 	${(report)!}
 </#macro>

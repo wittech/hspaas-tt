@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ImportResource;
 import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
-@ServletComponentScan
+//@ServletComponentScan
 // @EnableTransactionManagement
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsSmsApplication {

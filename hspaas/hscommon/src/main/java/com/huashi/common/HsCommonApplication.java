@@ -4,7 +4,6 @@ import java.util.concurrent.CountDownLatch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
@@ -12,7 +11,6 @@ import org.springframework.context.annotation.ImportResource;
 import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
-@ServletComponentScan
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsCommonApplication {
 

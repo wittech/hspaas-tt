@@ -183,6 +183,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 			return cmppManageProxy;
 		} catch (Exception e) {
+		    // 重新初始化连接，如果发生异常并且连接不为空，则需要清理连接资源
 			if(cmppManageProxy != null && cmppManageProxy.getConn() != null) {
 				cmppManageProxy.getConn().close();
 			}

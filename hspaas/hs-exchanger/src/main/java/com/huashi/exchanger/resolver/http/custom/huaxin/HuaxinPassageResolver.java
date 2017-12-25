@@ -116,8 +116,6 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
             return null;
         }
 		
-		System.out.println("---------" + result);
-		
 		List<ProviderSendResponse> list = new ArrayList<>();
 		StringReader read = new StringReader(result);
 		// 创建新的输入源SAX 解析器将使用 InputSource 对象来确定如何读取 XML 输入

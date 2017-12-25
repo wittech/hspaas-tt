@@ -64,7 +64,7 @@ public class CmppProxySender {
 	 */
 	public void doProcessDeliverMessage(CMPPMessage msg) {
 		CMPPDeliverMessage deliverMsg = (CMPPDeliverMessage) msg;
-		logger.info("回执，{}", JSON.toJSONString(msg));
+//		logger.info("回执，{}", JSON.toJSONString(msg));
 		// deliverMsg.getRegisteredDeliver()等于0时，为上行短信；等于1时为状态报告
 		if (deliverMsg.getRegisteredDeliver() == 0) {
             moReceive(deliverMsg);
@@ -460,7 +460,7 @@ public class CmppProxySender {
         }
 
 		try {
-			logger.info("CMPP状态报告数据: {}", report);
+//			logger.info("CMPP状态报告数据: {}", report);
 
 			// 发送时手机号码拼接86，回执需去掉86前缀
 			String mobile = report.getSrcterminalId();
@@ -491,7 +491,7 @@ public class CmppProxySender {
 
 			// 解析返回结果并返回
 		} catch (Exception e) {
-			logger.error("CMPP状态回执解析失败：{}", JSON.toJSONString(report), e);
+			logger.error("CMPP状态回执解析失败：{}", e);
 			throw new RuntimeException("CMPP状态回执解析失败");
 		}
 	}
