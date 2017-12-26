@@ -18,11 +18,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.service.ISmsMoMessageService;
-import com.huashi.sms.task.context.MQConstant;
 import com.rabbitmq.client.Channel;
 
 /**
@@ -47,7 +47,7 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Override
-	@RabbitListener(queues = MQConstant.MQ_SMS_MO_RECEIVE)
+	@RabbitListener(queues = RabbitConstant.MQ_SMS_MO_RECEIVE)
 	public void onMessage(Message message, Channel channel) throws Exception {
 		try {
 			JSONObject object =(JSONObject) messageConverter.fromMessage(message);

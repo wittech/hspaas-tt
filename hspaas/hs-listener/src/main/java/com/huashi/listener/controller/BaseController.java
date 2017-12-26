@@ -15,7 +15,7 @@ import com.huashi.listener.util.ParameterUtil;
 
 public class BaseController {
 
-	protected Logger logger = LoggerFactory.getLogger(getClass().getName());
+	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Resource
 	protected HttpServletRequest request;

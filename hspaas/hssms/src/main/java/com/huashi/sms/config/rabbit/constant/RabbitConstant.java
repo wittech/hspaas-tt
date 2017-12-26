@@ -1,8 +1,8 @@
-package com.huashi.sms.task.context;
+package com.huashi.sms.config.rabbit.constant;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class MQConstant {
+public class RabbitConstant {
 
 	/*-----------------------------------交换机-----------------------------------------*/
 	// 交换机

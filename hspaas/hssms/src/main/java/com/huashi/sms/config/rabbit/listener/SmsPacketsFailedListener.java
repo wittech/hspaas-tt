@@ -12,9 +12,9 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
-import com.huashi.sms.task.context.MQConstant;
 import com.rabbitmq.client.Channel;
 
 /**
@@ -36,7 +36,7 @@ public class SmsPacketsFailedListener implements ChannelAwareMessageListener {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Override
-	@RabbitListener(queues = MQConstant.MQ_SMS_MT_PACKETS_EXCEPTION)
+	@RabbitListener(queues = RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION)
 	public void onMessage(Message message, Channel channel) throws Exception {
 		try {
 			SmsMtMessageSubmit submit = (SmsMtMessageSubmit) messageConverter.fromMessage(message);

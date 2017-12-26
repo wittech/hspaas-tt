@@ -24,7 +24,7 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.huashi.common.util.IdGenerator;
-import com.huashi.sms.task.context.MQConstant;
+import com.huashi.listener.constant.RabbitConstant;
 
 /**
  * 
@@ -81,13 +81,13 @@ public class RabbitMqConfiguration {
 	public AmqpAdmin amqpAdmin(
 			@Qualifier("connectionFactory") ConnectionFactory connectionFactory) {
 		AmqpAdmin amqpAdmin = new RabbitAdmin(connectionFactory);
-		DirectExchange exchange =  new DirectExchange(MQConstant.EXCHANGE_SMS, true, false);
+		DirectExchange exchange =  new DirectExchange(RabbitConstant.EXCHANGE_SMS, true, false);
 		amqpAdmin.declareExchange(exchange);
 		
 		// 网关回执数据，带解析回执数据并推送
-		Queue smsWaitReceiptQueue = new Queue(MQConstant.MQ_SMS_MT_WAIT_RECEIPT, true, false, false, setMaxPriority());
+		Queue smsWaitReceiptQueue = new Queue(RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT, true, false, false, setMaxPriority());
 		Binding smsWaitReceiptBinding = BindingBuilder.bind(smsWaitReceiptQueue).to(exchange)
-				.with(MQConstant.MQ_SMS_MT_WAIT_RECEIPT);
+				.with(RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT);
 		amqpAdmin.declareQueue(smsWaitReceiptQueue);
 		amqpAdmin.declareBinding(smsWaitReceiptBinding);
 		
@@ -124,14 +124,6 @@ public class RabbitMqConfiguration {
 		retryTemplate.setBackOffPolicy(backOffPolicy);
 		rabbitTemplate.setRetryTemplate(retryTemplate);
 	}
-
-	// @Bean
-	// public StatefulRetryOperationsInterceptor interceptor() {
-	// return RetryInterceptorBuilder.stateful().maxAttempts(5)
-	// .backOffOptions(1000, 2.0, 10000) // initialInterval, multiplier,
-	// maxInterval
-	// .build();
-	// }
 
 	// 设置队列最大优先级
 	private Map<String, Object> setMaxPriority() {

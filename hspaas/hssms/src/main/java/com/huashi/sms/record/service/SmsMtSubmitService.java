@@ -39,6 +39,8 @@ import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.rabbit.RabbitMessageQueueManager;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant.WordsPriority;
 import com.huashi.sms.config.rabbit.listener.SmsWaitSubmitListener;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
@@ -51,8 +53,6 @@ import com.huashi.sms.record.domain.SmsMtMessagePush;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.record.vo.SmsLastestRecordVo;
 import com.huashi.sms.record.vo.SmsLastestRecordVo.MessageNode;
-import com.huashi.sms.task.context.MQConstant;
-import com.huashi.sms.task.context.MQConstant.WordsPriority;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
 
@@ -471,7 +471,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
 	@Override
 	public String getSubmitMessageQueueName(String passageCode) {
-		return String.format("%s.%s", MQConstant.MQ_SMS_MT_WAIT_SUBMIT, passageCode);
+		return String.format("%s.%s", RabbitConstant.MQ_SMS_MT_WAIT_SUBMIT, passageCode);
 	}
 
 	@Override
@@ -541,7 +541,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 					continue;
 				}
 
-				rabbitTemplate.convertAndSend(MQConstant.EXCHANGE_SMS, getSubmitMessageQueueName(passageCode), packet,
+				rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, getSubmitMessageQueueName(passageCode), packet,
 						new MessagePostProcessor() {
 
 							@Override

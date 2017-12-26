@@ -35,6 +35,7 @@ import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.service.ISmsProviderService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
 import com.huashi.sms.passage.context.PassageContext.PassageSmsTemplateParam;
 import com.huashi.sms.passage.domain.SmsPassage;
@@ -46,7 +47,6 @@ import com.huashi.sms.passage.service.SmsPassageMessageTemplateService;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.record.service.ISmsMtPushService;
 import com.huashi.sms.signature.service.ISignatureExtNoService;
-import com.huashi.sms.task.context.MQConstant;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
 import com.huashi.sms.task.domain.SmsMtTask;
@@ -413,7 +413,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 			// 如果提交数据失败，则需要制造伪造包补推送
 			if (_submit.getStatus() == MessageSubmitStatus.FAILED.getCode()) {
 				_submit.setPushErrorCode(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
-				rabbitTemplate.convertAndSend(MQConstant.EXCHANGE_SMS, MQConstant.MQ_SMS_MT_PACKETS_EXCEPTION, _submit);
+				rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION, _submit);
 			}
 
 			submits.add(_submit);
@@ -458,7 +458,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 			submitx.setCmcp(CMCP.local(mobile).getCode());
 			submitx.setMobile(mobile);
 
-			rabbitTemplate.convertAndSend(MQConstant.EXCHANGE_SMS, MQConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submitx);
+			rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submitx);
 		}
 	}
 

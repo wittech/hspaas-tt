@@ -49,6 +49,8 @@ import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.constants.ResponseMessage;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant.WordsPriority;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
@@ -59,8 +61,6 @@ import com.huashi.sms.record.service.ISmsMtProcessFailedService;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
 import com.huashi.sms.settings.service.IForbiddenWordsService;
 import com.huashi.sms.settings.service.ISmsMobileBlackListService;
-import com.huashi.sms.task.context.MQConstant;
-import com.huashi.sms.task.context.MQConstant.WordsPriority;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsActionActor;
 import com.huashi.sms.task.context.TaskContext.PacketsActionPosition;
@@ -502,10 +502,10 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 			// JSON.toJSONString(task));
 			// }
 
-			String queueName = MQConstant.MQ_SMS_MT_WAIT_PROCESS;
+			String queueName = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS;
 			if(TaskSubmitType.POINT_TO_POINT.getCode() == task.getSubmitType() 
 					|| TaskSubmitType.TEMPLATE_POINT_TO_POINT.getCode() == task.getSubmitType()) {
-				queueName = MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
+				queueName = RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
 			}
 			
 			rabbitTemplate.convertAndSend(queueName, task, new MessagePostProcessor() {
@@ -711,7 +711,7 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 				submit.setNeedPush(true);
 			}
 
-			rabbitTemplate.convertAndSend(MQConstant.EXCHANGE_SMS, MQConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submit);
+			rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submit);
 		}
 	}
 	
@@ -723,7 +723,7 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 	 */
 	private String getQueueNameBySubmitType(SmsMtTask task) {
 		if(TaskSubmitType.BATCH_MESSAGE.getCode() == task.getSubmitType()) {
-            return MQConstant.MQ_SMS_MT_WAIT_PROCESS;
+            return RabbitConstant.MQ_SMS_MT_WAIT_PROCESS;
         }
 		
 		if(StringUtils.isEmpty(task.getContent())) {
@@ -752,7 +752,7 @@ public class SmsMtTaskService implements ISmsMtTaskService, RabbitTemplate.Confi
 		task.setP2pBody(task.getContent());
 		task.setP2pBodies(p2pBalanceResponse.getP2pBodies());
 		
-		return MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
+		return RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
 	}
 
 	@Override

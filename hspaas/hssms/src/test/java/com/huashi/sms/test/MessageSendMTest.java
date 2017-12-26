@@ -17,8 +17,8 @@ import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.util.IdGenerator;
 import com.huashi.common.util.RandomUtil;
 import com.huashi.constants.CommonContext.AppType;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
-import com.huashi.sms.task.context.MQConstant;
 import com.huashi.sms.task.domain.SmsMtTask;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
@@ -59,8 +59,8 @@ public class MessageSendMTest extends BaseTest {
 	public static void send() {
 		BaseTest base = new BaseTest();
 
-		base.rabbitTemplate().convertAndSend(MQConstant.EXCHANGE_SMS,
-				MQConstant.MQ_SMS_MT_WAIT_PROCESS, smsMtTask,
+		base.rabbitTemplate().convertAndSend(RabbitConstant.EXCHANGE_SMS,
+				RabbitConstant.MQ_SMS_MT_WAIT_PROCESS, smsMtTask,
 				new MessagePostProcessor() {
 
 					@Override

@@ -46,6 +46,7 @@ import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.context.PassageContext.PassageStatus;
 import com.huashi.sms.passage.context.PassageContext.RouteType;
@@ -57,7 +58,6 @@ import com.huashi.sms.settings.service.IForbiddenWordsService;
 import com.huashi.sms.settings.service.ISmsMobileBlackListService;
 import com.huashi.sms.settings.service.ISmsMobileTablesService;
 import com.huashi.sms.settings.service.ISmsMobileWhiteListService;
-import com.huashi.sms.task.context.MQConstant;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsActionActor;
 import com.huashi.sms.task.context.TaskContext.PacketsActionPosition;
@@ -279,7 +279,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     }
 
     @Override
-    @RabbitListener(queues = MQConstant.MQ_SMS_MT_WAIT_PROCESS)
+    @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS)
     public void onMessage(Message message, Channel channel) throws Exception {
         try {
             SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
@@ -813,7 +813,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             submit.setMobile(mobile);
             submit.setCmcp(CMCP.local(mobile).getCode());
 
-            rabbitTemplate.convertAndSend(MQConstant.EXCHANGE_SMS, MQConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submit);
+            rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submit);
         }
     }
 

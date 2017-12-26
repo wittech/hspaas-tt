@@ -19,13 +19,13 @@ import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.record.service.ISmsMtDeliverService;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
-import com.huashi.sms.task.context.MQConstant;
 import com.rabbitmq.client.Channel;
 
 /**
@@ -53,7 +53,7 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Override
-	@RabbitListener(queues = MQConstant.MQ_SMS_MT_WAIT_RECEIPT)
+	@RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT)
 	public void onMessage(Message message, Channel channel) throws Exception {
 		try {
 			JSONObject object =(JSONObject) messageConverter.fromMessage(message);

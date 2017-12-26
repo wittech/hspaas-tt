@@ -24,6 +24,8 @@ import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.common.util.IdGenerator;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.developer.constant.RabbitConstant;
+import com.huashi.developer.constant.RabbitConstant.WordsPriority;
 import com.huashi.developer.model.SmsModel;
 import com.huashi.developer.model.SmsP2PModel;
 import com.huashi.developer.model.SmsP2PTemplateModel;
@@ -31,8 +33,6 @@ import com.huashi.developer.response.sms.SmsBalanceResponse;
 import com.huashi.developer.response.sms.SmsSendResponse;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
 import com.huashi.sms.record.service.ISmsApiFaildRecordService;
-import com.huashi.sms.task.context.MQConstant;
-import com.huashi.sms.task.context.MQConstant.WordsPriority;
 import com.huashi.sms.task.context.TaskContext.TaskSubmitType;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.exception.QueueProcessException;
@@ -245,10 +245,10 @@ public class SmsPrervice {
 			// JSON.toJSONString(task));
 			// }
 
-			String queueName = MQConstant.MQ_SMS_MT_WAIT_PROCESS;
+			String queueName = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS;
 			if(TaskSubmitType.POINT_TO_POINT.getCode() == task.getSubmitType() 
 					|| TaskSubmitType.TEMPLATE_POINT_TO_POINT.getCode() == task.getSubmitType()) {
-				queueName = MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
+				queueName = RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
 			}
 			
 			rabbitTemplate.convertAndSend(queueName, task, new MessagePostProcessor() {

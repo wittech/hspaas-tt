@@ -16,13 +16,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.listener.constant.RabbitConstant;
 import com.huashi.listener.task.PassageMoReportPullTask;
 import com.huashi.listener.task.PassageStatusReportPullTask;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 import com.huashi.sms.record.service.ISmsMtDeliverService;
-import com.huashi.sms.task.context.MQConstant;
 
 @Service
 public class SmsPassagePrervice {
@@ -83,7 +83,7 @@ public class SmsPassagePrervice {
 		jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
 		// 发送异步消息
-		rabbitTemplate.convertAndSend(MQConstant.MQ_SMS_MT_WAIT_RECEIPT, jsonObject);
+		rabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT, jsonObject);
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class SmsPassagePrervice {
 		jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
 		// 发送异步消息
-		rabbitTemplate.convertAndSend(MQConstant.MQ_SMS_MO_RECEIVE, jsonObject);
+		rabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MO_RECEIVE, jsonObject);
 	}
 	
 	/**

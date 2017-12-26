@@ -29,6 +29,7 @@ import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.CommonContext.CallbackUrlType;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.service.ISmsPassageService;
 import com.huashi.sms.record.dao.SmsMoMessagePushMapper;
@@ -38,7 +39,6 @@ import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.settings.constant.MobileBlacklistType;
 import com.huashi.sms.settings.domain.SmsMobileBlackList;
 import com.huashi.sms.settings.service.ISmsMobileBlackListService;
-import com.huashi.sms.task.context.MQConstant;
 
 /**
  * 短信接收记录服务接口类
@@ -262,7 +262,7 @@ public class SmsMoMessageService implements ISmsMoMessageService {
 	private void sendToPushQueue(SmsMoMessageReceive receive) {
 		try {
 			// 发送至待推送信息队列
-			rabbitTemplate.convertAndSend(MQConstant.EXCHANGE_SMS, MQConstant.MQ_SMS_MO_WAIT_PUSH, receive);
+			rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MO_WAIT_PUSH, receive);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);

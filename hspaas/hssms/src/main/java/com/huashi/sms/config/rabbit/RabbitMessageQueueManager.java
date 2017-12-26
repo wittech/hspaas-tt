@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.druid.util.StringUtils;
-import com.huashi.sms.task.context.MQConstant;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 
 /**
  * 
@@ -93,7 +93,7 @@ public class RabbitMessageQueueManager {
 	 */
 	public void createQueue(String queueName, boolean isDirectProtocol, ChannelAwareMessageListener channelAwareMessageListener) {
 		try {
-			DirectExchange exchange = new DirectExchange(MQConstant.EXCHANGE_SMS, true, false);
+			DirectExchange exchange = new DirectExchange(RabbitConstant.EXCHANGE_SMS, true, false);
 			rabbitAdmin.declareExchange(exchange);
 
 			Queue queue = new Queue(queueName, true, false, false, setQueueFeatures());

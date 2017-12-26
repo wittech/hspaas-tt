@@ -1,19 +1,15 @@
 package com.huashi.developer.config;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.connection.Connection;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -29,9 +25,7 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.huashi.common.util.IdGenerator;
-import com.huashi.sms.task.context.MQConstant;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
+import com.huashi.developer.constant.RabbitConstant;
 
 /**
  * 
@@ -110,20 +104,20 @@ public class RabbitMqConfiguration {
 	@Bean
 	public AmqpAdmin amqpAdmin(@Qualifier("rabbitConnectionFactory") ConnectionFactory rabbitConnectionFactory) {
 		AmqpAdmin amqpAdmin = new RabbitAdmin(rabbitConnectionFactory);
-		DirectExchange exchange = new DirectExchange(MQConstant.EXCHANGE_SMS, true, false);
+		DirectExchange exchange = new DirectExchange(RabbitConstant.EXCHANGE_SMS, true, false);
 		amqpAdmin.declareExchange(exchange);
 		
 		// 待分包处理队列
-		Queue smsWaitProcessQueue = new Queue(MQConstant.MQ_SMS_MT_WAIT_PROCESS, true, false, false, setQueueFeatures());
+		Queue smsWaitProcessQueue = new Queue(RabbitConstant.MQ_SMS_MT_WAIT_PROCESS, true, false, false, setQueueFeatures());
 		Binding smsWaitProcessBinding = BindingBuilder.bind(smsWaitProcessQueue).to(exchange)
-				.with(MQConstant.MQ_SMS_MT_WAIT_PROCESS);
+				.with(RabbitConstant.MQ_SMS_MT_WAIT_PROCESS);
 		amqpAdmin.declareQueue(smsWaitProcessQueue);
 		amqpAdmin.declareBinding(smsWaitProcessBinding);
 		
 		// 待点对点短信分包处理队列
-		Queue smsP2PWaitProcessQueue = new Queue(MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS, true, false, false, setQueueFeatures());
+		Queue smsP2PWaitProcessQueue = new Queue(RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS, true, false, false, setQueueFeatures());
 		Binding smsP2PWaitProcessBinding = BindingBuilder.bind(smsP2PWaitProcessQueue).to(exchange)
-				.with(MQConstant.MQ_SMS_MT_P2P_WAIT_PROCESS);
+				.with(RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS);
 		amqpAdmin.declareQueue(smsP2PWaitProcessQueue);
 		amqpAdmin.declareBinding(smsP2PWaitProcessBinding);
 		
@@ -170,24 +164,6 @@ public class RabbitMqConfiguration {
 	
 	/**
 	 * 
-	   * TODO 获取队列中消息总量
-	   * 
-	   * @param queue
-	   * @param rabbitConnectionFactory
-	   * @return
-	   * @throws IOException
-	 */
-	public int getMessageCount(final String queue, @Qualifier("rabbitConnectionFactory") ConnectionFactory rabbitConnectionFactory) 
-			throws IOException {
-        Connection connection = rabbitConnectionFactory.createConnection();
-        final Channel channel = connection.createChannel(false);
-        final AMQP.Queue.DeclareOk declareOk = channel.queueDeclarePassive(queue);
-
-        return declareOk.getMessageCount();
-    }
-
-	/**
-	 * 
 	   * TODO 设置队列属性
 	   * @return
 	 */
@@ -204,32 +180,5 @@ public class RabbitMqConfiguration {
 		return args;
 	}
 
-	// @Bean
-	// MessageListenerAdapter listenerAdapter(SmsQueueService smsQueueService) {
-	// return new MessageListenerAdapter(smsQueueService, "receiveMessage");
-
-	@Bean
-	SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(@Qualifier("rabbitConnectionFactory") ConnectionFactory rabbitConnectionFactory) {
-		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-		factory.setConnectionFactory(rabbitConnectionFactory);
-
-		factory.setConcurrentConsumers(concurrentConsumers);
-		factory.setMaxConcurrentConsumers(maxConcurrentConsumers);
-		// 消息失败重试后 设置 RabbitMQ把消息分发给有空的cumsuer，同 channel.basicQos(1);
-		factory.setPrefetchCount(rabbitPrefetchCount);
-//		factory.setConsumerTagStrategy(consumerTagStrategy);
-		
-		
-		factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-		factory.setMessageConverter(messageConverter());
-		
-//		factory.setMissingQueuesFatal(missingQueuesFatal);
-		
-//		ExecutorService service = Executors.newFixedThreadPool(500);
-//		factory.setTaskExecutor(service);
-		
-		
-		return factory;
-	}
 
 }

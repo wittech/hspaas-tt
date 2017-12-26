@@ -16,10 +16,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.context.PassageContext.PushStatus;
 import com.huashi.sms.record.domain.SmsMoMessagePush;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
-import com.huashi.sms.task.context.MQConstant;
 import com.rabbitmq.client.Channel;
 
 /**
@@ -69,7 +69,7 @@ public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareM
 	}
 	
 	@Override
-	@RabbitListener(queues = MQConstant.MQ_SMS_MO_WAIT_PUSH)
+	@RabbitListener(queues = RabbitConstant.MQ_SMS_MO_WAIT_PUSH)
 	public void onMessage(Message message, Channel channel) throws Exception {
 		Object object = messageConverter.fromMessage(message);
 		try {
