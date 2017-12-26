@@ -7,10 +7,12 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
+@EnableScheduling
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsMonitorApplication {
 	
