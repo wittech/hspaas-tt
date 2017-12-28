@@ -44,13 +44,13 @@
                             <div class="form-group">
                                 <label class="col-xs-3 control-label">配置名称</label>
                                 <div class="col-xs-5">
-                                    <input type="text" class="form-control validate[required,maxSize[100]]" name="config.attrName" value="${config.attrName!''}" id="title" placeholder="请输入配置名称">
+                                    <input type="text" class="form-control validate[required,maxSize[500]]" name="config.attrName" value="${config.attrName!''}" id="title" placeholder="请输入配置名称">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-xs-3 control-label">配置Key</label>
                                 <div class="col-xs-5">
-                                    <input type="text" class="form-control validate[required,maxSize[100]]" name="config.attrKey" readOnly value="${config.attrKey!''}" id="attrKey" placeholder="请输入配置Key">
+                                    <input type="text" class="form-control validate[required,maxSize[500]]" name="config.attrKey" readOnly value="${config.attrKey!''}" id="attrKey" placeholder="请输入配置Key">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -69,7 +69,7 @@
                                             </#list>
                                         </select>
                                     <#else>
-                                        <input class="form-control validate[required,maxSize[100]]" name="config.attrValue" id="attrValue" value="${config.attrValue!''}"/>
+                                        <input class="form-control validate[required,maxSize[500]]" name="config.attrValue" id="attrValue" value="${config.attrValue!''}"/>
                                     </#if>
                                 </div>
                             </div>

@@ -5,22 +5,12 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.http.custom.AbstractPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.cmccopen.CmccopenPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.dianji.DianjiPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.huashi.HspaasPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.huaxin.HuaxinPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.kuanxin.KuanxinPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.lanjinglz.LanjinglianzhongPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.maiyuan.MaiyuanPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.wukong.WukongPassageResolver;
-import com.huashi.exchanger.resolver.http.custom.yescloudtree.YescloudtreePassageResolver;
 import com.huashi.exchanger.template.handler.DeliverTemplateHandler;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.handler.ResponseTemplateHandler;
@@ -31,13 +21,18 @@ import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 
 /**
- * @author tenx
+ * 
+  * TODO http 自定义处理器
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2017年12月28日 上午10:00:17
  */
 @Component
-public class HttpResolver {
+public class HttpResolver{
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-
+    
     /**
      * TODO 调用上家通道接口
      *
@@ -114,7 +109,8 @@ public class HttpResolver {
      */
     private List<ProviderSendResponse> sendCustomTranslate(SmsPassageParameter parameter, String mobile,
                                                            String content, String extNumber, TParameter tparameter) {
-        return getResolver(tparameter.customPassage()).send(parameter, mobile, content, extNumber);
+        
+        return AbstractPassageResolver.getInstance(tparameter.customPassage()).send(parameter, mobile, content, extNumber);
     }
 
     /**
@@ -159,7 +155,7 @@ public class HttpResolver {
      * @return
      */
     private List<SmsMtMessageDeliver> customStatusTranslate(SmsPassageAccess access, TParameter tparameter) {
-        return getResolver(tparameter.customPassage()).mtPullDeliver(tparameter, access.getUrl(), access.getSuccessCode());
+        return AbstractPassageResolver.getInstance(tparameter.customPassage()).mtPullDeliver(tparameter, access.getUrl(), access.getSuccessCode());
     }
 
     /**
@@ -171,7 +167,7 @@ public class HttpResolver {
      * @return
      */
     private List<SmsMtMessageDeliver> customStatusTranslate(JSONObject report, TParameter tparameter, String successCode) {
-        return getResolver(tparameter.customPassage()).mtDeliver(report.getString(ParameterFilterContext.PARAMETER_NAME_IN_STREAM), successCode);
+        return AbstractPassageResolver.getInstance(tparameter.customPassage()).mtDeliver(report.getString(ParameterFilterContext.PARAMETER_NAME_IN_STREAM), successCode);
     }
 
     /**
@@ -182,7 +178,7 @@ public class HttpResolver {
      * @return
      */
     private List<SmsMoMessageReceive> customMoTranslate(SmsPassageAccess access, TParameter tparameter) {
-        return getResolver(tparameter.customPassage()).moPullReceive(tparameter, access.getUrl(), access.getPassageId());
+        return AbstractPassageResolver.getInstance(tparameter.customPassage()).moPullReceive(tparameter, access.getUrl(), access.getPassageId());
     }
 
     /**
@@ -194,7 +190,7 @@ public class HttpResolver {
      * @return
      */
     private List<SmsMoMessageReceive> customMoTranslate(JSONObject report, TParameter tparameter, Integer passageId) {
-        return getResolver(tparameter.customPassage()).moReceive(report.getString(ParameterFilterContext.PARAMETER_NAME_IN_STREAM), passageId);
+        return AbstractPassageResolver.getInstance(tparameter.customPassage()).moReceive(report.getString(ParameterFilterContext.PARAMETER_NAME_IN_STREAM), passageId);
     }
 
 
@@ -230,52 +226,4 @@ public class HttpResolver {
         return null;
     }
 
-    @Autowired
-    private DianjiPassageResolver dianjiPassageResolver;
-    @Autowired
-    private MaiyuanPassageResolver maiyuanPassageResolver;
-    @Autowired
-    private WukongPassageResolver wukongPassageResolver;
-    @Autowired
-    private HspaasPassageResolver hspaasPassageResolver;
-    @Autowired
-    private HuaxinPassageResolver huaxinPassageResolver;
-    @Autowired
-    private LanjinglianzhongPassageResolver lanjinglianzhongPassageResolver;
-    @Autowired
-    private YescloudtreePassageResolver yescloudtreePassageResolver;
-    @Autowired
-    private CmccopenPassageResolver cmccopenPassageResolver;
-    @Autowired
-    private KuanxinPassageResolver kuanxinPassageResolver;
-
-    /**
-     * TODO 根据通道简码获取相关处理器
-     *
-     * @param code 通道简码
-     * @return
-     */
-    private AbstractPassageResolver getResolver(String code) {
-        if (dianjiPassageResolver.code().equalsIgnoreCase(code)) {
-            return dianjiPassageResolver;
-        } else if (hspaasPassageResolver.code().equalsIgnoreCase(code)) {
-            return hspaasPassageResolver;
-        } else if (cmccopenPassageResolver.code().equalsIgnoreCase(code)) {
-            return cmccopenPassageResolver;
-        } else if (huaxinPassageResolver.code().equalsIgnoreCase(code)) {
-            return huaxinPassageResolver;
-        } else if (maiyuanPassageResolver.code().equalsIgnoreCase(code)) {
-            return maiyuanPassageResolver;
-        } else if (wukongPassageResolver.code().equalsIgnoreCase(code)) {
-            return wukongPassageResolver;
-        } else if (lanjinglianzhongPassageResolver.code().equalsIgnoreCase(code)) {
-            return lanjinglianzhongPassageResolver;
-        } else if (yescloudtreePassageResolver.code().equalsIgnoreCase(code)) {
-            return yescloudtreePassageResolver;
-        } else if (kuanxinPassageResolver.code().equalsIgnoreCase(code)) {
-            return kuanxinPassageResolver;
-        }
-
-        throw new RuntimeException("通道简码：[" + code + "] 未找到相关处理器");
-    }
 }

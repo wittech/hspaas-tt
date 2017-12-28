@@ -311,18 +311,6 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	}
 
 	@Override
-	public List<SmsMtMessageDeliver> mtDeliver(String report, String successCode) {
-		logger.info("下行状态推送暂不支持");
-		return null;
-	}
-
-	@Override
-	public List<SmsMoMessageReceive> moReceive(String report, Integer passageId) {
-		logger.info("上行推送暂不支持");
-		return null;
-	}
-
-	@Override
 	public Object balance(Object param) {
 		return 0;
 	}

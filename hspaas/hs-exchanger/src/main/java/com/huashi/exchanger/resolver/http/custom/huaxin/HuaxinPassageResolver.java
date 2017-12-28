@@ -83,7 +83,6 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 		params.put("extno", extNumber == null ? "" : extNumber);
 		params.put("action", tparameter.getString("action"));
 		
-		
 		return params;
 	}
 	
@@ -316,10 +315,6 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 			logger.error("解析失败", e);
 			throw new RuntimeException("解析失败");
 		}
-	}
-	
-	public static void main(String[] args) {
-		System.out.println("2016/12/23 13:27:32".replaceAll("/", "-"));
 	}
 
 }

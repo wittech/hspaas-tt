@@ -284,28 +284,6 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 		}
 		return list;
 	}
-	
-	public static void main(String[] args) {
-		String report = "{\"code\":0,\"msg\":\"\",\"data\":[{\"task_id\":\"4233132\",\"phone_no\":\"15992125766\",\"receive_code\":\"6\",\"receive_time\":null,\"sub_port\":\"\",\"sms_id\":\"\"},{\"task_id\":\"4233135\",\"phone_no\":\"18883145062\",\"receive_code\":\"6\",\"receive_time\":null,\"sub_port\":\"\",\"sms_id\":\"\"},{\"task_id\":\"4233131\",\"phone_no\":\"18251838983\",\"receive_code\":\"6\",\"receive_time\":null,\"sub_port\":\"\",\"sms_id\":\"\"}]}";
-		WukongPassageResolver resolver = new WukongPassageResolver();
-		List<SmsMtMessageDeliver> list = resolver.deliverResponse(report, "0");
-		System.out.println(JSON.toJSONString(list));
-		
-	}
-	
-	
-
-	@Override
-	public List<SmsMtMessageDeliver> mtDeliver(String report, String successCode) {
-		logger.info("下行状态推送暂不支持");
-		return null;
-	}
-
-	@Override
-	public List<SmsMoMessageReceive> moReceive(String report, Integer passageId) {
-		logger.info("上行推送暂不支持");
-		return null;
-	}
 
 	@Override
 	public Object balance(Object param) {

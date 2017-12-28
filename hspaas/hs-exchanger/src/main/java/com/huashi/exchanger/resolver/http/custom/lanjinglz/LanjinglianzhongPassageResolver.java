@@ -234,14 +234,4 @@ public class LanjinglianzhongPassageResolver extends AbstractPassageResolver{
 	public String code() {
 		return "lanjinglz";
 	}
-
-	@Override
-	public List<SmsMtMessageDeliver> mtPullDeliver(TParameter tparameter, String url, String successCode) {
-		throw new RuntimeException("暂不提供");
-	}
-
-	@Override
-	public List<SmsMoMessageReceive> moPullReceive(TParameter tparameter, String url, Integer passageId) {
-		throw new RuntimeException("暂不提供");
-	} 
 }
