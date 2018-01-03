@@ -42,7 +42,8 @@ public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 			}
 			
 			try {
-                Thread.sleep(1L);//先释放资源，避免cpu占用过高
+				//先释放资源，避免cpu占用过高
+                Thread.sleep(1L);
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
@@ -93,7 +94,7 @@ public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 	 * 
 	 * TODO 持久化主任务
 	 * 
-	 * @param list
+	 * @param tasks
 	 * @param tasks
 	 * @param taskPackets
 	 */
@@ -107,7 +108,7 @@ public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 			logger.info("主任务持久同步完成，共处理 主任务 {} 条，子任务：{} 条", tasks.size(), taskPackets.size());
 		} catch (Exception e) {
 			logger.error("主任务异步持久化失败", e);
-			getStringRedisTemplate().opsForList().rightPushAll(SmsRedisConstant.RED_DB_MESSAGE_TASK_FAILED_LIST, JSON.toJSONString(tasks));
+			getStringRedisTemplate().opsForList().rightPushAll(redisBackupKey(), JSON.toJSONString(tasks));
 		} finally {
 			super.clear(tasks);
 			taskPackets.clear();
@@ -120,6 +121,11 @@ public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 	@Override
 	protected String redisKey() {
 		return SmsRedisConstant.RED_DB_MESSAGE_TASK_LIST;
+	}
+
+	@Override
+	protected String jobTitle() {
+		return "短信分包任务持久化";
 	}
 
 }

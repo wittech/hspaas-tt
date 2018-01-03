@@ -26,25 +26,21 @@ public class SmsDeliverPersistenceWorker extends AbstractWorker<SmsMtMessageDeli
 
 	@Override
 	protected void operate(List<SmsMtMessageDeliver> list) {
-		try {
-			if (CollectionUtils.isEmpty(list)) {
-                return;
-            }
-
-			long startTime = System.currentTimeMillis();
-			getInstance(ISmsMtDeliverService.class).batchInsert(list);
-			logger.info("短信状态回执信息持久同步完成，共处理  {} 条, 耗时： {} ms", list.size(), System.currentTimeMillis() - startTime);
-		} catch (Exception e) {
-			logger.error("短信状态回执异步持久化失败", e);
-			super.backupIfFailed(SmsRedisConstant.RED_DB_MESSAGE_STATUS_RECEIVE_FAILED_LIST, list);
-		} finally {
-			super.clear(list);
+		if (CollectionUtils.isEmpty(list)) {
+			return;
 		}
+
+		getInstance(ISmsMtDeliverService.class).batchInsert(list);
 	}
 
 	@Override
 	protected String redisKey() {
 		return SmsRedisConstant.RED_DB_MESSAGE_STATUS_RECEIVE_LIST;
+	}
+
+	@Override
+	protected String jobTitle() {
+		return "短信状态回执持久化";
 	}
 
 }

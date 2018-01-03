@@ -121,7 +121,7 @@ public class CmppProxySender {
 	/**
 	 * 长短信计数器
 	 */
-	private AtomicInteger longTextCounter = new AtomicInteger(1);
+	private final AtomicInteger longTextCounter = new AtomicInteger(1);
 
 	/**
 	 * 短信内容转换为 字节数。普通短信 GBK编码。长短信 UCS2编码

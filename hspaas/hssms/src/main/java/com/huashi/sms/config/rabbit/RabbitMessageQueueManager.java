@@ -72,16 +72,6 @@ public class RabbitMessageQueueManager {
 
 	/**
 	 * 
-	   * TODO 创建队列
-	   * 
-	   * @param queueName
-	   * @param channelAwareMessageListener
-	 */
-	public void createQueue(String queueName, ChannelAwareMessageListener channelAwareMessageListener) {
-		createQueue(queueName, false, channelAwareMessageListener);
-	}
-	/**
-	 * 
 	   * TODO 创建指定消费者数量消息队列
 	   * 
 	   * @param queueName
@@ -155,7 +145,6 @@ public class RabbitMessageQueueManager {
         }
 		
 		return Integer.parseInt(properties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
-		
 	}
 
 	private Map<String, Object> setQueueFeatures() {
@@ -182,7 +171,7 @@ public class RabbitMessageQueueManager {
 	   * @param channelAwareMessageListener
 	   * @return
 	 */
-	public SimpleMessageListenerContainer messageListenerContainer(String queueName, Integer consumers, 
+	private SimpleMessageListenerContainer messageListenerContainer(String queueName, Integer consumers,
 			ChannelAwareMessageListener channelAwareMessageListener) {
 		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(rabbitConnectionFactory);
 		container.setConcurrentConsumers(consumers);
@@ -217,7 +206,9 @@ public class RabbitMessageQueueManager {
 
 		// 设置优先级
 //		container.setConsumerArguments(Collections.<String, Object> singletonMap("x-priority", Integer.valueOf(10)));
-		container.setAcknowledgeMode(AcknowledgeMode.MANUAL); // 设置确认模式手工确认
+
+		// 设置确认模式手工确认s
+		container.setAcknowledgeMode(AcknowledgeMode.MANUAL);
 		
 		container.setMessageListener(channelAwareMessageListener);
 		

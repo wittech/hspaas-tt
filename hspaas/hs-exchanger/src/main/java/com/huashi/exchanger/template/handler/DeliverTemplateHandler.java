@@ -53,7 +53,7 @@ public class DeliverTemplateHandler {
                 return null;
             }
 			
-			SmsMtMessageDeliver response = null;
+			SmsMtMessageDeliver response;
 			for(JSONObject prameterReport : array) {
 				
 				// 消息ID
@@ -86,24 +86,4 @@ public class DeliverTemplateHandler {
 		}
 	}
 
-	/**
-	 * 
-	 * TODO 获取接收时间
-	 * 
-	 * @param paramDefination
-	 * @param prameterReport
-	 * @return
-	 */
-//	private static String getReceiveTimeInFact(JSONObject paramDefination, JSONObject prameterReport) {
-//		String deliverTime = null;
-//		if (paramDefination.containsKey(TPosition.SEND_TIME_NODE_NAME)) {
-//			// 不确定对方传递的格式，不好直接转换yyyy-MMdd HH:mm:ss ，前期暂时使用当前时间
-//			// deliverTime =
-//			// prameterReport.getString(paramDefination.getString(TPosition.SEND_TIME_NODE_NAME));
-//			deliverTime = DateUtil.getNow();
-//		} else
-//			deliverTime = DateUtil.getNow();
-//
-//		return deliverTime;
-//	}
 }

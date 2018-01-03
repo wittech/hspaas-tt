@@ -199,7 +199,6 @@ public class SmsMtPushService implements ISmsMtPushService {
             return false;
         }
 		
-		JSONObject body = new JSONObject();
 		Map<String, JSONObject> cachedPushArgs = new HashMap<>();
 		// 用户ID对应的 推送报告集合数据
 		Map<Integer, List<JSONObject>> userBodies = new HashMap<>();
@@ -212,6 +211,7 @@ public class SmsMtPushService implements ISmsMtPushService {
                     continue;
                 }
 				
+				JSONObject body = new JSONObject();
 				if(!assembleBody(body, deliver, cachedPushArgs, failoverDeliversQueue)) {
                     continue;
                 }
@@ -243,7 +243,6 @@ public class SmsMtPushService implements ISmsMtPushService {
 		}
 		
 		// 处理本次资源，加速GC
-		body = null;
 		userBodies = null;
 		cachedPushArgs = null;
 		failoverDeliversQueue = null;

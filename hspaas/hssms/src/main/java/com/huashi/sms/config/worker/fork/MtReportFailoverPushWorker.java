@@ -11,47 +11,45 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.service.ISmsMtPushService;
 
 /**
+ * TODO 针对短信下行报告推送（首次数据未入库或者REDIS无相关数据，后续追加推送）
  * 
-  * TODO 针对短信下行报告推送（首次数据未入库或者REDIS无相关数据，后续追加推送）
-  * @author zhengying
-  * @version V1.0   
-  * @date 2017年12月5日 下午5:45:18
+ * @author zhengying
+ * @version V1.0
+ * @date 2017年12月5日 下午5:45:18
  */
 public class MtReportFailoverPushWorker extends AbstractWorker<SmsMtMessageDeliver> {
 
-	public MtReportFailoverPushWorker(ApplicationContext applicationContext) {
-		super(applicationContext);
-	}
+    @Override
+    protected String jobTitle() {
+        return "短信状态补偿轮训";
+    }
 
-	@Override
-	protected void operate(List<SmsMtMessageDeliver> list) {
-		if(CollectionUtils.isEmpty(list)) {
+    public MtReportFailoverPushWorker(ApplicationContext applicationContext) {
+        super(applicationContext);
+    }
+
+    @Override
+    protected void operate(List<SmsMtMessageDeliver> list) {
+        if (CollectionUtils.isEmpty(list)) {
             return;
         }
-		
-		try {
-			getInstance(ISmsMtPushService.class).compareAndPushBody(list);
-		} catch (Exception e) {
-			logger.error("补偿推送失败", e);
-		} finally {
-			timer.set(0);
-			list.clear();
-		}
-	}
 
-	@Override
-	protected String redisKey() {
-		return SmsRedisConstant.RED_QUEUE_SMS_DELIVER_FAILOVER;
-	}
+        getInstance(ISmsMtPushService.class).compareAndPushBody(list);
+    }
 
-	@Override
-	protected int scanSize() {
-		return 1000;
-	}
+    @Override
+    protected String redisKey() {
+        return SmsRedisConstant.RED_QUEUE_SMS_DELIVER_FAILOVER;
+    }
 
-	@Override
-	protected long timeout() {
-		return super.timeout();
-	}
-	
+    @Override
+    protected int scanSize() {
+        return 1000;
+    }
+
+    @Override
+    protected long timeout() {
+        return super.timeout();
+    }
+
 }

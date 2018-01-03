@@ -1,17 +1,5 @@
 package com.huashi.sms.config.rabbit.listener;
 
-import java.util.Date;
-
-import javax.annotation.Resource;
-
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
@@ -21,6 +9,16 @@ import com.huashi.sms.passage.context.PassageContext.PushStatus;
 import com.huashi.sms.record.domain.SmsMoMessagePush;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * 
@@ -90,14 +88,13 @@ public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareM
 			channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 		}
 	}
-	
+
 	/**
-	 * 
-	   * TODO 推送持久化
-	   * 
-	   * @param report
-	   * @param responseContent
-	   * @param timeCost
+	 * 推送持久化
+	 * @param report
+	 * @param content
+	 * @param retryResponse
+	 * @param timeCost
 	 */
 	private void doPushPersistence(SmsMoMessageReceive report, String content, RetryResponse retryResponse, long timeCost) {
 		SmsMoMessagePush push = new SmsMoMessagePush();

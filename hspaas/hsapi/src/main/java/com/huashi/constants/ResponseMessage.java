@@ -55,8 +55,4 @@ public class ResponseMessage implements Serializable {
 		this.message = message;
 	}
 
-	public ResponseMessage() {
-		super();
-	}
-	
 }

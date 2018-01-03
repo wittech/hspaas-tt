@@ -20,7 +20,7 @@ import com.alibaba.fastjson.TypeReference;
  */
 public class FastJsonMessageConverter extends AbstractMessageConverter {
 
-	public static final String DEFAULT_CHARSET = "UTF-8";
+	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	private volatile String defaultCharset = DEFAULT_CHARSET;
 
@@ -54,7 +54,7 @@ public class FastJsonMessageConverter extends AbstractMessageConverter {
     protected Message createMessage(Object objectToConvert,
                                     MessageProperties messageProperties)
 			throws MessageConversionException {
-		byte[] bytes = null;
+		byte[] bytes;
 		try {
 			String jsonString = JSONObject.toJSONString(objectToConvert);
 			bytes = jsonString.getBytes(this.defaultCharset);
@@ -64,9 +64,7 @@ public class FastJsonMessageConverter extends AbstractMessageConverter {
 		}
 		messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
 		messageProperties.setContentEncoding(this.defaultCharset);
-		if (bytes != null) {
-			messageProperties.setContentLength(bytes.length);
-		}
+		messageProperties.setContentLength(bytes.length);
 		return new Message(bytes, messageProperties);
 
 	}

@@ -85,8 +85,8 @@ public class RabbitMqConfiguration {
         connectionFactory.setPassword(mqPassword);
         connectionFactory.setVirtualHost(mqVhost);
 
-        // 显性设置后才能进行回调函数设置
-        connectionFactory.setPublisherReturns(true); // enable confirm mode
+        // 显性设置后才能进行回调函数设置 enable confirm mode
+        connectionFactory.setPublisherReturns(true);
         connectionFactory.setPublisherConfirms(true);
 
         // 默认 connectionFactory.setCacheMode(CacheMode.CHANNEL), ConnectionCacheSize无法设置
@@ -94,7 +94,9 @@ public class RabbitMqConfiguration {
 //		connectionFactory.setConnectionCacheSize(5);
 
         connectionFactory.setRequestedHeartBeat(60);
-        connectionFactory.setConnectionTimeout(15000);// 15秒
+
+        // 设置超时时间15秒
+        connectionFactory.setConnectionTimeout(15000);
 
         // 断开重连接，保证数据无丢失
 //		connectionFactory.setAutomaticRecoveryEnabled(true);
@@ -160,9 +162,6 @@ public class RabbitMqConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     RabbitTemplate rabbitTemplate(@Qualifier("rabbitConnectionFactory") ConnectionFactory rabbitConnectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(rabbitConnectionFactory);
-        // rabbitTemplate.setQueue(SmsQueueConstant.MQ_SMS_MT_WAIT_PROCESS);
-        // rabbitTemplate.setRoutingKey(SmsQueueConstant.MQ_SMS_MT_WAIT_PROCESS);
-
         rabbitTemplate.setMessageConverter(messageConverter());
         rabbitTemplate.setRetryTemplate(retryTemplate());
         rabbitTemplate.setMandatory(true);

@@ -34,21 +34,19 @@ public class MtReportPushToDeveloperWorker extends AbstractWorker<JSONObject> {
 		if(CollectionUtils.isEmpty(list)) {
             return;
         }
-		
-		try {
-			getInstance(ISmsMtPushService.class).pushMessageBodyToDeveloper(list);
-		} catch (Exception e) {
-			logger.error("推送下行状态报告失败", e);
-		} finally {
-			timer.set(0);
-			list.clear();
-		}
+
+		getInstance(ISmsMtPushService.class).pushMessageBodyToDeveloper(list);
 	}
 	
 
 	@Override
 	protected String redisKey() {
 		return developerPushQueueName;
+	}
+
+	@Override
+	protected String jobTitle() {
+		return "短信状态报告推送";
 	}
 
 	@Override

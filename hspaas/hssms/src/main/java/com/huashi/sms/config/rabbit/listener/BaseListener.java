@@ -1,21 +1,26 @@
 package com.huashi.sms.config.rabbit.listener;
 
-import com.alibaba.druid.util.StringUtils;
-import com.huashi.util.HttpClientUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
+
+import com.alibaba.druid.util.StringUtils;
+import com.huashi.util.HttpClientUtil;
 
 public class BaseListener {
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
-	// 推送回执信息，如果用户回执success才算正常接收，否则重试，达到重试上限次数，抛弃
-	public static final String PUSH_REPONSE_SUCCESS_CODE = "success";
-	public static final int PUSH_RETRY_TIMES = 3;
+
+	/**
+	 * 推送回执信息，如果用户回执success才算正常接收，否则重试，达到重试上限次数，抛弃
+	 */
+	private static final String PUSH_REPONSE_SUCCESS_CODE = "success";
+	
+	/**
+	 * 重试次数两次
+	 */
+	protected static final int PUSH_RETRY_TIMES = 2;
 
 	/**
 	 * 
@@ -31,10 +36,13 @@ public class BaseListener {
 	 */
 	protected RetryResponse post(String url, String content, int retryTimes, int curretCount) {
 		RetryResponse retryResponse = new RetryResponse();
+
         if (StringUtils.isEmpty(url) || StringUtils.isEmpty(content)) {
         	retryResponse.setResult("URL或内容为空");
         	return retryResponse;
         }
+
+
         logger.info("------------------------------HttpClient 推送开始-------------------------------");
         logger.info("req  url{}, content:{}", url, content);
         
@@ -66,36 +74,21 @@ public class BaseListener {
 	}
 	
 
-	/**
-	 * 
-	 * TODO 设置重试模板
-	 * 
-	 * @param retryTimes
-	 * @return
-	 */
-	protected RetryTemplate retryTemplate(int retryTimes) {
-		// 重试模板
-		RetryTemplate retryTemplate = new RetryTemplate();
-		ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-		backOffPolicy.setInitialInterval(500);
-		backOffPolicy.setMultiplier(10.0);
-		backOffPolicy.setMaxInterval(10000);
-		retryTemplate.setBackOffPolicy(backOffPolicy);
-
-		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-		// 尝试最大重试次数
-		retryPolicy.setMaxAttempts(retryTimes);
-		retryTemplate.setRetryPolicy(retryPolicy);
-
-		return retryTemplate;
-	}
-
 	public class RetryResponse {
-		// 尝试次数
-		private int attemptTimes = 0;
-		// 返回结果
+
+		/**
+		 *  尝试次数
+		 */
+		private int attemptTimes;
+
+		/**
+		 * 返回结果
+		 */
 		private String result;
-		// 最后一次异常信息
+
+		/**
+		 * 最后一次异常信息
+		 */
 		private Throwable lastThrowable;
 		
 		private boolean isSuccess = false;
@@ -104,7 +97,7 @@ public class BaseListener {
 			return attemptTimes;
 		}
 
-		public void setAttemptTimes(int attemptTimes) {
+		private void setAttemptTimes(int attemptTimes) {
 			this.attemptTimes = attemptTimes;
 		}
 

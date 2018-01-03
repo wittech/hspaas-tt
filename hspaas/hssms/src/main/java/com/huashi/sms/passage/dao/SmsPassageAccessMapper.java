@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 
 public interface SmsPassageAccessMapper {
+
 	int deleteByPrimaryKey(Integer id);
 
 	int insert(SmsPassageAccess record);

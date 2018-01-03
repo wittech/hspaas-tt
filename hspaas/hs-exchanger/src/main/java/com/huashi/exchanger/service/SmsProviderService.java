@@ -78,11 +78,12 @@ public class SmsProviderService implements ISmsProviderService {
 			list.addAll(tlist);
 		}
 		
-		rateLimiter = null;
 		return list;
 	}
 	
-	// 默认限流计流数
+	/**
+	 * 默认限流计流数
+	 */
 	private static final Integer DEFAULT_RATE_LIMITER_TIMES = 1;
 	
 	/**
@@ -121,11 +122,8 @@ public class SmsProviderService implements ISmsProviderService {
         }
 		
 		ProtocolType protocolType = ProtocolType.parse(protocol);
-		if(protocolType == null || protocolType == ProtocolType.HTTP || protocolType == ProtocolType.WEBSERVICE) {
-            return false;
-        }
-		
-		return true;
+
+		return !(protocolType == null || protocolType == ProtocolType.HTTP || protocolType == ProtocolType.WEBSERVICE);
 	}
 	
 	/**
@@ -139,8 +137,15 @@ public class SmsProviderService implements ISmsProviderService {
 	 */
 	private List<ProviderSendResponse> submitData2Gateway(SmsPassageParameter parameter, String mobile, String content,
 			String extNumber) {
+
+		ProtocolType pt = ProtocolType.parse(parameter.getProtocol());
+		if(pt == null) {
+			logger.warn("协议类型未解析，跳过");
+			return null;
+		}
+
 		List<ProviderSendResponse> list = null;
-		switch (ProtocolType.parse(parameter.getProtocol())) {
+		switch (pt) {
 		case HTTP: {
 			list = httpResolver.post(parameter, mobile, content, extNumber);
 			break;
@@ -192,9 +197,9 @@ public class SmsProviderService implements ISmsProviderService {
 		int groupSize = (totalMobileSize % groupMobileSize == 0) ? (totalMobileSize / groupMobileSize) : (totalMobileSize / groupMobileSize + 1);
 
 		List<String[]> mobileData = new ArrayList<>(groupSize);
-		StringBuilder builder = null;
-		String[] report = null;
-		int index = 0;
+		StringBuilder builder;
+		String[] report;
+		int index;
 		for (int i = 0; i < groupSize; i++) {
 			int roundSize = 0;
 			report = new String[2];
