@@ -29,7 +29,7 @@ import com.huawei.insa2.util.Args;
 public class SmsProxyManageService implements ISmsProxyManageService {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	private final Object lock = new Object();
+//	private final Object lock = new Object();
 
 	@Autowired
 	private CmppProxySender cmppProxySender;
@@ -41,15 +41,15 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	/**
 	 * CMPP/SGIP/SMGP通道代理发送实例
 	 */
-	public volatile static Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
+	public static Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
 	//
 
 	/**
 	 * 通道PROXY 发送错误次数计数器 add by 20170903
 	 */
-	private volatile static Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
+	private static Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
 	
-	public volatile static Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS = new HashMap<>();
+	public static Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS = new HashMap<>();
 
 	/**
 	 * 默认限流速度
@@ -121,39 +121,37 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 			return;
 		}
 
-		synchronized (lock) {
-			Object proxy = null;
-			switch (protocolType) {
-			case CMPP2:
-			case CMPP3: {
-				proxy = loadCmppManageProxy(passageId, tparameter.getCmppConnectAttrs());
-				break;
-			}
-			case SGIP: {
-				proxy = loadSgipManageProxy(passageId, tparameter.getSgipConnectAttrs());
-				break;
-			}
-			case SMGP: {
-				proxy = loadSmgpManageProxy(passageId, tparameter.getSmgpConnectAttrs());
-				break;
-			}
-			default:
-				logger.warn("通道协议类型为：{} 无需加载通道代理", protocolType.name());
-				return;
-			}
-
-			if (proxy == null) {
-				return;
-			}
-
-			// 加载通道代理类信息
-			GLOBAL_PROXIES.put(passageId, proxy);
-
-			// 加载限速控制器
-			RateLimiter limiter = RateLimiter.create((speed == null || speed == 0) ? DEFAULT_LIMIT_SPEED : speed);
-			GLOBAL_RATE_LIMITERS.put(passageId, limiter);
-
+		Object proxy = null;
+		switch (protocolType) {
+		case CMPP2:
+		case CMPP3: {
+			proxy = loadCmppManageProxy(passageId, tparameter.getCmppConnectAttrs());
+			break;
 		}
+		case SGIP: {
+			proxy = loadSgipManageProxy(passageId, tparameter.getSgipConnectAttrs());
+			break;
+		}
+		case SMGP: {
+			proxy = loadSmgpManageProxy(passageId, tparameter.getSmgpConnectAttrs());
+			break;
+		}
+		default:
+			logger.warn("通道协议类型为：{} 无需加载通道代理", protocolType.name());
+			return;
+		}
+
+		if (proxy == null) {
+			return;
+		}
+
+		// 加载通道代理类信息
+		GLOBAL_PROXIES.put(passageId, proxy);
+
+		// 加载限速控制器
+		RateLimiter limiter = RateLimiter.create((speed == null || speed == 0) ? DEFAULT_LIMIT_SPEED : speed);
+		GLOBAL_RATE_LIMITERS.put(passageId, limiter);
+
 	}
 
 	/**
@@ -375,26 +373,26 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	
 	@Override
 	public void plusSendErrorTimes(Integer passageId) {
-		Integer counter = GLOBAL_PROXIES_ERROR_COUNTER.get(passageId);
-		if(counter == null) {
-			counter = 0;
-		}
-		
-		logger.info("当前通道 passageId : {} 代理失败次数 {}", passageId, counter+1);
 		synchronized (GLOBAL_PROXIES_ERROR_COUNTER) {
+		    Integer counter = GLOBAL_PROXIES_ERROR_COUNTER.get(passageId);
+	        if(counter == null) {
+	            counter = 0;
+	        }
+	        
+	        logger.info("当前通道 passageId : {} 代理失败次数 {}", passageId, counter+1);
 		    GLOBAL_PROXIES_ERROR_COUNTER.put(passageId, counter+1);
         }
 	}
 	
 	@Override
 	public void clearSendErrorTimes(Integer passageId) {
-		Integer counter = GLOBAL_PROXIES_ERROR_COUNTER.get(passageId);
-		if(counter == null) {
-			return;
-		}
-		
 		synchronized (GLOBAL_PROXIES_ERROR_COUNTER) {
-		    GLOBAL_PROXIES_ERROR_COUNTER.remove(passageId);
+		    Integer counter = GLOBAL_PROXIES_ERROR_COUNTER.get(passageId);
+	        if(counter == null) {
+	            return;
+	        }
+	        
+		    GLOBAL_PROXIES_ERROR_COUNTER.put(passageId, 0);
         }
 	}
 

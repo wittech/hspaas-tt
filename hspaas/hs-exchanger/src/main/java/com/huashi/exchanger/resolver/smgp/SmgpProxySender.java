@@ -51,6 +51,8 @@ public class SmgpProxySender {
 
 	@Autowired
 	private ISmsProxyManageService smsProxyManageService;
+	
+	private final Object lock = new Object();
 
 	/**
 	 * 对于Proxy分发短信的接收
@@ -339,16 +341,21 @@ public class SmgpProxySender {
 	 * @return
 	 */
 	public SmgpManageProxy getSmgpManageProxy(SmsPassageParameter parameter) {
-		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-            return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-        }
-		
-		boolean isOk = smsProxyManageService.startProxy(parameter);
-		if (!isOk) {
-            return null;
-        }
+	    synchronized (lock) {
+	        if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+	            return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+	        }
+	        
+	        boolean isOk = smsProxyManageService.startProxy(parameter);
+	        if (!isOk) {
+	            return null;
+	        }
+	        
+	        // 重新初始化后将错误计数器归零
+	        smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
 
-		return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+	        return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+	    }
 	}
 
 	/**

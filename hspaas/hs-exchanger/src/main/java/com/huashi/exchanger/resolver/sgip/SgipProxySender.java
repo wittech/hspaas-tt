@@ -51,6 +51,8 @@ public class SgipProxySender {
 
 	@Autowired
 	private ISmsProxyManageService smsProxyManageService;
+	
+	private final Object lock = new Object();
 
 	private final AtomicInteger LONG_MESSGE_CONTENT_COUNTER = new AtomicInteger(1);
 
@@ -359,16 +361,21 @@ public class SgipProxySender {
 	 * @return
 	 */
 	public SgipManageProxy getSgipManageProxy(SmsPassageParameter parameter) {
-		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-            return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-        }
+	    synchronized(lock) {
+	        if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+	            return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+	        }
 
-		boolean isOk = smsProxyManageService.startProxy(parameter);
-		if (!isOk) {
-            return null;
-        }
+	        boolean isOk = smsProxyManageService.startProxy(parameter);
+	        if (!isOk) {
+	            return null;
+	        }
+	        
+	        // 重新初始化后将错误计数器归零
+	        smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
 
-		return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+	        return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+	    }
 	}
 
 	/**

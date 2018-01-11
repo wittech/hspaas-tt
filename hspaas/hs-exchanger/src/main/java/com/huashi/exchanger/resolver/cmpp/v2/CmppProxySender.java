@@ -56,7 +56,9 @@ public class CmppProxySender {
 
 	@Autowired
 	private ISmsProxyManageService smsProxyManageService;
-
+	
+	private final Object lock = new Object();
+	
 	/**
 	 * 对于Proxy分发短信的接收
 	 * 
@@ -435,16 +437,21 @@ public class CmppProxySender {
 	 * @return
 	 */
 	public CmppManageProxy getCmppManageProxy(SmsPassageParameter parameter) {
-		if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-            return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-        }
+	   synchronized (lock) {
+	       if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+               return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+           }
 
-		boolean isOk = smsProxyManageService.startProxy(parameter);
-		if (!isOk) {
-            return null;
-        }
+           boolean isOk = smsProxyManageService.startProxy(parameter);
+           if (!isOk) {
+               return null;
+           }
+           
+           // 重新初始化后将错误计数器归零
+           smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
 
-		return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+           return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+	   }
 	}
 
 	/**

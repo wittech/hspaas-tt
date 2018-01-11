@@ -65,7 +65,7 @@ public class TParameter extends HashMap<String, Object> implements Map<String, O
 		// 心跳信息发送间隔时间(单位：秒)
 		attrs.put("heartbeat-interval", getOrDefault("heartbeat_interval", 10));
 		// 连接中断时重连间隔时间(单位：秒)
-		attrs.put("reconnect-interval", getOrDefault("reconnect_interval", 10));
+		attrs.put("reconnect-interval", getOrDefault("reconnect_interval", 30));
 		// 需要重连时，连续发出心跳而没有接收到响应的个数（单位：个)
 		attrs.put("heartbeat-noresponseout", getOrDefault("heartbeat_noresponseout", 5));
 		// 操作超时时间(单位：秒)
