@@ -36,7 +36,9 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 @Component
 public class XinchiPassageResolver extends AbstractPassageResolver {
     
-    // 默认前置签名
+    /**
+     * 默认前置签名
+     */
     private static final String DEFAULT_SIGNATURE_POSITION = "FRONT";
 
     @Override

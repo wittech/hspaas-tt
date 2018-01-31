@@ -140,7 +140,7 @@ public class SmsProviderService implements ISmsProviderService {
 
 		ProtocolType pt = ProtocolType.parse(parameter.getProtocol());
 		if(pt == null) {
-			logger.warn("协议类型未解析，跳过");
+			logger.warn("协议类型不匹配，跳过");
 			return null;
 		}
 
@@ -168,7 +168,7 @@ public class SmsProviderService implements ISmsProviderService {
 			break;
 		}
 		default:
-			logger.warn("协议类型未解析，跳过");
+			logger.warn("协议类型不匹配，跳过");
 			break;
 		}
 		

@@ -102,7 +102,7 @@ public class DianjiPassageResolver extends AbstractPassageResolver{
         }
 		List<ProviderSendResponse> list = new ArrayList<>();
 		List<String> l = JSON.parseArray(o.toString(), String.class);
-		ProviderSendResponse response = null;
+		ProviderSendResponse response;
 		for (String s : l) {
 			Map<String, Object> map = JSON.parseObject(s, new TypeReference<Map<String, Object>>(){});
 			response = new ProviderSendResponse();

@@ -7,11 +7,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import com.alibaba.fastjson.JSON;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.CMCP;
+import com.huashi.exchanger.config.RabbitMqConfiguration;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.cmpp.constant.CmppConstant;
 import com.huashi.exchanger.resolver.sgip.constant.SgipConstant;
@@ -52,6 +56,9 @@ public class SmgpProxySender {
 	@Autowired
 	private ISmsProxyManageService smsProxyManageService;
 	
+	@Resource
+	private RabbitTemplate rabbitTemplate;
+
 	private final Object lock = new Object();
 
 	/**
@@ -61,8 +68,8 @@ public class SmgpProxySender {
 	 */
 	public void doProcessDeliverMessage(SMGPDeliverMessage msg) {
 		if (msg == null) {
-            return;
-        }
+			return;
+		}
 
 		if (msg.getIsReport() == 0) {
 			// 上行报告
@@ -73,7 +80,8 @@ public class SmgpProxySender {
 		}
 	}
 
-	private final AtomicInteger LONG_MESSGE_CONTENT_COUNTER = new AtomicInteger(1);
+	private final AtomicInteger LONG_MESSGE_CONTENT_COUNTER = new AtomicInteger(
+			1);
 
 	/**
 	 * 短信内容转换为 字节数。普通短信 GBK编码。长短信 UCS2编码
@@ -117,7 +125,9 @@ public class SmgpProxySender {
 				tp_udhiHead[5] = (byte) (i + 1);
 				byte[] msgContent;
 				if (i != messageUCS2Count - 1) {// 不为最后一条
-					msgContent = byteAdd(tp_udhiHead, messageUCS2,
+					msgContent = byteAdd(
+							tp_udhiHead,
+							messageUCS2,
 							i * (SmgpConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
 							(i + 1)
 									* (SmgpConstant.MAX_MESSAGE_UCS2_LENGTH - 6));
@@ -172,12 +182,13 @@ public class SmgpProxySender {
 			TParameter tparameter = RequestTemplateHandler.parse(parameter
 					.getParams());
 			if (MapUtils.isEmpty(tparameter)) {
-                throw new RuntimeException("SMGP 参数信息为空");
-            }
+				throw new RuntimeException("SMGP 参数信息为空");
+			}
 
 			SmgpManageProxy smgpManageProxy = getSmgpManageProxy(parameter);
 			if (smgpManageProxy == null) {
-				logger.error("SMGP 代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile, content, extNumber);
+				logger.error("SMGP 代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile,
+						content, extNumber);
 
 				return null;
 			}
@@ -187,37 +198,46 @@ public class SmgpProxySender {
 					+ (StringUtils.isEmpty(extNumber) ? "" : extNumber);
 
 			// 获取发送回执信息
-			SMGPSubmitRespMessage submitRepMsg = getSMGPSubmitResponseMessage(tparameter.getString("spid"), 
-					StringUtils.isEmpty(tparameter.getString("msg_fmt")) ? CmppConstant.MSG_FMT_GBK : Integer.parseInt(tparameter.getString("msg_fmt")),
-							StringUtils.isEmpty(tparameter.getString("mobile")) ? "" : tparameter.getString("mobile"),
-					srcTerminalId, mobile, content, "", smgpManageProxy);
-			
+			SMGPSubmitRespMessage submitRepMsg = getSMGPSubmitResponseMessage(
+					tparameter.getString("spid"),
+					StringUtils.isEmpty(tparameter.getString("msg_fmt")) ? CmppConstant.MSG_FMT_GBK
+							: Integer.parseInt(tparameter.getString("msg_fmt")),
+					StringUtils.isEmpty(tparameter.getString("mobile")) ? ""
+							: tparameter.getString("mobile"), srcTerminalId,
+					mobile, content, "", smgpManageProxy);
+
 			List<ProviderSendResponse> list = new ArrayList<>();
 			ProviderSendResponse response = new ProviderSendResponse();
-			if(submitRepMsg == null) {
+			if (submitRepMsg == null) {
 				logger.error("SMGPSubmitRespMessage 网关提交信息为空");
-				smsProxyManageService.plusSendErrorTimes(parameter.getPassageId());
+				smsProxyManageService.plusSendErrorTimes(parameter
+						.getPassageId());
 				return null;
 			}
-			
-			if (submitRepMsg.getStatus() == MessageSubmitStatus.SUCCESS.getCode()) {
+
+			if (submitRepMsg.getStatus() == MessageSubmitStatus.SUCCESS
+					.getCode()) {
 				// 发送成功清空
-				smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
-				
+				smsProxyManageService.clearSendErrorTimes(parameter
+						.getPassageId());
+
 				response.setMobile(mobile);
 				response.setStatusCode(submitRepMsg.getStatus() + "");
-				response.setSid(submitRepMsg.bytesToHexString(submitRepMsg.getMsgId()));
+				response.setSid(submitRepMsg.bytesToHexString(submitRepMsg
+						.getMsgId()));
 				response.setSuccess(true);
-				response.setRemark(String.format("{msgId:%s, sequenceId:%d}", response.getSid(), submitRepMsg.getSequenceId()));
+				response.setRemark(String.format("{msgId:%s, sequenceId:%d}",
+						response.getSid(), submitRepMsg.getSequenceId()));
 
 				list.add(response);
 			} else {
 				response.setMobile(mobile);
 				response.setStatusCode(submitRepMsg.getStatus() + "");
-				response.setSid(submitRepMsg.bytesToHexString(submitRepMsg.getMsgId()));
+				response.setSid(submitRepMsg.bytesToHexString(submitRepMsg
+						.getMsgId()));
 				response.setSuccess(false);
 				response.setRemark(submitRepMsg.getSequenceId() + "");
-				
+
 				list.add(response);
 			}
 
@@ -225,7 +245,7 @@ public class SmgpProxySender {
 		} catch (Exception e) {
 			// 累加发送错误次数
 			smsProxyManageService.plusSendErrorTimes(parameter.getPassageId());
-			
+
 			logger.error("SMGP发送失败", e);
 			throw new RuntimeException("SMGP发送失败");
 		}
@@ -240,7 +260,7 @@ public class SmgpProxySender {
 	 * @param msgFmt
 	 *            消息编码方式（默认GBK）
 	 * @param chargeNumber
-	 * 			  计费手机号码
+	 *            计费手机号码
 	 * @param srcTerminalId
 	 *            接入号（包含用于配置的扩展号码）
 	 * @param mobile
@@ -253,8 +273,9 @@ public class SmgpProxySender {
 	 * @throws IOException
 	 */
 	private SMGPSubmitRespMessage getSMGPSubmitResponseMessage(String spid,
-			int msgFmt, String chargeNumber, String srcTerminalId, String mobile, String content,
-			String reserve, SmgpManageProxy smgpManageProxy) throws IOException {
+			int msgFmt, String chargeNumber, String srcTerminalId,
+			String mobile, String content, String reserve,
+			SmgpManageProxy smgpManageProxy) throws IOException {
 
 		// 存活有效期（2天）
 		Date validTime = new Date(System.currentTimeMillis() + (long) 0xa4cb800);
@@ -283,23 +304,25 @@ public class SmgpProxySender {
 					chargeNumber,
 					srcTerminalId,
 					mobile.split(MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR),
-					contentList.get(index - 1),
-					reserve);
+					contentList.get(index - 1), reserve);
 
-			SMGPSubmitRespMessage repMsg = (SMGPSubmitRespMessage) smgpManageProxy.send(submitMsg);
+			SMGPSubmitRespMessage repMsg = (SMGPSubmitRespMessage) smgpManageProxy
+					.send(submitMsg);
 			if (index == 1) {
 				// 以长短信 拆分发送时，目前状态报告的 msgid 是 拆分后第一条的 msgid
 				submitRepMsg = repMsg;
 			} else if (submitRepMsg == null) {
 				submitRepMsg = repMsg;
 			}
-			
+
 			if (submitRepMsg == null) {
-				logger.error(" SmgpSubmitRepMessage null, submitMsg : {}", submitMsg);
-		    }else if (submitRepMsg.getStatus() != 0) {
-				logger.error(" submitRepMsg result :{}, index : {}, content: {}, mobile : {}", submitRepMsg.getStatus(), index 
-						,content, mobile);
-		    }
+				logger.error(" SmgpSubmitRepMessage null, submitMsg : {}",
+						submitMsg);
+			} else if (submitRepMsg.getStatus() != 0) {
+				logger.error(
+						" submitRepMsg result :{}, index : {}, content: {}, mobile : {}",
+						submitRepMsg.getStatus(), index, content, mobile);
+			}
 
 		}
 
@@ -308,28 +331,33 @@ public class SmgpProxySender {
 
 	/**
 	 * 
-	   * TODO 组装SMGP提交信息
-	   * 
-	   * @param tpUdhi
-	   * @param msgFmt
-	   * @param spid
-	   * @param validTime
-	   * @param atTime
-	   * @param chargeNumber
-	   * 		扣费号码
-	   * @param srcTerminalId
-	   * @param mobiles
-	   * @param msgContent
-	   * @param reserve
-	   * @return
+	 * TODO 组装SMGP提交信息
+	 * 
+	 * @param tpUdhi
+	 * @param msgFmt
+	 * @param spid
+	 * @param validTime
+	 * @param atTime
+	 * @param chargeNumber
+	 *            扣费号码
+	 * @param srcTerminalId
+	 * @param mobiles
+	 * @param msgContent
+	 * @param reserve
+	 * @return
 	 */
-	private SMGPSubmitMessage getSMGPSubmitMessage(int tpUdhi, int msgFmt, String spid, Date validTime, Date atTime,String chargeNumber, 
-			String srcTerminalId, String[] mobiles, byte[] msgContent, String reserve) {
-		
-		return new SMGPSubmitMessage(SmgpConstant.MSG_TYPE, SmgpConstant.NEED_REPORT,SmgpConstant.PRIORITY, spid, SmgpConstant.FEE_TYPE,
-				SmgpConstant.FEE_CODE, SmgpConstant.FIXED_FEE, msgFmt, validTime, atTime, srcTerminalId, chargeNumber, 
-				mobiles, msgContent, tpUdhi, reserve);
-		
+	private SMGPSubmitMessage getSMGPSubmitMessage(int tpUdhi, int msgFmt,
+			String spid, Date validTime, Date atTime, String chargeNumber,
+			String srcTerminalId, String[] mobiles, byte[] msgContent,
+			String reserve) {
+
+		return new SMGPSubmitMessage(SmgpConstant.MSG_TYPE,
+				SmgpConstant.NEED_REPORT, SmgpConstant.PRIORITY, spid,
+				SmgpConstant.FEE_TYPE, SmgpConstant.FEE_CODE,
+				SmgpConstant.FIXED_FEE, msgFmt, validTime, atTime,
+				srcTerminalId, chargeNumber, mobiles, msgContent, tpUdhi,
+				reserve);
+
 	}
 
 	/**
@@ -341,21 +369,23 @@ public class SmgpProxySender {
 	 * @return
 	 */
 	public SmgpManageProxy getSmgpManageProxy(SmsPassageParameter parameter) {
-	    synchronized (lock) {
-	        if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-	            return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-	        }
-	        
-	        boolean isOk = smsProxyManageService.startProxy(parameter);
-	        if (!isOk) {
-	            return null;
-	        }
-	        
-	        // 重新初始化后将错误计数器归零
-	        smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
+		synchronized (lock) {
+			if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+				return (SmgpManageProxy) SmsProxyManageService
+						.getManageProxy(parameter.getPassageId());
+			}
 
-	        return (SmgpManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-	    }
+			boolean isOk = smsProxyManageService.startProxy(parameter);
+			if (!isOk) {
+				return null;
+			}
+
+			// 重新初始化后将错误计数器归零
+			smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
+
+			return (SmgpManageProxy) SmsProxyManageService
+					.getManageProxy(parameter.getPassageId());
+		}
 	}
 
 	/**
@@ -367,12 +397,12 @@ public class SmgpProxySender {
 	 */
 	private void mtDeliver(SMGPDeliverMessage report) {
 		if (report == null) {
-            return;
-        }
+			return;
+		}
 
 		try {
 			logger.info("SMGP状态报告数据: {}", report);
-			
+
 			// 发送时手机号码拼接86，回执需去掉86前缀
 			String mobile = report.getSrcTermID();
 			if (mobile != null && mobile.startsWith("86")) {
@@ -386,13 +416,16 @@ public class SmgpProxySender {
 			response.setMobile(mobile);
 			response.setCmcp(CMCP.local(response.getMobile()).getCode());
 			response.setStatus((StringUtils.isNotEmpty(report.getErrorCode())
-					&& SmgpConstant.SMGP_MT_STATUS_SUCCESS_CODE.equalsIgnoreCase(report.getErrorCode()) 
-					? DeliverStatus.SUCCESS.getValue() : DeliverStatus.FAILED.getValue()));
+					&& SmgpConstant.SMGP_MT_STATUS_SUCCESS_CODE
+							.equalsIgnoreCase(report.getErrorCode()) ? DeliverStatus.SUCCESS
+					.getValue() : DeliverStatus.FAILED.getValue()));
 
 			// edit by zhengying 20171208 电信成功码转义
-			response.setStatusCode(DeliverStatus.SUCCESS.getValue() == response.getStatus() ? 
-					SmgpConstant.COMMON_MT_STATUS_SUCCESS_CODE : String.format("%s:%s", report.getStat(), report.getErrorCode()));
-			
+			response.setStatusCode(DeliverStatus.SUCCESS.getValue() == response
+					.getStatus() ? SmgpConstant.COMMON_MT_STATUS_SUCCESS_CODE
+					: String.format("%s:%s", report.getStat(),
+							report.getErrorCode()));
+
 			response.setDeliverTime(DateUtil.getNow());
 			response.setCreateTime(new Date());
 			response.setRemark(String.format("DestnationId:%s,RecvTime:%s",
@@ -401,8 +434,10 @@ public class SmgpProxySender {
 			list.add(response);
 
 			if (CollectionUtils.isNotEmpty(list)) {
-                smsMtDeliverService.doFinishDeliver(list);
-            }
+				// 发送异步消息
+				rabbitTemplate.convertAndSend(
+						RabbitMqConfiguration.MQ_SMS_MT_WAIT_RECEIPT, list);
+			}
 
 			// 解析返回结果并返回
 		} catch (Exception e) {
@@ -419,8 +454,8 @@ public class SmgpProxySender {
 	 */
 	public void moReceive(SMGPDeliverMessage report) {
 		if (report == null) {
-            return;
-        }
+			return;
+		}
 
 		try {
 
@@ -433,7 +468,7 @@ public class SmgpProxySender {
 			if (mobile != null && mobile.startsWith("86")) {
 				mobile = mobile.substring(2);
 			}
-			
+
 			SmsMoMessageReceive response = new SmsMoMessageReceive();
 			response.setPassageId(null);
 			response.setMsgId(report.bytesToHexString(report.getMsgId()));
@@ -452,27 +487,29 @@ public class SmgpProxySender {
 			list.add(response);
 
 			if (CollectionUtils.isNotEmpty(list)) {
-                smsMoMessageService.doFinishReceive(list);
-            }
+				rabbitTemplate.convertAndSend(
+						RabbitMqConfiguration.MQ_SMS_MO_RECEIVE, list);
+			}
 
 		} catch (Exception e) {
 			logger.error("SMGP上行解析失败 {}", JSON.toJSONString(report), e);
 			throw new RuntimeException("SMGP上行解析失败");
 		}
 	}
-	
+
 	/***
 	 * 
-	   * TODO 网关断开下发通知
-	   * 
-	   * @param passageId
+	 * TODO 网关断开下发通知
+	 * 
+	 * @param passageId
 	 */
 	public void onTerminate(Integer passageId) {
 		logger.info("Smgp onTerminate, passageId : {} ", passageId);
 		Object myProxy = SmsProxyManageService.getManageProxy(passageId);
-		if(myProxy != null){
-			((SmgpManageProxy)myProxy).close();
-			logger.info("myProxy.getConnState() : {}, passageId : {} ", ((SmgpManageProxy)myProxy).getConnState(), passageId);
+		if (myProxy != null) {
+			((SmgpManageProxy) myProxy).close();
+			logger.info("myProxy.getConnState() : {}, passageId : {} ",
+					((SmgpManageProxy) myProxy).getConnState(), passageId);
 			SmsProxyManageService.GLOBAL_PROXIES.remove(passageId);
 		}
 	}

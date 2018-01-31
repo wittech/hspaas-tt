@@ -104,14 +104,14 @@ public class LanjinglianzhongPassageResolver extends AbstractPassageResolver{
         }
 		
 		String[] report = result.split(":");
-		String sid = null;
+		String sid;
 		List<ProviderSendResponse> list = new ArrayList<>();
 		if(StringUtils.isNotEmpty(report[0]) && successCode.equalsIgnoreCase(report[0])) {
 			// ok:mid:tele,tele（多个号码返回格式）
 			sid = report[1];
 			String[] mobiles = report[2].replaceAll("\n", "").split(",");
 			
-			ProviderSendResponse response = null;
+			ProviderSendResponse response;
 			for (String mobile : mobiles) {
 				response = new ProviderSendResponse();
 				response.setMobile(mobile);
@@ -125,7 +125,6 @@ public class LanjinglianzhongPassageResolver extends AbstractPassageResolver{
 		} else {
 			ProviderSendResponse response = new ProviderSendResponse();
 			response.setStatusCode(report[0]);
-			response.setSid(sid);
 			response.setSuccess(false);
 			response.setRemark(String.format("status:%s, error_msg:%s", report[0], report[1]));
 			
@@ -165,7 +164,7 @@ public class LanjinglianzhongPassageResolver extends AbstractPassageResolver{
 
 			List<SmsMtMessageDeliver> list = new ArrayList<>();
 
-			SmsMtMessageDeliver response = null;
+			SmsMtMessageDeliver response;
 			for(int i = 0; i< msgIds.length; i++) {
 				response = new SmsMtMessageDeliver();
 				response.setMsgId(msgIds[i]);

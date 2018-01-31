@@ -1,22 +1,5 @@
 package com.huashi.developer.prervice;
 
-import java.util.Date;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import org.apache.commons.collections.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessagePostProcessor;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.user.domain.UserBalance;
@@ -36,6 +19,21 @@ import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.task.context.TaskContext.TaskSubmitType;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.exception.QueueProcessException;
+import org.apache.commons.collections.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.support.CorrelationData;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * 
@@ -76,9 +74,7 @@ public class SmsPrervice {
 
 			long sid = doSubmitTask(task);
 			if (sid != 0L) {
-				{
-					return new SmsSendResponse(model.getTotalFee(), sid);
-				}
+				return new SmsSendResponse(model.getTotalFee(), sid);
 			}
 
 		} catch (QueueProcessException e) {
@@ -108,9 +104,7 @@ public class SmsPrervice {
 
 			long sid = doSubmitTask(task);
 			if (sid != 0L) {
-				{
-					return new SmsSendResponse(model.getTotalFee(), sid);
-				}
+				return new SmsSendResponse(model.getTotalFee(), sid);
 			}
 
 		} catch (QueueProcessException e) {
@@ -138,9 +132,7 @@ public class SmsPrervice {
 
 			long sid = doSubmitTask(task);
 			if (sid != 0L) {
-				{
-					return new SmsSendResponse(model.getTotalFee(), sid);
-				}
+				return new SmsSendResponse(model.getTotalFee(), sid);
 			}
 
 		} catch (QueueProcessException e) {

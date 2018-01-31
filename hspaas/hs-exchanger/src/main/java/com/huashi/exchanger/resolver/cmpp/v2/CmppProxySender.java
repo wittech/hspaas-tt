@@ -7,11 +7,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.RecoveryCallback;
 import org.springframework.retry.RetryCallback;
@@ -26,6 +29,7 @@ import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.CMCP;
+import com.huashi.exchanger.config.RabbitMqConfiguration;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.cmpp.constant.CmppConstant;
 import com.huashi.exchanger.service.ISmsProxyManageService;
@@ -56,9 +60,12 @@ public class CmppProxySender {
 
 	@Autowired
 	private ISmsProxyManageService smsProxyManageService;
-	
+
+	@Resource
+	private RabbitTemplate rabbitTemplate;
+
 	private final Object lock = new Object();
-	
+
 	/**
 	 * 对于Proxy分发短信的接收
 	 * 
@@ -66,13 +73,13 @@ public class CmppProxySender {
 	 */
 	public void doProcessDeliverMessage(CMPPMessage msg) {
 		CMPPDeliverMessage deliverMsg = (CMPPDeliverMessage) msg;
-//		logger.info("回执，{}", JSON.toJSONString(msg));
+		// logger.info("回执，{}", JSON.toJSONString(msg));
 		// deliverMsg.getRegisteredDeliver()等于0时，为上行短信；等于1时为状态报告
 		if (deliverMsg.getRegisteredDeliver() == 0) {
-            moReceive(deliverMsg);
-        } else {
-            mtDeliver(deliverMsg);
-        }
+			moReceive(deliverMsg);
+		} else {
+			mtDeliver(deliverMsg);
+		}
 	}
 
 	/**
@@ -114,8 +121,10 @@ public class CmppProxySender {
 		seq_id |= (bt[7] & mask);
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(month).append(date + 1).append((hour < 10) ? "0" + hour : hour)
-				.append(minute < 10 ? "0" + minute : minute).append(second < 10 ? "0" + second : second).append(Msg_Id)
+		sb.append(month).append(date + 1)
+				.append((hour < 10) ? "0" + hour : hour)
+				.append(minute < 10 ? "0" + minute : minute)
+				.append(second < 10 ? "0" + second : second).append(Msg_Id)
 				.append(seq_id);
 		return sb.toString();
 	}
@@ -132,7 +141,8 @@ public class CmppProxySender {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	private List<byte[]> getLongByte(String message, Integer feeByWords) throws UnsupportedEncodingException {
+	private List<byte[]> getLongByte(String message, Integer feeByWords)
+			throws UnsupportedEncodingException {
 		List<byte[]> list = new ArrayList<byte[]>();
 		byte[] messageUCS2 = message.getBytes("UnicodeBigUnmarked");
 		// int messageGBKLen = messageGBK.length;// 短信长度
@@ -142,12 +152,14 @@ public class CmppProxySender {
 			// 如果字节数大于 GBK，则使用UCS2编码以长短信发送
 			// byte[] messageUCS2 = message.getBytes("UnicodeBigUnmarked");
 			int messageUCS2Len = messageUCS2.length;
-			int yushu = messageUCS2Len % (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6);
+			int yushu = messageUCS2Len
+					% (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6);
 			int add = 0;
 			if (yushu > 0) {
 				add = 1;
 			}
-			int messageUCS2Count = messageUCS2Len / (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6) + add;// 长短信分为多少条发送
+			int messageUCS2Count = messageUCS2Len
+					/ (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6) + add;// 长短信分为多少条发送
 
 			byte[] tp_udhiHead = new byte[6];
 			tp_udhiHead[0] = 0x05;
@@ -164,11 +176,17 @@ public class CmppProxySender {
 				tp_udhiHead[5] = (byte) (i + 1);
 				byte[] msgContent;
 				if (i != messageUCS2Count - 1) {// 不为最后一条
-					msgContent = byteAdd(tp_udhiHead, messageUCS2, i * (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
-							(i + 1) * (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6), i, feeByWords);
+					msgContent = byteAdd(
+							tp_udhiHead,
+							messageUCS2,
+							i * (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
+							(i + 1)
+									* (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
+							i, feeByWords);
 					list.add(msgContent);
 				} else {
-					msgContent = byteAdd(tp_udhiHead, messageUCS2, i * (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
+					msgContent = byteAdd(tp_udhiHead, messageUCS2, i
+							* (CmppConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
 							messageUCS2Len, i, feeByWords);
 					list.add(msgContent);
 				}
@@ -176,29 +194,32 @@ public class CmppProxySender {
 				// String(msgContent,"UnicodeBigUnmarked"));
 			}
 		} else {
-			if(isSignatureBelongtoPointCustomer(feeByWords)){
-				list.add(message.substring(UserBalanceConstant.WORDS_SIZE_PER_NUM-feeByWords).getBytes("GBK"));
-			}else{
+			if (isSignatureBelongtoPointCustomer(feeByWords)) {
+				list.add(message.substring(
+						UserBalanceConstant.WORDS_SIZE_PER_NUM - feeByWords)
+						.getBytes("GBK"));
+			} else {
 				list.add(message.getBytes("GBK"));
 			}
 
 		}
 		return list;
 	}
-	
+
 	/**
 	 * 
-	   * TODO 是否为一客一签模式
-	   * 
-	   * @param feeByWords
-	   * @return
+	 * TODO 是否为一客一签模式
+	 * 
+	 * @param feeByWords
+	 * @return
 	 */
 	private static boolean isSignatureBelongtoPointCustomer(Integer feeByWords) {
-		return feeByWords != null && feeByWords != UserBalanceConstant.WORDS_SIZE_PER_NUM;
+		return feeByWords != null
+				&& feeByWords != UserBalanceConstant.WORDS_SIZE_PER_NUM;
 	}
 
-	private byte[] byteAdd(byte[] tpUdhiHead, byte[] messageUCS2, int i, int j, int index, Integer feeByWords)
-			throws UnsupportedEncodingException {
+	private byte[] byteAdd(byte[] tpUdhiHead, byte[] messageUCS2, int i, int j,
+			int index, Integer feeByWords) throws UnsupportedEncodingException {
 
 		// 如果为一客一签并且为第一条短信则预留签名字节数
 		if (isSignatureBelongtoPointCustomer(feeByWords) && index == 0) {
@@ -231,51 +252,78 @@ public class CmppProxySender {
 	 *            短信内容
 	 * @return
 	 */
-	public List<ProviderSendResponse> send(SmsPassageParameter parameter, String extNumber, String mobile,
-			String content) {
+	public List<ProviderSendResponse> send(SmsPassageParameter parameter,
+			String extNumber, String mobile, String content) {
 		try {
-			TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
-			if (MapUtils.isEmpty(tparameter)) {
-                throw new RuntimeException("CMPP 参数信息为空");
-            }
 
+			long t1 = System.currentTimeMillis();
+			TParameter tparameter = RequestTemplateHandler.parse(parameter
+					.getParams());
+			if (MapUtils.isEmpty(tparameter)) {
+				throw new RuntimeException("CMPP 参数信息为空");
+			}
+
+			long t2 = System.currentTimeMillis();
+
+			logger.info("==============t2-t1=" + (t2 - t1));
 			CmppManageProxy cmppManageProxy = getCmppManageProxy(parameter);
 			if (cmppManageProxy == null) {
-				logger.error("CMPP代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile, content, extNumber);
+				logger.error("CMPP代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile,
+						content, extNumber);
 
 				return null;
 			}
+
+			long t3 = System.currentTimeMillis();
+			logger.info("==============t3-t2=" + (t3 - t2));
 
 			// 接入号码（如果扩展号码不为空，则加入扩展号码）
 			String srcTerminalId = tparameter.getString("src_terminal_id")
 					+ (StringUtils.isEmpty(extNumber) ? "" : extNumber);
 
 			// 获取发送回执信息
-			CMPPSubmitRepMessage submitRepMsg = getCMPPSubmitResponseMessage(tparameter.getString("service_id"),
-					tparameter.getString("spid"), StringUtils.isEmpty(tparameter.getString("msg_fmt")) ? CmppConstant.MSG_FMT_GBK : Integer.parseInt(tparameter.getString("msg_fmt")),
-					StringUtils.isEmpty(tparameter.getString("mobile")) ? "000" : tparameter.getString("mobile"),
-					srcTerminalId, mobile, content, "", cmppManageProxy, parameter.getFeeByWords());
-			
-			if(submitRepMsg == null) {
+			CMPPSubmitRepMessage submitRepMsg = getCMPPSubmitResponseMessage(
+					tparameter.getString("service_id"),
+					tparameter.getString("spid"),
+					StringUtils.isEmpty(tparameter.getString("msg_fmt")) ? CmppConstant.MSG_FMT_GBK
+							: Integer.parseInt(tparameter.getString("msg_fmt")),
+					StringUtils.isEmpty(tparameter.getString("mobile")) ? "000"
+							: tparameter.getString("mobile"), srcTerminalId,
+					mobile, content, "", cmppManageProxy, parameter
+							.getFeeByWords());
+
+			long t4 = System.currentTimeMillis();
+			logger.info("==============t4-t3=" + (t4 - t3));
+
+			if (submitRepMsg == null) {
 				logger.error("CMPPSubmitRepMessage 网关提交信息为空");
-				smsProxyManageService.plusSendErrorTimes(parameter.getPassageId());
+				smsProxyManageService.plusSendErrorTimes(parameter
+						.getPassageId());
 				return null;
 			}
 
 			List<ProviderSendResponse> list = new ArrayList<>();
 			ProviderSendResponse response = new ProviderSendResponse();
-			
-			if (submitRepMsg.getResult() == MessageSubmitStatus.SUCCESS.getCode()) {
+
+			if (submitRepMsg.getResult() == MessageSubmitStatus.SUCCESS
+					.getCode()) {
 				// 发送成功清空
-				smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
-				
+				smsProxyManageService.clearSendErrorTimes(parameter
+						.getPassageId());
+
 				response.setMobile(mobile);
 				response.setStatusCode(submitRepMsg.getResult() + "");
 				response.setSid(getMsgId(submitRepMsg.getMsgId()));
 				response.setSuccess(true);
-				response.setRemark(String.format("{msgId:%s, sequenceId:%d, commandId:%d}", response.getSid(),
-						submitRepMsg.getSequenceId(), submitRepMsg.getCommandId()));
+				response.setRemark(String.format(
+						"{msgId:%s, sequenceId:%d, commandId:%d}",
+						response.getSid(), submitRepMsg.getSequenceId(),
+						submitRepMsg.getCommandId()));
 
+				long t5 = System.currentTimeMillis();
+
+				logger.info("==============t5-t4=" + (t5 - t4));
+				logger.info("==============t5-t1=" + (t5 - t1));
 				list.add(response);
 			} else {
 				response.setMobile(mobile);
@@ -291,7 +339,7 @@ public class CmppProxySender {
 		} catch (Exception e) {
 			// 累加发送错误次数
 			smsProxyManageService.plusSendErrorTimes(parameter.getPassageId());
-			
+
 			logger.error("CMPP发送失败", e);
 			throw new RuntimeException("CMCP发送失败");
 		}
@@ -305,18 +353,21 @@ public class CmppProxySender {
 
 		template.setRetryPolicy(policy);
 
-		String result = template.execute(new RetryCallback<String, Exception>() {
-			@Override
-            public String doWithRetry(RetryContext arg0) throws Exception {
-				System.out.println(arg0.getRetryCount());
-				throw new NullPointerException("nullPointerException");
-			}
-		}, new RecoveryCallback<String>() {
-			@Override
-            public String recover(RetryContext context) throws Exception {
-				return "recovery callback";
-			}
-		});
+		String result = template.execute(
+				new RetryCallback<String, Exception>() {
+					@Override
+					public String doWithRetry(RetryContext arg0)
+							throws Exception {
+						System.out.println(arg0.getRetryCount());
+						throw new NullPointerException("nullPointerException");
+					}
+				}, new RecoveryCallback<String>() {
+					@Override
+					public String recover(RetryContext context)
+							throws Exception {
+						return "recovery callback";
+					}
+				});
 		System.out.println(result);
 	}
 
@@ -345,9 +396,11 @@ public class CmppProxySender {
 	 * @return
 	 * @throws IOException
 	 */
-	private CMPPSubmitRepMessage getCMPPSubmitResponseMessage(String serviceId, String spid, int msgFmt,
-			String chargeNumber, String srcTerminalId, String mobile, String content, String reserve,
-			CmppManageProxy cmppManageProxy, Integer feeByWords) throws IOException {
+	private CMPPSubmitRepMessage getCMPPSubmitResponseMessage(String serviceId,
+			String spid, int msgFmt, String chargeNumber, String srcTerminalId,
+			String mobile, String content, String reserve,
+			CmppManageProxy cmppManageProxy, Integer feeByWords)
+			throws IOException {
 
 		// 存活有效期（2天）
 		Date validTime = new Date(System.currentTimeMillis() + (long) 0xa4cb800);
@@ -367,11 +420,22 @@ public class CmppProxySender {
 		CMPPSubmitMessage submitMsg = null;
 		CMPPSubmitRepMessage submitRepMsg = null;
 		for (int index = 1; index <= contentList.size(); index++) {
-			submitMsg = getCMPPSubmitMessage(contentList.size(), index, serviceId, tpUdhi, msgFmt, spid, validTime,
-					atTime, chargeNumber, srcTerminalId, mobile.split(MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR),
+			submitMsg = getCMPPSubmitMessage(
+					contentList.size(),
+					index,
+					serviceId,
+					tpUdhi,
+					msgFmt,
+					spid,
+					validTime,
+					atTime,
+					chargeNumber,
+					srcTerminalId,
+					mobile.split(MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR),
 					contentList.get(index - 1), reserve);
 
-			CMPPSubmitRepMessage repMsg = (CMPPSubmitRepMessage) cmppManageProxy.send(submitMsg);
+			CMPPSubmitRepMessage repMsg = (CMPPSubmitRepMessage) cmppManageProxy
+					.send(submitMsg);
 			if (index == 1) {
 				// 以长短信 拆分发送时，目前状态报告的 msgid 是 拆分后第一条的 msgid
 				submitRepMsg = repMsg;
@@ -380,10 +444,12 @@ public class CmppProxySender {
 			}
 
 			if (submitRepMsg == null) {
-				logger.error(" CMPPSubmitRepMessage null, submitMsg : {}", submitMsg);
+				logger.error(" CMPPSubmitRepMessage null, submitMsg : {}",
+						submitMsg);
 			} else if (submitRepMsg.getResult() != 0) {
-				logger.error(" submitRepMsg result :{}, index : {}, content: {}, mobile : {}", submitRepMsg.getResult(),
-						index, content, mobile);
+				logger.error(
+						" submitRepMsg result :{}, index : {}, content: {}, mobile : {}",
+						submitRepMsg.getResult(), index, content, mobile);
 			}
 		}
 
@@ -419,13 +485,18 @@ public class CmppProxySender {
 	 *            保留
 	 * @return
 	 */
-	private CMPPSubmitMessage getCMPPSubmitMessage(int pkTotal, int pkNumber, String serviceId, int tpUdhi, int msgFmt,
-			String spid, Date validTime, Date atTime, String chargeNumber, String srcTerminalId, String[] mobiles,
-			byte[] msgContent, String reserve) {
-		return new CMPPSubmitMessage(pkTotal, pkNumber, CmppConstant.REGISTERED_DELIVERY, CmppConstant.MSG_LEVEL,
-				serviceId, CmppConstant.FEE_USERTYPE, chargeNumber, CmppConstant.TP_PID, tpUdhi, msgFmt, spid,
-				CmppConstant.FEE_TYPE, CmppConstant.FEE_CODE, validTime, atTime, srcTerminalId, mobiles, msgContent,
-				reserve);
+	private CMPPSubmitMessage getCMPPSubmitMessage(int pkTotal, int pkNumber,
+			String serviceId, int tpUdhi, int msgFmt, String spid,
+			Date validTime, Date atTime, String chargeNumber,
+			String srcTerminalId, String[] mobiles, byte[] msgContent,
+			String reserve) {
+
+		return new CMPPSubmitMessage(pkTotal, pkNumber,
+				CmppConstant.REGISTERED_DELIVERY, CmppConstant.MSG_LEVEL,
+				serviceId, CmppConstant.FEE_USERTYPE, chargeNumber,
+				CmppConstant.TP_PID, tpUdhi, msgFmt, spid,
+				CmppConstant.FEE_TYPE, CmppConstant.FEE_CODE, validTime,
+				atTime, srcTerminalId, mobiles, msgContent, reserve);
 	}
 
 	/**
@@ -433,25 +504,26 @@ public class CmppProxySender {
 	 * TODO 获取CMPP 代理类
 	 * 
 	 * @param parameter
-	 * @param extNumber
 	 * @return
 	 */
-	public CmppManageProxy getCmppManageProxy(SmsPassageParameter parameter) {
-	   synchronized (lock) {
-	       if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-               return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-           }
+	private CmppManageProxy getCmppManageProxy(SmsPassageParameter parameter) {
+		synchronized (lock) {
+			if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+				return (CmppManageProxy) SmsProxyManageService
+						.getManageProxy(parameter.getPassageId());
+			}
 
-           boolean isOk = smsProxyManageService.startProxy(parameter);
-           if (!isOk) {
-               return null;
-           }
-           
-           // 重新初始化后将错误计数器归零
-           smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
+			boolean isOk = smsProxyManageService.startProxy(parameter);
+			if (!isOk) {
+				return null;
+			}
 
-           return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-	   }
+			// 重新初始化后将错误计数器归零
+			smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
+
+			return (CmppManageProxy) SmsProxyManageService
+					.getManageProxy(parameter.getPassageId());
+		}
 	}
 
 	/**
@@ -463,11 +535,11 @@ public class CmppProxySender {
 	 */
 	public void mtDeliver(CMPPDeliverMessage report) {
 		if (report == null) {
-            return;
-        }
+			return;
+		}
 
 		try {
-//			logger.info("CMPP状态报告数据: {}", report);
+			logger.info("CMPP状态报告数据: {}", report);
 
 			// 发送时手机号码拼接86，回执需去掉86前缀
 			String mobile = report.getSrcterminalId();
@@ -483,18 +555,21 @@ public class CmppProxySender {
 			response.setCmcp(CMCP.local(response.getMobile()).getCode());
 			response.setStatusCode(report.getStat());
 			response.setStatus((StringUtils.isNotEmpty(report.getStat())
-					&& CmppConstant.COMMON_MT_STATUS_SUCCESS_CODE.equalsIgnoreCase(report.getStat())
-							? DeliverStatus.SUCCESS.getValue() : DeliverStatus.FAILED.getValue()));
+					&& CmppConstant.COMMON_MT_STATUS_SUCCESS_CODE
+							.equalsIgnoreCase(report.getStat()) ? DeliverStatus.SUCCESS
+					.getValue() : DeliverStatus.FAILED.getValue()));
 			response.setDeliverTime(DateUtil.getNow());
 			response.setCreateTime(new Date());
-			response.setRemark(
-					String.format("DestnationId:%s,ServiceId:%s", report.getDestnationId(), report.getServiceId()));
+			response.setRemark(String.format("DestnationId:%s,ServiceId:%s",
+					report.getDestnationId(), report.getServiceId()));
 
 			list.add(response);
 
 			if (CollectionUtils.isNotEmpty(list)) {
-                smsMtDeliverService.doFinishDeliver(list);
-            }
+				// 发送异步消息
+				rabbitTemplate.convertAndSend(
+						RabbitMqConfiguration.MQ_SMS_MT_WAIT_RECEIPT, list);
+			}
 
 			// 解析返回结果并返回
 		} catch (Exception e) {
@@ -511,8 +586,8 @@ public class CmppProxySender {
 	 */
 	public void moReceive(CMPPDeliverMessage report) {
 		if (report == null) {
-            return;
-        }
+			return;
+		}
 
 		try {
 
@@ -544,8 +619,9 @@ public class CmppProxySender {
 			list.add(response);
 
 			if (CollectionUtils.isNotEmpty(list)) {
-                smsMoMessageService.doFinishReceive(list);
-            }
+				rabbitTemplate.convertAndSend(
+						RabbitMqConfiguration.MQ_SMS_MO_RECEIVE, list);
+			}
 
 		} catch (Exception e) {
 			logger.error("CMPP上行解析失败 {}", JSON.toJSONString(report), e);
@@ -555,16 +631,17 @@ public class CmppProxySender {
 
 	/***
 	 * 
-	   * TODO 网关断开下发通知
-	   * 
-	   * @param passageId
+	 * TODO 网关断开下发通知
+	 * 
+	 * @param passageId
 	 */
 	public void onTerminate(Integer passageId) {
 		logger.info("Cmpp onTerminate, passageId : {} ", passageId);
 		Object myProxy = SmsProxyManageService.getManageProxy(passageId);
-		if(myProxy != null){
-			((CmppManageProxy)myProxy).close();
-			logger.info("myProxy.getConnState() : {}, passageId : {} ", ((CmppManageProxy)myProxy).getConnState(), passageId);
+		if (myProxy != null) {
+			((CmppManageProxy) myProxy).close();
+			logger.info("myProxy.getConnState() : {}, passageId : {} ",
+					((CmppManageProxy) myProxy).getConnState(), passageId);
 			SmsProxyManageService.GLOBAL_PROXIES.remove(passageId);
 		}
 	}

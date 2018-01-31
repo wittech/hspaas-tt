@@ -37,7 +37,7 @@ public class PassportPervice {
 
     protected Logger              logger                   = LoggerFactory.getLogger(PassportPervice.class);
     // 时间戳过期时间秒数
-    public static final long      EXPIRE_TIMESTAMP_SECONDS = 30;
+    private static final long      EXPIRE_TIMESTAMP_SECONDS = 30;
 
     /**
      * TODO 根据参数获取用户ID
@@ -140,9 +140,7 @@ public class PassportPervice {
         boolean balanceEnough = userBalanceService.isBalanceEnough(developer.getUserId(),
                                                                    PlatformType.SEND_MESSAGE_SERVICE, (double) totalFee);
         if (!balanceEnough) {
-            {
-                throw new ValidateException(CommonApiCode.COMMON_BALANCE_NOT_ENOUGH);
-            }
+            throw new ValidateException(CommonApiCode.COMMON_BALANCE_NOT_ENOUGH);
         }
 
         PassportModel model = new PassportModel();
@@ -165,9 +163,7 @@ public class PassportPervice {
         try {
             boolean isSuccess = System.currentTimeMillis() - Long.valueOf(timestamp) <= EXPIRE_TIMESTAMP_SECONDS * 1000;
             if (isSuccess) {
-                {
-                    return;
-                }
+                return;
             }
 
             throw new ValidateException(CommonApiCode.COMMON_REQUEST_TIMESTAMPS_EXPIRED);

@@ -127,7 +127,7 @@ public class HspaasPassageResolver extends AbstractPassageResolver{
             }
 			
 			List<SmsMtMessageDeliver> list = new ArrayList<>();
-			SmsMtMessageDeliver response = null;
+			SmsMtMessageDeliver response;
 			for(Object object : array) {
 				if(object == null) {
                     continue;

@@ -40,7 +40,12 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
  */
 @Component
 public class HuaxinPassageResolver extends AbstractPassageResolver{
-	
+
+	/**
+	 * 返回报告中是否含有消息体标识字段，如果含有如下字段，则标识有消息体，需要处理
+	 */
+	private static final String REPORT_HAS_BODY_FLAG = "taskid";
+
 	@Override
 	public List<ProviderSendResponse> send(SmsPassageParameter parameter,String mobile, String content,
 			String extNumber) {
@@ -153,7 +158,7 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<SmsMtMessageDeliver> deliverResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result) || !result.contains("taskid")) {
+		if (StringUtils.isEmpty(result) || !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
 		
@@ -176,9 +181,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 			List<Element> data = root.getChildren();
 			// 获得XML中的命名空间（XML中未定义可不写）
 			Namespace ns = root.getNamespace();
-			SmsMtMessageDeliver response = null;
+			SmsMtMessageDeliver response;
 			for(Element et : data) {
-				if(et.getChild("taskid", ns) == null) {
+				if(et.getChild(REPORT_HAS_BODY_FLAG, ns) == null) {
                     continue;
                 }
 				
@@ -219,11 +224,11 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	   * TODO 解析上行返回值
 	   * 
 	   * @param result
-	   * @param successCode
+	   * @param passageId
 	   * @return
 	 */
 	private List<SmsMoMessageReceive> moResponse(String result, Integer passageId) {
-		if (StringUtils.isEmpty(result) || !result.contains("taskid")) {
+		if (StringUtils.isEmpty(result) || !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
 		
@@ -244,10 +249,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 			List<Element> data = root.getChildren();
 			// 获得XML中的命名空间（XML中未定义可不写）
 			Namespace ns = root.getNamespace();
-			SmsMoMessageReceive response = null;
+			SmsMoMessageReceive response;
 			
 			for(Element et : data) {
-				response = new SmsMoMessageReceive();
 				response = new SmsMoMessageReceive();
 				response.setPassageId(passageId);
 				response.setMsgId(et.getChild("taskid", ns).getText());

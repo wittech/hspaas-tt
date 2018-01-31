@@ -36,6 +36,11 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
  */
 @Component
 public class KuanxinPassageResolver extends AbstractPassageResolver{
+
+	/**
+	 * 返回报告中是否含有消息体标识字段，如果含有如下字段，则标识有消息体，需要处理
+	 */
+	private static final String REPORT_HAS_BODY_FLAG = "taskid";
 	
 	@Override
 	public List<ProviderSendResponse> send(SmsPassageParameter parameter,String mobile, String content,
@@ -74,7 +79,9 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
 		params.put("ts", timestamps);
 		params.put("sign", DigestUtils.md5Hex(tparameter.getString("userid") + timestamps + tparameter.getString("apikey")));
 		params.put("mobile", mobile);
-		params.put("msgcontent", content); //URLEncode.encode(content,“utf-8”)
+
+		//URLEncode.encode(content,“utf-8”)
+		params.put("msgcontent", content);
 		params.put("extnum", extNumber == null ? "" : extNumber);
 		
 		// time（选填） 发送时间(为空表示立即发送，如果定时发送，则需要按yyyyMMddHHmmss格式，如：20110115105822)
@@ -116,7 +123,7 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
 		// 如果状态码返回正确的才能解析到sid信息
 		if(response.isSuccess()) {
 			JSONObject taskJson = jsonObject.getJSONObject("data");
-			if(MapUtils.isNotEmpty(taskJson) && taskJson.containsKey("taskid")) {
+			if(MapUtils.isNotEmpty(taskJson) && taskJson.containsKey(REPORT_HAS_BODY_FLAG)) {
                 response.setSid(taskJson.getString("taskid"));
             }
 		}
@@ -143,7 +150,7 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
             }
 			
 			List<SmsMtMessageDeliver> list = new ArrayList<>();
-			SmsMtMessageDeliver response = null;
+			SmsMtMessageDeliver response;
 			for(Object object : array) {
 				if(object == null) {
                     continue;
@@ -195,7 +202,7 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
             }
 			
 			List<SmsMoMessageReceive> list = new ArrayList<>();
-			SmsMoMessageReceive response = null;
+			SmsMoMessageReceive response;
 			for(Object object : array) {
 				response = new SmsMoMessageReceive();
 				JSONObject jsonobj = (JSONObject)object;

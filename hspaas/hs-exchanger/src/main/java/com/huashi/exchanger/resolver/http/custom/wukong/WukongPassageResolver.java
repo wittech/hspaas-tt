@@ -37,6 +37,11 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
  */
 @Component
 public class WukongPassageResolver extends AbstractPassageResolver{
+
+	/**
+	 * 返回报告中是否含有消息体标识字段，如果含有如下字段，则标识有消息体，需要处理
+	 */
+	private static final String REPORT_HAS_BODY_FLAG = "phone_no";
 	
 	@Override
 	public List<ProviderSendResponse> send(SmsPassageParameter parameter,String mobile, String content,
@@ -179,7 +184,7 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 	   * @return
 	 */
 	private List<SmsMtMessageDeliver> deliverResponse(String result, String successCode) {
-		if (StringUtils.isEmpty(result) || !result.contains("phone_no")) {
+		if (StringUtils.isEmpty(result) || !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
 		
@@ -203,7 +208,7 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 			
 			List<Map<String, Object>> data = JSON.parseObject(m.get("data").toString(), new TypeReference<List<Map<String, Object>>>(){});
 			
-			SmsMtMessageDeliver response = null;
+			SmsMtMessageDeliver response;
 			for(Map<String, Object> et : data) {
 				response = new SmsMtMessageDeliver();
 				response.setMsgId(et.getOrDefault("task_id", "").toString());
@@ -248,11 +253,11 @@ public class WukongPassageResolver extends AbstractPassageResolver{
 	   * TODO 解析上行返回值
 	   * 
 	   * @param result
-	   * @param successCode
+	   * @param passageId
 	   * @return
 	 */
 	private List<SmsMoMessageReceive> moResponse(String result, Integer passageId) {
-		if (StringUtils.isEmpty(result) || !result.contains("phone_no")) {
+		if (StringUtils.isEmpty(result) || !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
 		
@@ -271,7 +276,7 @@ public class WukongPassageResolver extends AbstractPassageResolver{
             return null;
         }
 		
-		SmsMoMessageReceive response = null;
+		SmsMoMessageReceive response;
 		for(Map<String, Object> my : data) {
 			response = new SmsMoMessageReceive();
 			response.setPassageId(passageId);

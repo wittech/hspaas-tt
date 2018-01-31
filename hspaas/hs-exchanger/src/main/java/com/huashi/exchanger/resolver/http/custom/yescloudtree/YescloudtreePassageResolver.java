@@ -44,8 +44,15 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 @Component
 public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	
-	// 最大连接数
+	/**
+	 * 最大连接数
+	 */
 	private Integer maxPerRoute = 20;
+
+	/**
+	 * 返回报告中是否含有消息体标识字段，如果含有如下字段，则标识有消息体，需要处理
+	 */
+	private static final String REPORT_HAS_BODY_FLAG = "Mobile";
 	
 	@Override
 	public List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content,
@@ -90,8 +97,11 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 		// 扩展号，目前支持0-4位
 		params.put("ExtCode", extNumber == null ? "" : extNumber);
 
+		// 群发配置
+		String isBatchSend = tparameter.getString("is_p2p");
+
 		// 判断群发选项是否为空，不为空则设置
-		if (StringUtils.isNotEmpty(tparameter.getString("is_p2p"))) {
+		if (StringUtils.isNotEmpty(isBatchSend)) {
             params.put("IsP2p", tparameter.getString("is_p2p"));
         }
 
@@ -103,6 +113,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	 * TODO 下行回执/上行短信组装请求信息
 	 * 
 	 * @param tparameter
+	 * @param actionName
 	 * @return
 	 */
 	private static Map<String, Object> request(TParameter tparameter, String actionName) {
@@ -114,9 +125,12 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 		return params;
 	}
 
-	// 状态报告分割符号
-	// eg.
-	// 0:<MOPacks><MOPack><DestId></DestId><Mobile></Mobile><Message></Message><MOTime></MOTime></MOPack></MOPacks>
+	/**
+	 *
+	 * 状态报告分割符号
+	 * eg.
+	 * 0:<MOPacks><MOPack><DestId></DestId><Mobile></Mobile><Message></Message><MOTime></MOTime></MOPack></MOPacks>
+	 */
 	private static final String REPORT_SPLIT_CHARACTER = ":";
 
 	/**
@@ -151,7 +165,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 
 			List<Element> data = root.getChildren();
 			Namespace ns = root.getNamespace();
-			ProviderSendResponse response = null;
+			ProviderSendResponse response;
 			for (Element et : data) {
 				if (et.getChild("Id", ns) == null) {
                     continue;
@@ -185,7 +199,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	 */
 	private List<SmsMtMessageDeliver> deliverResponse(String result, String successCode) {
 		// 保证有数据才解析
-		if (StringUtils.isEmpty(result) && !result.contains("Mobile")) {
+		if (StringUtils.isEmpty(result) && !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
 
@@ -209,7 +223,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 
 			List<Element> data = root.getChildren();
 			Namespace ns = root.getNamespace();
-			SmsMtMessageDeliver response = null;
+			SmsMtMessageDeliver response;
 			for (Element et : data) {
 				if (et.getChild("Id", ns) == null) {
                     continue;
@@ -246,9 +260,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	 * 
 	 * TODO 短信签名
 	 * 
-	 * @param appkey
 	 * @param password
-	 * @param timestamps
 	 * @return
 	 */
 	private static String signature(String password) {
@@ -260,12 +272,12 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	 * TODO 解析上行返回值
 	 * 
 	 * @param result
-	 * @param successCode
+	 * @param passageId
 	 * @return
 	 */
 	private List<SmsMoMessageReceive> moResponse(String result, Integer passageId) {
 		// 保证有数据才解析
-		if (StringUtils.isEmpty(result) && !result.contains("Mobile")) {
+		if (StringUtils.isEmpty(result) && !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
 
@@ -288,7 +300,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 
 			List<Element> data = root.getChildren();
 			Namespace ns = root.getNamespace();
-			SmsMoMessageReceive response = null;
+			SmsMoMessageReceive response;
 			for (Element et : data) {
 				if (et.getChild("Mobile", ns) == null) {
                     continue;
@@ -352,7 +364,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 	   * @param report
 	   * @return
 	 */
-	public static YescloudtreeResponse parseReport(String report) {
+	private static YescloudtreeResponse parseReport(String report) {
 		if (StringUtils.isEmpty(report)) {
             return null;
         }
@@ -364,7 +376,10 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 		return new YescloudtreeResponse(report.substring(0, report.indexOf(REPORT_SPLIT_CHARACTER)), 
 				report.substring(report.indexOf(REPORT_SPLIT_CHARACTER) + 1, report.length()));
 	}
-	
+
+	/**
+	 * 返回值类定义
+	 */
 	static class YescloudtreeResponse implements Serializable{
 		private static final long serialVersionUID = -4227037708935753641L;
 		private String statusCode;
@@ -386,11 +401,7 @@ public class YescloudtreePassageResolver extends AbstractPassageResolver {
 			this.report = report;
 		}
 
-		public YescloudtreeResponse() {
-			super();
-		}
-
-		public YescloudtreeResponse(String statusCode, String report) {
+		YescloudtreeResponse(String statusCode, String report) {
 			super();
 			this.statusCode = statusCode;
 			this.report = report;

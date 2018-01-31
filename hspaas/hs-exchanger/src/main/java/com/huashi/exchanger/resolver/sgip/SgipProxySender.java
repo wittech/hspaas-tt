@@ -7,11 +7,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import com.alibaba.fastjson.JSON;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.CMCP;
+import com.huashi.exchanger.config.RabbitMqConfiguration;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.cmpp.constant.CmppConstant;
 import com.huashi.exchanger.resolver.sgip.constant.SgipConstant;
@@ -52,9 +56,13 @@ public class SgipProxySender {
 	@Autowired
 	private ISmsProxyManageService smsProxyManageService;
 	
+	@Resource
+	private RabbitTemplate rabbitTemplate;
+
 	private final Object lock = new Object();
 
-	private final AtomicInteger LONG_MESSGE_CONTENT_COUNTER = new AtomicInteger(1);
+	private final AtomicInteger LONG_MESSGE_CONTENT_COUNTER = new AtomicInteger(
+			1);
 
 	/**
 	 * 短信内容转换为 字节数。普通短信 GBK编码。长短信 UCS2编码
@@ -74,7 +82,8 @@ public class SgipProxySender {
 			// 如果字节数大于 GBK，则使用UCS2编码以长短信发送
 			// byte[] messageUCS2 = message.getBytes("UnicodeBigUnmarked");
 			int messageUCS2Len = messageUCS2.length;
-			int yushu = messageUCS2Len % (SgipConstant.MAX_MESSAGE_UCS2_LENGTH - 6);
+			int yushu = messageUCS2Len
+					% (SgipConstant.MAX_MESSAGE_UCS2_LENGTH - 6);
 			int add = 0;
 			if (yushu > 0) {
 				add = 1;
@@ -97,8 +106,12 @@ public class SgipProxySender {
 				tp_udhiHead[5] = (byte) (i + 1);
 				byte[] msgContent;
 				if (i != messageUCS2Count - 1) {// 不为最后一条
-					msgContent = byteAdd(tp_udhiHead, messageUCS2, i * (SgipConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
-							(i + 1) * (SgipConstant.MAX_MESSAGE_UCS2_LENGTH - 6));
+					msgContent = byteAdd(
+							tp_udhiHead,
+							messageUCS2,
+							i * (SgipConstant.MAX_MESSAGE_UCS2_LENGTH - 6),
+							(i + 1)
+									* (SgipConstant.MAX_MESSAGE_UCS2_LENGTH - 6));
 					list.add(msgContent);
 				} else {
 					msgContent = byteAdd(tp_udhiHead, messageUCS2, i
@@ -114,7 +127,7 @@ public class SgipProxySender {
 		}
 		return list;
 	}
-	
+
 	private static byte[] byteAdd(byte[] tpUdhiHead, byte[] messageUCS2, int i,
 			int j) {
 		byte[] msgb = new byte[j - i + 6];
@@ -150,12 +163,13 @@ public class SgipProxySender {
 			TParameter tparameter = RequestTemplateHandler.parse(parameter
 					.getParams());
 			if (MapUtils.isEmpty(tparameter)) {
-                throw new RuntimeException("SGIP 参数信息为空");
-            }
+				throw new RuntimeException("SGIP 参数信息为空");
+			}
 
 			SgipManageProxy sgipManageProxy = getSgipManageProxy(parameter);
 			if (sgipManageProxy == null) {
-				logger.error("SGIP代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile, content, extNumber);
+				logger.error("SGIP代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile,
+						content, extNumber);
 				return null;
 			}
 
@@ -165,31 +179,39 @@ public class SgipProxySender {
 
 			// 获取发送回执信息
 			SGIPSubmitRepMessage submitRepMsg = getSGIPSubmitResponseMessage(
-					tparameter.getString("service_code"), tparameter.getString("spid"), 
-					StringUtils.isEmpty(tparameter.getString("msg_fmt")) ? CmppConstant.MSG_FMT_GBK : Integer.parseInt(tparameter.getString("msg_fmt")),
-					StringUtils.isEmpty(tparameter.getString("mobile")) ? "000" : tparameter.getString("mobile"),
-					srcTerminalId, mobile, content, "", sgipManageProxy);
-			
-			if(submitRepMsg == null) {
+					tparameter.getString("service_code"),
+					tparameter.getString("spid"),
+					StringUtils.isEmpty(tparameter.getString("msg_fmt")) ? CmppConstant.MSG_FMT_GBK
+							: Integer.parseInt(tparameter.getString("msg_fmt")),
+					StringUtils.isEmpty(tparameter.getString("mobile")) ? "000"
+							: tparameter.getString("mobile"), srcTerminalId,
+					mobile, content, "", sgipManageProxy);
+
+			if (submitRepMsg == null) {
 				logger.error("SGIPSubmitRepMessage 网关提交信息为空");
-				smsProxyManageService.plusSendErrorTimes(parameter.getPassageId());
+				smsProxyManageService.plusSendErrorTimes(parameter
+						.getPassageId());
 				return null;
 			}
-			
+
 			// 发送完短信设置上次发送时间
-			SgipConstant.SGIP_RECONNECT_TIMEMILLS.put(parameter.getPassageId(), System.currentTimeMillis());
-			
+			SgipConstant.SGIP_RECONNECT_TIMEMILLS.put(parameter.getPassageId(),
+					System.currentTimeMillis());
+
 			List<ProviderSendResponse> list = new ArrayList<>();
 			ProviderSendResponse response = new ProviderSendResponse();
-			if (submitRepMsg.getResult() == MessageSubmitStatus.SUCCESS.getCode()) {
+			if (submitRepMsg.getResult() == MessageSubmitStatus.SUCCESS
+					.getCode()) {
 				// 发送成功清空
-				smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
-				
+				smsProxyManageService.clearSendErrorTimes(parameter
+						.getPassageId());
+
 				response.setMobile(mobile);
 				response.setStatusCode(submitRepMsg.getResult() + "");
 				response.setSid(submitRepMsg.getSubmitSequenceNumber());
 				response.setSuccess(true);
-				response.setRemark(String.format("{msgId:%s, sequenceId:%d, commandId:%d}",
+				response.setRemark(String.format(
+						"{msgId:%s, sequenceId:%d, commandId:%d}",
 						response.getSid(), submitRepMsg.getSequenceId(),
 						submitRepMsg.getCommandId()));
 
@@ -201,7 +223,7 @@ public class SgipProxySender {
 				response.setSid("" + submitRepMsg.getSubmitSequenceNumber());
 				response.setSuccess(false);
 				response.setRemark(submitRepMsg.getSequenceId() + "");
-				
+
 				list.add(response);
 			}
 
@@ -209,27 +231,25 @@ public class SgipProxySender {
 		} catch (Exception e) {
 			// 累加发送错误次数
 			smsProxyManageService.plusSendErrorTimes(parameter.getPassageId());
-			
+
 			logger.error("SGIP发送失败", e);
 			throw new RuntimeException("SGIP发送失败");
 		}
 	}
 
-    // 手机号码前缀
+	// 手机号码前缀
 	private static final String MOBILE_PREFIX_NUMBER = "86";
-	
-	
-	
+
 	/**
 	 *
 	 * TODO 组装待提交短信CMPP结构体数据
 	 * 
 	 * @param serviceType
-	 * 			   业务代码
+	 *            业务代码
 	 * @param spid
 	 *            企业代码
 	 * @param chargeNumber
-	 * 			    计费号码
+	 *            计费号码
 	 * @param msgFmt
 	 *            消息编码方式（默认GBK）
 	 * @param srcTerminalId
@@ -243,8 +263,9 @@ public class SgipProxySender {
 	 * @return
 	 * @throws IOException
 	 */
-	private SGIPSubmitRepMessage getSGIPSubmitResponseMessage(String serviceType, String spid,
-			int msgFmt, String chargeNumber, String srcTerminalId, String mobile, String content,
+	private SGIPSubmitRepMessage getSGIPSubmitResponseMessage(
+			String serviceType, String spid, int msgFmt, String chargeNumber,
+			String srcTerminalId, String mobile, String content,
 			String reserve, SgipManageProxy sgipManageProxy) throws IOException {
 
 		// 存活有效期（6小时）
@@ -260,28 +281,22 @@ public class SgipProxySender {
 			tpUdhi = 1;
 			msgFmt = SgipConstant.MSG_FMT_UCS2;
 		}
-		
-		String[] mobiles = mobile.split(MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR);
-		for(int i=0; i<mobiles.length; i++) {
+
+		String[] mobiles = mobile
+				.split(MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR);
+		for (int i = 0; i < mobiles.length; i++) {
 			mobiles[i] = MOBILE_PREFIX_NUMBER + mobiles[i];
 		}
 
 		SGIPSubmitMessage submitMsg = null;
 		SGIPSubmitRepMessage submitRepMsg = null;
 		for (int index = 1; index <= contentList.size(); index++) {
-			submitMsg = getSGIPSubmitMessage(
-					serviceType,
-					tpUdhi,
-					msgFmt,
-					spid,
-					validTime,
-					atTime,
-					chargeNumber,
-					srcTerminalId,
-					mobiles,
+			submitMsg = getSGIPSubmitMessage(serviceType, tpUdhi, msgFmt, spid,
+					validTime, atTime, chargeNumber, srcTerminalId, mobiles,
 					contentList.get(index - 1), reserve);
-			
-			SGIPSubmitRepMessage repMsg = (SGIPSubmitRepMessage) sgipManageProxy.send(submitMsg);
+
+			SGIPSubmitRepMessage repMsg = (SGIPSubmitRepMessage) sgipManageProxy
+					.send(submitMsg);
 			if (index == 1) {
 				// 以长短信 拆分发送时，目前状态报告的 msgid 是 拆分后第一条的 msgid
 				submitRepMsg = repMsg;
@@ -290,11 +305,13 @@ public class SgipProxySender {
 			}
 
 			if (submitRepMsg == null) {
-				logger.error(" SgipSubmitRepMessage null, submitMsg : {}", submitMsg);
-		    }else if (submitRepMsg.getResult() != 0) {
-				logger.error(" submitRepMsg result :{}, index : {}, content: {}, mobile : {}", submitRepMsg.getResult(), index 
-						,content, mobile);
-		    }
+				logger.error(" SgipSubmitRepMessage null, submitMsg : {}",
+						submitMsg);
+			} else if (submitRepMsg.getResult() != 0) {
+				logger.error(
+						" submitRepMsg result :{}, index : {}, content: {}, mobile : {}",
+						submitRepMsg.getResult(), index, content, mobile);
+			}
 		}
 
 		return submitRepMsg;
@@ -323,33 +340,33 @@ public class SgipProxySender {
 	 *            保留
 	 * @return
 	 */
-	private SGIPSubmitMessage getSGIPSubmitMessage(String serviceType, int tpUdhi, 
-			int msgFmt, String spid, Date validTime, Date atTime, String chargeNumber, 
-			String srcTerminalId, String[] mobiles, byte[] msgContent, String reserve) {
-		
-		return new SGIPSubmitMessage(srcTerminalId,
-				chargeNumber, // 付费号码 string
+	private SGIPSubmitMessage getSGIPSubmitMessage(String serviceType,
+			int tpUdhi, int msgFmt, String spid, Date validTime, Date atTime,
+			String chargeNumber, String srcTerminalId, String[] mobiles,
+			byte[] msgContent, String reserve) {
+
+		return new SGIPSubmitMessage(srcTerminalId, chargeNumber, // 付费号码 string
 				mobiles, // 接收该短消息的手机号，最多100个号码 string[]
 				spid, // 企业代码，取值范围为0～99999 string
-                serviceType, // 业务代码，由SP定义 stirng
-                SgipConstant.FEE_TYPE, // 计费类型 int
-                SgipConstant.FEE_VALUE, // 该条短消息的收费值 stirng
-                SgipConstant.FEE_VALUE, // 赠送用户的话费 string
-                SgipConstant.FEE_CODE, // 代收费标志0：应收1：实收 int
-                0, // 引起MT消息的原因 int
-                0, // 优先级0～9从低 到高，默认为0 int
-                validTime, // 短消息寿命的终止时间 date
-                atTime, // 短消息定时发送的时间 date
-                1, // 状态报告标记 int
-                SgipConstant.TP_PID, // GSM协议类型 int
-                tpUdhi, // GSM协议类型 int
-                msgFmt, // 短消息的编码格式 int
-                0, // 信息类型 int
-                msgContent.length, // 短消息内容长度 int
-                msgContent, // 短消息的内容 btye[]
-                reserve // 保留，扩展用 string
-        );
-		
+				serviceType, // 业务代码，由SP定义 stirng
+				SgipConstant.FEE_TYPE, // 计费类型 int
+				SgipConstant.FEE_VALUE, // 该条短消息的收费值 stirng
+				SgipConstant.FEE_VALUE, // 赠送用户的话费 string
+				SgipConstant.FEE_CODE, // 代收费标志0：应收1：实收 int
+				0, // 引起MT消息的原因 int
+				0, // 优先级0～9从低 到高，默认为0 int
+				validTime, // 短消息寿命的终止时间 date
+				atTime, // 短消息定时发送的时间 date
+				1, // 状态报告标记 int
+				SgipConstant.TP_PID, // GSM协议类型 int
+				tpUdhi, // GSM协议类型 int
+				msgFmt, // 短消息的编码格式 int
+				0, // 信息类型 int
+				msgContent.length, // 短消息内容长度 int
+				msgContent, // 短消息的内容 btye[]
+				reserve // 保留，扩展用 string
+		);
+
 	}
 
 	/**
@@ -361,21 +378,23 @@ public class SgipProxySender {
 	 * @return
 	 */
 	public SgipManageProxy getSgipManageProxy(SmsPassageParameter parameter) {
-	    synchronized(lock) {
-	        if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-	            return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-	        }
+		synchronized (lock) {
+			if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+				return (SgipManageProxy) SmsProxyManageService
+						.getManageProxy(parameter.getPassageId());
+			}
 
-	        boolean isOk = smsProxyManageService.startProxy(parameter);
-	        if (!isOk) {
-	            return null;
-	        }
-	        
-	        // 重新初始化后将错误计数器归零
-	        smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
+			boolean isOk = smsProxyManageService.startProxy(parameter);
+			if (!isOk) {
+				return null;
+			}
 
-	        return (SgipManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-	    }
+			// 重新初始化后将错误计数器归零
+			smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
+
+			return (SgipManageProxy) SmsProxyManageService
+					.getManageProxy(parameter.getPassageId());
+		}
 	}
 
 	/**
@@ -387,20 +406,22 @@ public class SgipProxySender {
 	 */
 	public void mtDeliver(SGIPReportMessage report) {
 		if (report == null) {
-            return;
-        }
+			return;
+		}
 
 		try {
 			logger.info("SGIP状态报告数据: {}", report);
-			
+
 			String msgid = "" + report.getSubmitSequenceNumber();
 			int state = report.getState();
 			if (state == 1) {
-				logger.warn("下行状态回执失败，msgId -->" + msgid + " number" + report.getUserNumber() + " state -->" + report.getErrorCode());
+				logger.warn("下行状态回执失败，msgId -->" + msgid + " number"
+						+ report.getUserNumber() + " state -->"
+						+ report.getErrorCode());
 				// 等待发送状态直接返回不保存
 				return;
 			}
-			
+
 			// 发送时手机号码拼接86，回执需去掉86前缀
 			String mobile = report.getUserNumber();
 			if (mobile != null && mobile.startsWith("86")) {
@@ -413,17 +434,23 @@ public class SgipProxySender {
 			response.setMsgId(msgid);
 			response.setMobile(mobile);
 			response.setCmcp(CMCP.local(response.getMobile()).getCode());
-			response.setStatusCode(state == 0 ? SgipConstant.COMMON_MT_STATUS_SUCCESS_CODE : report.getErrorCode() + "");
-			response.setStatus(state == 0 ? DeliverStatus.SUCCESS.getValue() : DeliverStatus.FAILED.getValue());
+			response.setStatusCode(state == 0 ? SgipConstant.COMMON_MT_STATUS_SUCCESS_CODE
+					: report.getErrorCode() + "");
+			response.setStatus(state == 0 ? DeliverStatus.SUCCESS.getValue()
+					: DeliverStatus.FAILED.getValue());
 			response.setDeliverTime(DateUtil.getNow());
 			response.setCreateTime(new Date());
-			response.setRemark(String.format("msg_id:%s,code:%d",report.getSubmitSequenceNumber()+"", report.getErrorCode()));
+			response.setRemark(String.format("msg_id:%s,code:%d",
+					report.getSubmitSequenceNumber() + "",
+					report.getErrorCode()));
 
 			list.add(response);
 
 			if (CollectionUtils.isNotEmpty(list)) {
-                smsMtDeliverService.doFinishDeliver(list);
-            }
+				// 发送异步消息
+				rabbitTemplate.convertAndSend(
+						RabbitMqConfiguration.MQ_SMS_MT_WAIT_RECEIPT, list);
+			}
 
 			// 解析返回结果并返回
 		} catch (Exception e) {
@@ -431,7 +458,7 @@ public class SgipProxySender {
 			throw new RuntimeException("SGIP状态回执解析失败");
 		}
 	}
-	
+
 	/**
 	 * 
 	 * TODO SGIP上行报文回执
@@ -440,8 +467,8 @@ public class SgipProxySender {
 	 */
 	public void moReceive(SGIPDeliverMessage report) {
 		if (report == null) {
-            return;
-        }
+			return;
+		}
 
 		SGIPDeliverMessage deliverMsg = (SGIPDeliverMessage) report;
 		try {
@@ -449,13 +476,13 @@ public class SgipProxySender {
 			logger.info("SGIP上行报告数据: {}", report);
 
 			List<SmsMoMessageReceive> list = new ArrayList<>();
-			
+
 			// 发送时手机号码拼接86，回执需去掉86前缀
 			String mobile = report.getUserNumber();
 			if (mobile != null && mobile.startsWith("86")) {
 				mobile = mobile.substring(2);
 			}
-			
+
 			SmsMoMessageReceive response = new SmsMoMessageReceive();
 			response.setPassageId(null);
 			response.setMsgId(deliverMsg.getSPNumber());
@@ -474,28 +501,30 @@ public class SgipProxySender {
 			list.add(response);
 
 			if (CollectionUtils.isNotEmpty(list)) {
-                smsMoMessageService.doFinishReceive(list);
-            }
+				rabbitTemplate.convertAndSend(
+						RabbitMqConfiguration.MQ_SMS_MO_RECEIVE, list);
+			}
 
 		} catch (Exception e) {
 			logger.error("SGIP上行解析失败 {}", JSON.toJSONString(report), e);
 			throw new RuntimeException("SGIP上行解析失败");
 		}
 	}
-	
+
 	/***
 	 * 
-	   * TODO 网关断开下发通知
-	   * 
-	   * @param passageId
+	 * TODO 网关断开下发通知
+	 * 
+	 * @param passageId
 	 */
 	public void onTerminate(Integer passageId) {
 		logger.info("Sgip onTerminate, passageId : {} ", passageId);
 		Object myProxy = SmsProxyManageService.getManageProxy(passageId);
-		if(myProxy != null){
-			((SgipManageProxy)myProxy).stopService();
-			((SgipManageProxy)myProxy).close();
-			logger.info("myProxy.getConnState() : {}, passageId : {} ", ((SgipManageProxy)myProxy).getConnState(), passageId);
+		if (myProxy != null) {
+			((SgipManageProxy) myProxy).stopService();
+			((SgipManageProxy) myProxy).close();
+			logger.info("myProxy.getConnState() : {}, passageId : {} ",
+					((SgipManageProxy) myProxy).getConnState(), passageId);
 			SmsProxyManageService.GLOBAL_PROXIES.remove(passageId);
 		}
 	}
