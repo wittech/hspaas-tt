@@ -337,7 +337,7 @@ public class SmsRecordController extends BaseController {
 	 */
 	public void batchPass() {
 		try {
-			renderJson(iSmsMtTaskService.doForcePass(getPara("ids")));
+			renderJson(iSmsMtTaskService.doTaskApproved(getPara("ids")));
 		} catch (Exception e) {
 			renderJson(new ResponseMessage(e.getMessage()));
 		}
@@ -373,7 +373,7 @@ public class SmsRecordController extends BaseController {
 	 */
 	public void sameContentPass() {
 		try {
-			int result = iSmsMtTaskService.doPassWithSameContent(getPara("content"),
+			int result = iSmsMtTaskService.approvedBySameContent(getPara("content"),
 					getParaToInt("like_pattern", 0) == 1);
 			if (result >= 0) {
 				renderResultJson(true, String.format("共处理：%d条", result));
@@ -385,5 +385,22 @@ public class SmsRecordController extends BaseController {
 			renderResultJson(false);
 		}
 	}
+
+	/**
+	 *
+	 * TODO 批量驳回同短信短信待处理任务
+	 */
+	public void sameContentReject() {
+		try {
+			int result = iSmsMtTaskService.rejectBySameContent(getPara("content"),
+					getParaToInt("like_pattern", 0) == 1);
+
+			renderResultJson(result >= 0);
+		} catch (Exception e) {
+			renderResultJson(false);
+		}
+	}
+
+
 
 }

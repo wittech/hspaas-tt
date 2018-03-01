@@ -1,6 +1,7 @@
 package com.huashi.sms.config.rabbit.listener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import com.huashi.common.settings.context.SettingsContext.PushConfigStatus;
 import com.huashi.common.settings.domain.ProvinceLocal;
 import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.settings.service.IPushConfigService;
+import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.domain.UserSmsConfig;
@@ -36,6 +38,7 @@ import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.service.ISmsProviderService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.listener.packets.BasePacketsSupport;
 import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
 import com.huashi.sms.passage.context.PassageContext.PassageSmsTemplateParam;
 import com.huashi.sms.passage.domain.SmsPassage;
@@ -61,80 +64,102 @@ import com.rabbitmq.client.Channel;
  * @date 2016年10月11日 下午1:20:14
  */
 @Component
-public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
+public class SmsWaitSubmitListener extends BasePacketsSupport implements ChannelAwareMessageListener {
+
+    @Resource
+    private RabbitTemplate                    rabbitTemplate;
+    @Resource
+    private StringRedisTemplate               stringRedisTemplate;
 
     @Reference(timeout = 1200000)
-    private ISmsProviderService smsProviderService;
+    private ISmsProviderService               smsProviderService;
     @Reference
-    private IPushConfigService pushConfigService;
-    @Autowired
-    private ISmsMtPushService smsMtPushService;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private Jackson2JsonMessageConverter messageConverter;
+    private IPushConfigService                pushConfigService;
     @Reference
-    private IUserSmsConfigService userSmsConfigService;
+    private IMobileLocalService               mobileLocalService;
+    @Reference
+    private IUserSmsConfigService             userSmsConfigService;
+
     @Autowired
-    private ISmsPassageService smsPassageService;
-    @Resource
-    private RabbitTemplate rabbitTemplate;
+    private ISmsMtPushService                 smsMtPushService;
     @Autowired
-    private ISignatureExtNoService signatureExtNoService;
+    private ISmsPassageService                smsPassageService;
+    @Autowired
+    private ISignatureExtNoService            signatureExtNoService;
+    @Autowired
+    private Jackson2JsonMessageConverter      messageConverter;
     @Autowired
     private ISmsPassageMessageTemplateService smsPassageMessageTemplateService;
-    @Reference
-    private IMobileLocalService mobileLocalService;
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger                            logger = LoggerFactory.getLogger(getClass());
 
     /**
      * TODO 处理分包产生的数据，并调用上家通道接口
      *
-     * @param model
+     * @param packets 子任务
      */
-    private void doTransport(SmsMtTaskPackets model) {
-        if (StringUtils.isEmpty(model.getMobile())) {
+    private void transport2Gateway(SmsMtTaskPackets packets) {
+        if (StringUtils.isBlank(packets.getMobile())) {
             throw new RuntimeException("手机号码数据包为空，无法解析");
         }
 
-        if (model.getStatus() == PacketsApproveStatus.WAITING.getCode() || model.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
+        if (packets.getStatus() == PacketsApproveStatus.WAITING.getCode()
+            || packets.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
             logger.info("子任务状态为待处理或驳回，不处理");
             return;
         }
 
         try {
             // 组装最终发送短信的扩展号码
-            String extNumber = getUserExtNumber(model.getUserId(), model.getTemplateExtNumber(), model.getExtNumber(), model.getContent());
+            String extNumber = getUserExtNumber(packets.getUserId(), packets.getTemplateExtNumber(),
+                                                packets.getExtNumber(), packets.getContent());
 
             // 获取通道信息
-            SmsPassage smsPassage = smsPassageService.findById(model.getFinalPassageId());
+            SmsPassage smsPassage = smsPassageService.findById(packets.getFinalPassageId());
+
+            // 查询推送地址信息
+            PushConfig pushConfig = pushConfigService.getPushUrl(packets.getUserId(),
+                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                                 packets.getCallback());
 
             // 重新调整扩展号码
             extNumber = resizeExtNumber(extNumber, smsPassage);
 
+            // 根据网关分包数要求对手机号码进行拆分，分批提交
+            List<String> mobiles = regroupMobileByPacketsSize(packets.getMobile(), smsPassage);
+
             // add by zhengying 20179610 加入签名自动前置后置等逻辑
-            model.setContent(changeMessageContentBySignMode(model.getContent(), model.getPassageSignMode()));
+            packets.setContent(changeMessageContentBySignMode(packets.getContent(), packets.getPassageSignMode()));
 
-            List<ProviderSendResponse> responses = smsProviderService.doTransport(getPassageParameter(model, smsPassage), model.getMobile(), model.getContent(), model.getSingleFee(), extNumber);
+            for (String mobile : mobiles) {
+                // 调用网关通道处理器，提交短信信息，并接收回执
+                long s0 = System.currentTimeMillis();
+                List<ProviderSendResponse> responses = smsProviderService.doTransport(getPassageParameter(packets,
+                                                                                                          smsPassage),
+                                                                                      mobile, packets.getContent(),
+                                                                                      packets.getSingleFee(), extNumber);
+                long s1 = System.currentTimeMillis();
+                logger.info("网关回执------------------：" + (s1 - s0));
 
-            // 解析调用上家接口结果
-            if (CollectionUtils.isEmpty(responses)) {
-                throw new RuntimeException("调用上家接口回执数据为空");
+                // ProviderSendResponse response = list.iterator().next();
+                List<SmsMtMessageSubmit> list = buildSubmitMessage(packets, mobile, responses, extNumber, pushConfig);
+                if (CollectionUtils.isEmpty(list)) {
+                    logger.error("解析上家回执数据逻辑数据为空");
+                    return;
+                }
+                
+                long s2 = System.currentTimeMillis();
+                logger.info("拼接SUBMIT------------------：" + (s2 - s1));
+
+                doSubmitFinished(list);
+                
+                long s3 = System.currentTimeMillis();
+                logger.info("如队列------------------：" + (s3 - s2));
             }
-
-            // ProviderSendResponse response = list.iterator().next();
-            List<SmsMtMessageSubmit> list = buildSubmitMessage(model, responses, extNumber);
-            if (CollectionUtils.isEmpty(list)) {
-                logger.error("解析上家回执数据逻辑数据为空");
-                return;
-            }
-
-            doSubmitFinished(list);
 
         } catch (Exception e) {
             logger.error("调用上家通道失败", e);
-            doSubmitMessageFailed(model, model.getMobile());
+            doSubmitMessageFailed(packets, packets.getMobile());
         }
     }
 
@@ -143,7 +168,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
      *
      * @param userId
      * @param templateExtNumber 短信模板扩展号码
-     * @param extNumber         用户自定义扩展号码
+     * @param extNumber 用户自定义扩展号码
      * @return
      */
     private String getUserExtNumber(Integer userId, String templateExtNumber, String extNumber, String content) {
@@ -183,7 +208,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
     /**
      * TODO 截取超出通道扩展号最大长度的位数
      *
-     * @param extNumber  扩展号码
+     * @param extNumber 扩展号码
      * @param smsPassage 通道信息
      */
     private String resizeExtNumber(String extNumber, SmsPassage smsPassage) {
@@ -199,34 +224,35 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
         } else {
             // add by zhengying 2017-2-50
             // 如果当前扩展号码总长度小于扩展号长度上限则在直接返回，否则按照扩展号上限截取
-            return extNumber.length() < smsPassage.getExtNumber() ? extNumber : extNumber.substring(0, smsPassage.getExtNumber());
+            return extNumber.length() < smsPassage.getExtNumber() ? extNumber : extNumber.substring(0,
+                                                                                                    smsPassage.getExtNumber());
         }
     }
 
     /**
      * 短信签名前缀符号
      */
-    private static final String MESSAGE_SIGNATURE_PRIFIX = "【";
+    private static final String MESSAGE_SIGNATURE_PRIFIX              = "【";
 
     /**
      * 短信签名后缀符号
      */
-    private static final String MESSAGE_SIGNATURE_SUFFIX = "】";
+    private static final String MESSAGE_SIGNATURE_SUFFIX              = "】";
 
     /**
      * 扩展号码长度无限
      */
-    private static final int PASSAGE_EXT_NUMBER_LENGTH_ENDLESS = -1;
+    private static final int    PASSAGE_EXT_NUMBER_LENGTH_ENDLESS     = -1;
 
     /**
      * 扩展号码不可扩展
      */
-    private static final int PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED = 0;
+    private static final int    PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED = 0;
 
     /**
      * TODO 根据签名模式调整短信内容（主要针对签名位置）
      *
-     * @param content  短信内容
+     * @param content 短信内容
      * @param signMode 签名模型
      * @return
      */
@@ -242,13 +268,15 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
         if (PassageSignMode.SIGNATURE_AUTO_PREPOSITION.getValue() == signMode) {
             // 自动前置
             if (content.endsWith(MESSAGE_SIGNATURE_SUFFIX)) {
-                return content.substring(content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX)) + content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
+                return content.substring(content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX))
+                       + content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
             }
 
         } else if (PassageSignMode.SIGNATURE_AUTO_POSTPOSITION.getValue() == signMode) {
             // 自动后置
             if (content.startsWith(MESSAGE_SIGNATURE_PRIFIX)) {
-                return content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length()) + content.substring(0, content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1);
+                return content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length())
+                       + content.substring(0, content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1);
             }
 
         } else if (PassageSignMode.REMOVE_SIGNATURE.getValue() == signMode) {
@@ -269,7 +297,7 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
     /**
      * TODO 转换获取通道参数信息
      *
-     * @param packets    分包信息
+     * @param packets 分包信息
      * @param smsPassage 通道信息
      * @return
      */
@@ -297,14 +325,16 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
         }
 
         // add by 20170918 判断通道是否为强制参数模式
-        if (smsPassage.getSmsTemplateParam() == null || PassageSmsTemplateParam.NO.getValue() == smsPassage.getSmsTemplateParam()) {
+        if (smsPassage.getSmsTemplateParam() == null
+            || PassageSmsTemplateParam.NO.getValue() == smsPassage.getSmsTemplateParam()) {
             return parameter;
         }
 
         logger.info("通道：{} 为携参通道", smsPassage.getId());
 
         // 根据短信内容查询通道短信模板参数
-        SmsPassageMessageTemplate smsPassageMessageTemplate = smsPassageMessageTemplateService.getByMessageContent(smsPassage.getId(), packets.getContent());
+        SmsPassageMessageTemplate smsPassageMessageTemplate = smsPassageMessageTemplateService.getByMessageContent(smsPassage.getId(),
+                                                                                                                   packets.getContent());
         if (smsPassageMessageTemplate == null) {
             logger.warn("通道：{} 短信模板参数信息匹配为空", smsPassage.getId());
             return parameter;
@@ -315,7 +345,9 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
         parameter.setVariableParamNames(smsPassageMessageTemplate.getParamNames().split(","));
 
         // 根据表达式和参数数量获取本次具体的变量值
-        parameter.setVariableParamValues(SmsPassageMessageTemplateService.pickupValuesByRegex(packets.getContent(), smsPassageMessageTemplate.getRegexValue(), smsPassageMessageTemplate.getParamNames().split(",").length));
+        parameter.setVariableParamValues(SmsPassageMessageTemplateService.pickupValuesByRegex(packets.getContent(),
+                                                                                              smsPassageMessageTemplate.getRegexValue(),
+                                                                                              smsPassageMessageTemplate.getParamNames().split(",").length));
 
         return parameter;
     }
@@ -334,7 +366,8 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
                 }
             }
 
-            stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST, JSON.toJSONString(submits));
+            stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
+                                                       JSON.toJSONString(submits));
 
             logger.info("待提交信息已提交至REDIS队列完成");
         } catch (Exception e) {
@@ -343,21 +376,24 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
     }
 
     /**
-     * TODO 组装提交完成的短息信息入库
-     *
-     * @param model
-     * @param responses
-     * @param extNumber 扩展号码
+     * 
+       * TODO 组装提交完成的短息信息入库
+       * @param packets
+       * @param mobile
+       * @param responses
+       * @param extNumber 扩展号码
+       * @param pushConfig
+       * @return
      */
-    private List<SmsMtMessageSubmit> buildSubmitMessage(SmsMtTaskPackets model, List<ProviderSendResponse> responses, String extNumber) {
+    private List<SmsMtMessageSubmit> buildSubmitMessage(SmsMtTaskPackets packets, String mobile,
+                                                        List<ProviderSendResponse> responses, String extNumber,
+                                                        PushConfig pushConfig) {
         List<SmsMtMessageSubmit> submits = new ArrayList<>();
-
-        PushConfig pushConfig = pushConfigService.getPushUrl(model.getUserId(), PlatformType.SEND_MESSAGE_SERVICE.getCode(), model.getCallback());
 
         SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
 
-        BeanUtils.copyProperties(model, submit, "passageId", "mobile");
-        submit.setPassageId(model.getFinalPassageId());
+        BeanUtils.copyProperties(packets, submit, "passageId", "mobile");
+        submit.setPassageId(packets.getFinalPassageId());
 
         // 推送信息为固定地址或者每次传递地址才需要推送
         if (pushConfig != null && pushConfig.getStatus() != PushConfigStatus.NO.getCode()) {
@@ -369,34 +405,34 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
         submit.setCreateUnixtime(submit.getCreateTime().getTime());
         submit.setDestnationNo(extNumber);
 
-        String[] mobiles = model.getMobile().split(",");
+        String[] mobiles = mobile.split(",");
 
-        for (String mobile : mobiles) {
+        for (String m : mobiles) {
             SmsMtMessageSubmit _submit = new SmsMtMessageSubmit();
 
             for (ProviderSendResponse response : responses) {
-                if (StringUtils.isNotEmpty(response.getMobile()) && !mobile.equals(response.getMobile())) {
+                if (StringUtils.isNotEmpty(response.getMobile()) && !m.equals(response.getMobile())) {
                     continue;
                 }
 
-                submit.setStatus(response.isSuccess() ? MessageSubmitStatus.SUCCESS.getCode()
-                        : MessageSubmitStatus.FAILED.getCode());
+                submit.setStatus(response.isSuccess() ? MessageSubmitStatus.SUCCESS.getCode() : MessageSubmitStatus.FAILED.getCode());
                 submit.setRemark(response.getRemark());
-                submit.setMsgId(StringUtils.isNotEmpty(response.getSid()) ? response.getSid() : model.getSid() + "");
+                submit.setMsgId(StringUtils.isNotEmpty(response.getSid()) ? response.getSid() : packets.getSid() + "");
             }
 
             BeanUtils.copyProperties(submit, _submit);
-            _submit.setMobile(mobile);
+            _submit.setMobile(m);
 
             // 获取省份代码/运营商相关内容 add by 20171126
-            ProvinceLocal provinceLocal = mobileLocalService.getByMobile(mobile);
+            ProvinceLocal provinceLocal = mobileLocalService.getByMobile(m);
             _submit.setCmcp(provinceLocal.getCmcp());
             _submit.setProvinceCode(provinceLocal.getProvinceCode());
 
             // 如果提交数据失败，则需要制造伪造包补推送
             if (_submit.getStatus() == MessageSubmitStatus.FAILED.getCode()) {
                 _submit.setPushErrorCode(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
-                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION, _submit);
+                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION,
+                                              _submit);
             }
 
             submits.add(_submit);
@@ -406,13 +442,15 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
     }
 
     /**
-     * TODO 提交短信至上家通道（发送错误）
+     * TODO 提交短信至上家通道（发送网关错误，组装伪造包S0099）
      *
      * @param model
      * @param mobileReport
      */
     private void doSubmitMessageFailed(SmsMtTaskPackets model, String mobileReport) {
-        PushConfig pushConfig = pushConfigService.getPushUrl(model.getUserId(), PlatformType.SEND_MESSAGE_SERVICE.getCode(), model.getCallback());
+        PushConfig pushConfig = pushConfigService.getPushUrl(model.getUserId(),
+                                                             PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                             model.getCallback());
 
         SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
 
@@ -438,7 +476,8 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
             submitx.setCmcp(CMCP.local(mobile).getCode());
             submitx.setMobile(mobile);
 
-            rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submitx);
+            rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION,
+                                          submitx);
         }
     }
 
@@ -452,24 +491,29 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
     public void onMessage(Message message, Channel channel) throws Exception {
         try {
             Object object = messageConverter.fromMessage(message);
+
             // 针对 人工审核处理，重新入队列，入队列数据为子包
             if (object instanceof SmsMtTaskPackets) {
-                doTransport((SmsMtTaskPackets) object);
+                transport2Gateway((SmsMtTaskPackets) object);
             } else {
-                doTaskMain((SmsMtTask) object);
+                transport2Gateway((SmsMtTask) object);
             }
 
         } catch (Exception e) {
             logger.error("MQ消费提交网关数据失败： {}", messageConverter.fromMessage(message), e);
-            // channel.basicNack(message.getMessageProperties().getDeliveryTag(),
-            // false, false);
+            // channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
         } finally {
             // 确认消息成功消费
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         }
     }
 
-    private void doTaskMain(SmsMtTask task) {
+    /**
+     * TODO 主任务（多个子任务）发送网关
+     *
+     * @param task
+     */
+    private void transport2Gateway(SmsMtTask task) {
         if (task == null) {
             logger.error("待提交队列解析失败，主任务为空");
             return;
@@ -477,7 +521,8 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
 
         List<SmsMtTaskPackets> list = task.getPackets();
         for (SmsMtTaskPackets packet : list) {
-            if (packet.getStatus() == PacketsApproveStatus.WAITING.getCode() || packet.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
+            if (packet.getStatus() == PacketsApproveStatus.WAITING.getCode()
+                || packet.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
                 logger.info("数据包待处理，无需本次分包处理");
                 continue;
             }
@@ -487,8 +532,34 @@ public class SmsWaitSubmitListener implements ChannelAwareMessageListener {
                 continue;
             }
 
-            doTransport(packet);
+            transport2Gateway(packet);
         }
+    }
+
+    /**
+     * TODO 根据通道分包数重组手机号码
+     * 
+     * @param mobile
+     * @param smsPassage
+     * @return
+     */
+    private static List<String> regroupMobileByPacketsSize(String mobile, SmsPassage smsPassage) {
+        if (StringUtils.isBlank(mobile)) {
+            throw new RuntimeException("提交任务错误：手机号码为空");
+        }
+
+        String[] mobiles = mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
+        if (mobiles.length == 1) {
+            return Arrays.asList(mobiles);
+        }
+
+        // 如果通道为空或者分包手机号码未配置按照 分包队列的默认数直接提交（默认1000）
+        if (smsPassage == null || smsPassage.getMobileSize() == null || smsPassage.getMobileSize() == 0
+            || smsPassage.getMobileSize() == DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE) {
+            return Arrays.asList(mobiles);
+        }
+
+        return regroupMobiles(mobiles, smsPassage.getMobileSize());
     }
 
 }

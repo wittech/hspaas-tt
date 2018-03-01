@@ -20,6 +20,14 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import redis.clients.jedis.JedisPoolConfig;
 
+/**
+ * 
+  * TODO Redis配置
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2018年1月31日 上午10:36:49
+ */
 @Configuration
 @EnableCaching
 @Order(1)
@@ -109,14 +117,16 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 	public CacheManager cacheManager(RedisTemplate<String, Object> redisTemplate) {
 		RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
 		// Number of seconds before expiration. Defaults to unlimited (0)
-		cacheManager.setDefaultExpiration(10); // 设置key-value超时时间
+
+		// 设置key-value超时时间
+		cacheManager.setDefaultExpiration(10);
 		return cacheManager;
 	}
 
 	@Bean(name = "redisTemplate")
 	public RedisTemplate<String, Object> redisTemplate(
 			@Qualifier("jedisConnectionFactory") RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Object> template = new RedisTemplate<String, Object>();
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new RedisObjectSerializer());

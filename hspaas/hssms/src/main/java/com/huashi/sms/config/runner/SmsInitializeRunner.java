@@ -42,22 +42,33 @@ public class SmsInitializeRunner implements CommandLineRunner {
 	@Override
 	public void run(String... arg0) throws Exception {
 		logger.info("=======================数据初始化REDIS=======================");
-		initPassage();
-		initAccessPassage();
-		initMessageTemplate();
-		initForbiddenWordsList();
-		initMobileBlacklist();
-		initMobileWhiteList();
-		initUserMtReportPushConfigQueue();
-		logger.info("=======================初始化REDIS完成=======================");
-
+		try {
+		    initPassage();
+	        initAccessPassage();
+	        initMessageTemplate();
+	        initForbiddenWordsList();
+	        initMobileBlacklist();
+	        initMobileWhiteList();
+	        initUserMtReportPushConfigQueue();
+		    logger.info("=======================初始化REDIS完成=======================");
+        } catch (Exception e) {
+            logger.info("=======================初始化REDIS失败=======================", e);
+            throw e;
+        }
+		
 		logger.info("=======================数据初始化MQ=======================");
-		boolean isSuccess = initMessageQueues();
-		if (!isSuccess) {
-			logger.info("=======================初始化MQ失败=======================");
-			return;
-		}
-		logger.info("=======================初始化MQ完成=======================");
+		try {
+		    boolean isSuccess = initMessageQueues();
+	        if (!isSuccess) {
+	            logger.info("=======================初始化MQ失败=======================");
+	            throw new RuntimeException("初始化MQ失败");
+	        }
+	        
+	        logger.info("=======================初始化MQ完成=======================");
+        } catch (Exception e) {
+            logger.info("=======================初始化MQ失败=======================", e);
+            throw e;
+        }
 	}
 
 	private void initPassage() {

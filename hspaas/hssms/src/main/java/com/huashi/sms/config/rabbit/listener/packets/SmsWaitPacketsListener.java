@@ -1,5 +1,28 @@
 package com.huashi.sms.config.rabbit.listener.packets;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.bill.pay.constant.PayContext.PaySource;
@@ -35,7 +58,11 @@ import com.huashi.sms.settings.service.IForbiddenWordsService;
 import com.huashi.sms.settings.service.ISmsMobileBlackListService;
 import com.huashi.sms.settings.service.ISmsMobileTablesService;
 import com.huashi.sms.settings.service.ISmsMobileWhiteListService;
-import com.huashi.sms.task.context.TaskContext.*;
+import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
+import com.huashi.sms.task.context.TaskContext.PacketsActionActor;
+import com.huashi.sms.task.context.TaskContext.PacketsActionPosition;
+import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
+import com.huashi.sms.task.context.TaskContext.PacketsProcessStatus;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.huashi.sms.task.exception.QueueProcessException;
@@ -44,27 +71,12 @@ import com.huashi.sms.template.context.TemplateContext;
 import com.huashi.sms.template.domain.MessageTemplate;
 import com.huashi.sms.template.service.ISmsTemplateService;
 import com.rabbitmq.client.Channel;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * TODO 待消息分包处理
  *
  * @author zhengying
- * @version V1.0.0
+ * @version V1.0.0  
  * @date 2016年9月8日 下午11:35:54
  */
 @Component
@@ -104,15 +116,9 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     private IUserSmsConfigService userSmsConfigService;
 
     /**
-     * 默认每个包手机号码上限数
-     */
-    private static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 500;
-
-    /**
      * 根据当前用户ID和短信内容提取出的短信模板信息
      */
     private final ThreadLocal<MessageTemplate> messageTemplateLocal = new ThreadLocal<>();
-    //
 
     /**
      * 错误序列号计数器
@@ -826,7 +832,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 
         String mobile;
         SmsPassageAccess passage;
-        int requestPackageSize;
 
         for (Integer passageId : routePassage.getPassageMobiles().keySet()) {
             passage = routePassage.getPassaegAccesses().get(passageId);
@@ -846,8 +851,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
                 continue;
             }
 
-            requestPackageSize = getPassageRequestPackageSize(passage);
-
             // 手机号码只有一个则直接分成一个包提交
             if (mobiles.length == 1) {
                 joinTaskPackets(task, mobile, passage);
@@ -855,7 +858,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             }
 
             // 如果手机号码多于分包数量，需要对手机号码分包，重组子任务
-            List<String> groupMobiles = regroupMobiles(mobiles, requestPackageSize);
+            List<String> groupMobiles = regroupMobiles(mobiles, DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE);
             if (CollectionUtils.isEmpty(groupMobiles)) {
                 continue;
             }
@@ -865,21 +868,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             }
 
         }
-    }
-
-    /**
-     * TODO 获取通道每次HTTP/直连请求的手机号码最大个数
-     *
-     * @param passage
-     * @return
-     */
-    private static int getPassageRequestPackageSize(SmsPassageAccess passage) {
-        if (passage == null || passage.getMobileSize() == null || passage.getMobileSize() == 0) {
-            return DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE;
-        }
-
-        // 大于预设的手机号码分包数需要 拆包处理
-        return passage.getMobileSize();
     }
 
 }

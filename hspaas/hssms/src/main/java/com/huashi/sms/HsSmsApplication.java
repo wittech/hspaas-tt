@@ -6,13 +6,14 @@ import org.springframework.context.annotation.ImportResource;
 
 import com.huashi.common.util.LogUtils;
 
-@SpringBootApplication
 //@ServletComponentScan
-// @EnableTransactionManagement
+//@EnableTransactionManagement
+
+@SpringBootApplication
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsSmsApplication {
 
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		SpringApplication.run(HsSmsApplication.class, args);
 		LogUtils.info("华时短信服务项目已启动");
 		

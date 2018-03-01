@@ -14,260 +14,254 @@ package com.huashi.sms.passage.context;
  * @created_at 2016年8月25日下午7:02:30
  */
 public class PassageContext {
-	
-	// 异常通道ID
-	public static final int EXCEPTION_PASSAGE_ID = 0;
-	public static final String EXCEPTION_PASSAGE_NAME = "N/A";
-	
-	
 
-	/**
-	 * 
-	 * TODO 录用类型
-	 *
-	 * @author zhengying
-	 * @version V1.0.0
-	 * @date 2016年10月7日 下午8:48:03
-	 */
-	public enum RouteType {
-		DEFAULT(0, "默认路由"), VALIDATE_CODE(1, "验证码路由"), QUIK_NOTIFICATION(2,
-				"即时通知路由"), BATCH_NOTIFICATION(3, "批量通知路由"), HIGH_DANGER(4,
-				"高风险投诉路由");
+    /**
+     * 异常通道ID
+     */
+    public static final int EXCEPTION_PASSAGE_ID = 0;
 
-		private int value;
+    /**
+     * 异常（根据ID找不到通道等情况）显示的通道名称
+     */
+    public static final String EXCEPTION_PASSAGE_NAME = "N/A";
 
-		private String name;
 
-		private RouteType(int value, String name) {
-			this.name = name;
-			this.value = value;
-		}
+    /**
+     * TODO 录用类型
+     *
+     * @author zhengying
+     * @version V1.0.0
+     * @date 2016年10月7日 下午8:48:03
+     */
+    public enum RouteType {
+        DEFAULT(0, "默认路由"), VALIDATE_CODE(1, "验证码路由"), QUIK_NOTIFICATION(2, "即时通知路由"), BATCH_NOTIFICATION(3, "批量通知路由"), HIGH_DANGER(4, "高风险投诉路由");
 
-		public int getValue() {
-			return value;
-		}
+        private int value;
 
-		public String getName() {
-			return name;
-		}
+        private String name;
 
-		public static RouteType parse(int value) {
-			for (RouteType type : RouteType.values()) {
-				if (type.getValue() == value) {
-					return type;
-				}
-			}
-			return RouteType.DEFAULT;
-		}
-	}
+        RouteType(int value, String name) {
+            this.name = name;
+            this.value = value;
+        }
 
-	/**
-	 * 
-	 * TODO 通道状态
-	 *
-	 * @author zhengying
-	 * @version V1.0.0
-	 * @date 2016年10月7日 下午10:28:04
-	 */
-	public enum PassageStatus {
-		ACTIVE(0, "有效"), HANGUP(1, "暂停使用"), SERVER_EXCEPTION(2, "服务器异常停用");
+        public int getValue() {
+            return value;
+        }
 
-		private int value;
-		private String title;
+        public String getName() {
+            return name;
+        }
 
-		private PassageStatus(int value, String title) {
-			this.title = title;
-			this.value = value;
-		}
+        public static RouteType parse(int value) {
+            for (RouteType type : RouteType.values()) {
+                if (type.getValue() == value) {
+                    return type;
+                }
+            }
+            return RouteType.DEFAULT;
+        }
+    }
 
-		public int getValue() {
-			return value;
-		}
+    /**
+     * TODO 通道状态
+     *
+     * @author zhengying
+     * @version V1.0.0
+     * @date 2016年10月7日 下午10:28:04
+     */
+    public enum PassageStatus {
+        ACTIVE(0, "有效"), HANGUP(1, "暂停使用"), SERVER_EXCEPTION(2, "服务器异常停用");
 
-		public String getTitle() {
-			return title;
-		}
+        private int value;
+        private String title;
 
-		public static RouteType getByValue(int value) {
-			for (RouteType type : RouteType.values()) {
-				if (type.getValue() == value) {
-					return type;
-				}
-			}
-			return RouteType.DEFAULT;
-		}
-	}
+        PassageStatus(int value, String title) {
+            this.title = title;
+            this.value = value;
+        }
 
-	/**
-	 * 
-	 * TODO 返回数字定义
-	 *
-	 * @author zhengying
-	 * @version V1.0.0
-	 * @date 2016年10月7日 下午8:48:03
-	 */
-	public enum ResultCode {
-		ZERO(0, "失败"), ONE(1, "成功"), TWO(2, "重复"), THREE(3, "记录重复并且状态为停用");
+        public int getValue() {
+            return value;
+        }
 
-		private int value;
+        public String getTitle() {
+            return title;
+        }
 
-		private String title;
+        public static RouteType getByValue(int value) {
+            for (RouteType type : RouteType.values()) {
+                if (type.getValue() == value) {
+                    return type;
+                }
+            }
+            return RouteType.DEFAULT;
+        }
+    }
 
-		private ResultCode(int value, String title) {
-			this.title = title;
-			this.value = value;
-		}
+    /**
+     * TODO 返回数字定义
+     *
+     * @author zhengying
+     * @version V1.0.0
+     * @date 2016年10月7日 下午8:48:03
+     */
+    public enum ResultCode {
+        ZERO(0, "失败"), ONE(1, "成功"), TWO(2, "重复"), THREE(3, "记录重复并且状态为停用");
 
-		public int getValue() {
-			return value;
-		}
+        private int value;
 
-		public String getTitle() {
-			return title;
-		}
-	}
+        private String title;
 
-	/**
-	 * 
-	 * TODO 回执状态
-	 *
-	 * @author zhengying
-	 * @version V1.0.0
-	 * @date 2016年11月30日 下午10:50:32
-	 */
-	public enum DeliverStatus {
-		SUCCESS(0, "成功"), FAILED(1, "失败");
+        ResultCode(int value, String title) {
+            this.title = title;
+            this.value = value;
+        }
 
-		private int value;
-		private String title;
+        public int getValue() {
+            return value;
+        }
 
-		private DeliverStatus(int value, String title) {
-			this.title = title;
-			this.value = value;
-		}
+        public String getTitle() {
+            return title;
+        }
+    }
 
-		public int getValue() {
-			return value;
-		}
+    /**
+     * TODO 回执状态
+     *
+     * @author zhengying
+     * @version V1.0.0
+     * @date 2016年11月30日 下午10:50:32
+     */
+    public enum DeliverStatus {
+        SUCCESS(0, "成功"), FAILED(1, "失败");
 
-		public String getTitle() {
-			return title;
-		}
+        private int value;
+        private String title;
 
-	}
+        DeliverStatus(int value, String title) {
+            this.title = title;
+            this.value = value;
+        }
 
-	/**
-	 * 
-	 * TODO 推送状态
-	 * 
-	 * @author zhengying
-	 * @version V1.0
-	 * @date 2016年12月1日 下午6:54:24
-	 */
-	public enum PushStatus {
-		SUCCESS(0, "成功"), FAILED(1, "失败"), ;
+        public int getValue() {
+            return value;
+        }
 
-		private int value;
-		private String title;
+        public String getTitle() {
+            return title;
+        }
 
-		private PushStatus(int value, String title) {
-			this.title = title;
-			this.value = value;
-		}
+    }
 
-		public int getValue() {
-			return value;
-		}
+    /**
+     * TODO 推送状态
+     *
+     * @author zhengying
+     * @version V1.0
+     * @date 2016年12月1日 下午6:54:24
+     */
+    public enum PushStatus {
+        SUCCESS(0, "成功"), FAILED(1, "失败"),;
 
-		public String getTitle() {
-			return title;
-		}
-	}
-	
-	/**
-	 * 
-	  * TODO 通道签名模式
-	  *
-	  * @author zhengying
-	  * @version V1.0.0   
-	  * @date 2017年6月10日 下午6:49:03
-	 */
-	public enum PassageSignMode {
-		IGNORED(0, "不处理"), SIGNATURE_AUTO_PREPOSITION(1, "签名自动前置"), 
-			SIGNATURE_AUTO_POSTPOSITION(2, "签名自动后置"), REMOVE_SIGNATURE(3, "自动去掉签名");
+        private int value;
+        private String title;
 
-		private int value;
-		private String title;
+        PushStatus(int value, String title) {
+            this.title = title;
+            this.value = value;
+        }
 
-		private PassageSignMode(int value, String title) {
-			this.title = title;
-			this.value = value;
-		}
+        public int getValue() {
+            return value;
+        }
 
-		public int getValue() {
-			return value;
-		}
+        public String getTitle() {
+            return title;
+        }
+    }
 
-		public String getTitle() {
-			return title;
-		}
-	}
-	
-	/**
-	 * 
-	  * TODO 通道短信模板状态
-	  * 
-	  * @author zhengying
-	  * @version V1.0   
-	  * @date 2017年8月30日 下午1:51:37
-	 */
-	public enum PassageMessageTemplateStatus {
-		AVAIABLE(0, "使用中"), DISABLED(1, "停用");
+    /**
+     * TODO 通道签名模式
+     *
+     * @author zhengying
+     * @version V1.0.0
+     * @date 2017年6月10日 下午6:49:03
+     */
+    public enum PassageSignMode {
+        IGNORED(0, "不处理"), SIGNATURE_AUTO_PREPOSITION(1, "签名自动前置"), SIGNATURE_AUTO_POSTPOSITION(2, "签名自动后置"), REMOVE_SIGNATURE(3, "自动去掉签名");
 
-		private int value;
-		private String title;
+        private int value;
+        private String title;
 
-		private PassageMessageTemplateStatus(int value, String title) {
-			this.title = title;
-			this.value = value;
-		}
+        PassageSignMode(int value, String title) {
+            this.title = title;
+            this.value = value;
+        }
 
-		public int getValue() {
-			return value;
-		}
+        public int getValue() {
+            return value;
+        }
 
-		public String getTitle() {
-			return title;
-		}
+        public String getTitle() {
+            return title;
+        }
+    }
 
-	}
-	
-	/**
-	 * 
-	  * TODO 通道是否需要通道方强制携带规定参数
-	  * 
-	  * @author zhengying
-	  * @version V1.0   
-	  * @date 2017年9月19日 上午9:57:08
-	 */
-	public enum PassageSmsTemplateParam {
-		NO(0, "不需要"), YES(1, "需要");
+    /**
+     * TODO 通道短信模板状态
+     *
+     * @author zhengying
+     * @version V1.0
+     * @date 2017年8月30日 下午1:51:37
+     */
+    public enum PassageMessageTemplateStatus {
+        AVAIABLE(0, "使用中"), DISABLED(1, "停用");
 
-		private int value;
-		private String title;
+        private int value;
+        private String title;
 
-		private PassageSmsTemplateParam(int value, String title) {
-			this.title = title;
-			this.value = value;
-		}
+        PassageMessageTemplateStatus(int value, String title) {
+            this.title = title;
+            this.value = value;
+        }
 
-		public int getValue() {
-			return value;
-		}
+        public int getValue() {
+            return value;
+        }
 
-		public String getTitle() {
-			return title;
-		}
+        public String getTitle() {
+            return title;
+        }
 
-	}
+    }
+
+    /**
+     * TODO 通道是否需要通道方强制携带规定参数
+     *
+     * @author zhengying
+     * @version V1.0
+     * @date 2017年9月19日 上午9:57:08
+     */
+    public enum PassageSmsTemplateParam {
+        NO(0, "不需要"), YES(1, "需要");
+
+        private int value;
+        private String title;
+
+        PassageSmsTemplateParam(int value, String title) {
+            this.title = title;
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+    }
 }

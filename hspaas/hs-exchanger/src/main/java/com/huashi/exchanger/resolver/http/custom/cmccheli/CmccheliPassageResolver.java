@@ -63,7 +63,7 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
                     startMoPush(headers, tparameter.getString("mo_subscribe_url"), tparameter.getString("mo_callback_url"), 
                                 tparameter.getString("terminal_no"), parameter.getSuccessCode());
                 } catch (Exception e) {
-                    logger.error("和力云启动推送上行异常", e);
+                    logger.error("江苏和力云启动推送上行异常", e);
                 }
             }
 
@@ -73,8 +73,8 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
             // 解析返回结果并返回
             return sendResponse(result, parameter.getSuccessCode());
         } catch (Exception e) {
-            logger.error("和力云发送失败", e);
-            throw new RuntimeException("和力云发送发送");
+            logger.error("江苏和力云发送失败", e);
+            throw new RuntimeException("江苏和力云发送发送");
         }
     }
 
@@ -92,8 +92,13 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
         return content.substring(content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX) + 1, content.lastIndexOf(MESSAGE_SIGNATURE_SUFFIX));
     }
 
-    public static void main(String[] args) {
-        System.out.println(pickupSignature("【华时科技】少时诵诗书所"));
+    /**
+     * TODO 获取短信内容信息（去掉签名信息）
+     * @param content
+     * @return
+     */
+    private static String cutSignatureInContent(String content) {
+        return content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length());
     }
 
     /**
@@ -107,11 +112,18 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
         try {
             JSONObject paramReport = new JSONObject();
             for (int i = 0; i < paramNames.length; i++) {
-                paramReport.put(paramNames[i], paramValues[i]);
+
+                // 如果参数值包含【】 签名的方括号，则表明参数为短信内容，短信内容需要去掉 签名值（通道方会自动携带签名信息）
+                if(StringUtils.isNotEmpty(paramValues[i]) && paramValues[i].contains(MESSAGE_SIGNATURE_PRIFIX) &&
+                        paramValues[i].contains(MESSAGE_SIGNATURE_SUFFIX)) {
+                    paramReport.put(paramNames[i], cutSignatureInContent(paramValues[i]));
+                } else {
+                    paramReport.put(paramNames[i], paramValues[i]);
+                }
             }
             return paramReport.toJSONString();
         } catch (Exception e) {
-            logger.error("和力云组装发送参数信息", e);
+            logger.error("江苏和力云组装发送参数信息", e);
             return null;
         }
     }
@@ -145,7 +157,7 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
             return headers;
 
         } catch (Exception e) {
-            logger.error("和力云计算签名失败", e);
+            logger.error("江苏和力云计算签名失败", e);
             return null;
         }
     }
@@ -174,8 +186,11 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
         params.put("receiptNotificationURL", tparameter.get("mt_callback_url"));
         // 短信内容中提取签名信息（不需要携带【】）
         params.put("messageSign", pickupSignature(content));
-        if(StringUtils.isNotBlank(tparameter.getString("terminal_no"))) 
-            params.put("smsCustomCode", tparameter.get("terminal_no") + (StringUtils.isNotBlank(extNumber) ? extNumber : ""));
+
+        //码号
+        String terminalNo = tparameter.getString("terminal_no");
+        if(StringUtils.isNotBlank(terminalNo))
+            params.put("smsCustomCode", terminalNo + (StringUtils.isNotBlank(extNumber) ? extNumber : ""));
 
         return params.toJSONString();
     }
@@ -244,7 +259,9 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
             JSONObject jsonobj = JSONObject.parseObject(report);
             String msgId = jsonobj.getString("messageId");
             String status = jsonobj.getString("state");
-            String mobile = jsonobj.getString("destTerminalId");
+            // 手机号码前两位为86 ，需要截取去掉
+            String mobile = StringUtils.isEmpty(jsonobj.getString("destTerminalId")) ? "" : jsonobj.getString("destTerminalId").substring(2);
+
             String receiveTime = jsonobj.getString("doneTime");
 
             List<SmsMtMessageDeliver> list = new ArrayList<>();
@@ -263,8 +280,8 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
             // 解析返回结果并返回
             return list;
         } catch (Exception e) {
-            logger.error("和力云状态解析失败", e);
-            throw new RuntimeException("和力云状态解析失败");
+            logger.error("江苏和力云状态解析失败", e);
+            throw new RuntimeException("江苏和力云状态解析失败");
         }
     }
 
@@ -295,8 +312,8 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
             // 解析返回结果并返回
             return list;
         } catch (Exception e) {
-            logger.error("和力云上行解析失败", e);
-            throw new RuntimeException("和力云上行解析失败");
+            logger.error("江苏和力云上行解析失败", e);
+            throw new RuntimeException("江苏和力云上行解析失败");
         }
     }
 
@@ -328,14 +345,14 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
             String resultCode = response.getString("resultCode");
             if (successCode.equalsIgnoreCase(resultCode)) {
                 isMoPushRunning = true;
-                logger.info("和力云上行推送URL：{} 已开启", moCallbackUrl);
+                logger.info("江苏和力云上行推送URL：{} 已开启", moCallbackUrl);
                 return;
             }
 
-            logger.warn("和力云上行推送URL：{} 开启失败 , {}", moCallbackUrl, result);
+            logger.warn("江苏和力云上行推送URL：{} 开启失败 , {}", moCallbackUrl, result);
 
         } catch (Exception e) {
-            logger.error("和力云上行推送开启失败， URL: {} ", moUrl, e);
+            logger.error("江苏和力云上行推送开启失败， URL: {} ", moUrl, e);
         }
     }
 

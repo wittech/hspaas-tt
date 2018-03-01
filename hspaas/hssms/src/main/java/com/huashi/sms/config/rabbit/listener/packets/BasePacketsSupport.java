@@ -12,6 +12,11 @@ public abstract class BasePacketsSupport {
 
     // 错误信息分隔符
     protected static final String ERROR_MESSAGE_SEPERATOR = ";";
+    
+    /**
+     * 默认每个包手机号码上限数
+     */
+    protected static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 1000;
 
     /**
      * TODO 重组手机号码，按照分包数量进行数据拆分 分包数据
@@ -20,7 +25,7 @@ public abstract class BasePacketsSupport {
      * @param mobileNumPerGroup 每组手机号码个数
      * @return
      */
-    static List<String> regroupMobiles(String[] mobile, int mobileNumPerGroup) {
+    protected static List<String> regroupMobiles(String[] mobile, int mobileNumPerGroup) {
         int totalSize = mobile.length;
         // 获取要拆分子数组个数
         int count = (totalSize % mobileNumPerGroup == 0) ? (totalSize / mobileNumPerGroup) : (totalSize

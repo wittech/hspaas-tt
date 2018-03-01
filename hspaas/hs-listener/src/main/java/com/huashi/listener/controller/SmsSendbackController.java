@@ -25,11 +25,14 @@ public class SmsSendbackController extends BaseController {
 	private SmsPassagePrervice smsPassagePrervice;
 
 	/**
-	 * 
 	 * TODO 接收通道厂商回执状态报告
-	 * 
-	 * @param passage
-	 *            通道厂商标识
+	 *
+	 * @param filterCode
+	 * 		过滤码
+	 * @param providerCode
+	 * 		通道简码
+	 * @param encoding
+	 * 		编码方式
 	 * @return
 	 */
 	@RequestMapping("/status/{filter_code}/{provider_code}/{encoding}")
@@ -49,6 +52,7 @@ public class SmsSendbackController extends BaseController {
 	/**
 	 * 
 	   * TODO 接收通道厂商上行数据
+	 *
 	   * @param filterCode
 	   * @param providerCode
 	   * @param encoding

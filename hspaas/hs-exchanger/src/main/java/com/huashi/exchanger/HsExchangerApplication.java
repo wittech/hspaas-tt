@@ -7,11 +7,13 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.huashi.common.util.IdGenerator;
 import com.huashi.common.util.LogUtils;
 
-@SpringBootApplication	
+@SpringBootApplication
+@EnableAsync
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsExchangerApplication {
 

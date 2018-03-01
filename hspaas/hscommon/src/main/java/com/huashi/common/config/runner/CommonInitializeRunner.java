@@ -51,15 +51,21 @@ public class CommonInitializeRunner implements CommandLineRunner {
 		}
 		
 		logger.info("=======================数据初始化REDIS=======================");
-		initUserList();
-		initUserDeveloperList();
-		initUserSmsConfig();
-		initUserPushConfig();
-		initHostWhiteList();
-		initProvince();
-		initProvinceMobileLocal();
-		initSystemConfig();
-		logger.info("=======================初始化REDIS完成=======================");
+		try {
+		    initUserList();
+	        initUserDeveloperList();
+	        initUserSmsConfig();
+	        initUserPushConfig();
+	        initHostWhiteList();
+	        initProvince();
+	        initProvinceMobileLocal();
+	        initSystemConfig();
+	        
+	        logger.info("=======================初始化REDIS完成=======================");
+        } catch (Exception e) {
+            logger.error("=======================初始化REDIS失败=======================", e);
+            throw e;
+        }
 	}
 	
 	/**

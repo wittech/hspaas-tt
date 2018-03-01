@@ -80,7 +80,7 @@ public class HashCoderUtil {
 			// 获得密文
 			byte[] md = mdInst.digest();
 			// 把密文转换成十六进制的字符串形式
-			StringBuffer hexString = new StringBuffer();
+			StringBuilder hexString = new StringBuilder();
 			// 字节数组转换为 十六进制 数
 			for (int i = 0; i < md.length; i++) {
 				String shaHex = Integer.toHexString(md[i] & 0xFF);

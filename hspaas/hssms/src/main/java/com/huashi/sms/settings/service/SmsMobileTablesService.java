@@ -102,8 +102,15 @@ public class SmsMobileTablesService implements ISmsMobileTablesService {
 		
 		Integer _sendTotalCount = null;
 		try {
+		    // 如果上限次数为0，则不允许提交任何
+            if(maxLimit == 0) {
+                return MOBILE_BEYOND_TIMES;
+            }
+		    
+            // 根据手机号码和用户信息获取手机防火墙计数信息
 			Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(getAssistKey(SmsRedisConstant.RED_MOBILE_GREEN_TABLES, 
 					userId, templateId, mobile));
+			
 			if(MapUtils.isEmpty(map)) {
 				setMobileSendRecord(userId, templateId, mobile, _sendTotalCount == null ? 0 : _sendTotalCount.intValue());
 				return NICE_PASSED;
@@ -113,11 +120,6 @@ public class SmsMobileTablesService implements ISmsMobileTablesService {
 			Object sendTotalCount = map.get(MOBILE_SEND_TOTAL_COUNT);
 			_sendTotalCount = Integer.parseInt(sendTotalCount.toString()) + 1;
 
-			// 如果上限次数为0，则不允许提交任何
-			if(maxLimit == 0) {
-                return MOBILE_BEYOND_TIMES;
-            }
-			
 			// 判断手机号码一天内发送总量是否已超过预设值
 			if(_sendTotalCount >= maxLimit) {
                 return MOBILE_BEYOND_TIMES;

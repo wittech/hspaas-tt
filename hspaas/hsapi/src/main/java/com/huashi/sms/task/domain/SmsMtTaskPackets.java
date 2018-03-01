@@ -1,5 +1,6 @@
 package com.huashi.sms.task.domain;
 
+import java.beans.Transient;
 import java.io.Serializable;
 
 import com.huashi.common.user.model.UserModel;
@@ -370,6 +371,7 @@ public class SmsMtTaskPackets implements Serializable {
 		this.userModel = userModel;
 	}
 
+	@Transient
 	public String[] getMobiles() {
 		if (StringUtils.isNotBlank(mobile)) {
 			return mobile.split(",");
@@ -377,6 +379,7 @@ public class SmsMtTaskPackets implements Serializable {
 		return null;
 	}
 
+	@Transient
 	public String getFirstMobile() {
 		String[] mobiles = getMobiles();
 		if (mobiles != null && mobiles.length > 0) {

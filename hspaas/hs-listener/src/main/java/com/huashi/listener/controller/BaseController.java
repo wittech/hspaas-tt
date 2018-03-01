@@ -32,12 +32,13 @@ public class BaseController {
 	public String toString() {
 		return JSON.toJSONString(request.getParameterMap());
 	}
-	
+
 	/**
-	 * 
-	   * TODO 解析参数
-	   * 
-	   * @param provider
+	 *  TODO 解析参数
+	 *
+	 * @param filterCode
+	 * @param encoding
+	 * @return
 	 */
 	protected JSONObject doTranslateParameter(Integer filterCode, String encoding) {
 		ParameterFilter filter = ParameterFilter.parse(filterCode);

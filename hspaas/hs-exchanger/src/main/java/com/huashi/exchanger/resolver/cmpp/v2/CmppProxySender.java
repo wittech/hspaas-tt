@@ -71,6 +71,7 @@ public class CmppProxySender {
 	 * 
 	 * @param msg
 	 */
+//	@Async("asyncTaskExcutor")
 	public void doProcessDeliverMessage(CMPPMessage msg) {
 		CMPPDeliverMessage deliverMsg = (CMPPDeliverMessage) msg;
 		// logger.info("回执，{}", JSON.toJSONString(msg));
@@ -256,16 +257,12 @@ public class CmppProxySender {
 			String extNumber, String mobile, String content) {
 		try {
 
-			long t1 = System.currentTimeMillis();
 			TParameter tparameter = RequestTemplateHandler.parse(parameter
 					.getParams());
 			if (MapUtils.isEmpty(tparameter)) {
 				throw new RuntimeException("CMPP 参数信息为空");
 			}
 
-			long t2 = System.currentTimeMillis();
-
-			logger.info("==============t2-t1=" + (t2 - t1));
 			CmppManageProxy cmppManageProxy = getCmppManageProxy(parameter);
 			if (cmppManageProxy == null) {
 				logger.error("CMPP代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile,
@@ -273,9 +270,6 @@ public class CmppProxySender {
 
 				return null;
 			}
-
-			long t3 = System.currentTimeMillis();
-			logger.info("==============t3-t2=" + (t3 - t2));
 
 			// 接入号码（如果扩展号码不为空，则加入扩展号码）
 			String srcTerminalId = tparameter.getString("src_terminal_id")
@@ -291,9 +285,6 @@ public class CmppProxySender {
 							: tparameter.getString("mobile"), srcTerminalId,
 					mobile, content, "", cmppManageProxy, parameter
 							.getFeeByWords());
-
-			long t4 = System.currentTimeMillis();
-			logger.info("==============t4-t3=" + (t4 - t3));
 
 			if (submitRepMsg == null) {
 				logger.error("CMPPSubmitRepMessage 网关提交信息为空");
@@ -320,10 +311,6 @@ public class CmppProxySender {
 						response.getSid(), submitRepMsg.getSequenceId(),
 						submitRepMsg.getCommandId()));
 
-				long t5 = System.currentTimeMillis();
-
-				logger.info("==============t5-t4=" + (t5 - t4));
-				logger.info("==============t5-t1=" + (t5 - t1));
 				list.add(response);
 			} else {
 				response.setMobile(mobile);

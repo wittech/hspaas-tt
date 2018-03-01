@@ -242,6 +242,7 @@ public abstract class AbstractWorker<E> implements Runnable {
                     continue;
                 }
 
+                // 根据值对象的类型进行数据解析，填充
                 Object value = JSON.parse(o.toString());
                 if (value instanceof List) {
                     list.addAll(JSON.parseArray(o.toString(), getClildType()));

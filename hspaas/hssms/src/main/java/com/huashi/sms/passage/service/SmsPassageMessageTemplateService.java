@@ -126,6 +126,12 @@ public class SmsPassageMessageTemplateService implements ISmsPassageMessageTempl
 			return null;
 		}
 	}
+
+	public static void main(String[] args) {
+		String[] cc = pickupValuesByRegex("【车点点】您的验证码为959258，请尽快完成后续操作。", "^(.*)$", 1);
+
+		System.out.println(cc[0]);
+	}
 	
 	/**
 	 * 

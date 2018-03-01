@@ -124,7 +124,9 @@ public class BossPaginationVo<T> implements Serializable {
 		if (getCurrentPage() < liststep) {
 			for (int i = 1; i <= (getTotalPage() > liststep ? liststep
 					: getTotalPage()); i++) {
-				if (i != getCurrentPage()) {// 如果i不等于当前页
+
+				// 如果i不等于当前页
+				if (i != getCurrentPage()) {
 					pathfind.append("<li><a href='javascript:"
 							+ jumpPageFunction + "(" + i + ");'>" + i
 							+ "</a></li>");

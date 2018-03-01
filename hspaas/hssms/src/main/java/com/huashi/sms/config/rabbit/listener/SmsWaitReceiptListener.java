@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
@@ -51,18 +53,27 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Override
+	@Override
     @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT)
     public void onMessage(Message message, Channel channel) throws Exception {
         try {
-            JSONObject object = (JSONObject) messageConverter.fromMessage(message);
+            Object object = messageConverter.fromMessage(message);
             // 处理待提交队列逻辑
             if (object == null) {
                 logger.warn("状态回执报告解析失败：回执数据为空");
                 return;
             }
-
-            List<SmsMtMessageDeliver> delivers = doDeliverMessage(object);
+            
+            List<SmsMtMessageDeliver> delivers;
+            if(object instanceof JSONObject) {
+            	delivers = doDeliverMessage((JSONObject)object);
+            } else if(object instanceof List) {
+            	ObjectMapper mapper = new ObjectMapper();
+            	delivers = mapper.convertValue(object, new TypeReference<List<SmsMtMessageDeliver>>(){});
+            } else {
+            	logger.error("状态回执数据类型无法匹配");
+            	return;
+            }
 
             if (CollectionUtils.isEmpty(delivers)) {
                 logger.error("状态回执报告解析为空 : {}", messageConverter.fromMessage(message));

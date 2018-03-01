@@ -8,7 +8,6 @@ import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.ResponseMessage;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
-import com.huashi.sms.task.exception.QueueProcessException;
 
 /**
  * 
@@ -133,7 +132,7 @@ public interface ISmsMtTaskService {
 	   * 
 	   * @param taskIds
 	   * 		主任务ID集合，以','(半角逗号)分割
-	   * @param passageId
+	   * @param expectPassageId
 	   * 		切换后的通道ID
 	   * @return
 	 */
@@ -161,16 +160,6 @@ public interface ISmsMtTaskService {
 
 	/**
 	 * 
-	 * TODO 发送短信任务至队列
-	 * 
-	 * @param model
-	 * @return
-	 * @throws MqueueException
-	 */
-	long doSubmitTask(SmsMtTask model) throws QueueProcessException;
-
-	/**
-	 * 
 	 * TODO 根据ID查询子任务信息
 	 * 
 	 * @param id
@@ -189,9 +178,8 @@ public interface ISmsMtTaskService {
 	void batchSave(List<SmsMtTask> tasks, List<SmsMtTaskPackets> taskPackets) throws RuntimeException;
 
 	/**
-	 * 
-	 * TODO 主任务强制通过
-	 * 
+	 *  TODO 主任务强制通过
+	 *
 	 * @param sid
 	 * @return
 	 */
@@ -201,7 +189,7 @@ public interface ISmsMtTaskService {
 	 * 
 	 * TODO 主任务任务驳回 数据
 	 * 
-	 * @param task
+	 * @param taskIds
 	 * @return
 	 */
 	boolean doRejectInTask(String taskIds);
@@ -222,7 +210,7 @@ public interface ISmsMtTaskService {
 	   * @param taskIds
 	   * @return
 	 */
-	ResponseMessage doForcePass(String taskIds);
+	ResponseMessage doTaskApproved(String taskIds);
 	
 	/**
 	 * 
@@ -234,13 +222,25 @@ public interface ISmsMtTaskService {
 	   * 		是否模糊匹配，如果模糊匹配则采用包含模式，默认为全匹配 false
 	   * @return
 	 */
-	int doPassWithSameContent(String content, boolean isLikePattern);
+	int approvedBySameContent(String content, boolean isLikePattern);
+
+	/**
+	 *
+	 * TODO 批量驳回同样内容短信任务
+	 *
+	 * @param content
+	 * 		短信内容
+	 * @param isLikePattern
+	 * 		是否模糊匹配，如果模糊匹配则采用包含模式，默认为全匹配 false
+	 * @return
+	 */
+	int rejectBySameContent(String content, boolean isLikePattern);
 
 	/**
 	 * 
 	 * TODO 重新分包
 	 * 
-	 * @param sid
+	 * @param id
 	 * @return
 	 */
 	boolean doRePackets(long id);

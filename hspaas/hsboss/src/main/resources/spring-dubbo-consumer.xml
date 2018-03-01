@@ -1,83 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <dubbo:application name="hsboss-consumer" logger="slf4j"/>
+	<dubbo:application name="hsboss-consumer" logger="slf4j" />
 
-    <dubbo:registry protocol="zookeeper" address="${zookeeper.address}" timeout="15000"/>
+	<dubbo:registry protocol="zookeeper" address="${zookeeper.address}"
+		timeout="15000" />
 
-    <dubbo:provider timeout="100000" retries="0" protocol="dubbo" default="true"/>
-    <dubbo:protocol name="dubbo" serialization="kryo" port="-1"/>
+	<dubbo:provider timeout="100000" retries="0" protocol="dubbo"
+		default="true" />
+	<dubbo:protocol name="dubbo" serialization="kryo" port="-1" />
 
-    <dubbo:protocol name="hessian" port="-1"/>
+	<dubbo:protocol name="hessian" port="-1" />
 
-    <!-- <dubbo:annotation package="com.huashi" /> -->
-    <dubbo:reference id="iSystemConfigService" interface="com.huashi.common.settings.service.ISystemConfigService"/>
-    <dubbo:reference id="iNotificationService" interface="com.huashi.common.notice.service.INotificationService"/>
-    <dubbo:reference id="iNotificationMessageService"
-                     interface="com.huashi.common.notice.service.INotificationMessageService"/>
-    <dubbo:reference id="iRegisterService" interface="com.huashi.common.user.service.IRegisterService"/>
-    <dubbo:reference id="iUserService" interface="com.huashi.common.user.service.IUserService"/>
-    <dubbo:reference id="iPushConfigService" interface="com.huashi.common.settings.service.IPushConfigService"/>
-    <dubbo:reference id="iUserFluxDiscountService" interface="com.huashi.common.user.service.IUserFluxDiscountService"/>
-    <dubbo:reference id="iUserBalanceService" interface="com.huashi.common.user.service.IUserBalanceService"/>
-    <dubbo:reference id="iUserBalanceLogService" interface="com.huashi.common.user.service.IUserBalanceLogService"/>
+	<!-- <dubbo:annotation package="com.huashi" /> -->
+	<dubbo:reference id="iSystemConfigService"
+		interface="com.huashi.common.settings.service.ISystemConfigService" />
+	<dubbo:reference id="iNotificationService"
+		interface="com.huashi.common.notice.service.INotificationService" />
+	<dubbo:reference id="iNotificationMessageService"
+		interface="com.huashi.common.notice.service.INotificationMessageService" />
+	<dubbo:reference id="iRegisterService"
+		interface="com.huashi.common.user.service.IRegisterService" />
+	<dubbo:reference id="iUserService"
+		interface="com.huashi.common.user.service.IUserService" />
+	<dubbo:reference id="iPushConfigService"
+		interface="com.huashi.common.settings.service.IPushConfigService" />
+	<dubbo:reference id="iUserFluxDiscountService"
+		interface="com.huashi.common.user.service.IUserFluxDiscountService" />
+	<dubbo:reference id="iUserBalanceService"
+		interface="com.huashi.common.user.service.IUserBalanceService" />
+	<dubbo:reference id="iUserBalanceLogService"
+		interface="com.huashi.common.user.service.IUserBalanceLogService" />
 
-    <dubbo:reference id="iProductService" interface="com.huashi.bill.product.service.IProductService"/>
-    <dubbo:reference id="iComboService" interface="com.huashi.bill.product.service.IComboService"/>
+	<dubbo:reference id="iProductService"
+		interface="com.huashi.bill.product.service.IProductService" />
+	<dubbo:reference id="iComboService"
+		interface="com.huashi.bill.product.service.IComboService" />
 
-    <!-- <dubbo:reference id="iComboProductService" interface="com.huashi.common.product.service.IComboProductService" /> -->
+	<!-- <dubbo:reference id="iComboProductService" interface="com.huashi.common.product.service.IComboProductService" 
+		/> -->
 
-    <dubbo:reference id="iInvoiceRecordService" interface="com.huashi.common.finance.service.IInvoiceRecordService"/>
-    <dubbo:reference id="iInvoiceBalanceService" interface="com.huashi.common.finance.service.IInvoiceBalanceService"/>
+	<dubbo:reference id="iInvoiceRecordService"
+		interface="com.huashi.common.finance.service.IInvoiceRecordService" />
+	<dubbo:reference id="iInvoiceBalanceService"
+		interface="com.huashi.common.finance.service.IInvoiceBalanceService" />
 
-    <dubbo:reference id="iPassageTemplateService"
-                     interface="com.huashi.common.passage.service.IPassageTemplateService"/>
-    <!--<dubbo:reference id="iMessageTemplateService" interface="com.huashi.sms.template.service.IMessageTemplateService" />-->
-    <dubbo:reference id="iSmsPassageService" interface="com.huashi.sms.passage.service.ISmsPassageService"/>
-    <dubbo:reference id="iSmsPassageGroupService" interface="com.huashi.sms.passage.service.ISmsPassageGroupService"/>
-    <dubbo:reference id="iSmsPassageControlService"
-                     interface="com.huashi.sms.passage.service.ISmsPassageControlService"/>
-    <dubbo:reference id="iSmsPassageParameterService"
-                     interface="com.huashi.sms.passage.service.ISmsPassageParameterService"/>
-    <dubbo:reference id="iSmsPassageAccessService" interface="com.huashi.sms.passage.service.ISmsPassageAccessService"/>
+	<dubbo:reference id="iPassageTemplateService"
+		interface="com.huashi.common.passage.service.IPassageTemplateService" />
+	<!--<dubbo:reference id="iMessageTemplateService" interface="com.huashi.sms.template.service.IMessageTemplateService" 
+		/> -->
+	<dubbo:reference id="iSmsPassageService"
+		interface="com.huashi.sms.passage.service.ISmsPassageService" />
+	<dubbo:reference id="iSmsPassageGroupService"
+		interface="com.huashi.sms.passage.service.ISmsPassageGroupService" />
+	<dubbo:reference id="iSmsPassageControlService"
+		interface="com.huashi.sms.passage.service.ISmsPassageControlService" />
+	<dubbo:reference id="iSmsPassageParameterService"
+		interface="com.huashi.sms.passage.service.ISmsPassageParameterService" />
+	<dubbo:reference id="iSmsPassageAccessService"
+		interface="com.huashi.sms.passage.service.ISmsPassageAccessService" />
 
-    <dubbo:reference id="iFsPassageGroupService" interface="com.huashi.fs.passage.service.IFsPassageGroupService"/>
-    <dubbo:reference id="iUserPassageService" interface="com.huashi.common.user.service.IUserPassageService"/>
+	<dubbo:reference id="iFsPassageGroupService"
+		interface="com.huashi.fs.passage.service.IFsPassageGroupService" />
+	<dubbo:reference id="iUserPassageService"
+		interface="com.huashi.common.user.service.IUserPassageService" />
 
-    <dubbo:reference id="iSmsMoMessageService" interface="com.huashi.sms.record.service.ISmsMoMessageService"/>
-    <dubbo:reference id="iSmsApiFaildRecordService"
-                     interface="com.huashi.sms.record.service.ISmsApiFaildRecordService"/>
-    <dubbo:reference id="iSmsMtProcessFailedService"
-                     interface="com.huashi.sms.record.service.ISmsMtProcessFailedService"/>
-    <dubbo:reference id="iSmsTemplateService" interface="com.huashi.sms.template.service.ISmsTemplateService"/>
-    <dubbo:reference id="iSignatureExtNoService" interface="com.huashi.sms.signature.service.ISignatureExtNoService"/>
-    <dubbo:reference id="iMobileWhiteListService" interface="com.huashi.sms.settings.service.ISmsMobileWhiteListService"/>
-    <dubbo:reference id="iMobileBlackListService" interface="com.huashi.sms.settings.service.ISmsMobileBlackListService"/>
-    <dubbo:reference id="iHostWhiteListService" interface="com.huashi.common.settings.service.IHostWhiteListService"/>
-    <dubbo:reference id="iForbiddenWordsService" interface="com.huashi.sms.settings.service.IForbiddenWordsService"/>
+	<dubbo:reference id="iSmsMoMessageService"
+		interface="com.huashi.sms.record.service.ISmsMoMessageService" />
+	<dubbo:reference id="iSmsApiFaildRecordService"
+		interface="com.huashi.sms.record.service.ISmsApiFaildRecordService" />
+	<dubbo:reference id="iSmsMtProcessFailedService"
+		interface="com.huashi.sms.record.service.ISmsMtProcessFailedService" />
+	<dubbo:reference id="iSmsTemplateService"
+		interface="com.huashi.sms.template.service.ISmsTemplateService" />
+	<dubbo:reference id="iSignatureExtNoService"
+		interface="com.huashi.sms.signature.service.ISignatureExtNoService" />
+	<dubbo:reference id="iMobileWhiteListService"
+		interface="com.huashi.sms.settings.service.ISmsMobileWhiteListService" />
+	<dubbo:reference id="iMobileBlackListService"
+		interface="com.huashi.sms.settings.service.ISmsMobileBlackListService" timeout="1200000"/>
+	<dubbo:reference id="iHostWhiteListService"
+		interface="com.huashi.common.settings.service.IHostWhiteListService" />
+	<dubbo:reference id="iForbiddenWordsService"
+		interface="com.huashi.sms.settings.service.IForbiddenWordsService" />
 
-    <dubbo:reference id="iSmsMtSubmitService" interface="com.huashi.sms.record.service.ISmsMtSubmitService"/>
-    <dubbo:reference id="iSmsMtTaskService" interface="com.huashi.sms.task.service.ISmsMtTaskService"/>
+	<dubbo:reference id="iSmsMtSubmitService"
+		interface="com.huashi.sms.record.service.ISmsMtSubmitService" />
+	<dubbo:reference id="iSmsMtTaskService"
+		interface="com.huashi.sms.task.service.ISmsMtTaskService" timeout="1200000" />
 
-    <dubbo:reference id="iUserSmsConfigService" interface="com.huashi.common.user.service.IUserSmsConfigService"/>
-    <dubbo:reference id="iTradeOrderService" interface="com.huashi.bill.order.service.ITradeOrderService"/>
-    <dubbo:reference id="iUserDeveloperService" interface="com.huashi.common.user.service.IUserDeveloperService"/>
+	<dubbo:reference id="iUserSmsConfigService"
+		interface="com.huashi.common.user.service.IUserSmsConfigService" />
+	<dubbo:reference id="iTradeOrderService"
+		interface="com.huashi.bill.order.service.ITradeOrderService" />
+	<dubbo:reference id="iUserDeveloperService"
+		interface="com.huashi.common.user.service.IUserDeveloperService" />
 
-    <dubbo:reference id="iSmsProviderService" interface="com.huashi.exchanger.service.ISmsProviderService"/>
-    <dubbo:reference id="iProvinceService" interface="com.huashi.common.settings.service.IProvinceService"/>
-    <dubbo:reference id="iPassageMonitorService" interface="com.huashi.monitor.passage.service.IPassageMonitorService"/>
-    <dubbo:reference id="iSmsPassageReachrateSettingsService" interface="com.huashi.sms.passage.service.ISmsPassageReachrateSettingsService"/>
-	<dubbo:reference id="iSmsPriorityWordsService" interface="com.huashi.sms.settings.service.ISmsPriorityWordsService"/>
-	<dubbo:reference id="iSmsSubmitHourReportService" interface="com.huashi.sms.report.service.ISmsSubmitHourReportService"/>
-	<dubbo:reference id="iSmsPassageMessageTemplateService" interface="com.huashi.sms.passage.service.ISmsPassageMessageTemplateService"/>
-	
+	<dubbo:reference id="iSmsProviderService"
+		interface="com.huashi.exchanger.service.ISmsProviderService" />
+	<dubbo:reference id="iProvinceService"
+		interface="com.huashi.common.settings.service.IProvinceService" />
+	<dubbo:reference id="iPassageMonitorService"
+		interface="com.huashi.monitor.passage.service.IPassageMonitorService" />
+	<dubbo:reference id="iSmsPassageReachrateSettingsService"
+		interface="com.huashi.sms.passage.service.ISmsPassageReachrateSettingsService" />
+	<dubbo:reference id="iSmsPriorityWordsService"
+		interface="com.huashi.sms.settings.service.ISmsPriorityWordsService" />
+	<dubbo:reference id="iSmsSubmitHourReportService"
+		interface="com.huashi.sms.report.service.ISmsSubmitHourReportService" />
+	<dubbo:reference id="iSmsPassageMessageTemplateService"
+		interface="com.huashi.sms.passage.service.ISmsPassageMessageTemplateService" />
 
 
-    <!-- 定义全局的配置，测试中@Reference的check=false不起作用，在这里配置 -->
-    <dubbo:consumer check="false"/>
-    <dubbo:annotation package="com.huashi"/>
+
+	<!-- 定义全局的配置，测试中@Reference的check=false不起作用，在这里配置 -->
+	<dubbo:consumer check="false" />
+	<dubbo:annotation package="com.huashi" />
 
 </beans>

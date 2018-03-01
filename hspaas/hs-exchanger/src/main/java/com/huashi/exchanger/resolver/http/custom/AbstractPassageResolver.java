@@ -55,8 +55,8 @@ public abstract class AbstractPassageResolver {
     @PostConstruct
     protected void loadCodeRefrenceBeans() {
         if (CODE_REFRENCE_BEANS.containsKey(code())) {
-            logger.error("=============当前工厂中处理器简码[" + code() + "]冲突");
-            throw new RuntimeException("当前工厂中处理器简码[" + code() + "]冲突");
+            logger.error("=============当前工厂中处理器简码[" + code() + "] 冲突");
+            throw new RuntimeException("当前工厂中处理器简码[" + code() + "] 冲突");
         }
 
         try {

@@ -58,9 +58,11 @@ public class SmsTemplateService implements ISmsTemplateService {
 	private StringRedisTemplate stringRedisTemplate;
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
-	// 全局短信模板（与REDIS 同步采用广播模式）
+	/**
+	 * 全局短信模板（与REDIS 同步采用广播模式）
+	 */
 	public volatile static Map<Integer, Set<String>> GLOBAL_MESSAGE_TEMPLATE = new HashMap<>();
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	@Override
 	public PaginationVo<MessageTemplate> findPage(int userId, String status, String content, String currentPage) {
@@ -87,7 +89,7 @@ public class SmsTemplateService implements ISmsTemplateService {
             return null;
         }
 		
-		return new PaginationVo<MessageTemplate>(list, _currentPage, totalRecord);
+		return new PaginationVo<>(list, _currentPage, totalRecord);
 	}
 
 	private String getKey(int userId) {
@@ -209,8 +211,8 @@ public class SmsTemplateService implements ISmsTemplateService {
 
 	@Override
 	public BossPaginationVo<MessageTemplate> findPageBoos(int pageNum, String keyword, String status,String userId) {
-		BossPaginationVo<MessageTemplate> page = new BossPaginationVo<MessageTemplate>();
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+		BossPaginationVo<MessageTemplate> page = new BossPaginationVo<>();
+		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put("keyword", keyword);
 		paramMap.put("status", status);
 		paramMap.put("userId", userId);
@@ -246,8 +248,10 @@ public class SmsTemplateService implements ISmsTemplateService {
 	 * @param content
 	 * @return
 	 */
-	public MessageTemplate getTemplateFromRedis(int userId, String content) {
+	private MessageTemplate getTemplateFromRedis(int userId, String content) {
 		try {
+			// 超级模板表达式
+			String superTemplateRegex = "^[\\s\\S]*$";
 			MessageTemplate superTemplate = null;
 			Set<String> texts = getFromRedis(userId);
 			if (CollectionUtils.isNotEmpty(texts)) {
@@ -262,7 +266,7 @@ public class SmsTemplateService implements ISmsTemplateService {
                         continue;
                     }
 
-					if (TEMPLATE_SUPER_REGEX.equalsIgnoreCase(template.getRegexValue())) {
+					if (superTemplateRegex.equalsIgnoreCase(template.getRegexValue())) {
 						superTemplate = template;
 						continue;
 					}
@@ -285,7 +289,7 @@ public class SmsTemplateService implements ISmsTemplateService {
 		return null;
 	}
 
-	public MessageTemplate getTemplateFromDb(int userId, String content) {
+	private MessageTemplate getTemplateFromDb(int userId, String content) {
 		// REDIS没查到
 //		MessageTemplate superTemplate = null;
 		List<MessageTemplate> list = messageTemplateMapper.findAvaiableByUserId(userId);
@@ -362,7 +366,7 @@ public class SmsTemplateService implements ISmsTemplateService {
             template.setStatus(ApproveStatus.WAITING.getValue());
         }
 
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		CollectionUtils.addAll(set, contents);
 		boolean allResult = true;
 		for (String content : set) {
@@ -387,9 +391,6 @@ public class SmsTemplateService implements ISmsTemplateService {
 		}
 		return allResult;
 	}
-
-	// 超级模板表达式
-	private static String TEMPLATE_SUPER_REGEX = "^[\\s\\S]*$";
 
 	/**
 	 * 
@@ -427,11 +428,7 @@ public class SmsTemplateService implements ISmsTemplateService {
 	@Override
 	public boolean isContentMatched(long id, String content) {
 		MessageTemplate template = get(id);
-		if (template == null) {
-            return false;
-        }
-
-		return PatternUtil.isRight(template.getRegexValue(), content);
+		return template != null && PatternUtil.isRight(template.getRegexValue(), content);
 	}
 	
 	private void reloadUserTemplate(int userId) {

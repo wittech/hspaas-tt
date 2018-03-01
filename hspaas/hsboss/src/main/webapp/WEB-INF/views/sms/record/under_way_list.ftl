@@ -133,6 +133,8 @@
                             &nbsp;
                             <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuse();">驳回</a>
                             &nbsp;
+                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuseWithSameContent();">同内容驳回</a>
+                            &nbsp;
                             <a href="javascript:void(0);" class="btn btn-warning" onclick="openSwitchPassage();">切换通道</a>
                             &nbsp;
                             <a href="javascript:void(0);" class="btn btn-info" onclick="batchRepeatTask();">重新分包</a>
@@ -387,6 +389,25 @@
             </div><!-- /.modal-dialog -->
         </div>
 
+        <div class="modal fade" id="contentRefuseModal">
+            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">短信内容</h4>
+                    </div>
+                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000" id="myModelBody">
+                        <textarea id="sms_refuse_content" class="form-control" rows="6"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="checkbox" id="content_refuse_like"><span onclick="chooseRefuseLike();">内容是否模糊匹配</span>&nbsp;&nbsp;
+                        <button type="button" class="btn btn-success" onclick="sameContentRefuse();">确定</button>
+                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div>
+
         <div class="modal fade" id="passageModal">
             <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
                 <div class="modal-content">
@@ -526,6 +547,21 @@
         $('#contentPassModal').modal('show');
     }
 
+    // 同内容批量驳回
+    function batchRefuseWithSameContent() {
+        var ids = getSelectIds();
+        if(ids == ''){
+            Boss.alert('请选择需要处理的任务！');
+            return;
+        }
+        var realId = ids.split(',')[0];
+
+        var obj = $('#item_'+realId);
+        var sid = obj.attr('sid');
+        $('#sms_refuse_content').val($("#"+sid+"_content").val());
+        $('#contentRefuseModal').modal('show');
+    }
+
     function batchRefuse(){
         var ids = getSelectIds();
         if(ids == ''){
@@ -586,12 +622,21 @@
     }
     
     function chooseLike() {
-    	var chk = $("#content_like");
-    	if(chk.is(":checked")) {
-    		chk.attr("checked", false);
-    	} else {
-    		chk.attr("checked", true);
-    	}
+        var chk = $("#content_like");
+        if(chk.is(":checked")) {
+            chk.attr("checked", false);
+        } else {
+            chk.attr("checked", true);
+        }
+    }
+
+    function chooseRefuseLike() {
+        var chk = $("#content_refuse_like");
+        if(chk.is(":checked")) {
+            chk.attr("checked", false);
+        } else {
+            chk.attr("checked", true);
+        }
     }
 
     function batchSwitchPassage(){
@@ -657,6 +702,7 @@
         $('#userModal').modal('hide');
         $('#passageModal').modal('hide');
         $('#contentPassModal').modal('hide');
+        $('#contentRefuseModal').modal('hide');
     }
 
     function editContent(sid) {
@@ -726,6 +772,38 @@
 		
         $.ajax({
             url: '${BASE_PATH}/sms/record/sameContentPass',
+            data: {'like_pattern': likePattern, 'content': finalContent},
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+                Boss.alertToCallback(data.message,function(){
+                    if (data.result) {
+                        location.reload();
+                    }
+                });
+
+            }, error: function (data) {
+                Boss.alert('批放失败!');
+            }
+        });
+    }
+
+
+    /**同短信内容驳回**/
+    function sameContentRefuse() {
+        var finalContent = $('#sms_refuse_content').val();
+        if ($.trim(finalContent) == '') {
+            Boss.alert('请输入短信内容！');
+            return;
+        }
+
+        var likePattern = 0;
+        if($('#content_refuse_like').is(':checked')) {
+            likePattern = 1;
+        }
+
+        $.ajax({
+            url: '${BASE_PATH}/sms/record/sameContentReject',
             data: {'like_pattern': likePattern, 'content': finalContent},
             dataType: 'json',
             type: 'post',

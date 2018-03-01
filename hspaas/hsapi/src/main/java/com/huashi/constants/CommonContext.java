@@ -7,12 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
-  * TODO 通用枚举类
-  * 
-  * @author zhengying
-  * @version V1.0   
-  * @date 2017年12月28日 下午10:40:25
+ * TODO 通用枚举类
+ *
+ * @author zhengying
+ * @version V1.0
+ * @date 2017年12月28日 下午10:40:25
  */
 public class CommonContext {
 
@@ -24,7 +23,19 @@ public class CommonContext {
      * @date 2016年8月9日 下午3:36:01
      */
     public enum CMCP {
-        UNRECOGNIZED(0, "无法识别", null), CHINA_MOBILE(1, "移动", "^((134|135|136|137|138|139|150|151|152|157|158|159|182|183|184|187|188|178|147|198)[0-9]{8}|1705[0-9]{7})$"), CHINA_TELECOM(2, "电信", "^((133|149|153|180|181|189||173|177|199)[0-9]{8}|(1700|1701)[0-9]{7})$"), CHINA_UNICOM(3, "联通", "^((130|131|132|155|156|185|186|175|176|145|166)[0-9]{8}|(1709|1718|1719|1707|1708)[0-9]{7})$"), GLOBAL(4, "全网", "^(13[0-9]|15[012356789]|166|17[05678]|18[0-9]|14[579]|19[89])[0-9]{8}$");
+
+        /**
+         * 针对无法识别的运营商
+         */
+        UNRECOGNIZED(0, "无法识别", null),
+
+        CHINA_MOBILE(1, "移动", "^((134|135|136|137|138|139|150|151|152|157|158|159|182|183|184|187|188|178|147|198)[0-9]{8}|1705[0-9]{7})$"),
+
+        CHINA_TELECOM(2, "电信", "^((133|149|153|180|181|189||173|177|199)[0-9]{8}|(1700|1701)[0-9]{7})$"),
+
+        CHINA_UNICOM(3, "联通", "^((130|131|132|155|156|185|186|175|176|145|166)[0-9]{8}|(1709|1718|1719|1707|1708)[0-9]{7})$"),
+
+        GLOBAL(4, "全网", "^(13[0-9]|15[012356789]|166|17[05678]|18[0-9]|14[579]|19[89])[0-9]{8}$");
 
         CMCP(int code, String title, String localRegex) {
             this.code = code;
@@ -65,16 +76,12 @@ public class CommonContext {
          */
         public static CMCP local(String mobileNumber) {
             if (StringUtils.isEmpty(mobileNumber)) {
-                {
-                    return CMCP.UNRECOGNIZED;
-                }
+                return CMCP.UNRECOGNIZED;
             }
 
             for (CMCP cmcp : CMCP.values()) {
                 if (PatternUtil.isRight(cmcp.getLocalRegex(), mobileNumber)) {
-                    {
-                        return cmcp;
-                    }
+                    return cmcp;
                 }
             }
             return CMCP.UNRECOGNIZED;
@@ -87,13 +94,7 @@ public class CommonContext {
          * @return
          */
         public static boolean isAvaiableMobile(String mobileNumber) {
-            if (StringUtils.isEmpty(mobileNumber)) {
-                {
-                    return false;
-                }
-            }
-
-            return PatternUtil.isRight(CMCP.GLOBAL.getLocalRegex(), mobileNumber);
+            return StringUtils.isNotBlank(mobileNumber) && PatternUtil.isRight(CMCP.GLOBAL.getLocalRegex(), mobileNumber);
         }
 
     }
@@ -115,7 +116,7 @@ public class CommonContext {
         private int code;
         private String name;
 
-        private PlatformType(int code, String name) {
+        PlatformType(int code, String name) {
             this.code = code;
             this.name = name;
         }
@@ -131,9 +132,7 @@ public class CommonContext {
         public static PlatformType parse(int code) {
             for (PlatformType pt : PlatformType.values()) {
                 if (pt.getCode() == code) {
-                    {
-                        return pt;
-                    }
+                    return pt;
                 }
             }
             return null;
@@ -148,9 +147,7 @@ public class CommonContext {
             List<Integer> all = new ArrayList<Integer>();
             for (PlatformType pt : PlatformType.values()) {
                 if (pt == PlatformType.UNDEFINED) {
-                    {
-                        continue;
-                    }
+                    continue;
                 }
                 all.add(pt.getCode());
             }
@@ -171,7 +168,7 @@ public class CommonContext {
         private int code;
         private String name;
 
-        private CallbackUrlType(int code, String name) {
+        CallbackUrlType(int code, String name) {
             this.code = code;
             this.name = name;
         }
@@ -187,9 +184,7 @@ public class CommonContext {
         public static PlatformType parse(int code) {
             for (PlatformType pt : PlatformType.values()) {
                 if (pt.getCode() == code) {
-                    {
-                        return pt;
-                    }
+                    return pt;
                 }
             }
             return null;
@@ -204,12 +199,26 @@ public class CommonContext {
      * @date 2016年9月12日 上午12:28:20
      */
     public enum PassageCallType {
-        DATA_SEND(1, "数据发送"), STATUS_RECEIPT_WITH_PUSH(2, "状态报告网关推送"), STATUS_RECEIPT_WITH_SELF_GET(3, "状态回执自取"), SMS_MO_REPORT_WITH_PUSH(4, "短信上行推送"), SMS_MO_REPORT_WITH_SELF_GET(5, "短信上行自取"), PASSAGE_BALANCE_GET(6, "通道余额查询");
+
+        /**
+         * 数据发送
+         */
+        DATA_SEND(1, "数据发送"),
+
+        STATUS_RECEIPT_WITH_PUSH(2, "状态报告网关推送"),
+
+        STATUS_RECEIPT_WITH_SELF_GET(3, "状态回执自取"),
+
+        SMS_MO_REPORT_WITH_PUSH(4, "短信上行推送"),
+
+        SMS_MO_REPORT_WITH_SELF_GET(5, "短信上行自取"),
+
+        PASSAGE_BALANCE_GET(6, "通道余额查询");
 
         private int code;
         private String name;
 
-        private PassageCallType(int code, String name) {
+        PassageCallType(int code, String name) {
             this.code = code;
             this.name = name;
         }
@@ -225,9 +234,7 @@ public class CommonContext {
         public static PassageCallType parse(int code) {
             for (PassageCallType pt : PassageCallType.values()) {
                 if (pt.getCode() == code) {
-                    {
-                        return pt;
-                    }
+                    return pt;
                 }
             }
             return null;
@@ -242,12 +249,20 @@ public class CommonContext {
      * @date 2016年9月18日 下午2:53:59
      */
     public enum AppType {
-        WEB(1, "融合WEB平台"), DEVELOPER(2, "开发者平台"), BOSS(3, "运营支撑系统");
+
+        /**
+         * web 网页，简码W
+         */
+        WEB(1, "融合WEB平台"),
+
+        DEVELOPER(2, "开发者平台"),
+
+        BOSS(3, "运营支撑系统");
 
         private int code;
         private String name;
 
-        private AppType(int code, String name) {
+        AppType(int code, String name) {
             this.code = code;
             this.name = name;
         }
