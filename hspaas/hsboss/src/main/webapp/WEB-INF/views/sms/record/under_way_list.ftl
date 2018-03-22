@@ -200,8 +200,12 @@
                                 <td>
                                     <#if pl.mobiles?? && pl.mobiles?size gt 1>
                                     ${pl.firstMobile!''}...
+                                    	<#--
                                         <button type="button" onclick="showAllMobile('${pl.mobile!''}');"
                                                 class="btn btn-primary btn-xs">${pl.mobiles?size}</button>
+                                         -->
+                                                
+                                        <button type="button" class="btn btn-primary btn-xs">${pl.mobiles?size}</button>   
                                     <#else>
                                     ${(pl.mobile)!''}
                                     </#if>
@@ -209,16 +213,23 @@
                                 <td>
                                     <#if pl.showErrorMobiles?? && pl.showErrorMobiles?size gt 1>
                                     ${pl.showErrorFirstMobile!''}...
-                                        <button type="button" onclick="showAllMobile('${pl.errorMobiles!''}');"
+                                    	<#-- 
+                                    	 <button type="button" onclick="showAllMobile('${pl.errorMobiles!''}');"
                                                 class="btn btn-danger btn-xs">${pl.showErrorMobiles?size}</button>
+                                    	-->
+                                        <button type="button" class="btn btn-danger btn-xs">${pl.showErrorMobiles?size}</button>
                                     <#else>
                                     ${(pl.errorMobiles)!'--'}
                                     </#if>
                                 </td>
                                 <td>
                                     <#if pl.showRepeatMobiles?? && pl.showRepeatMobiles?size gt 1>
+                                        <#-- 
                                         <button type="button" onclick="showAllMobile('${pl.repeatMobiles!''}');"
                                                 class="btn btn-danger btn-xs">${pl.showRepeatMobiles?size}</button>
+                                         -->
+                                         
+                                         <button type="button" class="btn btn-danger btn-xs">${pl.showRepeatMobiles?size}</button>
                                     </#if>
                                 </td>
                                 <td>

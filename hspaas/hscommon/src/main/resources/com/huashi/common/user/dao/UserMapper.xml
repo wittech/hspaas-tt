@@ -19,9 +19,11 @@
 		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
 	</resultMap>
 	<sql id="Base_Column_List">
-		id, user_name, mobile, email, password, salt, secret_password, source,
+		id, user_name, mobile, email, password, salt,
+		secret_password, source,
 		regist_ip,
-		name, knick, status, create_time, update_time
+		name, knick, status, create_time,
+		update_time
 	</sql>
 	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
 		parameterType="java.lang.Integer">
@@ -31,7 +33,8 @@
 		where id = #{id,jdbcType=INTEGER}
 	</select>
 	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-		delete from hspaas_user
+		delete from
+		hspaas_user
 		where id = #{id,jdbcType=INTEGER}
 	</delete>
 	<insert id="insert" parameterType="com.huashi.common.user.domain.User">
@@ -40,16 +43,21 @@
 			SELECT LAST_INSERT_ID()
 		</selectKey>
 		insert into hspaas_user (user_name, mobile, email,
-		password, salt, secret_password,
+		password, salt,
+		secret_password,
 		source, regist_ip, name,
 		knick, status, create_time,
 		update_time)
-		values (#{userName,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR},
+		values (#{userName,jdbcType=VARCHAR},
+		#{mobile,jdbcType=VARCHAR},
 		#{email,jdbcType=VARCHAR},
-		#{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR}, #{secretPassword,jdbcType=VARCHAR},
-		#{source,jdbcType=TINYINT}, #{registIp,jdbcType=VARCHAR},
+		#{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR},
+		#{secretPassword,jdbcType=VARCHAR},
+		#{source,jdbcType=TINYINT},
+		#{registIp,jdbcType=VARCHAR},
 		#{name,jdbcType=VARCHAR},
-		#{knick,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP},
+		#{knick,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT},
+		#{createTime,jdbcType=TIMESTAMP},
 		#{updateTime,jdbcType=TIMESTAMP})
 	</insert>
 	<insert id="insertSelective" parameterType="com.huashi.common.user.domain.User">
@@ -189,18 +197,23 @@
 	<update id="updateByPrimaryKey" parameterType="com.huashi.common.user.domain.User">
 		update hspaas_user
 		set user_name = #{userName,jdbcType=VARCHAR},
-		mobile = #{mobile,jdbcType=VARCHAR},
+		mobile =
+		#{mobile,jdbcType=VARCHAR},
 		email = #{email,jdbcType=VARCHAR},
-		password = #{password,jdbcType=VARCHAR},
+		password
+		= #{password,jdbcType=VARCHAR},
 		salt = #{salt,jdbcType=VARCHAR},
 		secret_password = #{secretPassword,jdbcType=VARCHAR},
-		source = #{source,jdbcType=TINYINT},
+		source =
+		#{source,jdbcType=TINYINT},
 		regist_ip = #{registIp,jdbcType=VARCHAR},
 		name = #{name,jdbcType=VARCHAR},
 		knick = #{knick,jdbcType=VARCHAR},
 		status = #{status,jdbcType=TINYINT},
-		create_time = #{createTime,jdbcType=TIMESTAMP},
-		update_time = #{updateTime,jdbcType=TIMESTAMP}
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP}
 		where id = #{id,jdbcType=INTEGER}
 	</update>
 
@@ -217,18 +230,20 @@
 	</select>
 
 	<select id="getByEmail" resultMap="BaseResultMap">
-		select * from hspaas_user where email = #{email} limit 1
+		select * from hspaas_user
+		where email = #{email} limit 1
 	</select>
 
 	<select id="getByMobile" resultMap="BaseResultMap">
-		select * from hspaas_user where mobile = #{mobile} limit 1
+		select * from hspaas_user
+		where mobile = #{mobile} limit 1
 	</select>
 
 	<select id="getByUsername" resultMap="BaseResultMap"
 		parameterType="java.lang.String">
 		select id, salt, email, mobile from hspaas_user
 		where
-		(email = #{username} or mobile = #{username}) and status = 0
+		status = = and (email = #{username} or mobile = #{username})
 	</select>
 
 	<select id="getByUsernameAndPassword" resultType="int"
@@ -239,7 +254,8 @@
 	</select>
 
 	<update id="updateUserState">
-		update hspaas_user set status = #{flag} where id = #{userId}
+		update hspaas_user set status = #{flag} where id =
+		#{userId}
 	</update>
 
 	<update id="updateUserInfo">
@@ -256,13 +272,13 @@
 		user_name=#{userName},mobile=#{mobile},email=#{email},name=#{name},knick=#{knick}
 		where id=#{id}
 	</update>
-	
+
 	<select id="selectAvaiableUserList" resultMap="BaseResultMap">
-		select 
+		select
 		<include refid="Base_Column_List" />
 		from hspaas_user where status = 0
 	</select>
-	
+
 	<!-- 用户映射（虚拟） -->
 	<resultMap id="UserMappingResultMap" type="com.huashi.common.user.model.UserModel">
 		<result column="user_id" property="userId" jdbcType="INTEGER" />
@@ -274,15 +290,21 @@
 		<result column="app_key" property="appkey" jdbcType="VARCHAR" />
 		<result column="app_secret" property="appsecret" jdbcType="VARCHAR" />
 	</resultMap>
-	
+
 	<select id="selectAllMapping" resultMap="UserMappingResultMap">
-		SELECT d.user_id, u.user_name, u.mobile, u.email, u.name, u.status, d.app_key, d.app_secret
-		FROM hspaas_user u JOIN hspaas_user_developer d ON u.id = d.user_id
+		SELECT d.user_id,
+		u.user_name, u.mobile, u.email, u.name, u.status, d.app_key,
+		d.app_secret
+		FROM hspaas_user u JOIN hspaas_user_developer d ON u.id =
+		d.user_id
 	</select>
-	
+
 	<select id="selectMappingByUserId" resultMap="UserMappingResultMap">
-		SELECT d.user_id, u.user_name, u.mobile, u.email, u.name, u.status, d.app_key, d.app_secret
-		FROM hspaas_user u JOIN hspaas_user_developer d ON u.id = d.user_id WHERE u.id = #{userId} limit 1 
+		SELECT d.user_id,
+		u.user_name, u.mobile, u.email, u.name, u.status, d.app_key,
+		d.app_secret
+		FROM hspaas_user u JOIN hspaas_user_developer d ON u.id =
+		d.user_id WHERE u.id = #{userId} limit 1
 	</select>
-	
+
 </mapper>

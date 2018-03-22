@@ -24,7 +24,7 @@ import com.huashi.sms.record.domain.SmsApiFailedRecord;
 /**
  * 短信错误记录接口服务实现类
  * 
- * @author Administrator
+ * @author tenx
  *
  */ 
 
@@ -73,7 +73,7 @@ public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
 			mr.setErrorCodeText(code == null ? "" : code.getMessage());
 		}
 
-		return new PaginationVo<SmsApiFailedRecord>(list, _currentPage, totalRecord);
+		return new PaginationVo<>(list, _currentPage, totalRecord);
 	}
 
 	@Override
@@ -89,9 +89,9 @@ public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
 
 	@Override
 	public BossPaginationVo<SmsApiFailedRecord> findPage(int pageNum, String keyword) {
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put("keyword", keyword);
-		BossPaginationVo<SmsApiFailedRecord> page = new BossPaginationVo<SmsApiFailedRecord>();
+		BossPaginationVo<SmsApiFailedRecord> page = new BossPaginationVo<>();
 		page.setCurrentPage(pageNum);
 		int total = smsApiFailedRecordMapper.findCount(paramMap);
 		if (total <= 0) {

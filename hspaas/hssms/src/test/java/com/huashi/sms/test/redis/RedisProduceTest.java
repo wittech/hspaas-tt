@@ -26,16 +26,18 @@ public class RedisProduceTest extends RedisBasicTest{
 
 		@Override
 		public void run() {
-			long start = System.currentTimeMillis();
+			
 			Jedis jedis = getJedis();
-			String[] ss = new String[1000];
-			for(int i =0; i < 1000; i++) {
-				logger.info("----------" + i);
-				ss[i] = Thread.currentThread().getName() + "_" + i + System.currentTimeMillis();
-//				jedis.rpush("test_list_queue_009", Thread.currentThread().getName() + "_" + i + System.currentTimeMillis());
+			int length = 100000;
+			String[] ss = new String[length];
+			long start = System.currentTimeMillis();
+			for(int i =0; i < length; i++) {
+//				logger.info("----------" + i);
+				ss[i] = Thread.currentThread().getName() + "_" + i + System.nanoTime();
+//				jedis.rpush("test_list_queue_10", Thread.currentThread().getName() + "_" + i + System.currentTimeMillis());
 			}
 
-			jedis.rpush("test_list_queue_010", ss);
+			jedis.rpush("test_list_queue_20", ss);
 
 			jedis.close();
 			logger.info(Thread.currentThread().getName() + "耗时：" + (System.currentTimeMillis() - start));

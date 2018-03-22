@@ -2,7 +2,7 @@ package com.huashi.developer.model;
 
 import com.huashi.developer.validator.ValidateField;
 
-public class FluxModel extends BaseModel {
+public class FluxModel extends PassportModel {
 
 	private static final long serialVersionUID = 2029866580659952586L;
 
@@ -11,15 +11,15 @@ public class FluxModel extends BaseModel {
 	private String mobile;
 
 	// 短信内容
-	@ValidateField(value = "content", utf8 = true, notEmpty = true)
+	@ValidateField(value = "content", utf8 = true)
 	private String content;
 
 	// 扩展码号
-	@ValidateField(value = "ext", necessary = false, number = true)
+	@ValidateField(value = "ext", required = false, number = true)
 	private String extNumber;
 
 	// 备选:主要用于用户自定义内容，会原封不动的给用户返回（业务主要用于渠道区分自己的客户，可能传递的是渠道方自己的用户Id）
-	@ValidateField(value = "attach", necessary = false)
+	@ValidateField(value = "attach", required = false)
 	private String attach;
 
 	public String getMobile() {

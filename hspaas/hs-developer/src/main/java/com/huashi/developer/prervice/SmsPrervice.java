@@ -68,7 +68,7 @@ public class SmsPrervice {
 		SmsMtTask task = new SmsMtTask();
 
 		BeanUtils.copyProperties(model, task);
-		task.setAppType(model.getApptype());
+		task.setAppType(model.getAppType());
 
 		try {
 
@@ -95,7 +95,7 @@ public class SmsPrervice {
 		SmsMtTask task = new SmsMtTask();
 
 		BeanUtils.copyProperties(model, task);
-		task.setAppType(model.getApptype());
+		task.setAppType(model.getAppType());
 		task.setSubmitType(TaskSubmitType.POINT_TO_POINT.getCode());
 		task.setP2pBody(model.getBody());
 		task.setP2pBodies(model.getP2pBodies());
@@ -125,7 +125,7 @@ public class SmsPrervice {
 		SmsMtTask task = new SmsMtTask();
 
 		BeanUtils.copyProperties(model, task);
-		task.setAppType(model.getApptype());
+		task.setAppType(model.getAppType());
 		task.setSubmitType(TaskSubmitType.TEMPLATE_POINT_TO_POINT.getCode());
 
 		try {

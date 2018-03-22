@@ -244,7 +244,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             task.setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
             doExceptionOverWithReport(task, blackMobiles, SmsPushCode.SMS_MOBILE_BLACKLIST.getCode());
             task.setBlackMobiles(StringUtils.join(blackMobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
-            logger.warn("手机黑名单{}", StringUtils.join(blackMobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
+            logger.warn("手机黑名单: {}", StringUtils.join(blackMobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
         }
 
         // 经过黑名单处理后，如果可用手机号码为空则直接插入主任务
@@ -530,7 +530,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             return null;
         }
 
-        return doRoutePassageByCmcp(mobileCatagory, task.getUserId());
+        return doRoutePassageByCmcp(task, mobileCatagory, task.getUserId());
     }
 
     /**
@@ -571,11 +571,12 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     /**
      * 根据运营商和路由通道寻找具体的通道信息
      *
+     * @param model
      * @param mobileCatagory 分省后手机号码组
      * @param userId         用户ID
      * @return
      */
-    private SmsRoutePassage doRoutePassageByCmcp(MobileCatagory mobileCatagory, int userId) {
+    private SmsRoutePassage doRoutePassageByCmcp(SmsMtTask model, MobileCatagory mobileCatagory, int userId) {
         SmsPassageAccess passageAccess;
         boolean isAvaiable;
 
@@ -583,13 +584,15 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         routePassage.setUserId(userId);
 
         Integer routeType = getMessageRouteType();
-
+        
         Map<String, SmsPassageAccess> userPassages = smsPassageAccessService.getByUserId(userId);
-        if (MapUtils.isEmpty(userPassages)) {
-            routePassage.setErrorMessage("任务中无可可用通道[all]");
-            return routePassage;
+        // 是否有可用通道
+        boolean hasAvaiableAccess = MapUtils.isNotEmpty(userPassages);
+        if (!hasAvaiableAccess) {
+            model.getErrorMessageReport().append(formatMessage("通道不可用"));
+            refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(), model.getForceActionsReport());
         }
-
+        
         Map<Integer, String> provinceCmcpMobileNumbers;
         for (CMCP cmcp : CMCPS) {
             provinceCmcpMobileNumbers = getCmcpMobileNumbers(cmcp, mobileCatagory);
@@ -599,6 +602,13 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 
             Set<Integer> provinceCodes = provinceCmcpMobileNumbers.keySet();
             for (Integer provinceCode : provinceCodes) {
+                
+                // 如果没有可用通道，则直接将相关省份手机号码进行分配
+                if(!hasAvaiableAccess) {
+                    routePassage.addPassageMobilesMapping(PassageContext.EXCEPTION_PASSAGE_ID, provinceCmcpMobileNumbers.get(provinceCode));
+                    continue;
+                }
+                
                 passageAccess = userPassages.get(smsPassageAccessService.getAssistKey(routeType, cmcp.getCode(), provinceCode));
 
                 isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
@@ -800,27 +810,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     }
 
     /**
-     * TODO 检查通道信息
-     *
-     * @param task
-     * @param routePassage
-     */
-    private void checkTaskPassage(SmsMtTask task, SmsRoutePassage routePassage) {
-        // 通道错误信息
-        String passageErrorMessage = routePassage == null ? null : routePassage.getErrorMessage();
-
-        // 设置可操作类型
-        if (routePassage == null || StringUtils.isNotEmpty(passageErrorMessage) || MapUtils.isEmpty(routePassage.getPassaegAccesses())) {
-
-            // 主要为了设置主任务错误信息和操作符 add by zhengying 2017-03-08
-            task.getErrorMessageReport().append(">").append(passageErrorMessage).append(" ;");
-
-            // 重新填充通道错误码 操作位
-            refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(), task.getForceActionsReport());
-        }
-    }
-
-    /**
      * TODO 通道分包逻辑
      * 根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
      *
@@ -828,8 +817,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
      * @param routePassage 用户运营商路由下对应的通道信息
      */
     private void subpackage(SmsMtTask task, SmsRoutePassage routePassage) {
-        checkTaskPassage(task, routePassage);
-
         String mobile;
         SmsPassageAccess passage;
 

@@ -18,7 +18,8 @@
 		<result column="signature_content" property="signatureContent"
 			jdbcType="VARCHAR" />
 		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
-		<result column="submit_interval" property="submitInterval" jdbcType="INTEGER" />
+		<result column="submit_interval" property="submitInterval"
+			jdbcType="INTEGER" />
 		<result column="limit_times" property="limitTimes" jdbcType="INTEGER" />
 		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
 		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
@@ -28,7 +29,8 @@
 		message_pass,
 		need_template,
 		auto_template, signature_source,
-		signature_content, ext_number,submit_interval, limit_times, create_time, update_time
+		signature_content, ext_number,submit_interval, limit_times,
+		create_time, update_time
 	</sql>
 	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
 		parameterType="java.lang.Long">
@@ -52,15 +54,18 @@
 		sms_timeout, message_pass, need_template,
 		auto_template, signature_source, signature_content, ext_number,
 		submit_interval, limit_times, create_time, update_time)
-		values (#{userId,jdbcType=INTEGER},
+		values
+		(#{userId,jdbcType=INTEGER},
 		#{smsWords,jdbcType=INTEGER},
 		#{smsReturnRule,jdbcType=INTEGER},
-		#{smsTimeout,jdbcType=BIGINT}, #{messagePass,jdbcType=BIT},
+		#{smsTimeout,jdbcType=BIGINT},
+		#{messagePass,jdbcType=BIT},
 		#{needTemplate,jdbcType=BIT},
 		#{autoTemplate,jdbcType=BIT},
 		#{signatureSource,jdbcType=INTEGER},
 		#{signatureContent,jdbcType=VARCHAR},
-		#{extNumber,jdbcType=VARCHAR}, #{submitInterval,jdbcType=INTEGER}, #{limitTimes,jdbcType=INTEGER},
+		#{extNumber,jdbcType=VARCHAR},
+		#{submitInterval,jdbcType=INTEGER}, #{limitTimes,jdbcType=INTEGER},
 		#{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
 	</insert>
 	<insert id="insertSelective" parameterType="com.huashi.common.user.domain.UserSmsConfig">
@@ -227,8 +232,10 @@
 		#{signatureContent,jdbcType=VARCHAR},
 		ext_number =
 		#{extNumber,jdbcType=VARCHAR},
-		submit_interval = #{submitInterval,jdbcType=INTEGER},
-		limit_times = #{limitTimes,jdbcType=INTEGER},
+		submit_interval =
+		#{submitInterval,jdbcType=INTEGER},
+		limit_times =
+		#{limitTimes,jdbcType=INTEGER},
 		update_time =
 		#{updateTime,jdbcType=TIMESTAMP}
 		where id = #{id,jdbcType=BIGINT}

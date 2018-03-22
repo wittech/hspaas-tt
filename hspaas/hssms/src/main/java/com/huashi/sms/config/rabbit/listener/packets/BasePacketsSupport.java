@@ -16,7 +16,7 @@ public abstract class BasePacketsSupport {
     /**
      * 默认每个包手机号码上限数
      */
-    protected static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 1000;
+    protected static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 4000;
 
     /**
      * TODO 重组手机号码，按照分包数量进行数据拆分 分包数据
@@ -45,5 +45,15 @@ public abstract class BasePacketsSupport {
             rows.add(builder.substring(0, builder.length() - 1));
         }
         return rows;
+    }
+    
+    public static void main(String[] args) {
+        String[] mobile = {"1","2","3","4","5","6","7","8"};
+        List<String> list = regroupMobiles(mobile, 4000);
+        for(String m : list) {
+            System.out.println(m);
+        }
+        
+        System.out.println(list.size());
     }
 }

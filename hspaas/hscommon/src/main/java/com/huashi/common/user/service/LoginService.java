@@ -12,26 +12,24 @@ import com.huashi.common.vo.SessionUser;
 @com.alibaba.dubbo.config.annotation.Service
 public class LoginService implements ILoginService {
 
-	@Autowired
-	private IUserService userService;
-	private Logger logger = LoggerFactory.getLogger(LoginService.class);
+    @Autowired
+    private IUserService userService;
+    private Logger       logger = LoggerFactory.getLogger(LoginService.class);
 
-	@Override
-	public SessionUser login(String username, String password) throws LoginException {
-		User user = userService.getByUsername(username);
-		if (user == null) {
-			logger.info("login username : {} 数据为空", username);
-			throw new LoginException("用户数据异常");
-		}
-
-		boolean isAvaiable = userService.verify(username, SecurityUtil.decode(password, user.getSalt()));
-		if (isAvaiable) {
-            {
-                return new SessionUser(user.getId(), user.getEmail(), user.getMobile());
-            }
+    @Override
+    public SessionUser login(String username, String password) throws LoginException {
+        User user = userService.getByUsername(username);
+        if (user == null) {
+            logger.info("login username : {} 数据为空", username);
+            throw new LoginException("用户数据异常");
         }
 
-		throw new LoginException("用户名密码认证失败");
-	}
+        boolean isAvaiable = userService.verify(username, SecurityUtil.decode(password, user.getSalt()));
+        if (isAvaiable) {
+            return new SessionUser(user.getId(), user.getEmail(), user.getMobile());
+        }
+
+        throw new LoginException("用户名密码认证失败");
+    }
 
 }

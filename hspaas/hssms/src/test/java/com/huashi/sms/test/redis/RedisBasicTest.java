@@ -1,25 +1,24 @@
 package com.huashi.sms.test.redis;
 
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
 public class RedisBasicTest {
 
-    private Jedis jedis;
-    private static JedisPool pool = null;
-    protected static Logger logger = LoggerFactory.getLogger(RedisBasicTest.class);
-
+    protected Jedis          jedis;
+    private static JedisPool pool   = null;
+    protected static Logger  logger = LoggerFactory.getLogger(RedisBasicTest.class);
 
     /**
      * 同步获取Jedis实例
@@ -57,25 +56,33 @@ public class RedisBasicTest {
         config.setTestOnReturn(Boolean.valueOf(bundle.getString("redis.pool.testOnReturn")));
         // 根据配置实例化jedis池
         try {
-            pool = new JedisPool(config, bundle.getString("redis.ip"), Integer.valueOf(bundle.getString("redis.port")), Integer.valueOf(bundle.getString("redis.timeout")), StringUtils.isEmpty(bundle.getString("redis.password")) ? null : bundle.getString("redis.password"), Integer.parseInt(bundle.getString("redis.database")));
+            pool = new JedisPool(
+                                 config,
+                                 bundle.getString("redis.ip"),
+                                 Integer.valueOf(bundle.getString("redis.port")),
+                                 Integer.valueOf(bundle.getString("redis.timeout")),
+                                 StringUtils.isEmpty(bundle.getString("redis.password")) ? null : bundle.getString("redis.password"),
+                                 Integer.parseInt(bundle.getString("redis.database")));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
     @Before
     public void setup() {
         // 连接redis服务器，192.168.0.100:6379
-        jedis = new Jedis("106.14.37.153", 6379);
         // 权限认证
-        jedis.auth("huashi_redis_99088@");
+//         jedis = new Jedis("106.14.37.153", 6379);
+//         jedis.auth("huashi_redis_99088@");
+
+        jedis = new Jedis("192.168.1.167", 6379);
+        jedis.auth("8WTsPdC6YxH]nGKmyYG=aHXCwkqADs");
     }
 
     /**
      * redis存储字符串
      */
-    @Test
+    // @Test
     public void testString() {
         // -----添加数据----------
         jedis.set("name", "xinxin");// 向key-->name中放入了value-->xinxin
@@ -96,7 +103,7 @@ public class RedisBasicTest {
     /**
      * redis操作Map
      */
-    @Test
+    // @Test
     public void testMap() {
         // -----添加数据----------
         Map<String, String> map = new HashMap<String, String>();
@@ -127,7 +134,7 @@ public class RedisBasicTest {
     /**
      * jedis操作List
      */
-    @Test
+    // @Test
     public void testList() {
         // 开始前，先移除所有的内容
         jedis.del("java framework");
@@ -150,7 +157,7 @@ public class RedisBasicTest {
     /**
      * jedis操作Set
      */
-    @Test
+    // @Test
     public void testSet() {
         // 添加
         jedis.sadd("user", "liuling");
@@ -167,7 +174,7 @@ public class RedisBasicTest {
         System.out.println(jedis.scard("user"));// 返回集合的元素个数
     }
 
-    @Test
+    // @Test
     public void test() throws InterruptedException {
         // jedis 排序
         // 注意，此处的rpush和lpush是List的操作。是一个双向链表（但从表现来看的）
@@ -181,7 +188,7 @@ public class RedisBasicTest {
         System.out.println(jedis.lrange("a", 0, -1));
     }
 
-    @Test
+    // @Test
     public void testRedisPool() {
         RedisUtil.getJedis().set("newname", "中文测试");
         System.out.println(RedisUtil.getJedis().get("newname"));

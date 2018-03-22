@@ -66,9 +66,7 @@ public class UserBalanceService implements IUserBalanceService {
     @Override
     public UserBalance getByUserId(int userId, PlatformType type) {
         if (userId == 0) {
-            {
-                return null;
-            }
+            return null;
         }
 
         return userBalanceMapper.selectByUserIdAndType(userId, type.getCode());
@@ -79,7 +77,7 @@ public class UserBalanceService implements IUserBalanceService {
     }
 
     @Override
-    @Transactional(readOnly = false, rollbackFor = Exception.class)
+    @Transactional(readOnly = false, rollbackFor = RuntimeException.class)
     public boolean saveBalance(UserBalance balance) {
         try {
             balance.setPayType(balance.getPayType() == null ? BalancePayType.PREPAY.getValue() : balance.getPayType());
@@ -99,7 +97,7 @@ public class UserBalanceService implements IUserBalanceService {
 
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("保存用户 [" + balance.getUserId() + "]失败", e);
             throw new RuntimeException(e);
         }
     }
@@ -154,9 +152,7 @@ public class UserBalanceService implements IUserBalanceService {
     @Transactional(readOnly = false, rollbackFor = Exception.class)
     public boolean exchange(int userId, int fromUserId, int type, int amount) {
         if (userId == 0) {
-            {
-                throw new ExchangeException("用户ID为空");
-            }
+            throw new ExchangeException("用户ID为空");
         }
 
         validate(fromUserId, type, amount);
@@ -165,10 +161,8 @@ public class UserBalanceService implements IUserBalanceService {
             boolean isOk = updateBalance(userId, amount, type, PaySource.USER_ACCOUNT_EXCHANGE,
                                          PayType.HSUSER_EXCHANGE, null, null, "余额转赠", true);
             if (isOk) {
-                {
-                    return updateBalance(fromUserId, -amount, type, PaySource.USER_ACCOUNT_EXCHANGE,
-                                         PayType.HSUSER_EXCHANGE, null, null, "余额转赠", true);
-                }
+                return updateBalance(fromUserId, -amount, type, PaySource.USER_ACCOUNT_EXCHANGE,
+                                     PayType.HSUSER_EXCHANGE, null, null, "余额转赠", true);
             }
             return false;
         } catch (Exception e) {
@@ -178,28 +172,20 @@ public class UserBalanceService implements IUserBalanceService {
 
     private void validate(int fromUserId, int type, int balance) {
         if (fromUserId == 0) {
-            {
-                throw new ExchangeException("转存人ID为空");
-            }
+            throw new ExchangeException("转存人ID为空");
         }
 
         if (balance == 0d) {
-            {
-                throw new ExchangeException("转存额度为0");
-            }
+            throw new ExchangeException("转存额度为0");
         }
 
         UserBalance userBalance = getByUserId(fromUserId, type);
         if (userBalance == null) {
-            {
-                throw new ExchangeException("用户平台额度数据为空");
-            }
+            throw new ExchangeException("用户平台额度数据为空");
         }
 
         if (userBalance.getBalance() < balance) {
-            {
-                throw new ExchangeException(String.format("用户平台额度不足，当前余额 : %d ", balance));
-            }
+            throw new ExchangeException(String.format("用户平台额度不足，当前余额 : %d ", balance));
         }
 
     }
@@ -331,9 +317,10 @@ public class UserBalanceService implements IUserBalanceService {
         }
 
         // 长短信计费按照67字计费
-        return realTotalWords % UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM == 0 ? 
-                    realTotalWords / UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM : 
-                        realTotalWords / UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM + 1;
+        return realTotalWords % UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM == 0 ? realTotalWords
+                                                                                                / UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM : realTotalWords
+                                                                                                                                                             / UserBalanceConstant.LONG_TEXT_MESSAGE_WORDS_SIZE_PER_NUM
+                                                                                                                                                             + 1;
     }
 
     @Override

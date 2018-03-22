@@ -426,7 +426,8 @@ public class HttpClientUtil {
 			response = httpClient.execute(httpPost);
 			// 获取响应内容
 			StatusLine statusLine = response.getStatusLine();
-			int statusCode = statusLine.getStatusCode();// 响应码
+			// 响应码
+			int statusCode = statusLine.getStatusCode();
 			// String reasonPhrase = statusLine.getReasonPhrase();// 响应信息
 			
 			if(statusCode != 200) {
@@ -451,9 +452,9 @@ public class HttpClientUtil {
 			logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
 			// 释放资源
 			httpPost.releaseConnection();
-			if (url.startsWith("https") && httpClient != null&& httpClient instanceof CloseableHttpClient) {
+			if (url.startsWith("https") && httpClient != null) {
                 try {
-					((CloseableHttpClient) httpClient).close();
+					httpClient.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -519,7 +520,9 @@ public class HttpClientUtil {
 			response = httpClient.execute(httpPost);
 			// 获取响应内容
 			StatusLine statusLine = response.getStatusLine();
-			int statusCode = statusLine.getStatusCode();// 响应码
+
+			// 响应码
+			int statusCode = statusLine.getStatusCode();
 			// String reasonPhrase = statusLine.getReasonPhrase();// 响应信息
 			
 			if(statusCode != 200) {
@@ -546,7 +549,7 @@ public class HttpClientUtil {
 			httpPost.releaseConnection();
 			if (url.startsWith("https") && httpClient != null&& httpClient instanceof CloseableHttpClient) {
                 try {
-					((CloseableHttpClient) httpClient).close();
+					httpClient.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -613,7 +616,8 @@ public class HttpClientUtil {
 			response = httpClient.execute(httpPost);
 			// 获取响应内容
 			StatusLine statusLine = response.getStatusLine();
-			int statusCode = statusLine.getStatusCode();// 响应码
+			// 响应码
+			int statusCode = statusLine.getStatusCode();
 			// String reasonPhrase = statusLine.getReasonPhrase();// 响应信息
 			if(statusCode != 200) {
 				httpPost.abort();
@@ -637,9 +641,9 @@ public class HttpClientUtil {
 			logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
 			// 释放资源
 			httpPost.releaseConnection();
-			if (url.startsWith("https") && httpClient != null&& httpClient instanceof CloseableHttpClient) {
+			if (url.startsWith("https") && httpClient != null) {
                 try {
-					((CloseableHttpClient) httpClient).close();
+					httpClient.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -706,7 +710,8 @@ public class HttpClientUtil {
 			response = httpClient.execute(httpPost);
 			// 获取响应内容
 			StatusLine statusLine = response.getStatusLine();
-			int statusCode = statusLine.getStatusCode();// 响应码
+			// 响应码
+			int statusCode = statusLine.getStatusCode();
 			// String reasonPhrase = statusLine.getReasonPhrase();// 响应信息
 			if(statusCode != 200) {
 				httpPost.abort();
@@ -730,9 +735,9 @@ public class HttpClientUtil {
 			logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
 			// 释放资源
 			httpPost.releaseConnection();
-			if (url.startsWith("https") && httpClient != null&& httpClient instanceof CloseableHttpClient) {
+			if (url.startsWith("https") && httpClient != null) {
                 try {
-					((CloseableHttpClient) httpClient).close();
+					httpClient.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

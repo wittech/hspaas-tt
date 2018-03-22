@@ -13,28 +13,38 @@ import com.huashi.developer.validator.ValidateField;
  * @version V1.0.0
  * @date 2017年3月31日 下午9:39:29
  */
-public class SmsP2PTemplateModel extends BaseModel {
+public class SmsP2PTemplateModel extends PassportModel {
 
 	private static final long serialVersionUID = 1271682197751091183L;
 
-	// 模板内容信息，模板变量以 #code# 为例
-	@ValidateField(value = "content", utf8 = true, notEmpty = true)
+	/**
+	 * 模板内容信息，模板变量以 #code# 为例
+	 */
+	@ValidateField(value = "content", required = true, utf8 = true)
 	private String content;
 	
-	// 报文信息
-	@ValidateField(value = "body", utf8 = true, notEmpty = true)
+	/**
+	 * 报文信息
+	 */
+	@ValidateField(value = "body", required = true, utf8 = true)
 	private String body;
 
-	// 扩展码号
-	@ValidateField(value = "extNumber", necessary = false, number = true)
+	/**
+	 * 扩展码号
+	 */
+	@ValidateField(value = "extNumber", required = false, number = true)
 	private String extNumber;
 
-	// 备选:主要用于用户自定义内容，会原封不动的给用户返回（业务主要用于渠道区分自己的客户，可能传递的是渠道方自己的用户Id）
-	@ValidateField(value = "attach", necessary = false)
+	/**
+	 * 用于调用者自定义内容，主要为了实现调用侧的自行业务逻辑标识，如调用方自己的 会员标识，最终我方会原样返回
+	 */
+	@ValidateField(value = "attach", required = false)
 	private String attach;
 
-	// 回调URL
-	@ValidateField(value = "callback", necessary = false)
+	/**
+     * 回调URL,用于调用方接口短信状态报告地址，目前只支持http地址
+     */
+	@ValidateField(value = "callback", required = false)
 	private String callback;
 	
 	private List<JSONObject> p2pBodies;

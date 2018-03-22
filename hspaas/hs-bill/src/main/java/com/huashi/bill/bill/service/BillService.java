@@ -40,17 +40,13 @@ public class BillService implements IBillService {
         // 根据手机号码判断归属地、运营商
         CMCP cmcp = CMCP.local(mobile);
         if (CMCP.UNRECOGNIZED == cmcp) {
-            {
-                throw new IllegalArgumentException("手机号码无法识别归属地：" + mobile);
-            }
+            throw new IllegalArgumentException("手机号码无法识别归属地：" + mobile);
         }
 
         // 根据套餐面值、运营商及归属地 及用户确定的通道组 ？？确定产品（判断是否有）
         List<FluxProduct> products = fluxProductService.findByPackage(packages, cmcp.getCode());
         if (CollectionUtils.isEmpty(products)) {
-            {
-                throw new IllegalArgumentException("未找到该面值流量套餐信息：" + packages + "M");
-            }
+            throw new IllegalArgumentException("未找到该面值流量套餐信息：" + packages + "M");
         }
 
         // 根据用户查询具体的流量通道组，判断该通道组下是否支持该流量产品（暂不做）
@@ -97,7 +93,7 @@ public class BillService implements IBillService {
         String[] result = new String[3];
 
         PlatformType platformType = PlatformType.parse(platform);
-        if(platformType == null) {
+        if (platformType == null) {
             return null;
         }
         switch (platformType) {
@@ -130,7 +126,7 @@ public class BillService implements IBillService {
         List<ConsumptionReport> list = new ArrayList<>();
 
         PlatformType platformType = PlatformType.parse(platform);
-        if(platformType == null) {
+        if (platformType == null) {
             return;
         }
         switch (platformType) {
@@ -150,9 +146,7 @@ public class BillService implements IBillService {
         }
 
         if (CollectionUtils.isEmpty(list)) {
-            {
-                return;
-            }
+            return;
         }
 
         consumptionReportMapper.batchInsert(list);

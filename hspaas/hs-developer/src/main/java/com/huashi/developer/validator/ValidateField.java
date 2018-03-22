@@ -9,13 +9,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface ValidateField {
 
-	String value() default "";
-	
-	boolean necessary() default true;
-	
-	boolean number() default false;
-	
-	boolean utf8() default false;
-	
-	boolean notEmpty() default false;
+    String value() default "";
+
+    boolean required() default false;
+
+    boolean number() default false;
+
+    boolean utf8() default false;
 }

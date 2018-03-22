@@ -34,7 +34,7 @@ public class RedisConsumeTest extends RedisBasicTest{
 			long start = System.currentTimeMillis();
 			while (true) {
 
-				String value = jedis.lpop("test_list_queue_010");
+				String value = jedis.lpop("test_list_queue_20");
 				if(StringUtils.isEmpty(value)) {
 					logger.info(Thread.currentThread().getName() + "耗时：" + (System.currentTimeMillis() - start));
 					jedis.close();

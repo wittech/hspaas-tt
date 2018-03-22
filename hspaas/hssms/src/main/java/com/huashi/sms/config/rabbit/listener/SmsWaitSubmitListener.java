@@ -147,12 +147,12 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
                     logger.error("解析上家回执数据逻辑数据为空");
                     return;
                 }
-                
+
                 long s2 = System.currentTimeMillis();
                 logger.info("拼接SUBMIT------------------：" + (s2 - s1));
 
                 doSubmitFinished(list);
-                
+
                 long s3 = System.currentTimeMillis();
                 logger.info("如队列------------------：" + (s3 - s2));
             }
@@ -376,14 +376,14 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
     }
 
     /**
+     * TODO 组装提交完成的短息信息入库
      * 
-       * TODO 组装提交完成的短息信息入库
-       * @param packets
-       * @param mobile
-       * @param responses
-       * @param extNumber 扩展号码
-       * @param pushConfig
-       * @return
+     * @param packets
+     * @param mobile
+     * @param responses
+     * @param extNumber 扩展号码
+     * @param pushConfig
+     * @return
      */
     private List<SmsMtMessageSubmit> buildSubmitMessage(SmsMtTaskPackets packets, String mobile,
                                                         List<ProviderSendResponse> responses, String extNumber,
@@ -392,8 +392,11 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
 
         SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
 
+        long l1 = System.currentTimeMillis();
         BeanUtils.copyProperties(packets, submit, "passageId", "mobile");
         submit.setPassageId(packets.getFinalPassageId());
+        long l2 = System.currentTimeMillis();
+        logger.info("SmsWaitSubmitListener l1 BeanUtils.copyProperties" + (l2 - l1));
 
         // 推送信息为固定地址或者每次传递地址才需要推送
         if (pushConfig != null && pushConfig.getStatus() != PushConfigStatus.NO.getCode()) {
@@ -407,9 +410,12 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
 
         String[] mobiles = mobile.split(",");
 
+        
+        long t1 = System.currentTimeMillis();
         for (String m : mobiles) {
             SmsMtMessageSubmit _submit = new SmsMtMessageSubmit();
 
+            long f1 = System.currentTimeMillis();
             for (ProviderSendResponse response : responses) {
                 if (StringUtils.isNotEmpty(response.getMobile()) && !m.equals(response.getMobile())) {
                     continue;
@@ -419,14 +425,25 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
                 submit.setRemark(response.getRemark());
                 submit.setMsgId(StringUtils.isNotEmpty(response.getSid()) ? response.getSid() : packets.getSid() + "");
             }
-
+            long f2 = System.currentTimeMillis();
+            
+            logger.info("ffffffff f2" + (f2 - f1));
+            
+            long b1 = System.currentTimeMillis();
             BeanUtils.copyProperties(submit, _submit);
             _submit.setMobile(m);
+            long b2 = System.currentTimeMillis();
+            
+            
+            logger.info("BeanUtils.copyProperties(submit, _submit) b2" + (b2 - b1));
 
+            long s1 = System.currentTimeMillis();
             // 获取省份代码/运营商相关内容 add by 20171126
             ProvinceLocal provinceLocal = mobileLocalService.getByMobile(m);
             _submit.setCmcp(provinceLocal.getCmcp());
             _submit.setProvinceCode(provinceLocal.getProvinceCode());
+            long s2 = System.currentTimeMillis();
+            logger.info("mobileLocalService.getByMobile(m) s2 " + (s2 - s1));
 
             // 如果提交数据失败，则需要制造伪造包补推送
             if (_submit.getStatus() == MessageSubmitStatus.FAILED.getCode()) {
@@ -437,6 +454,10 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
 
             submits.add(_submit);
         }
+        
+        long t2 = System.currentTimeMillis();
+        
+        logger.info("fffffffffff t2 " + (t2 - t1));
 
         return submits;
     }
@@ -553,10 +574,10 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             return Arrays.asList(mobiles);
         }
 
-        // 如果通道为空或者分包手机号码未配置按照 分包队列的默认数直接提交（默认1000）
+        // 如果通道为空或者分包手机号码未配置按照 分包队列的默认数直接提交（默认4000）
         if (smsPassage == null || smsPassage.getMobileSize() == null || smsPassage.getMobileSize() == 0
             || smsPassage.getMobileSize() == DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE) {
-            return Arrays.asList(mobiles);
+            return regroupMobiles(mobiles, mobiles.length);
         }
 
         return regroupMobiles(mobiles, smsPassage.getMobileSize());

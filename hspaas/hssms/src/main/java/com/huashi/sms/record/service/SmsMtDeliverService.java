@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -40,6 +41,10 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 	private IPushConfigService pushConfigService;
 	@Autowired
 	private ISmsMtPushService smsMtPushService;
+	
+	@Resource
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
 	@Override
@@ -80,11 +85,17 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 			
 //			lock.acquire();
 			
-			// 将待推送消息发送至用户队列进行处理（2017-03-20 合包处理）
-			smsMtPushService.compareAndPushBody(delivers);
+			long l1 = System.currentTimeMillis();
+			// 将待推送消息发送至用户队列进行处理（2017-03-20 合包处理），异步执行
+			threadPoolTaskExecutor.submit(new JoinPushThread(smsMtPushService, delivers));
+			long l2 = System.currentTimeMillis();
+			
+			logger.info("异步加入推送耗时 : {} MS", (l2 - l1));
 			
 			// 提交至待DB持久队列
 			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_STATUS_RECEIVE_LIST, JSON.toJSONString(delivers));
+			
+			logger.info("回执入REDIS耗时 : {} MS", (System.currentTimeMillis() - l2));
 			
 			return delivers.size();
 		} catch (Exception e) {
@@ -101,6 +112,34 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 //			}
 //			
 //		}
+	}
+	
+	/**
+	 * 
+	  * TODO 异步加入推送线程
+	  * 
+	  * @author zhengying
+	  * @version V1.0   
+	  * @date 2018年3月21日 下午9:41:00
+	 */
+	private class JoinPushThread extends Thread {
+	    
+	    private ISmsMtPushService smsMtPushService;
+	    private List<SmsMtMessageDeliver> delivers;
+	    
+	    private Logger logger = LoggerFactory.getLogger(getClass());
+	    
+	    JoinPushThread(ISmsMtPushService smsMtPushService, List<SmsMtMessageDeliver> delivers) {
+	        this.smsMtPushService = smsMtPushService;
+	        this.delivers = delivers;
+	    }
+	    
+	    @Override
+	    public void run(){
+	        long start = System.currentTimeMillis();
+	        smsMtPushService.compareAndPushBody(delivers);
+	        logger.info("异步推送执行耗时：{}" ,(System.currentTimeMillis() - start));
+	    }
 	}
 	
 	/**

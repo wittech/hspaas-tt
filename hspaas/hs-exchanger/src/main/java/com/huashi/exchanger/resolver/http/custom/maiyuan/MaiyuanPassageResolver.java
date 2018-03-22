@@ -107,6 +107,7 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver{
 		params.put("account", tparameter.getString("account"));
 		params.put("password", tparameter.getString("password"));
 		params.put("action", tparameter.getString("action"));
+		params.put("statusNum", 1000);
 		
 		return params;
 	}

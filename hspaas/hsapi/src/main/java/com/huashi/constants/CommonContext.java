@@ -33,7 +33,7 @@ public class CommonContext {
 
         CHINA_TELECOM(2, "电信", "^((133|149|153|180|181|189||173|177|199)[0-9]{8}|(1700|1701)[0-9]{7})$"),
 
-        CHINA_UNICOM(3, "联通", "^((130|131|132|155|156|185|186|175|176|145|166)[0-9]{8}|(1709|1718|1719|1707|1708)[0-9]{7})$"),
+        CHINA_UNICOM(3, "联通", "^((130|131|132|155|156|185|186|175|176|145|166)[0-9]{8}|(1704|1707|1708|1709|1718|1719)[0-9]{7})$"),
 
         GLOBAL(4, "全网", "^(13[0-9]|15[012356789]|166|17[05678]|18[0-9]|14[579]|19[89])[0-9]{8}$");
 
@@ -111,6 +111,10 @@ public class CommonContext {
      * @date 2016年8月28日 下午7:22:48
      */
     public enum PlatformType {
+
+        /**
+         * 未定义
+         */
         UNDEFINED(0, "未定义"), SEND_MESSAGE_SERVICE(1, "短信服务"), FLUX_SERVICE(2, "流量服务"), VOICE_SERVICE(3, "语音服务");
 
         private int code;
@@ -144,7 +148,7 @@ public class CommonContext {
          * @return
          */
         public static List<Integer> allCodes() {
-            List<Integer> all = new ArrayList<Integer>();
+            List<Integer> all = new ArrayList<>();
             for (PlatformType pt : PlatformType.values()) {
                 if (pt == PlatformType.UNDEFINED) {
                     continue;
@@ -163,6 +167,10 @@ public class CommonContext {
      * @date 2016年9月5日 下午9:57:52
      */
     public enum CallbackUrlType {
+
+        /**
+         * 短信状态报告
+         */
         SMS_STATUS(1, "短信状态报告"), SMS_MO(2, "短信上行报告"), FLUX_CHARGE_RESULT(3, "流量充值结果"), VOICE_SEND_STATUS(4, "语音验证码发送报告");
 
         private int code;
