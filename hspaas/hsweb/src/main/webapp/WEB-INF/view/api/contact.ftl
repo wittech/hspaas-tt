@@ -23,7 +23,7 @@
 						总机：400-118-0339<br>
 						QQ：<a target="blank" href="http://wpa.qq.com/msgrd?V=3&amp;uin=3239019280&amp;Site=华时科技&amp;Menu=yes"><img border="0" src="http://wpa.qq.com/pa?p=1:3239019280:7" alt="点击这里给我发消息"></a><br>
 						24小时客服：<span style="white-space:normal;">400-118-0339</span> <br>
-						总部地址：杭州市拱墅区萍水路333号御峰大厦610室<br>
+						总部地址：杭州市拱墅区萍水路333号御峰大厦1202室<br>
 						<br>
 						<img src="${rc.contextPath}/assets/images/partner/222211013829.jpg" alt=""><br>
 						<br>

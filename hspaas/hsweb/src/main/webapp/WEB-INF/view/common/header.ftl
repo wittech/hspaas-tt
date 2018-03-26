@@ -35,7 +35,7 @@
 					</div>
 				</li>
 				<li>
-					<a href="${rc.contextPath}/api/development" id="api">API&文档</a>
+					<a href="${rc.contextPath}/api/sms" id="api">API&文档</a>
 				</li>
 				<li>
 					<a href="${rc.contextPath}/api/help" id="help">帮助支持</a>

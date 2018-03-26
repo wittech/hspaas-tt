@@ -243,7 +243,7 @@
 		parameterType="java.lang.String">
 		select id, salt, email, mobile from hspaas_user
 		where
-		status = = and (email = #{username} or mobile = #{username})
+		status =0 and (email = #{username} or mobile = #{username})
 	</select>
 
 	<select id="getByUsernameAndPassword" resultType="int"

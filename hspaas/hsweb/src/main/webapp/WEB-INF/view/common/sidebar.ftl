@@ -52,13 +52,14 @@
 						微推管理
 					</a>
 				</li>
-				-->
+				2018-03-23下架
 				<li id="li_finance">
 					<a href="javascript:void(0)">
 						<i class="i6">&nbsp;</i>
 						财务管理
 					</a>
 				</li>
+				-->
 				<#--
 				<li id="li_jishu">
 					<a href="javascript:void(0)">
@@ -66,7 +67,8 @@
 						技术信息
 					</a>
 				</li>
-				-->
+				
+				2018-03-23下架
                 <li id="li_service">
 					<a href="javascript:void(0)">
 						<i class="i8">&nbsp;</i>
@@ -79,14 +81,25 @@
 						系统设置
 					</a>
 				</li>
+				-->
 			</ul>
 		</div>
 		<div class="tab_ctn">
+			<#--2018-03-23上架-->
+			<dl id="dx_send">
+				<dd id="dx_basis"><a href="${base}/user/basis"><i class="i21">&nbsp;</i>用户信息</a></dd>
+				<dd id="dx_create"><a href="${base}/sms/record/send/create"><i class="i21">&nbsp;</i>短信发送</a></dd>
+				<dd id="dx_template"><a href="${base}/sms/template/index"><i class="i21">&nbsp;</i>短信模板</a></dd>
+				<dd id="dx_send"><a href="${base}/sms/record/send/index"><i class="i21">&nbsp;</i>发送记录</a></dd>
+				<dd id="dx_recharge"><a href="${base}/account/recharge"><i class="i21">&nbsp;</i>账户充值</a></dd>
+				<dd id="dx_push"><a href="${base}/settings/push/index"><i class="i21">&nbsp;</i>推送设置</a></dd>
+			</dl>
 			<#--
 			<dl style="display: none;" id="console">
 				<dd id="console_product_list"><a href="${base}/product/index"><i class="i11">&nbsp;</i>产品报价</a></dd>
 			</dl>
 			-->
+			<#--2018-03-23下架
 			<dl id="dx_send">
 				<dd id="dx_create" class="current"><a href="${base}/sms/record/send/create"><i class="i21">&nbsp;</i>短信发送</a></dd>
 				<dd id="dx_template"><a href="${base}/sms/template/index"><i class="i21">&nbsp;</i>短信模板</a></dd>
@@ -96,8 +109,9 @@
 				<dd id="dx_send_receive"><a href="${base}/sms/record/receive/index"><i class="i23">&nbsp;</i>接收记录</a></dd>
 				<dd id="dx_send_test"><a href="${base}/sms/record/test/index"><i class="i24">&nbsp;</i>验证码测试</a></dd>
 				<dd id="dx_send_massage_white_list"><a href="${base}/settings/mobile/white/index"><i class="i25">&nbsp;</i>手机白名单</a></dd>
-				<#--<dd id="dx_send_massage_black_list"><a href="${base}/settings/mobile/black/index"><i class="i31">&nbsp;</i>手机黑名单</a></dd>-->
+				<dd id="dx_send_massage_black_list"><a href="${base}/settings/mobile/black/index"><i class="i31">&nbsp;</i>手机黑名单</a></dd>
 			</dl>
+			-->
 			<#--
 			<dl id="flow" style="display: none;">
 				<dd id="my_order"><a href="${base}/fs/record/order/index"><i class="i32">&nbsp;</i>我的订单</a></dd>
@@ -118,12 +132,14 @@
                 <dd><a href="客服系统-意见反馈.html"><i class="i48">&nbsp;</i>意见反馈</a></dd>
 			</dl>
 			-->
+			<#--2018-03-23下架
             <dl id="financial" style="display: none;">
 				<dd id="information"><a href="${base}/account/information"><i class="i50">&nbsp;</i>账户信息</a></dd>
 				<dd id="recharge"><a href="${base}/account/recharge"><i class="i51">&nbsp;</i>账户充值</a></dd>
 				<dd id="consumption_list"><a href="${base}/order/consumption"><i class="i52">&nbsp;</i>消费账单</a></dd>
 				<dd id="financial_balance_list" class="current"><a href="${base}/finance/balance/index"><i class="i53">&nbsp;</i>发票管理</a></dd>
 			</dl>
+			-->
 			<#--
 			 <dl style="display: none;">
 				<dd><a href="技术信息-短信技术文档.html"><i class="i41">&nbsp;</i>短信技术文档</a></dd>
@@ -131,6 +147,7 @@
 				<dd><a href="技术信息-流量技术文档.html"><i class="i43">&nbsp;</i>流量技术文档</a></dd>
 			</dl>
 			-->
+			<#--2018-03-23下架
 			<dl id="service" style="display: none;">
 				<dd id="service_opinion"><a href="${base}/service/opinion/index"><i class="i54">&nbsp;</i>意见反馈</a></dd>
 				<dd id="service_agreement_contract"><a href="${base}/service/agreement_contract/index"><i class="i55">&nbsp;</i>协议合同</a></dd>
@@ -143,6 +160,7 @@
 				<dd id="settings_address_book_list"><a href="${base}/settings/address_book/index"><i class="i60">&nbsp;</i>地址管理</a></dd>
 				<dd id="settings_host_white_list"><a href="${base}/settings/host/index"><i class="i61">&nbsp;</i>ip白名单</a></dd>
 			</dl>
+			-->
 		</div>
 	</div>
 	<#--
