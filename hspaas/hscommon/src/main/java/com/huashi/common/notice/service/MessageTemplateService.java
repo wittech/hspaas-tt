@@ -9,21 +9,19 @@ import com.huashi.common.notice.domain.SmsTemplate;
 
 @Service
 public class MessageTemplateService implements IMessageTemplateService {
-	
-	@Autowired
-	private SmsTemplateMapper smsTemplateMapper;
-	
-	@Override
-	public String getVerifyContent(String code) {
-		// 根据短信模板查询 短信动态码模板内容
-		SmsTemplate template = smsTemplateMapper.selectByCode(SmsCode.VERIFY_CODE.getCode());
-		if(template == null) {
-            {
-                return null;
-            }
+
+    @Autowired
+    private SmsTemplateMapper smsTemplateMapper;
+
+    @Override
+    public String getVerifyContent(String code) {
+        // 根据短信模板查询 短信动态码模板内容
+        SmsTemplate template = smsTemplateMapper.selectByCode(SmsCode.VERIFY_CODE.getCode());
+        if (template == null) {
+            return null;
         }
-		
-		return String.format(template.getContent(), code);
-	}
+
+        return String.format(template.getContent(), code);
+    }
 
 }

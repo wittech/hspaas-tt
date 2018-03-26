@@ -63,8 +63,6 @@ public class SmsMtTask implements Serializable {
 
 	private UserModel userModel;
 
-	private List<SmsMtTaskPackets> packets;
-
 	private Long messageTemplateId;
 
 	private String forceActions;
@@ -91,6 +89,8 @@ public class SmsMtTask implements Serializable {
 	
 	// 敏感词标签
 	private List<ForbiddenWords> forbiddenWordLabels;
+	
+	private List<SmsMtTaskPackets> packets;
 
 	// 汇总错误信息
 	private transient StringBuilder errorMessageReport = new StringBuilder();

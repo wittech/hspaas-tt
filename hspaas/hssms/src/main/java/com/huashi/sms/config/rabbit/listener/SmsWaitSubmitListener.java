@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -18,6 +19,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -49,6 +51,7 @@ import com.huashi.sms.passage.service.ISmsPassageService;
 import com.huashi.sms.passage.service.SmsPassageMessageTemplateService;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.record.service.ISmsMtPushService;
+import com.huashi.sms.record.service.ISmsMtSubmitService;
 import com.huashi.sms.signature.service.ISignatureExtNoService;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
@@ -81,6 +84,8 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
     private IUserSmsConfigService             userSmsConfigService;
 
     @Autowired
+    private ISmsMtSubmitService               smsSubmitService;
+    @Autowired
     private ISmsMtPushService                 smsMtPushService;
     @Autowired
     private ISmsPassageService                smsPassageService;
@@ -90,6 +95,8 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
     private Jackson2JsonMessageConverter      messageConverter;
     @Autowired
     private ISmsPassageMessageTemplateService smsPassageMessageTemplateService;
+    @Resource
+    private ThreadPoolTaskExecutor            threadPoolTaskExecutor;
 
     private Logger                            logger = LoggerFactory.getLogger(getClass());
 
@@ -359,19 +366,53 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
      */
     private void doSubmitFinished(List<SmsMtMessageSubmit> submits) {
         try {
-            for (SmsMtMessageSubmit submit : submits) {
-                // 如果需要推送，则设置REDIS 推送开关数据
-                if (submit.getNeedPush() != null && submit.getNeedPush() && StringUtils.isNotEmpty(submit.getPushUrl())) {
-                    smsMtPushService.setReadyMtPushConfig(submit);
-                }
+            // 当数据量大于阈值时无需REDIS汇聚，直接调用批量入库接口
+            if (submits.size() >= DIRECT_PERSISTENT_SIZE_THRESHOLD) {
+                smsSubmitService.batchInsertSubmit(submits);
+            } else {
+                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
+                                                           JSON.toJSONString(submits));
             }
 
-            stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
-                                                       JSON.toJSONString(submits));
+            // add by 2018-03-24 取出第一个值的信息（推送设置一批任务为一致信息）
+            SmsMtMessageSubmit submit = submits.iterator().next();
+            if (submit.getNeedPush() != null && submit.getNeedPush() && StringUtils.isNotEmpty(submit.getPushUrl())) {
+                // 异步设置需要推送的信息
+                threadPoolTaskExecutor.execute(new SetPushConfigThread(smsMtPushService, submits));
+            }
 
             logger.info("待提交信息已提交至REDIS队列完成");
         } catch (Exception e) {
             logger.error("处理待提交信息REDIS失败，失败信息：{}", JSON.toJSONString(submits), e);
+        }
+    }
+
+    /**
+     * TODO 异步设置推送信息线程
+     * 
+     * @author zhengying
+     * @version V1.0
+     * @date 2018年3月21日 下午9:41:00
+     */
+    private class SetPushConfigThread extends Thread {
+
+        private ISmsMtPushService        smsMtPushService;
+        private List<SmsMtMessageSubmit> submits;
+
+        private Logger                   logger = LoggerFactory.getLogger(getClass());
+
+        SetPushConfigThread(ISmsMtPushService smsMtPushService, List<SmsMtMessageSubmit> submits) {
+            this.smsMtPushService = smsMtPushService;
+            this.submits = submits;
+        }
+
+        @Override
+        public void run() {
+            long start = System.currentTimeMillis();
+            for (SmsMtMessageSubmit submit : submits) {
+                smsMtPushService.setReadyMtPushConfig(submit);
+            }
+            logger.info("异步推送执行耗时：{}", (System.currentTimeMillis() - start));
         }
     }
 
@@ -392,11 +433,8 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
 
         SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
 
-        long l1 = System.currentTimeMillis();
         BeanUtils.copyProperties(packets, submit, "passageId", "mobile");
         submit.setPassageId(packets.getFinalPassageId());
-        long l2 = System.currentTimeMillis();
-        logger.info("SmsWaitSubmitListener l1 BeanUtils.copyProperties" + (l2 - l1));
 
         // 推送信息为固定地址或者每次传递地址才需要推送
         if (pushConfig != null && pushConfig.getStatus() != PushConfigStatus.NO.getCode()) {
@@ -410,12 +448,16 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
 
         String[] mobiles = mobile.split(",");
 
-        
+        long s1 = System.currentTimeMillis();
+        // 批量获取手机号码省份归属地
+        Map<String, ProvinceLocal> mobileProvinceLocals = mobileLocalService.getByMobiles(mobiles);
+        long s2 = System.currentTimeMillis();
+        logger.info("mobileLocalService.getByMobile(m) s2 " + (s2 - s1));
+
         long t1 = System.currentTimeMillis();
         for (String m : mobiles) {
             SmsMtMessageSubmit _submit = new SmsMtMessageSubmit();
 
-            long f1 = System.currentTimeMillis();
             for (ProviderSendResponse response : responses) {
                 if (StringUtils.isNotEmpty(response.getMobile()) && !m.equals(response.getMobile())) {
                     continue;
@@ -425,25 +467,10 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
                 submit.setRemark(response.getRemark());
                 submit.setMsgId(StringUtils.isNotEmpty(response.getSid()) ? response.getSid() : packets.getSid() + "");
             }
-            long f2 = System.currentTimeMillis();
-            
-            logger.info("ffffffff f2" + (f2 - f1));
-            
-            long b1 = System.currentTimeMillis();
             BeanUtils.copyProperties(submit, _submit);
             _submit.setMobile(m);
-            long b2 = System.currentTimeMillis();
-            
-            
-            logger.info("BeanUtils.copyProperties(submit, _submit) b2" + (b2 - b1));
-
-            long s1 = System.currentTimeMillis();
-            // 获取省份代码/运营商相关内容 add by 20171126
-            ProvinceLocal provinceLocal = mobileLocalService.getByMobile(m);
-            _submit.setCmcp(provinceLocal.getCmcp());
-            _submit.setProvinceCode(provinceLocal.getProvinceCode());
-            long s2 = System.currentTimeMillis();
-            logger.info("mobileLocalService.getByMobile(m) s2 " + (s2 - s1));
+            _submit.setCmcp(mobileProvinceLocals.get(m).getCmcp());
+            _submit.setProvinceCode(mobileProvinceLocals.get(m).getProvinceCode());
 
             // 如果提交数据失败，则需要制造伪造包补推送
             if (_submit.getStatus() == MessageSubmitStatus.FAILED.getCode()) {
@@ -454,9 +481,8 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
 
             submits.add(_submit);
         }
-        
+
         long t2 = System.currentTimeMillis();
-        
         logger.info("fffffffffff t2 " + (t2 - t1));
 
         return submits;

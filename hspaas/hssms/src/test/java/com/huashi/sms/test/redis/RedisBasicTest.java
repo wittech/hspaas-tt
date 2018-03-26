@@ -75,8 +75,11 @@ public class RedisBasicTest {
 //         jedis = new Jedis("106.14.37.153", 6379);
 //         jedis.auth("huashi_redis_99088@");
 
-        jedis = new Jedis("192.168.1.167", 6379);
-        jedis.auth("8WTsPdC6YxH]nGKmyYG=aHXCwkqADs");
+//        jedis = new Jedis("192.168.1.167", 6379);
+//        jedis.auth("8WTsPdC6YxH]nGKmyYG=aHXCwkqADs");
+        
+        jedis = new Jedis("192.168.1.104", 6379);
+        jedis.auth("huashi_redis_99088@");
     }
 
     /**

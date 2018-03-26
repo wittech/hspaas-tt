@@ -17,6 +17,11 @@ public abstract class BasePacketsSupport {
      * 默认每个包手机号码上限数
      */
     protected static final int DEFAULT_REQUEST_MOBILE_PACKAGE_SIZE = 4000;
+    
+    /**
+     * 当提交数据大于等于阈值时直接调用持久化方法，无需REDIS汇聚数据
+     */
+    protected static final int DIRECT_PERSISTENT_SIZE_THRESHOLD = 500;
 
     /**
      * TODO 重组手机号码，按照分包数量进行数据拆分 分包数据

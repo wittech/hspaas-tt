@@ -23,7 +23,7 @@ public class InsertListTest extends RedisBasicTest {
 
     @Before
     public void init() {
-        size = 40000;
+        size = 4000;
         list = new ArrayList<>(size);
         stringList = new String[size];
         for (int i = 0; i < size; i++) {

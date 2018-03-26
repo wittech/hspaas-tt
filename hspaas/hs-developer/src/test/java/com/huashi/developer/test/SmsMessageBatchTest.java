@@ -1,122 +1,153 @@
 package com.huashi.developer.test;
 
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.commons.collections.MapUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.util.RandomUtil;
 import com.huashi.common.util.SecurityUtil;
 import com.huashi.constants.CommonContext.AppType;
+import com.huashi.constants.OpenApiCode;
+import com.huashi.util.HttpClientUtil;
 
 public class SmsMessageBatchTest {
+    
+    /**
+     * 单个请求包中包含的手机号码数
+     */
+    private static int MOBILE_SIZE;
+    
+    /**
+     * 总线程个数
+     */
+    private static int THREAD_SIZE;
+    
+    /**
+     * 单个线程中调用发送次数
+     */
+    private static int RQEUST_SIZE;
+    private static String APPKEY;
+    private static String PASSWORD;
+    private static String URL;
+//    private static final AtomicInteger COUNTER = new AtomicInteger(0);
+    
+    static {
+        MOBILE_SIZE = 1;
+        THREAD_SIZE = 128;
+        RQEUST_SIZE = 1;
+        
+//        MOBILE_SIZE = 1;
+//        THREAD_SIZE = 1;
+//        RQEUST_SIZE = 1;
+        
+        APPKEY = "hsjXxJ2gO75iOK";
+        PASSWORD = "e3293685e23847fce6a8afc532de6dac";
+        URL = "http://localhost:8080/sms/send";
+//        String url = "http://dev.hspaas.cn:8080/sms/send";
+    }
+    
+    private static String getMobiles() {
+        StringBuilder builder = new StringBuilder();
+        for(int i=0; i< MOBILE_SIZE; i++) {
+            builder.append("158" + RandomUtil.getRandomNum(8)).append(",");
+        }
+        return builder.substring(0, builder.length() - 1);
+    }
 
-	public static void send() {
-		
-		String url = "http://dev.hspaas.cn:8080/sms/send";
-//		String url = "http://localhost:8080/sms/send";
-		String password = "8854d3a11f7fa220ef22896ef25cd213";
-		String mobile = "158" + RandomUtil.getRandomNum(8);
-		String time = System.currentTimeMillis() + "";
-
-		String apptype = AppType.WEB.getCode() + "";
+	public static boolean send() {
+		String mobile = getMobiles();
 
 		String content = String.format("【华时科技】您的短信验证码为%s，请尽快完成后续操作。", RandomUtil.getRandomNum());
 
-		System.out.println("短信内容：" + content);
+		System.out.println(Thread.currentThread().getName() + "-> 短信内容：" + content);
 
-		FormBody.Builder bulider = new FormBody.Builder().add("appkey", "b7064fe2115b46a09b39611520de305a")
-				.add("appsecret", SecurityUtil.md5Hex(password + mobile + time)).add("timestamp", time)
-				.add("mobile", mobile).add("content", content).add("attach", "test889")
-				.add("callback", "http://localhost:9999/sms/status_report");
-
-		Map<String, Object> result = JSON.parseObject(post(url, bulider, apptype),
+		
+		Map<String, Object> result = JSON.parseObject(call(mobile, content),
 				new TypeReference<Map<String, Object>>() {
 				});
 
-		System.out.println(result.get("code").toString());
-	}
-
-	@Before
-	public void before() {
-		// url = "http://dev.hspaas.cn:8080/sms/send";
-
-	}
-
-	public static void main(String[] args) {
-		ExecutorService service = Executors.newFixedThreadPool(100);
-
-		long time = System.currentTimeMillis();
-		service.execute(new Runnable() {
-			public void run() {
-
-				for (int i = 0; i < 10; i++) {
-					send();
-				}
-			}
-		});
-		System.out.println(System.currentTimeMillis() - time);
-	}
-
-	@Test
-	public void test() {
-
-		ExecutorService service = Executors.newFixedThreadPool(100);
-
-		service.execute(new Runnable() {
-			public void run() {
-
-				for (int i = 0; i < 100; i++) {
-					send();
-				}
-			}
-		});
-
-		service.shutdown();
-
-	}
-
-	// String post(String url, String content) {
-	//
-	// Request request = new Request.Builder()
-	// .url(url)
-	// .post(RequestBody.create(
-	// MediaType.parse("text/html; charset=utf-8"), content))
-	// .build();
-	// try {
-	// Response response = new OkHttpClient().newCall(request).execute();
-	// if (response.isSuccessful())
-	// return response.body().string();
-	// else
-	// System.err.println("URL:{}, 回执失败");
-	// } catch (IOException e) {
-	// throw new RuntimeException(e);
-	// }
-	// throw new RuntimeException(String.format("URL: %s 调用失败！", url));
-	// }
-
-	private static String post(String url, FormBody.Builder bulider, String apptype) {
-		Request request = new Request.Builder().url(url).post(bulider.build()).addHeader("apptype", apptype).build();
-		try {
-			Response response = new OkHttpClient().newCall(request).execute();
-			if (response.isSuccessful())
-				return response.body().string();
-			else
-				System.err.println("URL:{}, 回执失败");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		if(MapUtils.isEmpty(result) || !OpenApiCode.SUCCESS.equals(result.get("code").toString())) {
+		    System.out.println(JSON.toJSONString(result));
+		    return false;
 		}
-		throw new RuntimeException(String.format("URL: %s 调用失败！", url));
+		
+		return true;
 	}
 
+
+	public static void main(String[] args) throws InterruptedException {
+		ExecutorService service = Executors.newFixedThreadPool(50);
+
+		CountDownLatch cdl = new CountDownLatch(THREAD_SIZE);
+		
+		for(int i = 0; i< RQEUST_SIZE; i++) {
+		    service.execute(new SendWorker(cdl));
+		}
+		
+		System.out.println("线程加入完毕，准备执行任务。。。");
+		
+		// 记录一下等待开始时间
+        long s1 = System.currentTimeMillis();
+
+        // 协同：让main线程等待任务都完成
+        cdl.await();
+
+        System.out.println("任务执行完成，耗时:" + (System.currentTimeMillis() - s1) +"ms");
+
+        // TODO 再找出最大值
+
+        // 线程池不需要用了，把它关闭
+        service.shutdown();
+	}
+	
+	static class SendWorker implements Runnable {
+	    
+	    CountDownLatch cdl;
+	    SendWorker(CountDownLatch cdl) {
+	        this.cdl = cdl;
+	    }
+
+	    @Override
+        public void run() {
+	        for (int i = 0; i < THREAD_SIZE; i++) {
+                send();
+            }
+            
+	        cdl.countDown();
+        }
+    }
+
+	/**
+	 * 
+	   * TODO 调用发送短信
+	   * 
+	   * @param mobile
+	   * @param content
+	   * @return
+	 */
+	private static String call(String mobile, String content) {
+	    Map<String, Object> headers = new HashMap<>();
+	    headers.put("apptype", AppType.WEB.getCode() + "");
+	    
+	    // 当前时间戳
+	    String currentTime = System.currentTimeMillis() + "";
+	    
+	    
+        Map<String ,Object> params = new HashMap<>();
+        params.put("appkey", APPKEY);
+        params.put("appsecret", SecurityUtil.md5Hex(PASSWORD + mobile + currentTime));
+        params.put("timestamp", currentTime);
+        params.put("mobile", mobile);
+        params.put("content", content);
+        params.put("attach", "test889");
+        params.put("callback", "http://localhost:9999/sms/status_report");
+        
+        return HttpClientUtil.post(URL, headers, params, 100);
+	}
 }

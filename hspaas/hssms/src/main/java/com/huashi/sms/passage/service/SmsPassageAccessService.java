@@ -252,8 +252,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
             // 根据通道组ID查询通道组详细信息
             List<SmsPassageGroupDetail> detailList = smsPassageGroupDetailMapper.findPassageByGroupId(userPassage.getPassageGroupId());
             if (CollectionUtils.isEmpty(detailList)) {
-                logger.error("通道组ID：{} 查不到相关短信通道集合数据", userPassage.getPassageGroupId());
-                return false;
+                logger.warn("通道组ID：{} 查不到相关短信通道集合数据", userPassage.getPassageGroupId());
             }
 
             // 根据用户ID删除所有的可用通道信息

@@ -374,6 +374,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         if (passageAccess != null) {
             smsMtTaskPackets.setCmcp(passageAccess.getCmcp());
             smsMtTaskPackets.setProvinceCode(passageAccess.getProvinceCode());
+        } else {
+            smsMtTaskPackets.setCmcp(CMCP.local(mobile).getCode());
         }
 
         smsMtTaskPackets.setContent(task.getContent());

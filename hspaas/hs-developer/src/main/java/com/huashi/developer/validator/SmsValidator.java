@@ -39,6 +39,7 @@ public class SmsValidator extends Validator {
         PassportModel passportModel = passportValidator.validate(paramMap, ip, smsModel.getMobile());
 
         smsModel.setIp(ip);
+        smsModel.setUserId(passportModel.getUserId());
 
         // 校验用户短信余额是否满足
         checkBalanceAvaiable(smsModel, passportModel);
