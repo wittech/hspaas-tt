@@ -1,13 +1,11 @@
 package com.huashi.web;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ImportResource;
 
 import com.huashi.common.util.LogUtils;
 
-@SpringBootApplication
-@ImportResource({ "classpath:spring-dubbo-consumer.xml" })
+//@SpringBootApplication
+//@ImportResource({ "classpath:spring-dubbo-consumer.xml" })
 public class HsWebApplication{
 
 //	@Override

@@ -1,6 +1,5 @@
 package com.huashi.sms.test;
 
-import java.io.IOException;
 
 
 public class HookTest {

@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -84,7 +83,7 @@ public class RegisterService implements IRegisterService {
     @Autowired
     private ISystemConfigService       systemConfigService;
     @Reference
-    private ISmsPassageAccessService   iSmsPassageAccessService;
+    private ISmsPassageAccessService   simsPassageAccessService;
 
     @Value("${zk.connect}")
     private String                     zkConnectUrl;
@@ -125,6 +124,7 @@ public class RegisterService implements IRegisterService {
         // 编程式事务，方便调用，后续需要加入分布式事务TCC模式
         DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
         TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
+
         try {
             UserDeveloper developer = userService.save(model.getUser(), model.getUserProfile());
             if (developer == null) {
@@ -147,11 +147,6 @@ public class RegisterService implements IRegisterService {
                 throw new RuntimeException("Save initUserPassage failed");
             }
 
-            // 此处因为跨DUBBO应用服务，顾需要做 分布式事务回滚，需考虑，可采用rabbitMQ通知机制，或者提供简单回滚方法暴露
-            if (!iSmsPassageAccessService.updateByModifyUser(developer.getUserId())) {
-                throw new RuntimeException("Save updateByModifyUser failed");
-            }
-
             if (!userPushCallbackConfig(model.getPushConfigs(), developer.getUserId())) {
                 throw new RuntimeException("Save userPushCallbackConfig failed");
             }
@@ -160,7 +155,13 @@ public class RegisterService implements IRegisterService {
                 throw new RuntimeException("Save addRegisterFinishedNotificationMessage failed");
             }
 
-            // 如果发送邮件开关打开，则需要发送邮件
+            // 此处因为跨DUBBO应用服务，顾需要做 分布式事务回滚，
+            // 可采用rabbitMQ通知机制，或者提供简单回滚方法暴露（需考虑）
+            if (!simsPassageAccessService.updateByModifyUser(developer.getUserId())) {
+                throw new RuntimeException("Invoke method[updateByModifyUser] to update passsageAccess failed");
+            }
+
+            // 如果发送邮件开关打开，则需要发送邮件，（即使发送失败也不作为回滚条件）
             if (model.isSendEmail()) {
                 sendEmail(model.getUser(), developer);
             }
@@ -355,7 +356,6 @@ public class RegisterService implements IRegisterService {
      * @param user
      * @param developer
      */
-    @Async
     public void sendEmail(User user, UserDeveloper developer) {
         // 7、异步发送短信和邮件（邮件中需将 接口账号和密码发送，并将接口协议文档作为附件发送[后台可配置开关]）
         try {

@@ -7,14 +7,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
-import javax.annotation.PostConstruct;
-
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * TODO ZooKeeper分布式锁
@@ -44,7 +41,7 @@ public class ZkDistributeLock implements Lock {
     private String              currentPath;
 
 //    @Value("${zk.connect}")
-    private String              zkConnectUrl = "127.0.0.1:2181";
+//    private String              zkConnectUrl = "127.0.0.1:2181";
 
 //    @Value("${zk.locknode}")
     private String              zkLockNode = "LOCK";

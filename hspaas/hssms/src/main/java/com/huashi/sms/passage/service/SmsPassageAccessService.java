@@ -277,7 +277,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
 
             return true;
         } catch (Exception e) {
-            logger.error("更改可用通道失败", e);
+            logger.error("userId: ["+ userId+"] 更改可用通道失败", e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }

@@ -1,7 +1,6 @@
 package com.huashi.sms.record.service;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -70,7 +69,6 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 //		
 //		// 不可重入锁
 //		InterProcessLock lock = new InterProcessSemaphoreMutex(client, zkLockNode);
-//		
 //        client.start();
 		
 		try  {
@@ -86,7 +84,6 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 //			threadPoolTaskExecutor.submit(new JoinPushThread(smsMtPushService, delivers));
 			smsMtPushService.compareAndPushBody(delivers);
 			long l2 = System.currentTimeMillis();
-			
 			logger.info("2222222异步加入推送耗时 : {} MS", (l2 - l1));
 			
 			// 提交至待DB持久队列
@@ -111,47 +108,11 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 //		}
 	}
 	
-	/**
-	 * 
-	   * TODO 此条回执是否已经已处理（针对下家推送多次或者轮训取数据报告取多次情况，需要去除我方已经处理完成的数据，防止数据插入多次）
-	   * 
-	   * @param deliver
-	 */
-	public boolean isDelivedHasDone(String msgId, String mobile) {
-		try {
-			boolean isDone = stringRedisTemplate.opsForHash().hasKey(getReceiptKey(msgId), mobile);
-			if(isDone) {
-				logger.warn("回执数据正在处理中 ，本条忽略，消息ID：{}，手机号码：{}", msgId, mobile);
-				return true;
-			}
-			
-			SmsMtMessageDeliver deliver = smsMtMessageDeliverMapper.selectByMobileAndMsgid(msgId, mobile);
-			if(deliver != null) {
-				logger.warn("回执数据已处理完成 ，本条忽略，消息ID：{}，手机号码：{}", msgId, mobile);
-				return true;
-			}
-			
-			// 设置 待回执 短信内容
-			stringRedisTemplate.opsForHash().put(getReceiptKey(msgId), mobile, String.valueOf(System.currentTimeMillis()));
-			stringRedisTemplate.expire(getReceiptKey(msgId), 3, TimeUnit.DAYS);
-			
-			return false;
-		} catch (Exception e) {
-			logger.error("判断回执数据是否已处理失败，msg_id:{}, mobile:{}", msgId, mobile, e);
-			return false;
-		}
-	}
-	
-	private String getReceiptKey(String msgId) {
-		return String.format("%s:%s", SmsRedisConstant.RED_READY_MESSAGE_WAIT_RECEIPT, msgId);
-	}
-	
 	@Override
 	public boolean doDeliverToException(JSONObject obj) {
 		try {
-			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_MESSAGE_STATUS_RECEIPT_EXCEPTION_LIST,
-					JSON.toJSONString(obj));
-			return true;
+			return stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_MESSAGE_STATUS_RECEIPT_EXCEPTION_LIST,
+					JSON.toJSONString(obj)) > 0;
 		} catch (Exception e) {
 			logger.error("发送回执错误信息失败 {}", JSON.toJSON(obj), e);
 			return false;
@@ -160,9 +121,6 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
 
 	@Override
 	public boolean saveDeliverLog(JSONObject report) {
-		
-		
-		
 		return false;
 	}
 

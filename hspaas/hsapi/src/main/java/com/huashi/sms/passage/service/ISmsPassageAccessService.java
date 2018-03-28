@@ -108,7 +108,7 @@ public interface ISmsPassageAccessService {
 			int userId);
 
 	/**
-	 * 当更新用户信息时，如果通道组发生变化，更新access
+	 * 当更新用户信息时，如果通道组发生变化，更新access（DB,REDIS及通道参数信息）
 	 * 
 	 * @param userId
 	 * @return
