@@ -24,7 +24,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.huashi.bill.bill.domain.ConsumptionReport;
 import com.huashi.common.user.model.UserModel;
 import com.huashi.common.user.service.IUserService;
@@ -62,31 +61,31 @@ import com.huashi.sms.task.domain.SmsMtTaskPackets;
 public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.ConfirmCallback {
 
     @Reference
-    private IUserService userService;
+    private IUserService              userService;
     @Autowired
-    private SmsMtMessageSubmitMapper smsMtMessageSubmitMapper;
+    private SmsMtMessageSubmitMapper  smsMtMessageSubmitMapper;
     @Autowired
-    private SmsMtMessagePushMapper pushMapper;
+    private SmsMtMessagePushMapper    pushMapper;
     @Reference
-    private ISmsMtDeliverService smsMtDeliverService;
+    private ISmsMtDeliverService      smsMtDeliverService;
     @Autowired
-    private ISmsPassageService smsPassageService;
+    private ISmsPassageService        smsPassageService;
 
-    //	@Autowired
-//	private SqlSessionTemplate sqlSessionTemplate;
+    // @Autowired
+    // private SqlSessionTemplate sqlSessionTemplate;
 
     @Autowired
-    private SmsWaitSubmitListener smsWaitSubmitListener;
+    private SmsWaitSubmitListener     smsWaitSubmitListener;
     @Autowired
-    private ISmsMtPushService smsMtPushService;
+    private ISmsMtPushService         smsMtPushService;
 
     @Resource
-    private RabbitTemplate rabbitTemplate;
+    private RabbitTemplate            rabbitTemplate;
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate       stringRedisTemplate;
     @Autowired
     private RabbitMessageQueueManager rabbitMessageQueueManager;
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger                    logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<SmsMtMessageSubmit> findBySid(long sid) {
@@ -205,7 +204,8 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     }
 
     @Override
-    public PaginationVo<SmsMtMessageSubmit> findPage(int userId, String mobile, String startDate, String endDate, String currentPage, String sid) {
+    public PaginationVo<SmsMtMessageSubmit> findPage(int userId, String mobile, String startDate, String endDate,
+                                                     String currentPage, String sid) {
         if (userId <= 0) {
             return null;
         }
@@ -345,22 +345,23 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         }
 
         return smsMtMessageSubmitMapper.batchInsert(list);
-//		SqlSession session = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
-//		SmsMtMessagesmsMtMessageSubmitMapper smsMtMessageSubmitMapper = session.getMapper(SmsMtMessagesmsMtMessageSubmitMapper.class);
-//		int size = 0;
-//		try {
-//			size = smsMtMessageSubmitMapper.batchInsert(list);
-//			session.commit();
-//			// 清理缓存，防止溢出
-//			session.clearCache();
-//		} catch (Exception e) {
-//			// 没有提交的数据可以回滚
-//			// session.rollback();
-//			logger.error("短信提交数据入库失败", e);
-//		} finally {
-//			session.close();
-//		}
-//		return size;
+        // SqlSession session = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
+        // SmsMtMessagesmsMtMessageSubmitMapper smsMtMessageSubmitMapper =
+        // session.getMapper(SmsMtMessagesmsMtMessageSubmitMapper.class);
+        // int size = 0;
+        // try {
+        // size = smsMtMessageSubmitMapper.batchInsert(list);
+        // session.commit();
+        // // 清理缓存，防止溢出
+        // session.clearCache();
+        // } catch (Exception e) {
+        // // 没有提交的数据可以回滚
+        // // session.rollback();
+        // logger.error("短信提交数据入库失败", e);
+        // } finally {
+        // session.close();
+        // }
+        // return size;
     }
 
     @Override
@@ -408,24 +409,37 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
             deliver.setDeliverTime(DateUtil.getNow());
             deliver.setCreateTime(new Date());
             deliver.setRemark(submit.getRemark());
-
-            // 设置推送开关
-            if (submit.getNeedPush() != null && submit.getNeedPush() && StringUtils.isNotEmpty(submit.getPushUrl())) {
-                smsMtPushService.setReadyMtPushConfig(submit);
-            }
-
             delivers.add(deliver);
         }
 
-        stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST, JSON.toJSONString(submits, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullStringAsEmpty));
+        // 加入REDIS 待持久化队列
+        stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
+                                                   JSON.toJSONString(submits));
+
+        // 判断短信是否需要推送，需要则设置推送设置信息
+        setPushConfigurationIfNecessary(submits);
 
         try {
             smsMtDeliverService.doFinishDeliver(delivers);
             return true;
         } catch (Exception e) {
-            logger.warn("人工制造短信回执信息错误，错误信息：{}", e.getMessage());
+            logger.warn("伪造短信回执包信息错误", e);
             return false;
         }
+    }
+
+    @Override
+    public void setPushConfigurationIfNecessary(List<SmsMtMessageSubmit> submits) {
+        // add by 2018-03-24 取出第一个值的信息（推送设置一批任务为一致信息）
+        SmsMtMessageSubmit submit = submits.iterator().next();
+        if (submit.getNeedPush() == null || !submit.getNeedPush() || StringUtils.isEmpty(submit.getPushUrl())) {
+            return;
+        }
+
+        // 异步设置需要推送的信息
+        // threadPoolTaskExecutor.execute(new SetPushConfigThread(smsMtPushService, submits));
+
+        smsMtPushService.setMessageReadyPushConfigurations(submits);
     }
 
     @Override
@@ -438,7 +452,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
         try {
             for (String passageCode : passageCodes) {
-                rabbitMessageQueueManager.createQueue(getSubmitMessageQueueName(passageCode), smsPassageService.isPassageBelongtoDirect(null, passageCode), smsWaitSubmitListener);
+                rabbitMessageQueueManager.createQueue(getSubmitMessageQueueName(passageCode),
+                                                      smsPassageService.isPassageBelongtoDirect(null, passageCode),
+                                                      smsWaitSubmitListener);
             }
 
             return true;
@@ -462,7 +478,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     public boolean declareNewSubmitMessageQueue(String protocol, String passageCode) {
         String mqName = getSubmitMessageQueueName(passageCode);
         try {
-            rabbitMessageQueueManager.createQueue(mqName, smsPassageService.isPassageBelongtoDirect(protocol, passageCode), smsWaitSubmitListener);
+            rabbitMessageQueueManager.createQueue(mqName,
+                                                  smsPassageService.isPassageBelongtoDirect(protocol, passageCode),
+                                                  smsWaitSubmitListener);
             logger.info("RabbitMQ添加新队列：{} 成功", mqName);
             return true;
         } catch (Exception e) {
@@ -488,9 +506,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
     @Override
     public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-//        if (correlationData == null) {
-//            return;
-//        }
+        // if (correlationData == null) {
+        // return;
+        // }
 
         // if (ack) {
         // logger.error("=================待提交消息队列处理成功：{}",
@@ -519,12 +537,15 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
                     continue;
                 }
 
-                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, getSubmitMessageQueueName(passageCode), packet, (message) -> {
+                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS,
+                                              getSubmitMessageQueueName(passageCode),
+                                              packet,
+                                              (message) -> {
 
-                    message.getMessageProperties().setPriority(WordsPriority.getLevel(packet.getContent()));
+                                                  message.getMessageProperties().setPriority(WordsPriority.getLevel(packet.getContent()));
 
-                    return message;
-                }, new CorrelationData(packet.getSid() + ""));
+                                                  return message;
+                                              }, new CorrelationData(packet.getSid() + ""));
             } catch (Exception e) {
                 logger.error("子任务发送至待提交任务失败，信息为：{}", JSON.toJSONString(packet), e);
             }

@@ -370,23 +370,18 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             if (submits.size() >= DIRECT_PERSISTENT_SIZE_THRESHOLD) {
                 smsSubmitService.batchInsertSubmit(submits);
             } else {
-                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
-                                                           JSON.toJSONString(submits));
+                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST, JSON.toJSONString(submits));
             }
 
-            // add by 2018-03-24 取出第一个值的信息（推送设置一批任务为一致信息）
-            SmsMtMessageSubmit submit = submits.iterator().next();
-            if (submit.getNeedPush() != null && submit.getNeedPush() && StringUtils.isNotEmpty(submit.getPushUrl())) {
-                // 异步设置需要推送的信息
-                threadPoolTaskExecutor.execute(new SetPushConfigThread(smsMtPushService, submits));
-            }
+            // 判断并设置推送信息
+            smsSubmitService.setPushConfigurationIfNecessary(submits);
 
             logger.info("待提交信息已提交至REDIS队列完成");
         } catch (Exception e) {
             logger.error("处理待提交信息REDIS失败，失败信息：{}", JSON.toJSONString(submits), e);
         }
     }
-
+    
     /**
      * TODO 异步设置推送信息线程
      * 
@@ -394,27 +389,27 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
      * @version V1.0
      * @date 2018年3月21日 下午9:41:00
      */
-    private class SetPushConfigThread extends Thread {
-
-        private ISmsMtPushService        smsMtPushService;
-        private List<SmsMtMessageSubmit> submits;
-
-        private Logger                   logger = LoggerFactory.getLogger(getClass());
-
-        SetPushConfigThread(ISmsMtPushService smsMtPushService, List<SmsMtMessageSubmit> submits) {
-            this.smsMtPushService = smsMtPushService;
-            this.submits = submits;
-        }
-
-        @Override
-        public void run() {
-            long start = System.currentTimeMillis();
-            for (SmsMtMessageSubmit submit : submits) {
-                smsMtPushService.setReadyMtPushConfig(submit);
-            }
-            logger.info("异步推送执行耗时：{}", (System.currentTimeMillis() - start));
-        }
-    }
+//    private class SetPushConfigThread extends Thread {
+//
+//        private ISmsMtPushService        smsMtPushService;
+//        private List<SmsMtMessageSubmit> submits;
+//
+//        private Logger                   logger = LoggerFactory.getLogger(getClass());
+//
+//        SetPushConfigThread(ISmsMtPushService smsMtPushService, List<SmsMtMessageSubmit> submits) {
+//            this.smsMtPushService = smsMtPushService;
+//            this.submits = submits;
+//        }
+//
+//        @Override
+//        public void run() {
+//            long start = System.currentTimeMillis();
+//            for (SmsMtMessageSubmit submit : submits) {
+//                smsMtPushService.setReadyMtPushConfig(submit);
+//            }
+//            logger.info("异步推送执行耗时：{}", (System.currentTimeMillis() - start));
+//        }
+//    }
 
     /**
      * TODO 组装提交完成的短息信息入库
@@ -448,11 +443,8 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
 
         String[] mobiles = mobile.split(",");
 
-        long s1 = System.currentTimeMillis();
         // 批量获取手机号码省份归属地
         Map<String, ProvinceLocal> mobileProvinceLocals = mobileLocalService.getByMobiles(mobiles);
-        long s2 = System.currentTimeMillis();
-        logger.info("mobileLocalService.getByMobile(m) s2 " + (s2 - s1));
 
         long t1 = System.currentTimeMillis();
         for (String m : mobiles) {
@@ -475,6 +467,10 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             // 如果提交数据失败，则需要制造伪造包补推送
             if (_submit.getStatus() == MessageSubmitStatus.FAILED.getCode()) {
                 _submit.setPushErrorCode(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
+                if(StringUtils.isEmpty(_submit.getMsgId())) {
+                    _submit.setMsgId(packets.getSid() + "");
+                }
+                
                 rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION,
                                               _submit);
             }

@@ -48,7 +48,7 @@ import com.huashi.constants.ResponseMessage;
 import com.huashi.sms.config.cache.redis.constant.SmsRepeatSubmitConstant;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant.WordsPriority;
-import com.huashi.sms.config.zookeeper.ZkDistributeLock;
+import com.huashi.sms.config.zookeeper.ZookeeperLock;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
@@ -120,7 +120,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     private StringRedisTemplate          stringRedisTemplate;
 
     @Autowired
-    private ZkDistributeLock             zkDistributeLock;
+    private ZookeeperLock             zkDistributeLock;
 
     // @PostConstruct
     // public void setConfirmCallback() {

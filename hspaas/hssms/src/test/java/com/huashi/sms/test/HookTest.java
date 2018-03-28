@@ -1,5 +1,7 @@
 package com.huashi.sms.test;
 
+import java.io.IOException;
+
 
 public class HookTest {
 
@@ -16,9 +18,17 @@ public class HookTest {
 		start();
 		System.out.println("The Application is doing something");
 		
+        int i =0;
+		
 		while(true) {
 			System.out.println(System.currentTimeMillis());
+			i++;
+			if(i >=10)
+			    break;
 		}
+		
+		
+		
 //		try {
 //			TimeUnit.MILLISECONDS.sleep(5000);
 //		} catch (InterruptedException e) {

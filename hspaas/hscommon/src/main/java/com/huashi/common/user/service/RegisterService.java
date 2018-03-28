@@ -2,17 +2,24 @@ package com.huashi.common.user.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.bill.pay.constant.PayContext.PaySource;
+import com.huashi.common.config.lock.ZookeeperLock;
 import com.huashi.common.notice.context.MessageContext.ReadStatus;
 import com.huashi.common.notice.dao.EmailSendRecordMapper;
 import com.huashi.common.notice.dao.NotificationMessageMapper;
@@ -49,7 +56,7 @@ import com.huashi.sms.passage.service.ISmsPassageAccessService;
 @Service
 public class RegisterService implements IRegisterService {
 
-    private Logger                     logger = LoggerFactory.getLogger(getClass());
+    private Logger                     logger                     = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private IEmailSendService          emailSendService;
@@ -79,8 +86,19 @@ public class RegisterService implements IRegisterService {
     @Reference
     private ISmsPassageAccessService   iSmsPassageAccessService;
 
-//    @Autowired;
-//    private PlatformTransactionManager platformTransactionManager
+    @Value("${zk.connect}")
+    private String                     zkConnectUrl;
+
+    @Value("${zk.locknode}")
+    private String                     zkLockNode;
+
+    /**
+     * 当前业务锁节点名称
+     */
+    private static final String        CURRENT_BUSINESS_LOCK_NODE = "register";
+
+    @Autowired
+    private PlatformTransactionManager platformTransactionManager;
 
     @Override
     public boolean sendEmailBeforeVerify(String email) {
@@ -101,9 +119,12 @@ public class RegisterService implements IRegisterService {
             return false;
         }
 
+        Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
+        lock.lock();
+
         // 编程式事务，方便调用，后续需要加入分布式事务TCC模式
-        // DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-        // TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
+        DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+        TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
         try {
             UserDeveloper developer = userService.save(model.getUser(), model.getUserProfile());
             if (developer == null) {
@@ -145,16 +166,18 @@ public class RegisterService implements IRegisterService {
             }
 
             // 事务提交
-//            platformTransactionManager.commit(transactionStatus);
+            platformTransactionManager.commit(transactionStatus);
 
             return true;
         } catch (Exception e) {
             logger.error("注册或添加客户失败，参数信息：{}", JSON.toJSONString(model), e);
 
             // 本地事务回滚
-//            platformTransactionManager.rollback(transactionStatus);
+            platformTransactionManager.rollback(transactionStatus);
 
             return false;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -332,7 +355,8 @@ public class RegisterService implements IRegisterService {
      * @param user
      * @param developer
      */
-    private void sendEmail(User user, UserDeveloper developer) {
+    @Async
+    public void sendEmail(User user, UserDeveloper developer) {
         // 7、异步发送短信和邮件（邮件中需将 接口账号和密码发送，并将接口协议文档作为附件发送[后台可配置开关]）
         try {
             // 邮箱为空则不发送

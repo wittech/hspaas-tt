@@ -1,6 +1,7 @@
 package com.huashi.sms.record.service;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
@@ -44,20 +45,20 @@ public interface ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 设置消息ID组装待推送数据配置信息
-	   * @param submit
+	   * TODO 设置消息ID组装待推送数据配置信息（异步）
+	   * @param submits
 	   * @return
 	 */
-	void setReadyMtPushConfig(SmsMtMessageSubmit submit);
+	void setMessageReadyPushConfigurations(List<SmsMtMessageSubmit> submits);
 	
 	/**
 	 * 
-	   * TODO 比对回执报文数据并且发送报文至下家
+	   * TODO 比对回执报文数据并且发送报文至下家（异步）
 	   * 
 	   * @param delivers
 	   * @return
 	 */
-	boolean compareAndPushBody(List<SmsMtMessageDeliver> delivers);
+	Future<Boolean> compareAndPushBody(List<SmsMtMessageDeliver> delivers);
 	
 	/**
 	 * 

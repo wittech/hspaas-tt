@@ -241,4 +241,12 @@ public interface ISmsMtSubmitService {
 	   * @return
 	 */
 	List<Map<String, Object>> getSubmitCmcpReport(Long startTime, Long endTime);
+	
+	/**
+	 * 
+	   * TODO 判断短信是否需要推送，需要则设置推送信息
+	   * 
+	   * @param submits
+	 */
+	void setPushConfigurationIfNecessary(List<SmsMtMessageSubmit> submits);
 }

@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.passage.service.ISmsPassageService;
@@ -16,8 +14,8 @@ import com.huashi.sms.settings.service.ISmsMobileBlackListService;
 import com.huashi.sms.settings.service.ISmsMobileWhiteListService;
 import com.huashi.sms.template.service.ISmsTemplateService;
 
-@Configuration
-@Order(1)
+//@Configuration
+//@Order(1)
 public class SmsInitializeRunner implements CommandLineRunner {
 
 	@Autowired

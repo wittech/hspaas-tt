@@ -1,5 +1,7 @@
 package com.huashi.sms.config.zookeeper;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -13,7 +15,6 @@ import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * TODO ZooKeeper分布式锁
@@ -23,35 +24,30 @@ import org.springframework.stereotype.Component;
  * @date 2018年3月23日 下午6:07:58
  */
 
-@Component
-public class ZkDistributeLock implements Lock {
+//@Component
+public class ZookeeperLock implements Lock {
 
-    private ZkClient            client         = null;
+    private ZkClient       client = null;
 
-    private static Logger       logger         = LoggerFactory.getLogger(ZkDistributeLock.class);
+    private static Logger  logger = LoggerFactory.getLogger(ZookeeperLock.class);
 
-    private CountDownLatch      cdl;
+    private CountDownLatch cdl;
 
     /**
      * 当前请求的节点
      */
-    private String              beforePath;
+    private String         beforePath;
 
     /**
      * 当前请求的节点前一个节点
      */
-    private String              currentPath;
+    private String         currentPath;
 
     @Value("${zk.connect}")
-    private String              zkConnectUrl;
+    private String         zkConnectUrl;
 
     @Value("${zk.locknode}")
-    private String              zkLockNode;
-
-    /**
-     * 临时节点
-     */
-    private static final String TEMP_LOCK_NODE = "lock";
+    private String         zkLockNode;
 
     @PostConstruct
     public void initial() {
@@ -61,16 +57,15 @@ public class ZkDistributeLock implements Lock {
         if (!client.exists(zkLockNode)) {
             client.createPersistent(zkLockNode);
         }
+
+        logger.info("################调用了......");
     }
 
-    public boolean tryLock() {
+    public boolean tryLock(String tmpLockNode) {
         // 如果currentPath为空则为第一次尝试加锁，第一次加锁赋值currentPath
-        /*
-        
-        
         if (currentPath == null || currentPath.length() <= 0) {
             // 创建一个临时顺序节点
-            currentPath = this.client.createEphemeralSequential(zkLockNode + '/', TEMP_LOCK_NODE);
+            currentPath = this.client.createEphemeralSequential(zkLockNode + '/', tmpLockNode);
             System.out.println("---------------------------->" + currentPath);
         }
         // 获取所有临时节点并排序，临时节点名称为自增长的字符串如：0000000400
@@ -84,27 +79,20 @@ public class ZkDistributeLock implements Lock {
             beforePath = zkLockNode + '/' + childrens.get(wz - 1);
         }
         return false;
-        
-        
-        */
-        
-        return true;
     }
 
     public void unlock() {
         // 删除当前临时节点
-//        client.delete(currentPath);
-
+        client.delete(currentPath);
     }
 
     public void lock() {
-//        if (!tryLock()) {
-//            waitForLock();
-//            lock();
-//        } else {
-//            logger.info(Thread.currentThread().getName() + " 获得分布式锁！");
-//        }
-
+        if (!tryLock()) {
+            waitForLock();
+            lock();
+        } else {
+            logger.info(Thread.currentThread().getName() + " 获得分布式锁！");
+        }
     }
 
     private void waitForLock() {
@@ -144,6 +132,12 @@ public class ZkDistributeLock implements Lock {
 
     public Condition newCondition() {
         return null;
+    }
+
+    @Override
+    public boolean tryLock() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

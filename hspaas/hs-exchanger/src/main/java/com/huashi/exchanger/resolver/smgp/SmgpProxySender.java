@@ -18,7 +18,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
@@ -36,8 +35,6 @@ import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
-import com.huashi.sms.record.service.ISmsMoMessageService;
-import com.huashi.sms.record.service.ISmsMtDeliverService;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huawei.insa2.comm.smgp.message.SMGPDeliverMessage;
 import com.huawei.insa2.comm.smgp.message.SMGPSubmitMessage;
@@ -47,11 +44,6 @@ import com.huawei.insa2.comm.smgp.message.SMGPSubmitRespMessage;
 public class SmgpProxySender {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-
-	@Reference
-	private ISmsMtDeliverService smsMtDeliverService;
-	@Reference
-	private ISmsMoMessageService smsMoMessageService;
 
 	@Autowired
 	private ISmsProxyManageService smsProxyManageService;
