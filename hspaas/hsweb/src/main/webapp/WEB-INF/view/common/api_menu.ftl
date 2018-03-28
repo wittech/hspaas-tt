@@ -25,8 +25,8 @@
 <h2 class="cos" id="ul_sms">
     <a href="${rc.contextPath}/api/sms" id="sms" class=" item api20link">短信API</a>
     <ul class="sub-nav">
-        <li><a id="c11" href="#c1">点对点短信发送</a></li>
-        <li><a id="c22" href="#c2">批量发送</a></li>
+        <li><a id="c11" href="#c1">批量发送</a></li>
+        <li><a id="c22" href="#c2">点对点短信发送</a></li>
         <li><a id="c33" href="#c3">模板点对点短信发送</a></li>
         <li><a id="c66" href="#c4">余额查询</a></li>
         <li><a id="c77" href="#c5">状态报告推送</a></li>

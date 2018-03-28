@@ -216,20 +216,12 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         paramMap.put("userId", userId);
         if (StringUtils.isNotBlank(sid)) {
             paramMap.put("sid", sid);
-        } else {
-            paramMap.put("sid", "-1");
         }
         if (StringUtils.isNotBlank(mobile)) {
             paramMap.put("mobile", mobile);
-        } else {
-            paramMap.put("mobile", "");
         }
-        paramMap.put("content", "");
         paramMap.put("startDate", DateUtil.getSecondDate(startDate + " 00:00:01").getTime());
         paramMap.put("endDate", DateUtil.getSecondDate(endDate + " 23:59:59").getTime());
-        paramMap.put("cmcp", -1);
-        paramMap.put("status", -1);
-        paramMap.put("passageName", "");
         int totalRecord = smsMtMessageSubmitMapper.findCount(paramMap);
         if (totalRecord == 0) {
             return null;

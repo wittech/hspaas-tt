@@ -334,13 +334,13 @@
 		<if test="endDate != null and endDate !=''">
 			and s.create_unixtime &lt;=#{endDate}
 		</if>
-		<if test="sendStatus > -1">
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
 			and s.status = #{sendStatus}
 		</if>
-		<if test="deliverStatus == 2">
+		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 2">
 			and sd.status is null
 		</if>
-		<if test="deliverStatus == 0 or deliverStatus == 1">
+		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 0 or deliverStatus == 1">
 			and sd.status = #{deliverStatus}
 		</if>
 
@@ -375,13 +375,13 @@
 		<if test="endDate != null and endDate !=''">
 			and s.create_unixtime &lt;=#{endDate}
 		</if>
-		<if test="sendStatus > -1">
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
 			and s.status = #{sendStatus}
 		</if>
-		<if test="deliverStatus == 2">
+		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 2">
 			and sd.status is null
 		</if>
-		<if test="deliverStatus == 0 or deliverStatus == 1">
+		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 0 or deliverStatus == 1">
 			and sd.status = #{deliverStatus}
 		</if>
 		
