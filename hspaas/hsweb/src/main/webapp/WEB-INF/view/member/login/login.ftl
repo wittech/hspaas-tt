@@ -32,7 +32,7 @@
 									</li>
 									<li>
 										<input type="button" class="submit_btn" value="登录" /> 
-										<a href="javascript:void(0)" class="link">忘记密码？</a>
+										<#-- <a href="javascript:void(0)" class="link">忘记密码？</a> -->
 									</li>
 								</ul>
 							</form>

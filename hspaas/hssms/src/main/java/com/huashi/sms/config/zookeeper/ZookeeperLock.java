@@ -7,25 +7,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
-import javax.annotation.PostConstruct;
-
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
- * TODO ZooKeeper分布式锁
+ * TODO Zookeeper分布式锁
  * 
  * @author zhengying
  * @version V1.0
- * @date 2018年3月23日 下午6:07:58
+ * @date 2018年3月26日 下午10:59:31
  */
-
-//@Component
+// @Component
 public class ZookeeperLock implements Lock {
+
+    /**
+     * 锁的根目录
+     */
+    private String         rootLockPath;
+    
+   /**
+    * 分布式锁的自定义路径（节点锁） 
+    */
+    private String         tmpLockPath;
 
     private ZkClient       client = null;
 
@@ -43,40 +49,44 @@ public class ZookeeperLock implements Lock {
      */
     private String         currentPath;
 
-    @Value("${zk.connect}")
-    private String         zkConnectUrl;
+    /**
+     * 
+      *@param zkConnectUrl
+      *@param rootLockPath
+      *@param tmpLockPath
+     */
+    public ZookeeperLock(String zkConnectUrl, String rootLockPath, String tmpLockPath) {
+        this.rootLockPath = rootLockPath;
+        this.tmpLockPath = tmpLockPath;
 
-    @Value("${zk.locknode}")
-    private String         zkLockNode;
-
-    @PostConstruct
-    public void initial() {
         client = new ZkClient(zkConnectUrl, 1000, 1000, new SerializableSerializer());
 
         // 判断有没有LOCK目录，没有则创建
-        if (!client.exists(zkLockNode)) {
-            client.createPersistent(zkLockNode);
+        if (!this.client.exists(rootLockPath)) {
+            this.client.createPersistent(rootLockPath);
         }
-
-        logger.info("################调用了......");
     }
+    
 
-    public boolean tryLock(String tmpLockNode) {
+    public boolean tryLock() {
         // 如果currentPath为空则为第一次尝试加锁，第一次加锁赋值currentPath
         if (currentPath == null || currentPath.length() <= 0) {
             // 创建一个临时顺序节点
-            currentPath = this.client.createEphemeralSequential(zkLockNode + '/', tmpLockNode);
+            currentPath = this.client.createEphemeralSequential(rootLockPath + '/', tmpLockPath);
             System.out.println("---------------------------->" + currentPath);
         }
         // 获取所有临时节点并排序，临时节点名称为自增长的字符串如：0000000400
-        List<String> childrens = this.client.getChildren(zkLockNode);
+        List<String> childrens = this.client.getChildren(rootLockPath);
         Collections.sort(childrens);
 
-        if (currentPath.equals(zkLockNode + '/' + childrens.get(0))) {// 如果当前节点在所有节点中排名第一则获取锁成功
+        // 如果当前节点在所有节点中排名第一则获取锁成功
+        if (currentPath.equals(rootLockPath + '/' + childrens.get(0))) {
             return true;
-        } else {// 如果当前节点在所有节点中排名中不是排名第一，则获取前面的节点名称，并赋值给beforePath
+        } else {
+
+            // 如果当前节点在所有节点中排名中不是排名第一，则获取前面的节点名称，并赋值给beforePath
             int wz = Collections.binarySearch(childrens, currentPath.substring(6));
-            beforePath = zkLockNode + '/' + childrens.get(wz - 1);
+            beforePath = rootLockPath + '/' + childrens.get(wz - 1);
         }
         return false;
     }
@@ -84,6 +94,7 @@ public class ZookeeperLock implements Lock {
     public void unlock() {
         // 删除当前临时节点
         client.delete(currentPath);
+
     }
 
     public void lock() {
@@ -93,6 +104,7 @@ public class ZookeeperLock implements Lock {
         } else {
             logger.info(Thread.currentThread().getName() + " 获得分布式锁！");
         }
+
     }
 
     private void waitForLock() {
@@ -106,9 +118,9 @@ public class ZookeeperLock implements Lock {
             }
 
             public void handleDataChange(String dataPath, Object data) throws Exception {
+
             }
         };
-
         // 给排在前面的的节点增加数据删除的watcher
         this.client.subscribeDataChanges(beforePath, listener);
 
@@ -123,7 +135,10 @@ public class ZookeeperLock implements Lock {
         this.client.unsubscribeDataChanges(beforePath, listener);
     }
 
+    // ==========================================
+
     public void lockInterruptibly() throws InterruptedException {
+
     }
 
     public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
@@ -132,12 +147,6 @@ public class ZookeeperLock implements Lock {
 
     public Condition newCondition() {
         return null;
-    }
-
-    @Override
-    public boolean tryLock() {
-        // TODO Auto-generated method stub
-        return false;
     }
 
 }

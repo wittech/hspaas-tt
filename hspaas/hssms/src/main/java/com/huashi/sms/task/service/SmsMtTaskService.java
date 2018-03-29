@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Resource;
 
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -119,8 +121,16 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     @Resource
     private StringRedisTemplate          stringRedisTemplate;
 
-    @Autowired
-    private ZookeeperLock             zkDistributeLock;
+    @Value("${zk.connect}")
+    private String                     zkConnectUrl;
+
+    @Value("${zk.locknode}")
+    private String                     zkLockNode;
+    
+    /**
+     * 当前业务锁节点名称
+     */
+    private static final String        CURRENT_BUSINESS_LOCK_NODE = "task_lock";
 
     // @PostConstruct
     // public void setConfirmCallback() {
@@ -1123,8 +1133,9 @@ public class SmsMtTaskService implements ISmsMtTaskService {
      * @return
      */
     private List<String> filterTaskExecuting(String repeatGroupKey, String... taskIds) {
+        Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
         // 分布式锁开启
-        zkDistributeLock.lock();
+        lock.lock();
         try {
             List<String> finalTaskIds = new ArrayList<>();
             for (String taskId : taskIds) {
@@ -1143,7 +1154,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
             logger.error("检查任务执行操作失败，失败原因：" + e.getMessage());
             return null;
         } finally {
-            zkDistributeLock.unlock();
+            lock.unlock();
         }
     }
 

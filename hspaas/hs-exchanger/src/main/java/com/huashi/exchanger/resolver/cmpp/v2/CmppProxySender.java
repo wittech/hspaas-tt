@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
@@ -18,11 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.RecoveryCallback;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -62,7 +55,7 @@ public class CmppProxySender {
      * 长短信消息ID映射（因为长短信会有多次消息报告回执，但实际只需要解析任何一条有意义的即可） KEY: 因为长短信需要多次代理发送交互，所以产生多次MSG_ID，顾KEY存每一次的消息ID
      * VALUE：存储的是发送给HSSMS应用的msgId,即只存长短信中的第一次索引对应的msgId
      */
-    private static Map<byte[], byte[]> longTextMsgIdMapping = new HashMap<>();
+    private static List<String> ignoredMsgIds = new ArrayList<>();
 
     /**
      * 同步锁，用于保障每次获取proxy连接初始化一次
@@ -301,31 +294,6 @@ public class CmppProxySender {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        RetryTemplate template = new RetryTemplate();
-
-        SimpleRetryPolicy policy = new SimpleRetryPolicy();
-        policy.setMaxAttempts(2);
-
-        template.setRetryPolicy(policy);
-
-        String result = template.execute(new RetryCallback<String, Exception>() {
-
-            @Override
-            public String doWithRetry(RetryContext arg0) throws Exception {
-                System.out.println(arg0.getRetryCount());
-                throw new NullPointerException("nullPointerException");
-            }
-        }, new RecoveryCallback<String>() {
-
-            @Override
-            public String recover(RetryContext context) throws Exception {
-                return "recovery callback";
-            }
-        });
-        System.out.println(result);
-    }
-
     /**
      * TODO 组装待提交短信CMPP结构体数据
      * 
@@ -367,7 +335,6 @@ public class CmppProxySender {
 
         CMPPSubmitMessage submitMsg = null;
         CMPPSubmitRepMessage submitRepMsg = null;
-        byte[] msgId = null;
         for (int index = 1; index <= contentList.size(); index++) {
             submitMsg = getCMPPSubmitMessage(contentList.size(), index, serviceId, tpUdhi, msgFmt, spid, validTime,
                                              atTime, chargeNumber, srcTerminalId,
@@ -378,23 +345,19 @@ public class CmppProxySender {
             if (index == 1) {
                 // 以长短信 拆分发送时，目前状态报告的 msgid 是 拆分后第一条的 msgid
                 submitRepMsg = repMsg;
-                msgId = repMsg.getMsgId();
             } else if (submitRepMsg == null) {
                 submitRepMsg = repMsg;
             }
 
-            if (submitRepMsg == null) {
-                logger.error(" CMPPSubmitRepMessage null, submitMsg : {}", submitMsg);
-            } else if (submitRepMsg.getResult() != 0) {
-                logger.error(" submitRepMsg result :{}, index : {}, content: {}, mobile : {}",
-                             submitRepMsg.getResult(), index, content, mobile);
-            }
+            
 
             // 存入单条长短信对应关系数据
-            if (isLongtext && repMsg != null) {
-                longTextMsgIdMapping.put(repMsg.getMsgId(), msgId);
+            if (isLongtext && index > 1) {
+                ignoredMsgIds.add(getMsgId(repMsg.getMsgId()));
             }
         }
+        
+        System.out.println("------------" + JSON.toJSONString(ignoredMsgIds));
 
         return submitRepMsg;
     }
@@ -464,9 +427,13 @@ public class CmppProxySender {
         }
 
         try {
-            String msgId = checkIsLongTextMsgId(report.getStatusMsgId());
+            String msgId = getMsgId(report.getStatusMsgId());
             if(StringUtils.isEmpty(msgId)) {
-                logger.info("CMPP状态报告, msgId: {} 长短信已处理，忽略", getMsgId(report.getStatusMsgId()));
+                return;
+            }
+            
+            if(isInIgnoredMsgId(msgId)) {
+                logger.info("CMPP状态报告, msgId: {} 长短信已处理，忽略", msgId);
                 return;
             }
             
@@ -507,35 +474,21 @@ public class CmppProxySender {
     /**
      * TODO 检查是否是长短信 消息ID模式, 返回null则可跳过本次执行
      * 
-     * @param msgIdByte
+     * @param msgId
      * @return
      */
-    private String checkIsLongTextMsgId(byte[] msgIdByte) {
-        if(msgIdByte == null) {
-            return null;
+    private boolean isInIgnoredMsgId(String msgId) {
+        if(StringUtils.isEmpty(msgId)) {
+            return true;
         }
         
         // 如果长短信消息ID映射关系中不存在，则证明非长短信模式，直接返回
-        if (!longTextMsgIdMapping.containsKey(msgIdByte)) {
-            return getMsgId(msgIdByte);
+        if (ignoredMsgIds.contains(msgId)) {
+            ignoredMsgIds.remove(msgId);
+            return true;
         }
 
-        // 获取长短信消息ID映射的关系ID（实际返回给hssms应用的msgId）
-        byte[] expectedMsgIdByte = longTextMsgIdMapping.get(msgIdByte);
-        if (!longTextMsgIdMapping.containsKey(expectedMsgIdByte)) {
-            // 如果长短信映射关系中不存在实际的MSG_ID，证明已经处理完成，本次无需处理
-            longTextMsgIdMapping.remove(msgIdByte);
-            return null;
-        }
-
-        // 如果当前msgId就是第一条对应的真实msgId，只需要remove自己即可
-        longTextMsgIdMapping.remove(msgIdByte);
-        if (!msgIdByte.equals(expectedMsgIdByte)) {
-            longTextMsgIdMapping.remove(expectedMsgIdByte);
-        }
-
-        return getMsgId(msgIdByte);
-
+        return false;
     }
 
     /**
