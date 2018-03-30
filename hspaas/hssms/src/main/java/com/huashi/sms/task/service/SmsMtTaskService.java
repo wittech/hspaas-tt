@@ -14,11 +14,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -48,8 +47,7 @@ import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.constants.ResponseMessage;
 import com.huashi.sms.config.cache.redis.constant.SmsRepeatSubmitConstant;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant.WordsPriority;
+import com.huashi.sms.config.rabbit.constant.ActiveMqConstant;
 import com.huashi.sms.config.zookeeper.ZookeeperLock;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.domain.SmsPassage;
@@ -116,21 +114,21 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     @Autowired
     private ISmsTemplateService          smsTemplateService;
 
-    @Resource
-    private RabbitTemplate               rabbitTemplate;
+    @Autowired
+    private JmsMessagingTemplate         jmsMessagingTemplate;
     @Resource
     private StringRedisTemplate          stringRedisTemplate;
 
     @Value("${zk.connect}")
-    private String                     zkConnectUrl;
+    private String                       zkConnectUrl;
 
     @Value("${zk.locknode}")
-    private String                     zkLockNode;
-    
+    private String                       zkLockNode;
+
     /**
      * 当前业务锁节点名称
      */
-    private static final String        CURRENT_BUSINESS_LOCK_NODE = "task_lock";
+    private static final String          CURRENT_BUSINESS_LOCK_NODE = "task_lock";
 
     // @PostConstruct
     // public void setConfirmCallback() {
@@ -138,7 +136,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     // rabbitTemplate.setConfirmCallback(this);
     // }
 
-    protected Logger                     logger = LoggerFactory.getLogger(getClass());
+    protected Logger                     logger                     = LoggerFactory.getLogger(getClass());
 
     @Override
     public BossPaginationVo<SmsMtTask> findPage(Map<String, Object> condition) {
@@ -646,8 +644,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
                 submit.setNeedPush(true);
             }
 
-            rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION,
-                                          submit);
+            jmsMessagingTemplate.convertAndSend(ActiveMqConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submit);
         }
     }
 
@@ -659,7 +656,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
      */
     private String getQueueNameBySubmitType(SmsMtTask task) {
         if (TaskSubmitType.BATCH_MESSAGE.getCode() == task.getSubmitType()) {
-            return RabbitConstant.MQ_SMS_MT_WAIT_PROCESS;
+            return ActiveMqConstant.MQ_SMS_MT_WAIT_PROCESS;
         }
 
         if (StringUtils.isEmpty(task.getContent())) {
@@ -695,7 +692,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
         task.setP2pBody(task.getContent());
         task.setP2pBodies(p2pBalanceResponse.getP2pBodies());
 
-        return RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
+        return ActiveMqConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
     }
 
     @Override
@@ -712,10 +709,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
             result = taskMapper.deleteByPrimaryKey(task.getId());
             // 蒋主任务发送 分包队列，重新分包
             if (result > 0) {
-                rabbitTemplate.convertAndSend(getQueueNameBySubmitType(task), task, (message) -> {
-                    message.getMessageProperties().setPriority(WordsPriority.getLevel(task.getContent()));
-                    return message;
-                }, new CorrelationData(task.getSid().toString()));
+                jmsMessagingTemplate.convertAndSend(getQueueNameBySubmitType(task), task);
             }
 
             return result > 0;

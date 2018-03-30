@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1-BD-SNAPSHOT</version>
 	</parent>
 	<artifactId>hsapi</artifactId>
 	<packaging>jar</packaging>
@@ -28,6 +28,11 @@
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
 		</dependency>
 
 		<dependency>

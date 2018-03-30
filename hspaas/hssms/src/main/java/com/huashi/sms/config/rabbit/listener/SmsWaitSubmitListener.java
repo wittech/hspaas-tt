@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.jms.JMSException;
+import javax.jms.MessageListener;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jms.core.JmsMessagingTemplate;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,7 @@ import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.service.ISmsProviderService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.constant.ActiveMqConstant;
 import com.huashi.sms.config.rabbit.listener.packets.BasePacketsSupport;
 import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
 import com.huashi.sms.passage.context.PassageContext.PassageSmsTemplateParam;
@@ -57,7 +58,6 @@ import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
-import com.rabbitmq.client.Channel;
 
 /**
  * TODO 短信待提交队列监听
@@ -67,10 +67,10 @@ import com.rabbitmq.client.Channel;
  * @date 2016年10月11日 下午1:20:14
  */
 @Component
-public class SmsWaitSubmitListener extends BasePacketsSupport implements ChannelAwareMessageListener {
+public class SmsWaitSubmitListener extends BasePacketsSupport implements MessageListener {
 
     @Resource
-    private RabbitTemplate                    rabbitTemplate;
+    private JmsMessagingTemplate              jmsMessagingTemplate;
     @Resource
     private StringRedisTemplate               stringRedisTemplate;
 
@@ -92,7 +92,7 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
     @Autowired
     private ISignatureExtNoService            signatureExtNoService;
     @Autowired
-    private Jackson2JsonMessageConverter      messageConverter;
+    private MappingJackson2MessageConverter   messageConverter;
     @Autowired
     private ISmsPassageMessageTemplateService smsPassageMessageTemplateService;
     @Resource
@@ -370,7 +370,8 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             if (submits.size() >= DIRECT_PERSISTENT_SIZE_THRESHOLD) {
                 smsSubmitService.batchInsertSubmit(submits);
             } else {
-                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST, JSON.toJSONString(submits));
+                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
+                                                           JSON.toJSONString(submits));
             }
 
             // 判断并设置推送信息
@@ -381,7 +382,7 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             logger.error("处理待提交信息REDIS失败，失败信息：{}", JSON.toJSONString(submits), e);
         }
     }
-    
+
     /**
      * TODO 异步设置推送信息线程
      * 
@@ -389,27 +390,27 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
      * @version V1.0
      * @date 2018年3月21日 下午9:41:00
      */
-//    private class SetPushConfigThread extends Thread {
-//
-//        private ISmsMtPushService        smsMtPushService;
-//        private List<SmsMtMessageSubmit> submits;
-//
-//        private Logger                   logger = LoggerFactory.getLogger(getClass());
-//
-//        SetPushConfigThread(ISmsMtPushService smsMtPushService, List<SmsMtMessageSubmit> submits) {
-//            this.smsMtPushService = smsMtPushService;
-//            this.submits = submits;
-//        }
-//
-//        @Override
-//        public void run() {
-//            long start = System.currentTimeMillis();
-//            for (SmsMtMessageSubmit submit : submits) {
-//                smsMtPushService.setReadyMtPushConfig(submit);
-//            }
-//            logger.info("异步推送执行耗时：{}", (System.currentTimeMillis() - start));
-//        }
-//    }
+    // private class SetPushConfigThread extends Thread {
+    //
+    // private ISmsMtPushService smsMtPushService;
+    // private List<SmsMtMessageSubmit> submits;
+    //
+    // private Logger logger = LoggerFactory.getLogger(getClass());
+    //
+    // SetPushConfigThread(ISmsMtPushService smsMtPushService, List<SmsMtMessageSubmit> submits) {
+    // this.smsMtPushService = smsMtPushService;
+    // this.submits = submits;
+    // }
+    //
+    // @Override
+    // public void run() {
+    // long start = System.currentTimeMillis();
+    // for (SmsMtMessageSubmit submit : submits) {
+    // smsMtPushService.setReadyMtPushConfig(submit);
+    // }
+    // logger.info("异步推送执行耗时：{}", (System.currentTimeMillis() - start));
+    // }
+    // }
 
     /**
      * TODO 组装提交完成的短息信息入库
@@ -467,12 +468,11 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             // 如果提交数据失败，则需要制造伪造包补推送
             if (_submit.getStatus() == MessageSubmitStatus.FAILED.getCode()) {
                 _submit.setPushErrorCode(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
-                if(StringUtils.isEmpty(_submit.getMsgId())) {
+                if (StringUtils.isEmpty(_submit.getMsgId())) {
                     _submit.setMsgId(packets.getSid() + "");
                 }
-                
-                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION,
-                                              _submit);
+
+                jmsMessagingTemplate.convertAndSend(ActiveMqConstant.MQ_SMS_MT_PACKETS_EXCEPTION, _submit);
             }
 
             submits.add(_submit);
@@ -519,8 +519,7 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             submitx.setCmcp(CMCP.local(mobile).getCode());
             submitx.setMobile(mobile);
 
-            rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION,
-                                          submitx);
+            jmsMessagingTemplate.convertAndSend(ActiveMqConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submitx);
         }
     }
 
@@ -531,7 +530,7 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
      * @param channel
      */
     @Override
-    public void onMessage(Message message, Channel channel) throws Exception {
+    public void onMessage(javax.jms.Message message){
         try {
             Object object = messageConverter.fromMessage(message);
 
@@ -543,11 +542,12 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
             }
 
         } catch (Exception e) {
-            logger.error("MQ消费提交网关数据失败： {}", messageConverter.fromMessage(message), e);
+            try {
+                logger.error("MQ消费提交网关数据失败： {}", messageConverter.fromMessage(message), e);
+            } catch (MessageConversionException | JMSException e1) {
+                e1.printStackTrace();
+            }
             // channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
-        } finally {
-            // 确认消息成功消费
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         }
     }
 

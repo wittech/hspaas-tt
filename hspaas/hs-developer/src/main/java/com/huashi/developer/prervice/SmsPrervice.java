@@ -3,15 +3,12 @@ package com.huashi.developer.prervice;
 import java.util.Date;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -22,7 +19,6 @@ import com.huashi.common.util.IdGenerator;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.constant.RabbitConstant;
-import com.huashi.developer.constant.RabbitConstant.WordsPriority;
 import com.huashi.developer.model.SmsModel;
 import com.huashi.developer.model.SmsP2PModel;
 import com.huashi.developer.model.SmsP2PTemplateModel;
@@ -48,8 +44,9 @@ public class SmsPrervice {
 
     @Autowired
     private IdGenerator               idGenerator;
-    @Resource
-    private RabbitTemplate            rabbitTemplate;
+
+    @Autowired
+    private JmsMessagingTemplate      jmsMessagingTemplate;
     @Reference
     private IUserBalanceService       userBalanceService;
     @Reference
@@ -210,7 +207,6 @@ public class SmsPrervice {
             // 插入TASK任务（异步）
 
             // 判断队列的优先级别
-            int priority = WordsPriority.getLevel(task.getContent());
             // if(WordsPriority.L10.getLevel() == priority) {
             // stringRedisTemplate.opsForList().rightPush(SmsConstant.RED_TASK_PERSISTENCE_HIGH,
             // JSON.toJSONString(task));
@@ -229,10 +225,8 @@ public class SmsPrervice {
                 queueName = RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
             }
 
-            rabbitTemplate.convertAndSend(queueName, task, (message) -> {
-                message.getMessageProperties().setPriority(priority);
-                return message;
-            }, new CorrelationData(task.getSid().toString()));
+            // 发送至activeMq
+            jmsMessagingTemplate.convertAndSend(queueName, task);
 
             return task.getSid();
         } catch (Exception e) {

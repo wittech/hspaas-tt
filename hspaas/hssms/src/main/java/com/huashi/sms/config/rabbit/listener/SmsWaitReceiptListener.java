@@ -2,15 +2,18 @@ package com.huashi.sms.config.rabbit.listener;
 
 import java.util.List;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -21,14 +24,13 @@ import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.constant.ActiveMqConstant;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.record.service.ISmsMtDeliverService;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
-import com.rabbitmq.client.Channel;
 
 /**
  * TODO 短信下行状态报告回执处理
@@ -38,7 +40,7 @@ import com.rabbitmq.client.Channel;
  * @date 2016年11月24日 下午11:04:22
  */
 @Component
-public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
+public class SmsWaitReceiptListener implements MessageListener {
 
     @Autowired
     private ISmsMtSubmitService smsMtSubmitService;
@@ -47,15 +49,15 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
     @Autowired
     private ISmsMtDeliverService smsMtDeliverService;
     @Autowired
-    private Jackson2JsonMessageConverter messageConverter;
+    private MappingJackson2MessageConverter messageConverter;
     @Autowired
     private ISmsPassageAccessService smsPassageAccessService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Override
-    @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT)
-    public void onMessage(Message message, Channel channel) throws Exception {
+	@JmsListener(destination = ActiveMqConstant.MQ_SMS_MT_WAIT_RECEIPT)
+    public void onMessage(Message message){
         try {
             Object object = messageConverter.fromMessage(message);
             // 处理待提交队列逻辑
@@ -85,13 +87,15 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
 
         } catch (Exception e) {
             // 需要做重试判断
-            logger.error("MQ消费网关状态回执数据失败： {}", messageConverter.fromMessage(message), e);
-            backupIfFailed(message, e.getMessage());
+            try {
+                backupIfFailed(message, e.getMessage());
+                logger.error("MQ消费网关状态回执数据失败： {}", messageConverter.fromMessage(message), e);
+            } catch (MessageConversionException | JMSException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
 
 //			channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
-        } finally {
-            // 确认消息成功消费
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         }
     }
 
@@ -102,10 +106,14 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
      * @param errorDes 错误描述信息
      */
     private void backupIfFailed(Message message, String errorDes) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("reason", "上家回执状态报告失败:" + errorDes);
-        jsonObject.put("message", messageConverter.fromMessage(message));
-        smsMtDeliverService.doDeliverToException(jsonObject);
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("reason", "上家回执状态报告失败:" + errorDes);
+            jsonObject.put("message", messageConverter.fromMessage(message));
+            smsMtDeliverService.doDeliverToException(jsonObject);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

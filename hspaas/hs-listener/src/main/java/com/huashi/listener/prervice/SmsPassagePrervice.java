@@ -2,13 +2,12 @@ package com.huashi.listener.prervice;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -16,7 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
-import com.huashi.listener.constant.RabbitConstant;
+import com.huashi.listener.constant.ActiveMqConstant;
 import com.huashi.listener.task.PassageMoReportPullTask;
 import com.huashi.listener.task.PassageStatusReportPullTask;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
@@ -27,8 +26,8 @@ import com.huashi.sms.record.service.ISmsMtDeliverService;
 @Service
 public class SmsPassagePrervice {
 
-	@Resource
-	private RabbitTemplate rabbitTemplate;
+    @Autowired  
+    private JmsMessagingTemplate jmsMessagingTemplate;
 	@Reference
 	private ISmsProviderService smsProviderService;
 	@Reference
@@ -83,7 +82,7 @@ public class SmsPassagePrervice {
 		jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
 		// 发送异步消息
-		rabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT, jsonObject);
+		jmsMessagingTemplate.convertAndSend(ActiveMqConstant.MQ_SMS_MT_WAIT_RECEIPT, jsonObject);
 	}
 	
 	/**
@@ -104,7 +103,7 @@ public class SmsPassagePrervice {
 		jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
 		// 发送异步消息
-		rabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MO_RECEIVE, jsonObject);
+		jmsMessagingTemplate.convertAndSend(ActiveMqConstant.MQ_SMS_MO_RECEIVE, jsonObject);
 	}
 	
 	/**

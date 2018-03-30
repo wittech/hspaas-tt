@@ -2,15 +2,18 @@ package com.huashi.sms.config.rabbit.listener;
 
 import java.util.List;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -20,12 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.constant.ActiveMqConstant;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.service.ISmsMoMessageService;
-import com.rabbitmq.client.Channel;
 
 /**
  * 
@@ -36,12 +38,12 @@ import com.rabbitmq.client.Channel;
  * @date 2016年12月21日 下午2:13:56
  */
 @Component
-public class SmsMoReceiveListener implements ChannelAwareMessageListener {
+public class SmsMoReceiveListener implements MessageListener {
 
 	@Reference
 	private ISmsProviderService smsProviderService;
 	@Autowired
-	private Jackson2JsonMessageConverter messageConverter;
+	private MappingJackson2MessageConverter messageConverter;
 	@Autowired
 	private ISmsMoMessageService smsMoMessageService;
 	@Autowired
@@ -50,21 +52,24 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Override
-	@RabbitListener(queues = RabbitConstant.MQ_SMS_MO_RECEIVE)
-	public void onMessage(Message message, Channel channel) throws Exception {
+	@JmsListener(destination = ActiveMqConstant.MQ_SMS_MO_RECEIVE)
+	public void onMessage(Message message) {
 		try {
+		    
 			Object object = messageConverter.fromMessage(message);
 			// 处理待提交队列逻辑
 			if (object == null) {
 				logger.warn("上行报告解析失败：回执数据为空");
 				return;
 			}
+			
 
 			List<SmsMoMessageReceive> receives;
 			if (object instanceof JSONObject) {
 				receives = doReceiveMessage((JSONObject) object);
 			} else if (object instanceof List) {
-				ObjectMapper mapper = new ObjectMapper();
+			    ObjectMapper mapper = new ObjectMapper();
+			    
 				receives = mapper.convertValue(object,new TypeReference<List<SmsMoMessageReceive>>() {});
 			} else {
 				logger.error("上行回执数据类型无法匹配");
@@ -80,13 +85,13 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 			smsMoMessageService.doFinishReceive(receives);
 
 		} catch (Exception e) {
-			logger.error("MQ消费网关上行数据失败： {}",
-					messageConverter.fromMessage(message), e);
-			smsMoMessageService.doReceiveToException(message);
-		} finally {
-			// 确认消息成功消费
-			channel.basicAck(message.getMessageProperties().getDeliveryTag(),
-					false);
+			try {
+			    smsMoMessageService.doReceiveToException(message);
+                logger.error("MQ消费网关上行数据失败： {}", messageConverter.fromMessage(message), e);
+            } catch (MessageConversionException | JMSException e1) {
+                e1.printStackTrace();
+            }
+			
 		}
 	}
 

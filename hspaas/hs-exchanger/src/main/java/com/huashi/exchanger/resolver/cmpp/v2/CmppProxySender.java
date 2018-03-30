@@ -7,15 +7,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -23,7 +21,7 @@ import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.CMCP;
-import com.huashi.exchanger.config.RabbitMqConfiguration;
+import com.huashi.exchanger.config.ActivemqConfiguration;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.cmpp.constant.CmppConstant;
 import com.huashi.exchanger.service.ISmsProxyManageService;
@@ -48,8 +46,8 @@ public class CmppProxySender {
     @Autowired
     private ISmsProxyManageService     smsProxyManageService;
 
-    @Resource
-    private RabbitTemplate             rabbitTemplate;
+    @Autowired  
+    private JmsMessagingTemplate jmsMessagingTemplate;
 
     /**
      * 长短信消息ID映射（因为长短信会有多次消息报告回执，但实际只需要解析任何一条有意义的即可） KEY: 因为长短信需要多次代理发送交互，所以产生多次MSG_ID，顾KEY存每一次的消息ID
@@ -461,7 +459,7 @@ public class CmppProxySender {
 
             if (CollectionUtils.isNotEmpty(list)) {
                 // 发送异步消息
-                rabbitTemplate.convertAndSend(RabbitMqConfiguration.MQ_SMS_MT_WAIT_RECEIPT, list);
+                jmsMessagingTemplate.convertAndSend(ActivemqConfiguration.MQ_SMS_MT_WAIT_RECEIPT, list);
             }
 
             // 解析返回结果并返回
@@ -531,7 +529,7 @@ public class CmppProxySender {
             list.add(response);
 
             if (CollectionUtils.isNotEmpty(list)) {
-                rabbitTemplate.convertAndSend(RabbitMqConfiguration.MQ_SMS_MO_RECEIVE, list);
+                jmsMessagingTemplate.convertAndSend(ActivemqConfiguration.MQ_SMS_MO_RECEIVE, list);
             }
 
         } catch (Exception e) {

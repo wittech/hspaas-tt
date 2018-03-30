@@ -1,5 +1,19 @@
 package com.huashi.sms.record.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jms.core.JmsMessagingTemplate;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -12,7 +26,7 @@ import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.CommonContext.CallbackUrlType;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.constant.ActiveMqConstant;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.service.ISmsPassageService;
@@ -23,18 +37,6 @@ import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.settings.constant.MobileBlacklistType;
 import com.huashi.sms.settings.domain.SmsMobileBlackList;
 import com.huashi.sms.settings.service.ISmsMobileBlackListService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 短信接收记录服务接口类
@@ -53,8 +55,8 @@ public class SmsMoMessageService implements ISmsMoMessageService {
     private ISmsMtSubmitService smsMtSubmitService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-    @Resource
-    private RabbitTemplate rabbitTemplate;
+    @Autowired  
+    private JmsMessagingTemplate jmsMessagingTemplate;
     @Reference
     private IPushConfigService pushConfigService;
     @Reference
@@ -249,7 +251,7 @@ public class SmsMoMessageService implements ISmsMoMessageService {
     private void sendToPushQueue(SmsMoMessageReceive receive) {
         try {
             // 发送至待推送信息队列
-            rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MO_WAIT_PUSH, receive);
+            jmsMessagingTemplate.convertAndSend(ActiveMqConstant.MQ_SMS_MO_WAIT_PUSH, receive);
 
         } catch (Exception e) {
             throw new RuntimeException(e);

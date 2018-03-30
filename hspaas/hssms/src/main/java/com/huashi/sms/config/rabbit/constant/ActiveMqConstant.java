@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
  * @version V1.0
  * @date 2016年9月27日 下午2:47:27
  */
-public class RabbitConstant {
+public class ActiveMqConstant {
 
     /**
      * 融合平台短信交换机

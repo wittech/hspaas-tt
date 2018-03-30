@@ -1,32 +1,18 @@
 package com.huashi.sms.config.rabbit;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import javax.annotation.Resource;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageListener;
 
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.jms.listener.SimpleMessageListenerContainer;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Component;
-
-import com.alibaba.druid.util.StringUtils;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 
 /**
  * 
@@ -39,12 +25,10 @@ import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 @Component
 public class RabbitMessageQueueManager {
 
+	@Autowired
+	private MappingJackson2MessageConverter messageConverter;
 	@Resource
-	private RabbitAdmin rabbitAdmin;
-	@Resource
-	private MessageConverter messageConverter;
-	@Resource
-	private ConnectionFactory rabbitConnectionFactory;
+	private ConnectionFactory activeMQConnectionFactory;
 	
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -53,23 +37,12 @@ public class RabbitMessageQueueManager {
 	
 	@Value("${mq.rabbit.consumers}")
 	private int concurrentConsumers;
-	@Value("${mq.rabbit.maxconsumers}")
-	private int maxConcurrentConsumers;
 	
 	@Value("${mq.rabbit.consumers.direct:5}")
 	private int directConcurrentConsumers;
 	
-//	@Value("${mq.rabbit.threadnum}")
-//	private int rabbitPrefetchCount;
-	
-	@Value("${mq.rabbit.prefetch}")
-	private int rabbitPrefetchCount;
-	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
-//	@Resource
-//	private SimpleMessageListenerContainer simpleMessageListenerContainer;
-
 	/**
 	 * 
 	   * TODO 创建指定消费者数量消息队列
@@ -78,23 +51,16 @@ public class RabbitMessageQueueManager {
 	   * 	队列名称
 	   * @param isDirectProtocol
 	   * 	是否为直连协议
-	   * @param channelAwareMessageListener
+	   * @param messageListener
 	   * 	监听相关 
 	 */
-	public void createQueue(String queueName, boolean isDirectProtocol, ChannelAwareMessageListener channelAwareMessageListener) {
+	public void createQueue(String queueName, boolean isDirectProtocol, MessageListener messageListener) {
 		try {
-			DirectExchange exchange = new DirectExchange(RabbitConstant.EXCHANGE_SMS, true, false);
-			rabbitAdmin.declareExchange(exchange);
-
-			Queue queue = new Queue(queueName, true, false, false, setQueueFeatures());
-			Binding smsWaitProcessBinding = BindingBuilder.bind(queue).to(exchange).with(queueName);
-			rabbitAdmin.declareQueue(queue);
-			rabbitAdmin.declareBinding(smsWaitProcessBinding);
 			
 			// 如果为直连协议则控制消费者为预设的个数，其他协议则默认消费者配置
 			SimpleMessageListenerContainer container = this.messageListenerContainer(queueName, 
 					isDirectProtocol ? directConcurrentConsumers : concurrentConsumers, 
-					channelAwareMessageListener);
+					messageListener);
 			container.afterPropertiesSet();
 
 //	        container.addQueueNames(queueName);
@@ -113,52 +79,20 @@ public class RabbitMessageQueueManager {
 	   * @param queueName
 	 */
 	public void removeQueue(String queueName) {
-		rabbitAdmin.deleteQueue(queueName);
 	}
 	
-	/**
-	 * 
-	   * TODO 判断队列是否存在
-	   * 
-	   * @param queueName
-	   * @return
-	 */
-	public boolean isQueueExists(String queueName) {
-		return rabbitAdmin.getQueueProperties(queueName) != null;
-	}
-	
-	/**
-	 * 
-	   * TODO 获取消息个数
-	   * 
-	   * @param queueName
-	   * @return
-	 */
-	public int getMessageCount(String queueName) {
-		if(StringUtils.isEmpty(queueName)) {
-            return 0;
-        }
-		
-		Properties properties = rabbitAdmin.getQueueProperties(queueName);
-		if(MapUtils.isEmpty(properties)) {
-            return 0;
-        }
-		
-		return Integer.parseInt(properties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
-	}
-
-	private Map<String, Object> setQueueFeatures() {
-		Map<String, Object> args = new HashMap<>();
-		// 最大优先级定义
-		args.put("x-max-priority", 10);
-		// 过期时间，单位毫秒
-		// args .put("x-message-ttl", 60000);
-		// 30分钟，单位毫秒
-		// args.put("x-expires", 1800000);
-		// 集群高可用，数据复制
-		args.put("x-ha-policy", "all");
-		return args;
-	}
+//	private Map<String, Object> setQueueFeatures() {
+//		Map<String, Object> args = new HashMap<>();
+//		// 最大优先级定义
+//		args.put("x-max-priority", 10);
+//		// 过期时间，单位毫秒
+//		// args .put("x-message-ttl", 60000);
+//		// 30分钟，单位毫秒
+//		// args.put("x-expires", 1800000);
+//		// 集群高可用，数据复制
+//		args.put("x-ha-policy", "all");
+//		return args;
+//	}
 	
 	/**
 	 * 
@@ -172,15 +106,18 @@ public class RabbitMessageQueueManager {
 	   * @return
 	 */
 	private SimpleMessageListenerContainer messageListenerContainer(String queueName, Integer consumers,
-			ChannelAwareMessageListener channelAwareMessageListener) {
-		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(rabbitConnectionFactory);
-		container.setConcurrentConsumers(consumers);
-		container.setMaxConcurrentConsumers(maxConcurrentConsumers);
-		container.setPrefetchCount(rabbitPrefetchCount);
-		container.setMessageConverter(messageConverter);
-		container.setRabbitAdmin(rabbitAdmin);
+			MessageListener messageListener) {
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
 		
-		container.addQueueNames(queueName);
+		container.setConnectionFactory(activeMQConnectionFactory);
+//		container.setBeanName("jmsListeningContainer" + queueName);
+		container.setConcurrentConsumers(consumers);
+		container.setMessageConverter(messageConverter);
+		
+		container.setDestinationName(queueName);
+		container.setPubSubDomain(true);
+		
+		container.setConcurrentConsumers(consumers);
 		
 //		defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinition);
 //		
@@ -201,16 +138,10 @@ public class RabbitMessageQueueManager {
 		// 设置事务
 		// container.setChannelTransacted(true);
 
-		// 设置公平分发，同 channel.basicQos(1);
-		container.setPrefetchCount(rabbitPrefetchCount);
-
 		// 设置优先级
 //		container.setConsumerArguments(Collections.<String, Object> singletonMap("x-priority", Integer.valueOf(10)));
 
-		// 设置确认模式手工确认s
-		container.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-		
-		container.setMessageListener(channelAwareMessageListener);
+		container.setMessageListener(messageListener);
 		
 		return container;
 	}

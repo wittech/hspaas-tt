@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1-BD-SNAPSHOT</version>
 	</parent>
 	<artifactId>hssms</artifactId>
 	<packaging>jar</packaging>
@@ -97,7 +97,7 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
+			<artifactId>spring-boot-starter-activemq</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -138,7 +138,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- Jboss Undertow嵌入式容器 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -155,6 +155,11 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 	</dependencies>

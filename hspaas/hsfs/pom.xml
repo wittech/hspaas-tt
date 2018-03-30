@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1-BD-SNAPSHOT</version>
 	</parent>
 	<artifactId>hsfs</artifactId>
 	<name>华时流量服务</name>

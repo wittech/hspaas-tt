@@ -10,17 +10,19 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.core.JmsMessagingTemplate;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -46,7 +48,7 @@ import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.config.rabbit.constant.ActiveMqConstant;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.context.PassageContext.PassageStatus;
 import com.huashi.sms.passage.context.PassageContext.RouteType;
@@ -70,50 +72,50 @@ import com.huashi.sms.task.model.SmsRoutePassage;
 import com.huashi.sms.template.context.TemplateContext;
 import com.huashi.sms.template.domain.MessageTemplate;
 import com.huashi.sms.template.service.ISmsTemplateService;
-import com.rabbitmq.client.Channel;
 
 /**
  * TODO 待消息分包处理
  *
  * @author zhengying
- * @version V1.0.0  
+ * @version V1.0.0
  * @date 2016年9月8日 下午11:35:54
  */
 @Component
-public class SmsWaitPacketsListener extends BasePacketsSupport implements ChannelAwareMessageListener {
+public class SmsWaitPacketsListener extends BasePacketsSupport implements MessageListener  {
 
     @Resource
-    private RabbitTemplate rabbitTemplate;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
-    @Resource
-    private Jackson2JsonMessageConverter messageConverter;
+    private StringRedisTemplate                stringRedisTemplate;
 
     @Autowired
-    private ISmsTemplateService smsTemplateService;
+    private ISmsTemplateService                smsTemplateService;
     @Autowired
-    private IForbiddenWordsService forbiddenWordsService;
+    private IForbiddenWordsService             forbiddenWordsService;
     @Autowired
-    private ISmsPassageAccessService smsPassageAccessService;
+    private ISmsPassageAccessService           smsPassageAccessService;
     @Autowired
-    private ISmsMobileTablesService smsMobileTablesService;
+    private ISmsMobileTablesService            smsMobileTablesService;
     @Autowired
-    private ISmsMobileBlackListService mobileBlackListService;
+    private ISmsMobileBlackListService         mobileBlackListService;
     @Autowired
-    private ISmsMobileWhiteListService smsMobileWhiteListService;
+    private ISmsMobileWhiteListService         smsMobileWhiteListService;
     @Autowired
-    private ISmsMtSubmitService smtMtSubmitService;
+    private ISmsMtSubmitService                smtMtSubmitService;
 
     @Reference
-    private IMobileLocalService mobileLocalService;
+    private IMobileLocalService                mobileLocalService;
     @Reference
-    private IPushConfigService pushConfigService;
+    private IPushConfigService                 pushConfigService;
     @Reference
-    private IUserBalanceService userBalanceService;
+    private IUserBalanceService                userBalanceService;
     @Reference
-    private IUserPassageService userPassageService;
+    private IUserPassageService                userPassageService;
     @Reference
-    private IUserSmsConfigService userSmsConfigService;
+    private IUserSmsConfigService              userSmsConfigService;
+
+    @Autowired
+    private JmsMessagingTemplate               jmsMessagingTemplate;
+    @Autowired
+    private MappingJackson2MessageConverter    messageConverter;
 
     /**
      * 根据当前用户ID和短信内容提取出的短信模板信息
@@ -123,7 +125,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     /**
      * 错误序列号计数器
      */
-    private final AtomicInteger errorNo = new AtomicInteger();
+    private final AtomicInteger                errorNo              = new AtomicInteger();
 
     /**
      * TODO 正常任务处理
@@ -169,13 +171,15 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         task.setMobile(task.getOriginMobile());
 
         // 如果错误消息为空，则认为处理状态为 正常
-        task.setProcessStatus(StringUtils.isEmpty(task.getErrorMessageReport()) || CollectionUtils.isEmpty(task.getPackets()) ? PacketsProcessStatus.PROCESS_COMPLETE.getCode() : PacketsProcessStatus.PROCESS_EXCEPTION.getCode());
+        task.setProcessStatus(StringUtils.isEmpty(task.getErrorMessageReport())
+                              || CollectionUtils.isEmpty(task.getPackets()) ? PacketsProcessStatus.PROCESS_COMPLETE.getCode() : PacketsProcessStatus.PROCESS_EXCEPTION.getCode());
 
         task.setMessageTemplateId(messageTemplateLocal.get() == null ? null : messageTemplateLocal.get().getId());
         task.setForceActions(task.getForceActionsReport().toString());
 
         // 如果正在分包或者分包异常，则审核状态为待审核
-        task.setApproveStatus(PacketsProcessStatus.DOING.getCode() == task.getProcessStatus() || PacketsProcessStatus.PROCESS_EXCEPTION.getCode() == task.getProcessStatus() ? PacketsApproveStatus.WAITING.getCode() : PacketsApproveStatus.AUTO_COMPLETE.getCode());
+        task.setApproveStatus(PacketsProcessStatus.DOING.getCode() == task.getProcessStatus()
+                              || PacketsProcessStatus.PROCESS_EXCEPTION.getCode() == task.getProcessStatus() ? PacketsApproveStatus.WAITING.getCode() : PacketsApproveStatus.AUTO_COMPLETE.getCode());
 
         if (mobileCatagory != null) {
             task.setErrorMobiles(mobileCatagory.getFilterNumbers());
@@ -189,12 +193,12 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         task.setRemark(task.getErrorMessageReport().toString());
         task.setProcessTime(new Date());
 
-
         // 发送异步队列 暂时改成本地数据
         stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_TASK_LIST, JSON.toJSONString(task));
 
-        //  分包状态="分包完成"
-        if (PacketsProcessStatus.PROCESS_COMPLETE.getCode() == task.getProcessStatus() && PacketsApproveStatus.WAITING.getCode() != task.getApproveStatus()) {
+        // 分包状态="分包完成"
+        if (PacketsProcessStatus.PROCESS_COMPLETE.getCode() == task.getProcessStatus()
+            && PacketsApproveStatus.WAITING.getCode() != task.getApproveStatus()) {
 
             // 发送至待提交信息队列
             smtMtSubmitService.sendToSubmitQueue(task.getPackets());
@@ -213,9 +217,15 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
      */
     private void returnFeeToUser(SmsMtTask task, MobileCatagory mobileCatagory) {
         if (task.getReturnFee() != null && task.getReturnFee() != 0 && mobileCatagory != null) {
-            logger.info("用户ID：{} 发送短信 存在错号：{}个，重复号码：{}个，单条计费：{}条，共扣费：{}条，共需返还{}条", task.getUserId(), mobileCatagory.getFilterSize(), mobileCatagory.getRepeatSize(), task.getFee(), (task.getMobiles().length - mobileCatagory.getFilterSize() - mobileCatagory.getRepeatSize()) * task.getFee(), task.getReturnFee());
+            logger.info("用户ID：{} 发送短信 存在错号：{}个，重复号码：{}个，单条计费：{}条，共扣费：{}条，共需返还{}条", task.getUserId(),
+                        mobileCatagory.getFilterSize(), mobileCatagory.getRepeatSize(), task.getFee(),
+                        (task.getMobiles().length - mobileCatagory.getFilterSize() - mobileCatagory.getRepeatSize())
+                                * task.getFee(), task.getReturnFee());
             try {
-                userBalanceService.updateBalance(task.getUserId(), task.getReturnFee(), PlatformType.SEND_MESSAGE_SERVICE.getCode(), PaySource.USER_ACCOUNT_EXCHANGE, PayType.SYSTEM, 0d, 0d, "错号或者重号返还", false);
+                userBalanceService.updateBalance(task.getUserId(), task.getReturnFee(),
+                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                 PaySource.USER_ACCOUNT_EXCHANGE, PayType.SYSTEM, 0d, 0d, "错号或者重号返还",
+                                                 false);
             } catch (Exception e) {
                 logger.error("返还用户ID：{}，总短信条数：{} 失败", task.getUserId(), task.getMobiles().length * task.getFee(), e);
             }
@@ -230,7 +240,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
      */
     private MobileCatagory doMobileNumberProcess(SmsMtTask task) {
         // 转换手机号码数组
-        List<String> mobiles = new ArrayList<>(Arrays.asList(task.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+        List<String> mobiles = new ArrayList<>(
+                                               Arrays.asList(task.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 
         // 移除上次 黑名单数据（主要针对重新分包黑名单不要重复产生记录）add by 2017-04-08
         if (StringUtils.isNotEmpty(task.getBlackMobiles())) {
@@ -269,50 +280,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         }
 
         return mobileNumberResponse;
-    }
-
-    @Override
-    @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS)
-    public void onMessage(Message message, Channel channel) throws Exception {
-        try {
-            SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
-            model.setOriginMobile(model.getMobile());
-
-            // 用户短信配置中心数据
-            UserSmsConfig smsConfig = getSmsConfig(model);
-
-            // 获取短信模板信息
-            loadSmsTemplateByContent(model, smsConfig);
-
-            // 校验同模板下手机号码是否超速，超量
-            if (!isSameMobileOutOfRange(model, smsConfig)) {
-                asyncSendTask(model);
-                return;
-            }
-
-            // 如果短信内容包含敏感词，打标记
-            markContentHasSensitiveWords(model);
-
-            // 短信手机号码处理逻辑
-            MobileCatagory mobileCatagory = doMobileNumberProcess(model);
-            if (mobileCatagory == null) {
-                asyncSendTask(model);
-                return;
-            }
-
-            // 获取用户路由（分省）通道信息
-            SmsRoutePassage passage = getUserRoutePassage(model, mobileCatagory);
-
-            // 通道分包逻辑
-            doPassagePacketsFinished(model, mobileCatagory, passage);
-
-        } catch (Exception e) {
-            logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
-        } finally {
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            // 清除ThreadLocal对象，加速GC，减小内存压力
-            messageTemplateLocal.remove();
-        }
     }
 
     // @Override
@@ -361,8 +328,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     /**
      * TODO 保存子任务
      *
-     * @param task          主任务
-     * @param mobile        手机号码
+     * @param task 主任务
+     * @param mobile 手机号码
      * @param passageAccess 可用通道信息
      */
     private void joinTaskPackets(SmsMtTask task, String mobile, SmsPassageAccess passageAccess) {
@@ -412,7 +379,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         // boolean isAvaiable = isHsAdmin(task.getAppKey());
 
         // 短信模板ID为空，短信包含敏感词及其他错误信息，短信通道为空 均至状态为 待人工处理
-        if (passageAccess == null || StringUtils.isNotEmpty(smsMtTaskPackets.getRemark()) || messageTemplateLocal.get() == null || messageTemplateLocal.get().getId() == null) {
+        if (passageAccess == null || StringUtils.isNotEmpty(smsMtTaskPackets.getRemark())
+            || messageTemplateLocal.get() == null || messageTemplateLocal.get().getId() == null) {
             smsMtTaskPackets.setStatus(PacketsApproveStatus.WAITING.getCode());
         } else {
             smsMtTaskPackets.setStatus(PacketsApproveStatus.AUTO_COMPLETE.getCode());
@@ -461,7 +429,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
      */
     private void checkContentSignature(SmsMtTask task, UserSmsConfig smsConfig) {
         // 如果用户不携带签名模式（一客一签模式），模板匹配需要考虑时候将原短信内容基础上加入签名进行匹配
-        if (smsConfig.getSignatureSource() != null && smsConfig.getSignatureSource() == SmsSignatureSource.HSPAAS_AUTO_APPEND.getValue()) {
+        if (smsConfig.getSignatureSource() != null
+            && smsConfig.getSignatureSource() == SmsSignatureSource.HSPAAS_AUTO_APPEND.getValue()) {
 
             if (StringUtils.isEmpty(smsConfig.getSignatureContent())) {
                 task.getErrorMessageReport().append(formatMessage("短信内容强制签名但用户签名内容未设置"));
@@ -477,9 +446,9 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             }
 
             // 判断短信内容是否包含多个签名 edit by 20170610 暂时屏蔽
-//			if (PatternUtil.isMultiSignatures(model.getContent())) {
-//				model.getErrorMessageReport().append(formatMessage("用户短信内容包含多个签名"));
-//			}
+            // if (PatternUtil.isMultiSignatures(model.getContent())) {
+            // model.getErrorMessageReport().append(formatMessage("用户短信内容包含多个签名"));
+            // }
 
         }
     }
@@ -525,7 +494,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
      * @return
      */
     private SmsRoutePassage getUserRoutePassage(SmsMtTask task, MobileCatagory mobileCatagory) {
-        UserPassage userPassage = userPassageService.getByUserIdAndType(task.getUserId(), PlatformType.SEND_MESSAGE_SERVICE.getCode());
+        UserPassage userPassage = userPassageService.getByUserIdAndType(task.getUserId(),
+                                                                        PlatformType.SEND_MESSAGE_SERVICE.getCode());
         if (userPassage == null) {
             task.getErrorMessageReport().append("用户通道组未找到");
             refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(), task.getForceActionsReport());
@@ -536,8 +506,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     }
 
     /**
-     * TODO 获取短信路由类型
-     * 如果路由类型未确定，则按默认路由进行
+     * TODO 获取短信路由类型 如果路由类型未确定，则按默认路由进行
      *
      * @return
      */
@@ -568,14 +537,14 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         return null;
     }
 
-    private static final CMCP[] CMCPS = new CMCP[]{CMCP.CHINA_MOBILE, CMCP.CHINA_TELECOM, CMCP.CHINA_UNICOM};
+    private static final CMCP[] CMCPS = new CMCP[] { CMCP.CHINA_MOBILE, CMCP.CHINA_TELECOM, CMCP.CHINA_UNICOM };
 
     /**
      * 根据运营商和路由通道寻找具体的通道信息
      *
      * @param model
      * @param mobileCatagory 分省后手机号码组
-     * @param userId         用户ID
+     * @param userId 用户ID
      * @return
      */
     private SmsRoutePassage doRoutePassageByCmcp(SmsMtTask model, MobileCatagory mobileCatagory, int userId) {
@@ -586,7 +555,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         routePassage.setUserId(userId);
 
         Integer routeType = getMessageRouteType();
-        
+
         Map<String, SmsPassageAccess> userPassages = smsPassageAccessService.getByUserId(userId);
         // 是否有可用通道
         boolean hasAvaiableAccess = MapUtils.isNotEmpty(userPassages);
@@ -594,7 +563,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             model.getErrorMessageReport().append(formatMessage("通道不可用"));
             refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(), model.getForceActionsReport());
         }
-        
+
         Map<Integer, String> provinceCmcpMobileNumbers;
         for (CMCP cmcp : CMCPS) {
             provinceCmcpMobileNumbers = getCmcpMobileNumbers(cmcp, mobileCatagory);
@@ -604,24 +573,29 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
 
             Set<Integer> provinceCodes = provinceCmcpMobileNumbers.keySet();
             for (Integer provinceCode : provinceCodes) {
-                
+
                 // 如果没有可用通道，则直接将相关省份手机号码进行分配
-                if(!hasAvaiableAccess) {
-                    routePassage.addPassageMobilesMapping(PassageContext.EXCEPTION_PASSAGE_ID, provinceCmcpMobileNumbers.get(provinceCode));
+                if (!hasAvaiableAccess) {
+                    routePassage.addPassageMobilesMapping(PassageContext.EXCEPTION_PASSAGE_ID,
+                                                          provinceCmcpMobileNumbers.get(provinceCode));
                     continue;
                 }
-                
-                passageAccess = userPassages.get(smsPassageAccessService.getAssistKey(routeType, cmcp.getCode(), provinceCode));
+
+                passageAccess = userPassages.get(smsPassageAccessService.getAssistKey(routeType, cmcp.getCode(),
+                                                                                      provinceCode));
 
                 isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
                 if (!isAvaiable) {
                     // 如果通道不可用，判断当前运营商是否包含 全国通道
-                    passageAccess = userPassages.get(smsPassageAccessService.getAssistKey(routeType, cmcp.getCode(), Province.PROVINCE_CODE_ALLOVER_COUNTRY));
+                    passageAccess = userPassages.get(smsPassageAccessService.getAssistKey(routeType,
+                                                                                          cmcp.getCode(),
+                                                                                          Province.PROVINCE_CODE_ALLOVER_COUNTRY));
                     isAvaiable = isSmsPassageAccessAvaiable(passageAccess);
                 }
 
                 if (isAvaiable) {
-                    routePassage.addPassageMobilesMapping(passageAccess.getPassageId(), provinceCmcpMobileNumbers.get(provinceCode));
+                    routePassage.addPassageMobilesMapping(passageAccess.getPassageId(),
+                                                          provinceCmcpMobileNumbers.get(provinceCode));
                     routePassage.getPassaegAccesses().put(passageAccess.getPassageId(), passageAccess);
                 } else {
                     routePassage.setErrorMessage("任务中包含通道不可用数据");
@@ -666,7 +640,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             template = smsTemplateService.getByContent(task.getUserId(), task.getContent());
             if (template == null) {
                 task.getErrorMessageReport().append(formatMessage("用户短信模板未报备"));
-                refillForceActions(PacketsActionPosition.SMS_TEMPLATE_MISSED.getPosition(), task.getForceActionsReport());
+                refillForceActions(PacketsActionPosition.SMS_TEMPLATE_MISSED.getPosition(),
+                                   task.getForceActionsReport());
             }
         }
 
@@ -690,7 +665,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
         Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(task.getUserId());
 
         // 转换手机号码数组
-        List<String> mobiles = new ArrayList<>(Arrays.asList(task.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+        List<String> mobiles = new ArrayList<>(
+                                               Arrays.asList(task.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 
         // 过滤超速集合
         List<String> benyondSpeedList = new ArrayList<>();
@@ -705,7 +681,11 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             }
 
             // 判断短信发送是否超速
-            int beyondExpected = smsMobileTablesService.checkMobileIsBeyondExpected(task.getUserId(), messageTemplateLocal.get().getId(), mobile, messageTemplateLocal.get().getSubmitInterval(), messageTemplateLocal.get().getLimitTimes());
+            int beyondExpected = smsMobileTablesService.checkMobileIsBeyondExpected(task.getUserId(),
+                                                                                    messageTemplateLocal.get().getId(),
+                                                                                    mobile,
+                                                                                    messageTemplateLocal.get().getSubmitInterval(),
+                                                                                    messageTemplateLocal.get().getLimitTimes());
 
             if (ISmsMobileTablesService.MOBILE_BEYOND_SPEED == beyondExpected) {
                 benyondSpeedList.add(mobile);
@@ -722,7 +702,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             // 移除需要执行的手机号码
             mobiles.removeAll(benyondSpeedList);
             task.setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
-            doExceptionOverWithReport(task, benyondSpeedList, SmsPushCode.SMS_SAME_MOBILE_NUM_SEND_BY_HIGN_FREQUENCY.getCode());
+            doExceptionOverWithReport(task, benyondSpeedList,
+                                      SmsPushCode.SMS_SAME_MOBILE_NUM_SEND_BY_HIGN_FREQUENCY.getCode());
             logger.warn("手机号码超速 {}", StringUtils.join(benyondSpeedList, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
         }
 
@@ -730,7 +711,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             // 移除需要执行的手机号码
             mobiles.removeAll(benyondTimesList);
             task.setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
-            doExceptionOverWithReport(task, benyondTimesList, SmsPushCode.SMS_SAME_MOBILE_NUM_BEYOND_LIMIT_IN_ONE_DAY.getCode());
+            doExceptionOverWithReport(task, benyondTimesList,
+                                      SmsPushCode.SMS_SAME_MOBILE_NUM_BEYOND_LIMIT_IN_ONE_DAY.getCode());
             logger.warn("手机号码超量 {}", StringUtils.join(benyondSpeedList, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
         }
 
@@ -767,7 +749,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
      *
      * @param task
      * @param mobiles
-     * @param remark  备注
+     * @param remark 备注
      */
     private void doExceptionOverWithReport(SmsMtTask task, List<String> mobiles, String remark) {
         SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
@@ -793,7 +775,9 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             submit.setNeedPush(false);
 
         } else {
-            PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(), PlatformType.SEND_MESSAGE_SERVICE.getCode(), task.getCallback());
+            PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(),
+                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                                 task.getCallback());
 
             // 推送信息为固定地址或者每次传递地址才需要推送
             if (pushConfig != null && SettingsContext.PushConfigStatus.NO.getCode() != pushConfig.getStatus()) {
@@ -807,13 +791,12 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             submit.setMobile(mobile);
             submit.setCmcp(CMCP.local(mobile).getCode());
 
-            rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, RabbitConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submit);
+            jmsMessagingTemplate.convertAndSend(ActiveMqConstant.MQ_SMS_MT_PACKETS_EXCEPTION, submit);
         }
     }
 
     /**
-     * TODO 通道分包逻辑
-     * 根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
+     * TODO 通道分包逻辑 根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
      *
      * @param task
      * @param routePassage 用户运营商路由下对应的通道信息
@@ -856,6 +839,53 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
                 joinTaskPackets(task, gm, passage);
             }
 
+        }
+    }
+
+    @Override
+    @JmsListener(destination = ActiveMqConstant.MQ_SMS_MT_WAIT_PROCESS)
+    public void onMessage(Message message) {
+        try {
+            SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
+            model.setOriginMobile(model.getMobile());
+
+            // 用户短信配置中心数据
+            UserSmsConfig smsConfig = getSmsConfig(model);
+
+            // 获取短信模板信息
+            loadSmsTemplateByContent(model, smsConfig);
+
+            // 校验同模板下手机号码是否超速，超量
+            if (!isSameMobileOutOfRange(model, smsConfig)) {
+                asyncSendTask(model);
+                return;
+            }
+
+            // 如果短信内容包含敏感词，打标记
+            markContentHasSensitiveWords(model);
+
+            // 短信手机号码处理逻辑
+            MobileCatagory mobileCatagory = doMobileNumberProcess(model);
+            if (mobileCatagory == null) {
+                asyncSendTask(model);
+                return;
+            }
+
+            // 获取用户路由（分省）通道信息
+            SmsRoutePassage passage = getUserRoutePassage(model, mobileCatagory);
+
+            // 通道分包逻辑
+            doPassagePacketsFinished(model, mobileCatagory, passage);
+
+        } catch (Exception e) {
+            try {
+                logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
+            } catch (MessageConversionException | JMSException e1) {
+                e1.printStackTrace();
+            }
+        } finally {
+            // 清除ThreadLocal对象，加速GC，减小内存压力
+            messageTemplateLocal.remove();
         }
     }
 

@@ -7,11 +7,7 @@ package com.huashi.listener.constant;
  * @version V1.0
  * @date 2017年12月26日 下午2:33:29
  */
-public class RabbitConstant {
-
-    /*-----------------------------------交换机-----------------------------------------*/
-    // 交换机
-    public static final String EXCHANGE_SMS           = "hspaas.sms";
+public class ActiveMqConstant {
 
     /*-----------------------------------短信下行队列-----------------------------------------*/
     // 短信下行 已完成上家通道调用，待网关回执队列

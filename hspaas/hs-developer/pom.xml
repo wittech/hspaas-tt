@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1-BD-SNAPSHOT</version>
 	</parent>
 	<artifactId>hs-developer</artifactId>
 	<packaging>jar</packaging>
@@ -21,7 +21,7 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
+			<artifactId>spring-boot-starter-activemq</artifactId>
 			<exclusions>
 				<exclusion>
 					<artifactId>log4j-over-slf4j</artifactId>
