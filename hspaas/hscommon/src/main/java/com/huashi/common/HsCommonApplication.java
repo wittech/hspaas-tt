@@ -13,6 +13,7 @@ import com.huashi.common.util.LogUtils;
 //@EnableAsync
 //@EnableTransactionManagement
 @SpringBootApplication
+//@EnableDubboConfiguration
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsCommonApplication {
 
