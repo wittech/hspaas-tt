@@ -30,7 +30,6 @@ import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
-import com.huashi.sms.config.rabbit.RabbitMessageQueueManager;
 import com.huashi.sms.config.rabbit.constant.ActiveMqConstant;
 import com.huashi.sms.config.rabbit.listener.SmsWaitSubmitListener;
 import com.huashi.sms.passage.context.PassageContext;
@@ -80,8 +79,8 @@ public class SmsMtSubmitService implements ISmsMtSubmitService {
     private JmsMessagingTemplate      jmsMessagingTemplate;
     @Resource
     private StringRedisTemplate       stringRedisTemplate;
-    @Autowired
-    private RabbitMessageQueueManager rabbitMessageQueueManager;
+//    @Autowired
+//    private RabbitMessageQueueManager rabbitMessageQueueManager;
     private Logger                    logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -440,11 +439,11 @@ public class SmsMtSubmitService implements ISmsMtSubmitService {
         }
 
         try {
-            for (String passageCode : passageCodes) {
-                rabbitMessageQueueManager.createQueue(getSubmitMessageQueueName(passageCode),
-                                                      smsPassageService.isPassageBelongtoDirect(null, passageCode),
-                                                      smsWaitSubmitListener);
-            }
+//            for (String passageCode : passageCodes) {
+//                rabbitMessageQueueManager.createQueue(getSubmitMessageQueueName(passageCode),
+//                                                      smsPassageService.isPassageBelongtoDirect(null, passageCode),
+//                                                      smsWaitSubmitListener);
+//            }
 
             return true;
         } catch (Exception e) {
@@ -455,7 +454,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService {
 
     @Override
     public String getSubmitMessageQueueName(String passageCode) {
-        return String.format("%s.%s", ActiveMqConstant.MQ_SMS_MT_WAIT_SUBMIT, passageCode);
+        return ActiveMqConstant.MQ_SMS_MT_WAIT_SUBMIT;
+        
+//        return String.format("%s.%s", ActiveMqConstant.MQ_SMS_MT_WAIT_SUBMIT, passageCode);
     }
 
     @Override
@@ -467,9 +468,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService {
     public boolean declareNewSubmitMessageQueue(String protocol, String passageCode) {
         String mqName = getSubmitMessageQueueName(passageCode);
         try {
-             rabbitMessageQueueManager.createQueue(mqName,
-             smsPassageService.isPassageBelongtoDirect(protocol, passageCode),
-             smsWaitSubmitListener);
+//             rabbitMessageQueueManager.createQueue(mqName,
+//             smsPassageService.isPassageBelongtoDirect(protocol, passageCode),
+//             smsWaitSubmitListener);
 
             logger.info("RabbitMQ添加新队列：{} 成功", mqName);
             return true;
@@ -483,7 +484,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService {
     public boolean removeSubmitMessageQueue(String passageCode) {
         String mqName = getSubmitMessageQueueName(passageCode);
         try {
-            rabbitMessageQueueManager.removeQueue(mqName);
+//            rabbitMessageQueueManager.removeQueue(mqName);
 
             logger.info("RabbitMQ移除队列：{} 成功", mqName);
 

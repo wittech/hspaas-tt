@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConversionException;
@@ -530,6 +531,7 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Message
      * @param channel
      */
     @Override
+    @JmsListener(destination = ActiveMqConstant.MQ_SMS_MT_WAIT_SUBMIT, concurrency = "30-50")
     public void onMessage(javax.jms.Message message){
         try {
             Object object = messageConverter.fromMessage(message);

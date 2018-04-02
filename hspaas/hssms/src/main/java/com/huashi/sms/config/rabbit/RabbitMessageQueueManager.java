@@ -35,10 +35,10 @@ public class RabbitMessageQueueManager {
 	@Autowired
 	private DefaultListableBeanFactory defaultListableBeanFactory;
 	
-	@Value("${mq.rabbit.consumers}")
+	@Value("${mq.consumers:10}")
 	private int concurrentConsumers;
 	
-	@Value("${mq.rabbit.consumers.direct:5}")
+	@Value("${mq.consumers.direct:5}")
 	private int directConcurrentConsumers;
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -64,9 +64,11 @@ public class RabbitMessageQueueManager {
 			container.afterPropertiesSet();
 
 //	        container.addQueueNames(queueName);
-	        if(!container.isRunning()) {
-                container.start();
-            }
+//	        if(!container.isRunning()) {
+//                container.start();
+//            }
+	        
+	        container.start();
 			
 		} catch (Exception e) {
 			logger.error("创建队列：{}失败", queueName, e);
@@ -117,8 +119,6 @@ public class RabbitMessageQueueManager {
 		container.setDestinationName(queueName);
 		container.setPubSubDomain(true);
 		
-		container.setConcurrentConsumers(consumers);
-		
 //		defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinition);
 //		
 //		applicationContext.getbean
@@ -141,7 +141,8 @@ public class RabbitMessageQueueManager {
 		// 设置优先级
 //		container.setConsumerArguments(Collections.<String, Object> singletonMap("x-priority", Integer.valueOf(10)));
 
-		container.setMessageListener(messageListener);
+		container.setupMessageListener(messageListener);
+		container.setConcurrency("10-50");
 		
 		return container;
 	}

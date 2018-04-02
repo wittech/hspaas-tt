@@ -843,7 +843,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
     }
 
     @Override
-    @JmsListener(destination = ActiveMqConstant.MQ_SMS_MT_WAIT_PROCESS)
+    @JmsListener(destination = ActiveMqConstant.MQ_SMS_MT_WAIT_PROCESS, concurrency = "4-10")
     public void onMessage(Message message) {
         try {
             SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
