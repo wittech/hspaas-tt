@@ -38,12 +38,6 @@ import com.alibaba.druid.util.StringUtils;
 @Order(1)
 public class RedisConfiguration extends CachingConfigurerSupport {
 
-    @Value("${redis.host}")
-    private String  host;
-
-    @Value("${redis.port}")
-    private int     port;
-
     @Value("${redis.password}")
     private String  password;
 
