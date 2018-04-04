@@ -56,19 +56,19 @@ public class SmsInitializeRunner implements CommandLineRunner {
             throw e;
         }
 		
-		logger.info("=======================数据初始化MQ=======================");
-		try {
-		    boolean isSuccess = initMessageQueues();
-	        if (!isSuccess) {
-	            logger.info("=======================初始化MQ失败=======================");
-	            throw new RuntimeException("初始化MQ失败");
-	        }
-	        
-	        logger.info("=======================初始化MQ完成=======================");
-        } catch (Exception e) {
-            logger.info("=======================初始化MQ失败=======================", e);
-            throw e;
-        }
+//		logger.info("=======================数据初始化MQ=======================");
+//		try {
+//		    boolean isSuccess = initMessageQueues();
+//	        if (!isSuccess) {
+//	            logger.info("=======================初始化MQ失败=======================");
+//	            throw new RuntimeException("初始化MQ失败");
+//	        }
+//	        
+//	        logger.info("=======================初始化MQ完成=======================");
+//        } catch (Exception e) {
+//            logger.info("=======================初始化MQ失败=======================", e);
+//            throw e;
+//        }
 	}
 
 	private void initPassage() {
@@ -110,13 +110,13 @@ public class SmsInitializeRunner implements CommandLineRunner {
 		logger.info("短信手机号码白名单数据");
 	}
 
-	/**
-	 * 
-	 * TODO 初始化待提交消息队列信息
-	 */
-	private boolean initMessageQueues() {
-		return smsMtSubmitService.declareWaitSubmitMessageQueues();
-	}
+//	/**
+//	 * 
+//	 * TODO 初始化待提交消息队列信息
+//	 */
+//	private boolean initMessageQueues() {
+//		return smsMtSubmitService.declareWaitSubmitMessageQueues();
+//	}
 
 	/**
 	 * 
