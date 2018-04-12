@@ -282,7 +282,7 @@ public class SmsProviderService implements ISmsProviderService {
 	
 	/**
      * 
-       * TODO  获取限速信息
+       * TODO  获取限速信息，基于令牌分桶算法
        * 
        * @param passageId
        * @param speed

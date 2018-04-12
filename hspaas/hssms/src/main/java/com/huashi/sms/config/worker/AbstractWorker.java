@@ -165,10 +165,9 @@ public abstract class AbstractWorker<E> implements Runnable {
      */
     private void executeWithTimeCost(List<E> list) {
         long startTime = System.currentTimeMillis();
-        long utilTime = startTime - timer.get();
         try {
             operate(list);
-            logger.info("job::[" + jobTitle() + "] 执行耗时：{} ms， 共处理：{} 个，距离上次清零时间间隔：{} ms", System.currentTimeMillis() - startTime, list.size(), utilTime);
+            logger.info("job::[" + jobTitle() + "] 执行耗时：{} ms， 共处理：{} 个", System.currentTimeMillis() - startTime, list.size());
         } catch (Exception e) {
             logger.error("job::[" + jobTitle() + "] 执行失败", e);
             backupIfFailed(list);
@@ -206,7 +205,6 @@ public abstract class AbstractWorker<E> implements Runnable {
                 // 先休眠1毫秒，避免cpu占用过高
                 Thread.sleep(1L);
             } catch (InterruptedException e) {
-                // ignored
             }
 
             try {

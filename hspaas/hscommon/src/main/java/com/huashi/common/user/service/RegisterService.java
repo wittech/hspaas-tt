@@ -55,8 +55,6 @@ import com.huashi.sms.passage.service.ISmsPassageAccessService;
 @Service
 public class RegisterService implements IRegisterService {
 
-    private Logger                     logger                     = LoggerFactory.getLogger(getClass());
-
     @Autowired
     private IEmailSendService          emailSendService;
 
@@ -83,8 +81,13 @@ public class RegisterService implements IRegisterService {
     @Autowired
     private ISystemConfigService       systemConfigService;
     @Reference
-    private ISmsPassageAccessService   simsPassageAccessService;
+    private ISmsPassageAccessService   smsPassageAccessService;
 
+    private Logger                     logger                     = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 分布式锁相关
+     */
     @Value("${zk.connect}")
     private String                     zkConnectUrl;
 
@@ -157,9 +160,10 @@ public class RegisterService implements IRegisterService {
 
             // 此处因为跨DUBBO应用服务，顾需要做 分布式事务回滚，
             // 可采用rabbitMQ通知机制，或者提供简单回滚方法暴露（需考虑）
-            if (!simsPassageAccessService.updateByModifyUser(developer.getUserId())) {
-                throw new RuntimeException("Invoke method[updateByModifyUser] to update passsageAccess failed");
-            }
+            // edit by zhengying 20180408 目前暂时取消注册时产生默认可用通道，需要BOSS管理员配置
+//            if (!smsPassageAccessService.updateByModifyUser(developer.getUserId())) {
+//                throw new RuntimeException("Invoke method[updateByModifyUser] to update passsageAccess failed");
+//            }
 
             // 如果发送邮件开关打开，则需要发送邮件，（即使发送失败也不作为回滚条件）
             if (model.isSendEmail()) {

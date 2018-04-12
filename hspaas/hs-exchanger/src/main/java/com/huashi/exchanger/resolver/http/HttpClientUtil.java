@@ -44,7 +44,7 @@ public class HttpClientUtil {
 	/**
 	 * 从连接池获取连接的timeout
 	 */
-	private static final int CONNECTION_REQUEST_TIMEOUT = 5 * 1000;
+	private static final int CONNECTION_REQUEST_TIMEOUT = 2 * 1000;
 
 	/**
 	 * 和服务器建立连接的timeout
@@ -57,7 +57,7 @@ public class HttpClientUtil {
 	private static final int SOCKET_TIMEOUT = 60 * 1000;
 	
     
-    private volatile static Map<String, CloseableHttpClient> LOCAL_HTTP_CLIENT_FACTORY = new HashMap<String, CloseableHttpClient>();
+    private volatile static Map<String, PoolingHttpClientConnectionManager> LOCAL_HTTP_CLIENT_FACTORY = new HashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
     
 	/**
@@ -71,105 +71,127 @@ public class HttpClientUtil {
     public static final Integer DEFAULT_MAX_PER_ROUTE = 300;
 
     private final static Object SYNC_LOCK = new Object();
+    
+    /**
+     * HTTPS协议前缀名
+     */
+    private static final String                              HTTPS_PROTOCOL_PREFIX      = "https";
+
+    /**
+     * URL HOST和PORT分隔符
+     */
+    private static final String                              HOST_SEPARATOR             = ":";
+    
 	/**
 	 * 默认编码
 	 */
     private static final String ENCODING_UTF_8 = "UTF-8";
     
     /**
-     * 获取HttpClient对象
      * 
-     * @return
-     * @author SHANHY
-     * @create 2015年12月18日
+       * TODO URL是否为HTTPS
+       * @param url
+       * @return
      */
-    public static CloseableHttpClient getHttpClient(String url, Integer maxTotal, Integer maxPerRoute) {
-        String hostname = url.split("/")[2];
-        int port = 80;
-        if (hostname.contains(":")) {
-            String[] arr = hostname.split(":");
-            hostname = arr[0];
-            port = Integer.parseInt(arr[1]);
-        }
-        
-        String key = String.format("%s_%d", hostname, port);
-    	
-    	if(!LOCAL_HTTP_CLIENT_FACTORY.containsKey(key)) {
-    		synchronized (SYNC_LOCK) {
-   			   LOCAL_HTTP_CLIENT_FACTORY.put(key, createHttpClient(maxTotal, maxPerRoute));
-   			   logger.info("URL:{} 连接池初始化", url);
-   			   logger.info("KEY：{} 连接池初始化成功，连接池：{} 连接数： {}", url, key, maxTotal, maxPerRoute);
-           }
-    	}
-    	
-    	return LOCAL_HTTP_CLIENT_FACTORY.get(key);
+    private static boolean isHttpsUrl(String url) {
+        return StringUtils.isNotBlank(url) && url.trim().startsWith(HTTPS_PROTOCOL_PREFIX);
     }
     
     /**
-     * 创建HttpClient对象
-     * 
+     * 获取HttpClient对象
+     *
      * @return
      * @author SHANHY
      * @create 2015年12月18日
      */
-    public static CloseableHttpClient createHttpClient(int maxTotal, int maxPerRoute) {
+    private static CloseableHttpClient getHttpClient(String url, Integer maxTotal, Integer maxPerRoute) {
+        String hostname = url.split("/")[2];
+        
+        // HTTP端口默认80，HTTPS默认443
+        int port = isHttpsUrl(url) ? 433 : 80;
+        if (hostname.contains(HOST_SEPARATOR)) {
+            String[] arr = hostname.split(HOST_SEPARATOR);
+            hostname = arr[0];
+            port = Integer.parseInt(arr[1]);
+        }
+
+        String hostAndPort = String.format("%s_%d", hostname, port);
+
+        // 判断当前连接池中是否存在HTTP 配置信息
+        if (!LOCAL_HTTP_CLIENT_FACTORY.containsKey(hostAndPort)) {
+            synchronized (SYNC_LOCK) {
+                LOCAL_HTTP_CLIENT_FACTORY.put(hostAndPort, bindHttpClientConnectionManager(maxTotal, maxPerRoute));
+                logger.info("URL:{} 连接池初始化", url);
+                logger.info("KEY：{} 连接池初始化成功，连接池总大小：{} 单路由池大小： {}", hostAndPort, maxTotal, maxPerRoute);
+            }
+        }
+
+        return HttpClients.custom().setConnectionManager(LOCAL_HTTP_CLIENT_FACTORY.get(hostAndPort)).build();
+    }
+
+    /**
+     * 创建HttpClient对象
+     *
+     * @return
+     * @create 2015年12月18日
+     */
+    private static PoolingHttpClientConnectionManager bindHttpClientConnectionManager(int maxTotal, int maxPerRoute) {
         ConnectionSocketFactory plainsf = PlainConnectionSocketFactory.getSocketFactory();
         LayeredConnectionSocketFactory sslsf = SSLConnectionSocketFactory.getSocketFactory();
-        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create().register("http", plainsf)
-                .register("https", sslsf).build();
-        
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create().register("http", plainsf).register("https",
+                                                                                                                                   sslsf).build();
+
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
         // 将最大连接数增加
         cm.setMaxTotal(maxTotal);
         // 将每个路由基础的连接增加
         cm.setDefaultMaxPerRoute(maxPerRoute);
-        
-        
-//        HttpHost httpHost = new HttpHost(hostname, port);
-        
-//        // 将目标主机的最大连接数增加
-//        cm.setMaxPerRoute(new HttpRoute(httpHost), maxRoute);
+
+        // HttpHost httpHost = new HttpHost(hostname, port);
+
+        // // 将目标主机的最大连接数增加
+        // cm.setMaxPerRoute(new HttpRoute(httpHost), maxRoute);
 
         // 请求重试处理
-//        HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
-//            public boolean retryRequest(IOException exception,
-//                    int executionCount, HttpContext context) {
-//                if (executionCount >= 2) {// 如果已经重试了2次，就放弃
-//                    return false;
-//                }
-//                if (exception instanceof NoHttpResponseException) {// 如果服务器丢掉了连接，那么就重试
-//                    return true;
-//                }
-//                if (exception instanceof SSLHandshakeException) {// 不要重试SSL握手异常
-//                    return false;
-//                }
-//                if (exception instanceof InterruptedIOException) {// 超时
-//                    return false;
-//                }
-//                if (exception instanceof UnknownHostException) {// 目标服务器不可达
-//                    return false;
-//                }
-//                if (exception instanceof ConnectTimeoutException) {// 连接被拒绝
-//                    return false;
-//                }
-//                if (exception instanceof SSLException) {// SSL握手异常
-//                    return false;
-//                }
-//
-//                HttpClientContext clientContext = HttpClientContext.adapt(context);
-//                HttpRequest request = clientContext.getRequest();
-//                // 如果请求是幂等的，就再次尝试
-//                if (!(request instanceof HttpEntityEnclosingRequest)) {
-//                    return true;
-//                }
-//                return false;
-//            }
-//        };
+        // HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
+        // public boolean retryRequest(IOException exception,
+        // int executionCount, HttpContext context) {
+        // if (executionCount >= 2) {// 如果已经重试了2次，就放弃
+        // return false;
+        // }
+        // if (exception instanceof NoHttpResponseException) {// 如果服务器丢掉了连接，那么就重试
+        // return true;
+        // }
+        // if (exception instanceof SSLHandshakeException) {// 不要重试SSL握手异常
+        // return false;
+        // }
+        // if (exception instanceof InterruptedIOException) {// 超时
+        // return false;
+        // }
+        // if (exception instanceof UnknownHostException) {// 目标服务器不可达
+        // return false;
+        // }
+        // if (exception instanceof ConnectTimeoutException) {// 连接被拒绝
+        // return false;
+        // }
+        // if (exception instanceof SSLException) {// SSL握手异常
+        // return false;
+        // }
+        //
+        // HttpClientContext clientContext = HttpClientContext.adapt(context);
+        // HttpRequest request = clientContext.getRequest();
+        // // 如果请求是幂等的，就再次尝试
+        // if (!(request instanceof HttpEntityEnclosingRequest)) {
+        // return true;
+        // }
+        // return false;
+        // }
+        // };
 
-//        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).setRetryHandler(httpRequestRetryHandler).build();
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
-
-        return httpClient;
+        // CloseableHttpClient httpClient =
+        // HttpClients.custom().setConnectionManager(cm).setRetryHandler(httpRequestRetryHandler).build();
+        
+        return cm;
     }
 
     /**
@@ -452,13 +474,13 @@ public class HttpClientUtil {
 			logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
 			// 释放资源
 			httpPost.releaseConnection();
-			if (url.startsWith("https") && httpClient != null) {
-                try {
-					httpClient.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-            }
+//			if (url.startsWith("https") && httpClient != null) {
+//                try {
+//					httpClient.close();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//            }
 		}
 	}
 
@@ -547,13 +569,13 @@ public class HttpClientUtil {
 			logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
 			// 释放资源
 			httpPost.releaseConnection();
-			if (url.startsWith("https") && httpClient != null&& httpClient instanceof CloseableHttpClient) {
-                try {
-					httpClient.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-            }
+//			if (url.startsWith("https") && httpClient != null) {
+//                try {
+//					httpClient.close();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//            }
 		}
 	}
 	
@@ -641,13 +663,13 @@ public class HttpClientUtil {
 			logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
 			// 释放资源
 			httpPost.releaseConnection();
-			if (url.startsWith("https") && httpClient != null) {
-                try {
-					httpClient.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-            }
+//			if (url.startsWith("https") && httpClient != null) {
+//                try {
+//					httpClient.close();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//            }
 		}
 	}
 

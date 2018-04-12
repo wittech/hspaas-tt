@@ -29,7 +29,7 @@ public interface ISmsProviderService {
 	 * @return
 	 * @throws ExchangeProcessException
 	 */
-	List<ProviderSendResponse> doTransport(SmsPassageParameter parameter, String mobile, String content, Integer feee,
+	List<ProviderSendResponse> doTransport(SmsPassageParameter parameter, String mobile, String content, Integer fee,
 			String extNumber) throws ExchangeProcessException;
 
 	/**

@@ -78,7 +78,6 @@ public class SmsMtPushService implements ISmsMtPushService {
     @Override
     @Transactional
     public int savePushMessage(List<SmsMtMessagePush> pushes) {
-        // 保存推送信息
         return smsMtMessagePushMapper.batchInsert(pushes);
     }
 
@@ -171,9 +170,8 @@ public class SmsMtPushService implements ISmsMtPushService {
             // 如果本次处理的用户ID已经包含在上下文处理集合中，则直接追加即可
             if (MapUtils.isNotEmpty(userBodies) && userBodies.containsKey(body.getInteger("userId"))) {
                 userBodies.get(body.getInteger("userId")).add(body);
-            }
-            // 如果未曾处理过，则重新初始化集合
-            else {
+            } else {
+             // 如果未曾处理过，则重新初始化集合
                 // List<JSONObject> ds = new ArrayList<>();
                 // ds.add(body);
                 userBodies.put(body.getInteger("userId"), new ArrayList<>(Arrays.asList(body)));
@@ -186,6 +184,12 @@ public class SmsMtPushService implements ISmsMtPushService {
         }
     }
 
+    /**
+     * 比较报文内容并完成加入推送redis队列（方法异步）
+     * @param delivers
+     * @return
+     * @see com.huashi.sms.record.service.ISmsMtPushService#compareAndPushBody(java.util.List)
+     */
     @Override
     @Async
     public Future<Boolean> compareAndPushBody(List<SmsMtMessageDeliver> delivers) {
@@ -253,8 +257,7 @@ public class SmsMtPushService implements ISmsMtPushService {
     private void sendToDeliverdFailoverQueue(List<SmsMtMessageDeliver> failoverDeliversQueue) {
         try {
             stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_QUEUE_SMS_DELIVER_FAILOVER,
-                                                       JSON.toJSONString(failoverDeliversQueue,
-                                                                         new SimplePropertyPreFilter("msgId", "mobile",
+                                                       JSON.toJSONString(failoverDeliversQueue, new SimplePropertyPreFilter("msgId", "mobile",
                                                                                                      "statusCode",
                                                                                                      "deliverTime",
                                                                                                      "remark",
