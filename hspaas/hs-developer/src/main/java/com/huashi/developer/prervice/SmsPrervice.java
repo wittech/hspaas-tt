@@ -44,7 +44,7 @@ import com.huashi.sms.task.exception.QueueProcessException;
 @Service
 public class SmsPrervice {
 
-    Logger                            logger = LoggerFactory.getLogger(getClass());
+    private Logger                    logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private IdGenerator               idGenerator;

@@ -2,8 +2,6 @@ package com.huashi.exchanger.test.cmpp;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -88,22 +86,23 @@ public class CmppTest {
     @Test
     public void test() {
         CountDownLatch cdl = new CountDownLatch(threadNum);
-        
-//      CyclicBarrier cyclicBarrier = new CyclicBarrier(1);
-        
-//        ExecutorService executorService = Executors.newFixedThreadPool(20);
-//        for(int i=0; i< threadNum;i++) {
-//            executorService.submit(new SendThread(cdl, smsProviderService));
-//        }
-//        
-//        long startTime = System.currentTimeMillis();
-//        try {
-//            cdl.await();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+
+        // CyclicBarrier cyclicBarrier = new CyclicBarrier(1);
+
+        // ExecutorService executorService = Executors.newFixedThreadPool(20);
+        // for(int i=0; i< threadNum;i++) {
+        // executorService.submit(new SendThread(cdl, smsProviderService));
+        // }
+        //
+        // long startTime = System.currentTimeMillis();
+        // try {
+        // cdl.await();
+        // } catch (InterruptedException e) {
+        // e.printStackTrace();
+        // }
         long startTime = System.currentTimeMillis();
-        List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee, extNumber);
+        List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee,
+                                                                         extNumber);
         System.out.println("当前线程：" + Thread.currentThread().getName() + " 返回值：" + list);
         System.out.println("共耗时：" + (System.currentTimeMillis() - startTime));
     }
@@ -122,9 +121,10 @@ public class CmppTest {
         @Override
         public void run() {
             content += RandomUtil.getRandomNum(6);
-            List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee, extNumber);
+            List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee,
+                                                                             extNumber);
             System.out.println("当前线程：" + Thread.currentThread().getName() + " 返回值：" + list);
-            
+
             cdl.countDown();
         }
     }

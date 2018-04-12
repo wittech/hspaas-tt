@@ -32,7 +32,7 @@ import com.huashi.sms.record.domain.SmsApiFailedRecord;
 public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
 
 	@Reference
-	private IUserService iUserService;
+	private IUserService userService;
 	@Autowired
 	private SmsApiFailedRecordMapper smsApiFailedRecordMapper;
 	
@@ -103,7 +103,7 @@ public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
 		List<SmsApiFailedRecord> dataList = smsApiFailedRecordMapper.findList(paramMap);
 		for(SmsApiFailedRecord record : dataList){
 			if(record != null && record.getUserId() != null){
-				record.setUserModel(iUserService.getByUserId(record.getUserId()));
+				record.setUserModel(userService.getByUserId(record.getUserId()));
 			}
 		}
 		page.getList().addAll(dataList);

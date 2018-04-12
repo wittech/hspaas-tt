@@ -149,6 +149,7 @@
 				<version>${spring-boot.version}</version>
 				<configuration>
 					<mainClass>com.huashi.exchanger.HsExchangerApplication</mainClass>
+					<executable>ture</executable>
 				</configuration>
 				<executions>
 					<execution>

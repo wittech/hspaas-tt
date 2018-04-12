@@ -93,7 +93,8 @@ public class SmsApi extends BasicApiSupport {
             // 如果处理失败则持久化到DB
             smsPrervice.saveErrorLog(response.getCode(), request.getRequestURL().toString(), IpUtil.getClientIp(request), request.getParameterMap(), getAppType());
         } catch (Exception e) {
-            logger.error("持久化提交接口错误失败", e);
+            // 暂时忽略日志打印
+//            logger.error("持久化提交接口错误失败", e);
         }
 
         return response;
