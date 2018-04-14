@@ -231,8 +231,7 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
         } else {
             // add by zhengying 2017-2-50
             // 如果当前扩展号码总长度小于扩展号长度上限则在直接返回，否则按照扩展号上限截取
-            return extNumber.length() < smsPassage.getExtNumber() ? extNumber : extNumber.substring(0,
-                                                                                                    smsPassage.getExtNumber());
+            return extNumber.length() < smsPassage.getExtNumber() ? extNumber : extNumber.substring(0, smsPassage.getExtNumber());
         }
     }
 
