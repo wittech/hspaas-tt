@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -67,8 +69,8 @@ public class SmsMtPushService implements ISmsMtPushService {
     private int                    pushThreadPoolSize;
     @Autowired
     private ApplicationContext     applicationContext;
-    // @Resource
-    // private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    @Resource
+    private ThreadPoolTaskExecutor pushPoolTaskExecutor;
 
     private Logger                 logger                   = LoggerFactory.getLogger(getClass());
 
@@ -102,6 +104,14 @@ public class SmsMtPushService implements ISmsMtPushService {
         return false;
     }
 
+    /**
+     * 获取当前用户[userId]对应的状态报告推送队列名称
+     * 
+     * @param userId
+     *     用户ID，每个用户ID不同的队列（用户独享队列，非共享一个推送队列）
+     * @return
+     * @see com.huashi.sms.record.service.ISmsMtPushService#getUserPushQueueName(java.lang.Integer)
+     */
     @Override
     public String getUserPushQueueName(Integer userId) {
         return String.format("%s:%d", SmsRedisConstant.RED_QUEUE_SMS_MT_WAIT_PUSH, userId);
@@ -128,7 +138,7 @@ public class SmsMtPushService implements ISmsMtPushService {
             try {
                 JSONObject redisArgs = getWaitPushBodyArgs(deliver.getMsgId(), deliver.getMobile());
                 if (redisArgs == null) {
-                    // 如果数据生成时间超过5分钟则舍弃，不再重新补偿
+                    // 如果数据生成时间超过[5分钟]舍弃，不再重新补偿
                     // if(System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 5 * 60 * 1000 )
 
                     if (System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 20 * 1000) {
@@ -231,10 +241,9 @@ public class SmsMtPushService implements ISmsMtPushService {
                 sendToDeliverdFailoverQueue(failoverDeliversQueue);
             }
 
-            // 根据用户ID分别组装数据
-            for (Integer userId : userBodies.keySet()) {
-                stringRedisTemplate.opsForList().rightPush(getUserPushQueueName(userId),
-                                                           JSON.toJSONString(userBodies.get(userId)));
+            // 根据用户ID分别组装数据，并发送至各自队列, key:userId, value:bodies（推送报文数据）
+            for(Entry<Integer, List<JSONObject>> userBody : userBodies.entrySet()) {
+                stringRedisTemplate.opsForList().rightPush(getUserPushQueueName(userBody.getKey()), JSON.toJSONString(userBody.getValue()));
             }
             return new AsyncResult<Boolean>(true);
         } catch (Exception e) {
@@ -256,6 +265,7 @@ public class SmsMtPushService implements ISmsMtPushService {
      */
     private void sendToDeliverdFailoverQueue(List<SmsMtMessageDeliver> failoverDeliversQueue) {
         try {
+            // 目前数据的超时时间按照 创建是时间超过5分钟则超时
             stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_QUEUE_SMS_DELIVER_FAILOVER,
                                                        JSON.toJSONString(failoverDeliversQueue, new SimplePropertyPreFilter("msgId", "mobile",
                                                                                                      "statusCode",
@@ -361,8 +371,7 @@ public class SmsMtPushService implements ISmsMtPushService {
     public void setMessageReadyPushConfigurations(List<SmsMtMessageSubmit> submits) {
         try {
             for (SmsMtMessageSubmit submit : submits) {
-                stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()),
-                                                     submit.getMobile(),
+                stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()), submit.getMobile(),
                                                      JSON.toJSONString(submit, new SimplePropertyPreFilter("sid", "userId",
                                                                                                    "msgId", "attach",
                                                                                                    "pushUrl",
@@ -379,9 +388,8 @@ public class SmsMtPushService implements ISmsMtPushService {
     public boolean addUserMtPushListener(Integer userId) {
         try {
             for (int i = 0; i < pushThreadPoolSize; i++) {
-                Thread thread = new Thread(new MtReportPushToDeveloperWorker(applicationContext,
-                                                                             getUserPushQueueName(userId)));
-                thread.start();
+                pushPoolTaskExecutor.execute(new MtReportPushToDeveloperWorker(applicationContext, 
+                                                                               getUserPushQueueName(userId)));
             }
             return true;
         } catch (Exception e) {

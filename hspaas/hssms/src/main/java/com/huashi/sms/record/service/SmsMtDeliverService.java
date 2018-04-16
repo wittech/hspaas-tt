@@ -78,18 +78,12 @@ public class SmsMtDeliverService implements ISmsMtDeliverService{
             }
 			
 //			lock.acquire();
-			
-			long l1 = System.currentTimeMillis();
 			// 将待推送消息发送至用户队列进行处理（2017-03-20 合包处理），异步执行
 //			threadPoolTaskExecutor.submit(new JoinPushThread(smsMtPushService, delivers));
 			smsMtPushService.compareAndPushBody(delivers);
-			long l2 = System.currentTimeMillis();
-			logger.info("2222222异步加入推送耗时 : {} MS", (l2 - l1));
 			
 			// 提交至待DB持久队列
 			stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_STATUS_RECEIVE_LIST, JSON.toJSONString(delivers));
-			
-			logger.info("回执入REDIS耗时 : {} MS", (System.currentTimeMillis() - l2));
 			
 			return delivers.size();
 		} catch (Exception e) {

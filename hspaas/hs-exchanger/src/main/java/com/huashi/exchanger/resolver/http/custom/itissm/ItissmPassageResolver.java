@@ -9,6 +9,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.huashi.common.util.DateUtil;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.exchanger.domain.ProviderSendResponse;
@@ -112,7 +114,7 @@ public class ItissmPassageResolver extends AbstractPassageResolver{
 		    
 		    result = getInFactResponse(result);
 		    
-            int msgId = Integer.parseInt(result);
+            long msgId = Long.parseLong(result);
            
             ProviderSendResponse response = new ProviderSendResponse();
             
@@ -148,12 +150,19 @@ public class ItissmPassageResolver extends AbstractPassageResolver{
 		try {
 			logger.info("下行状态报告简码：{} =========={}", code(), report);
 			
+			if(StringUtils.isEmpty(report)) {
+			    return null;
+			}
+			
+//			{\"account\":\"HSKJYX\",\"GetReport\":\"2115238738241199173,18368031231,DELIVRD|2115238715962088136,18368031231,DELIVRD|\"}
+			JSONObject body = JSON.parseObject(report);
+			
 			// 只返回-1或者-3则通道方异常
 			if(!report.contains(",")) {
 			    throw new RuntimeException("云信应用程序异常 [" + report +"]");
 			}
 			
-			report = getInFactResponse(report);
+			report = body.getString("GetReport");
 			
 			/**
 			 * 数据格式：批次,号码,时间,状态|
@@ -201,7 +210,7 @@ public class ItissmPassageResolver extends AbstractPassageResolver{
 			throw new RuntimeException("解析失败");
 		}
 	}
-
+	
 	/**
 	 * 解析上行状态报告
 	 * 
@@ -221,7 +230,9 @@ public class ItissmPassageResolver extends AbstractPassageResolver{
 			    return null;
 			}
 			
-			report = getInFactResponse(report);
+//	          {"GetMo":"15868193450|,|￥ﾥﾽ￧ﾚﾄ￯ﾼﾌ￦ﾈﾑ￧ﾟﾥ￩ﾁﾓ￤ﾺﾆ|,|2018/4/16 11:14:13|,|106914010526|;|15868193450|,|￥ﾗﾯ￥ﾗﾯ￯ﾼﾌ￥ﾏﾯ￤ﾻﾥ|,|2018/4/16 11:14:13|,|106914010526|;|","account":"HSKJYX"}
+	        JSONObject body = JSON.parseObject(report);
+			report = body.getString("GetMo");
 			
 			/** 
 			 * 数据格式：
