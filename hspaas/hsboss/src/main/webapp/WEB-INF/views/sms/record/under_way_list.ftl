@@ -370,7 +370,6 @@
                     <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
                          id="myModelBody">
                         <textarea id="edit_content" class="form-control" rows="6"></textarea>
-                        <input type="hidden" id="editContentSid" value="-1">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" onclick="saveContent();">保存</button>
@@ -518,6 +517,19 @@
         }
         ids = ids.substring(0,ids.length - 1);
         return ids;
+    }
+    
+   <#-- 获取选中SID集合信息 -->
+    function getSelectSids(){
+        var selects = $('input[name=checkItem]:checked');
+        if(selects.length <= 0){
+            return '';
+        }
+        var sids = '';
+        for(var i = 0;i<selects.length;i++){
+            sids += $(selects[i]).attr("sid") + ',';
+        }
+        return sids.substring(0,sids.length - 1);
     }
 
     function batchPass(){
@@ -717,7 +729,6 @@
     }
 
     function editContent(sid) {
-        $('#editContentSid').val(sid);
         $('#edit_content').val($("#"+sid+"_content").val());
         $('#contentModal').modal('show');
     }
@@ -744,15 +755,20 @@
     }
 
     function saveContent() {
-        var sid = $('#editContentSid').val();
+        var sids = getSelectSids();
+        if(sids == ''){
+            Boss.alert('请选择需要修改内容的任务！');
+            return;
+        }
+        
         var finalContent = $('#edit_content').val();
         if ($.trim(finalContent) == '') {
             Boss.alert('请输入短信内容！');
             return;
         }
         $.ajax({
-            url: '${BASE_PATH}/sms/record/update_content',
-            data: {'sid': sid, 'content': finalContent},
+            url: '${BASE_PATH}/sms/record/batchUpdateContent',
+            data: {'sidArray': sids, 'content': finalContent},
             dataType: 'json',
             type: 'post',
             success: function (data) {

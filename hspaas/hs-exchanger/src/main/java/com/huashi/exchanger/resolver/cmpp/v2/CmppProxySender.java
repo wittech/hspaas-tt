@@ -55,7 +55,7 @@ public class CmppProxySender {
      * 长短信消息ID映射（因为长短信会有多次消息报告回执，但实际只需要解析任何一条有意义的即可） KEY: 因为长短信需要多次代理发送交互，所以产生多次MSG_ID，顾KEY存每一次的消息ID
      * VALUE：存储的是发送给HSSMS应用的msgId,即只存长短信中的第一次索引对应的msgId
      */
-    private static List<String> ignoredMsgIds = new ArrayList<>();
+//    private static List<String> ignoredMsgIds = new ArrayList<>();
 
     /**
      * 同步锁，用于保障每次获取proxy连接初始化一次
@@ -322,7 +322,7 @@ public class CmppProxySender {
                            // 0xa4cb800); //new Date();
 
         // 是否属于长短信
-        boolean isLongtext = false;
+//        boolean isLongtext = false;
         int tpUdhi = CmppConstant.TP_UDHI;
         // 全都改成以 UTF 16 格式提交
         List<byte[]> contentList = getLongByte(content, feeByWords);
@@ -330,7 +330,7 @@ public class CmppProxySender {
             // 长短信格式发送 增加协议头 改变编码方式
             tpUdhi = 1;
             msgFmt = CmppConstant.MSG_FMT_UCS2;
-            isLongtext = true;
+//            isLongtext = true;
         }
 
         CMPPSubmitMessage submitMsg = null;
@@ -352,13 +352,11 @@ public class CmppProxySender {
             
 
             // 存入单条长短信对应关系数据
-            if (isLongtext && index > 1) {
-                ignoredMsgIds.add(getMsgId(repMsg.getMsgId()));
-            }
+//            if (isLongtext && index > 1) {
+//                ignoredMsgIds.add(getMsgId(repMsg.getMsgId()));
+//            }
         }
         
-        System.out.println("------------" + JSON.toJSONString(ignoredMsgIds));
-
         return submitRepMsg;
     }
 
@@ -483,10 +481,10 @@ public class CmppProxySender {
         }
         
         // 如果长短信消息ID映射关系中不存在，则证明非长短信模式，直接返回
-        if (ignoredMsgIds.contains(msgId)) {
-            ignoredMsgIds.remove(msgId);
-            return true;
-        }
+//        if (ignoredMsgIds.contains(msgId)) {
+//            ignoredMsgIds.remove(msgId);
+//            return true;
+//        }
 
         return false;
     }

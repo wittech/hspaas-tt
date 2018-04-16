@@ -2,6 +2,8 @@ package com.huashi.exchanger.test.cmpp;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -36,8 +38,8 @@ public class CmppTest {
 
     @Before
     public void init() {
-        threadNum = 20;
-        mobile = getMobiles(10);
+        threadNum = 50;
+        mobile = getMobiles(1);
         fee = 1;
         content = "【测试】您的短信验证码为";
         setSmsPassageParameter();
@@ -67,15 +69,15 @@ public class CmppTest {
         smsPassageParameter.setProtocol(ProtocolType.CMPP2.name());
         smsPassageParameter.setCallType(PassageCallType.DATA_SEND.getCode());
         smsPassageParameter.setPassageId(1);
-        smsPassageParameter.setPacketsSize(5000);
+        smsPassageParameter.setPacketsSize(50);
         smsPassageParameter.setFeeByWords(68);
         smsPassageParameter.setSuccessCode("DELIVRD");
 
         JSONObject params = new JSONObject();
-        params.put("ip", "localhost");
-        params.put("port", "58081");
-        params.put("username", "111");
-        params.put("password", "111");
+        params.put("ip", "192.168.1.104");
+        params.put("port", "7890");
+        params.put("username", "1111");
+        params.put("password", "1111");
 
         params.put("spid", "1111");
         params.put("src_terminal_id", "1111");
@@ -89,21 +91,21 @@ public class CmppTest {
 
         // CyclicBarrier cyclicBarrier = new CyclicBarrier(1);
 
-        // ExecutorService executorService = Executors.newFixedThreadPool(20);
-        // for(int i=0; i< threadNum;i++) {
-        // executorService.submit(new SendThread(cdl, smsProviderService));
-        // }
-        //
-        // long startTime = System.currentTimeMillis();
-        // try {
-        // cdl.await();
-        // } catch (InterruptedException e) {
-        // e.printStackTrace();
-        // }
+        ExecutorService executorService = Executors.newFixedThreadPool(20);
+        for (int i = 0; i < threadNum; i++) {
+            executorService.submit(new SendThread(cdl, smsProviderService));
+        }
+
         long startTime = System.currentTimeMillis();
-        List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee,
-                                                                         extNumber);
-        System.out.println("当前线程：" + Thread.currentThread().getName() + " 返回值：" + list);
+        try {
+            cdl.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+//        long startTime = System.currentTimeMillis();
+        // List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee,
+        // extNumber);
+//        System.out.println("当前线程：" + Thread.currentThread().getName() + " 返回值：" + list);
         System.out.println("共耗时：" + (System.currentTimeMillis() - startTime));
     }
 
@@ -121,9 +123,11 @@ public class CmppTest {
         @Override
         public void run() {
             content += RandomUtil.getRandomNum(6);
-            List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee,
-                                                                             extNumber);
-            System.out.println("当前线程：" + Thread.currentThread().getName() + " 返回值：" + list);
+            for(int i=0; i< 100; i++) {
+                List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee,
+                                                                                 extNumber);
+                System.out.println("当前线程：" + Thread.currentThread().getName() + "-----" +i +"===== 返回值：" + list);
+            }
 
             cdl.countDown();
         }

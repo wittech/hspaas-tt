@@ -122,15 +122,21 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     private StringRedisTemplate          stringRedisTemplate;
 
     @Value("${zk.connect}")
-    private String                     zkConnectUrl;
+    private String                       zkConnectUrl;
 
     @Value("${zk.locknode}")
-    private String                     zkLockNode;
-    
+    private String                       zkLockNode;
+
+    @Value("${zk.sessionTimeout}")
+    private int                          zkSessionTimeout;
+
+    @Value("${zk.connectTimeout}")
+    private int                          zkConnectTimeout;
+
     /**
      * 当前业务锁节点名称
      */
-    private static final String        CURRENT_BUSINESS_LOCK_NODE = "task_lock";
+    private static final String          CURRENT_BUSINESS_LOCK_NODE = "task_lock";
 
     // @PostConstruct
     // public void setConfirmCallback() {
@@ -138,7 +144,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     // rabbitTemplate.setConfirmCallback(this);
     // }
 
-    protected Logger                     logger = LoggerFactory.getLogger(getClass());
+    protected Logger                     logger                     = LoggerFactory.getLogger(getClass());
 
     @Override
     public BossPaginationVo<SmsMtTask> findPage(Map<String, Object> condition) {
@@ -1133,7 +1139,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
      * @return
      */
     private List<String> filterTaskExecuting(String repeatGroupKey, String... taskIds) {
-        Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
+        Lock lock = new ZookeeperLock(zkConnectUrl, zkSessionTimeout, zkConnectTimeout, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
         // 分布式锁开启
         lock.lock();
         try {

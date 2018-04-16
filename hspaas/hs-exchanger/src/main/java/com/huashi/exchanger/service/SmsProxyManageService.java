@@ -42,7 +42,6 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	 * CMPP/SGIP/SMGP通道代理发送实例
 	 */
 	public static Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
-	//
 
 	/**
 	 * 通道PROXY 发送错误次数计数器 add by 20170903
@@ -322,9 +321,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 			}
 		}
 		
-		logger.info("当前通道ID： {} 发送错误次数：{}", passageId, GLOBAL_PROXIES_ERROR_COUNTER.get(passageId));
 		// 判断该通道发送错误是否累计3次，如果累计三次，返回FALSE，需要重连 add by 20170903
 		if(GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) != null && GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) >= 3) {
+		    logger.info("当前通道ID： {} 发送错误次数：{}", passageId, GLOBAL_PROXIES_ERROR_COUNTER.get(passageId));
             return false;
         }
 
