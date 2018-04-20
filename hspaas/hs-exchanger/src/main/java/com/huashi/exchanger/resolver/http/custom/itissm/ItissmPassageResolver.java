@@ -163,6 +163,9 @@ public class ItissmPassageResolver extends AbstractPassageResolver{
 			}
 			
 			report = body.getString("GetReport");
+			if(StringUtils.isEmpty(report)) {
+                return null;
+            }
 			
 			/**
 			 * 数据格式：批次,号码,时间,状态|
@@ -233,6 +236,10 @@ public class ItissmPassageResolver extends AbstractPassageResolver{
 //	          {"GetMo":"15868193450|,|￥ﾥﾽ￧ﾚﾄ￯ﾼﾌ￦ﾈﾑ￧ﾟﾥ￩ﾁﾓ￤ﾺﾆ|,|2018/4/16 11:14:13|,|106914010526|;|15868193450|,|￥ﾗﾯ￥ﾗﾯ￯ﾼﾌ￥ﾏﾯ￤ﾻﾥ|,|2018/4/16 11:14:13|,|106914010526|;|","account":"HSKJYX"}
 	        JSONObject body = JSON.parseObject(report);
 			report = body.getString("GetMo");
+			
+			if(StringUtils.isEmpty(report)) {
+			    return null;
+			}
 			
 			/** 
 			 * 数据格式：

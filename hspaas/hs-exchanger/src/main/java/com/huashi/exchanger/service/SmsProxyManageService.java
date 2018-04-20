@@ -48,7 +48,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	 */
 	private static Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
 	
-	public static Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS = new HashMap<>();
+	public static Map<Integer, RateLimiter> GLOBAL_GATEWAY_RATE_LIMITERS = new HashMap<>();
 
 	/**
 	 * 默认限流速度
@@ -149,7 +149,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 		// 加载限速控制器
 		RateLimiter limiter = RateLimiter.create((speed == null || speed == 0) ? DEFAULT_LIMIT_SPEED : speed);
-		GLOBAL_RATE_LIMITERS.put(passageId, limiter);
+		GLOBAL_GATEWAY_RATE_LIMITERS.put(passageId, limiter);
 
 	}
 

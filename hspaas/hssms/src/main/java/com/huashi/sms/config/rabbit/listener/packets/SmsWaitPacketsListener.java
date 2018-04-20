@@ -275,6 +275,10 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS)
     public void onMessage(Message message, Channel channel) throws Exception {
         try {
+            if(message == null) {
+                return;
+            }
+            
             SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
             model.setOriginMobile(model.getMobile());
 

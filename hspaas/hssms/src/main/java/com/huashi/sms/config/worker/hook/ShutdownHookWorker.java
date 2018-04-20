@@ -34,7 +34,7 @@ public class ShutdownHookWorker implements Runnable {
 	@Override
 	public void run() {
 		synchronized (startupShutdownMonitor) {
-			SmsDbPersistenceRunner.isCustomThreadShutdown = true;
+			SmsDbPersistenceRunner.shutdownSignal = true;
 			
 //			Map<String, SimpleMessageListenerContainer> containers = applicationContext.getBeansOfType(SimpleMessageListenerContainer.class);
 //			if(MapUtils.isNotEmpty(containers)) {

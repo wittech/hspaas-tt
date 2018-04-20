@@ -26,7 +26,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -69,8 +68,8 @@ public class SmsMtPushService implements ISmsMtPushService {
     private int                    pushThreadPoolSize;
     @Autowired
     private ApplicationContext     applicationContext;
-    @Resource
-    private ThreadPoolTaskExecutor pushPoolTaskExecutor;
+//    @Resource
+//    private ThreadPoolTaskExecutor pushPoolTaskExecutor;
 
     private Logger                 logger                   = LoggerFactory.getLogger(getClass());
 
@@ -201,7 +200,7 @@ public class SmsMtPushService implements ISmsMtPushService {
      * @see com.huashi.sms.record.service.ISmsMtPushService#compareAndPushBody(java.util.List)
      */
     @Override
-    @Async
+//    @Async
     public Future<Boolean> compareAndPushBody(List<SmsMtMessageDeliver> delivers) {
         if (CollectionUtils.isEmpty(delivers)) {
             return new AsyncResult<Boolean>(false);
@@ -388,8 +387,9 @@ public class SmsMtPushService implements ISmsMtPushService {
     public boolean addUserMtPushListener(Integer userId) {
         try {
             for (int i = 0; i < pushThreadPoolSize; i++) {
-                pushPoolTaskExecutor.execute(new MtReportPushToDeveloperWorker(applicationContext, 
-                                                                               getUserPushQueueName(userId)));
+                Thread thread = new Thread(new MtReportPushToDeveloperWorker(applicationContext, 
+                                                                             getUserPushQueueName(userId)));
+                thread.start();
             }
             return true;
         } catch (Exception e) {

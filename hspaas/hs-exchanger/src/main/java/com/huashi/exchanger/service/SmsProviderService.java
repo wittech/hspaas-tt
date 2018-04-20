@@ -289,13 +289,13 @@ public class SmsProviderService implements ISmsProviderService {
        * @return
      */
     private static RateLimiter getRateLimiter(Integer passageId, Integer speed) {
-        RateLimiter limiter = SmsProxyManageService.GLOBAL_RATE_LIMITERS.get(passageId);
+        RateLimiter limiter = SmsProxyManageService.GLOBAL_GATEWAY_RATE_LIMITERS.get(passageId);
         if (limiter == null) {
             ReentrantLock reentrantLock = new ReentrantLock();
             reentrantLock.tryLock();
             try {
                 limiter = RateLimiter.create((speed == null || speed == 0) ? SmsProxyManageService.DEFAULT_LIMIT_SPEED : speed);
-                SmsProxyManageService.GLOBAL_RATE_LIMITERS.put(passageId, limiter);
+                SmsProxyManageService.GLOBAL_GATEWAY_RATE_LIMITERS.put(passageId, limiter);
             } finally {
                 reentrantLock.unlock();
             }

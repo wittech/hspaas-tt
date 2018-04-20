@@ -98,7 +98,7 @@ public class RabbitMqConfiguration {
         // 设置超时时间15秒
         connectionFactory.setConnectionTimeout(15000);
 
-        // 断开重连接，保证数据无丢失
+        // 断开重连接，保证数据无丢失,默认为true
 //		connectionFactory.setAutomaticRecoveryEnabled(true);
 
         return connectionFactory;
@@ -231,7 +231,8 @@ public class RabbitMqConfiguration {
 
 //		ExecutorService service = Executors.newFixedThreadPool(500);
 //		factory.setTaskExecutor(service);
-
+        
+        factory.setAutoStartup(false);
 
         return factory;
     }

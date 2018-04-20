@@ -552,11 +552,15 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
                 return null;
             }
 
+            // edity by 20180418 修改之前的redis中值设置
+            Map<String, String> redisPassageValues = new HashMap<>(list.size());
             for (SmsPassageAccess passage : list) {
-                passages.put(getAssistKey(passage.getRouteType(), passage.getCmcp(), passage.getProvinceCode()), passage);
+                String assistKey = getAssistKey(passage.getRouteType(), passage.getCmcp(), passage.getProvinceCode());
+                passages.put(assistKey, passage);
+                redisPassageValues.put(assistKey, JSON.toJSONString(passage));
             }
-
-            stringRedisTemplate.opsForHash().putAll(getMainKey(userId, PassageCallType.DATA_SEND.getCode()), passages);
+            
+            stringRedisTemplate.opsForHash().putAll(getMainKey(userId, PassageCallType.DATA_SEND.getCode()), redisPassageValues);
 
             return passages;
         }
