@@ -520,19 +520,16 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
         // 发送至待提交信息队列处理
         Map<Integer, String> passageCodesMap = new HashMap<>();
-        String passageCode;
         for (SmsMtTaskPackets packet : packets) {
             try {
-                passageCode = getPassageCode(passageCodesMap, packet);
+                String passageCode = getPassageCode(passageCodesMap, packet);
                 if (StringUtils.isEmpty(passageCode)) {
                     logger.error("子任务通道数据为空，无法进行通道代码分队列处理，通道ID：{}", packet.getFinalPassageId());
                     continue;
                 }
 
-                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS,
-                                              getSubmitMessageQueueName(passageCode),
-                                              packet,
-                                              (message) -> {
+                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, getSubmitMessageQueueName(passageCode),
+                                              packet, (message) -> {
 
                                                   message.getMessageProperties().setPriority(WordsPriority.getLevel(packet.getContent()));
 
@@ -544,7 +541,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         }
         return true;
     }
-
+    
     /**
      * TODO 根据子任务中的通道获取通道代码信息
      *

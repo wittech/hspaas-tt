@@ -22,7 +22,7 @@ import com.alibaba.fastjson.JSON;
 //@Aspect
 //@Order(1)
 //@Component
-public class VisitLogAop {
+public class VisitLogTracePrinter {
 
 	AtomicLong startTime = new AtomicLong();
 	Logger logger = LoggerFactory.getLogger(getClass());

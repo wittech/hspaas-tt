@@ -42,14 +42,13 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	 * CMPP/SGIP/SMGP通道代理发送实例
 	 */
 	public static Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
-	//
 
 	/**
 	 * 通道PROXY 发送错误次数计数器 add by 20170903
 	 */
 	private static Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
 	
-	public static Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS = new HashMap<>();
+	public static Map<Integer, RateLimiter> GLOBAL_GATEWAY_RATE_LIMITERS = new HashMap<>();
 
 	/**
 	 * 默认限流速度
@@ -150,7 +149,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 		// 加载限速控制器
 		RateLimiter limiter = RateLimiter.create((speed == null || speed == 0) ? DEFAULT_LIMIT_SPEED : speed);
-		GLOBAL_RATE_LIMITERS.put(passageId, limiter);
+		GLOBAL_GATEWAY_RATE_LIMITERS.put(passageId, limiter);
 
 	}
 
@@ -322,9 +321,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 			}
 		}
 		
-		logger.info("当前通道ID： {} 发送错误次数：{}", passageId, GLOBAL_PROXIES_ERROR_COUNTER.get(passageId));
 		// 判断该通道发送错误是否累计3次，如果累计三次，返回FALSE，需要重连 add by 20170903
 		if(GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) != null && GLOBAL_PROXIES_ERROR_COUNTER.get(passageId) >= 3) {
+		    logger.info("当前通道ID： {} 发送错误次数：{}", passageId, GLOBAL_PROXIES_ERROR_COUNTER.get(passageId));
             return false;
         }
 

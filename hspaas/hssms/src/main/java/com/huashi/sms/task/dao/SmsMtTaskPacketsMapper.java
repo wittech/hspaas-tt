@@ -25,7 +25,7 @@ public interface SmsMtTaskPacketsMapper {
 	   * @param sid
 	   * @return
 	 */
-	List<SmsMtTaskPackets> findChildBySid(@Param("sid") long sid);
+	List<SmsMtTaskPackets> selectBySid(@Param("sid") long sid);
 
 	/**
 	 * 

@@ -36,7 +36,7 @@ public class SmsDbPersistenceRunner implements CommandLineRunner {
 	private int threadPoolSize;
 	
 	// 自定义线程关闭标记（用于钩子回调）
-	public static volatile boolean isCustomThreadShutdown = false;
+	public static volatile boolean shutdownSignal = false;
 
 	@Autowired
 	private ApplicationContext applicationContext;

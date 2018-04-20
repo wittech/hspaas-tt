@@ -1,12 +1,14 @@
 package com.huashi.sms.task.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Resource;
 
@@ -17,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -50,7 +51,6 @@ import com.huashi.constants.ResponseMessage;
 import com.huashi.sms.config.cache.redis.constant.SmsRepeatSubmitConstant;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant.WordsPriority;
-import com.huashi.sms.config.zookeeper.ZookeeperLock;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
@@ -121,16 +121,22 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     @Resource
     private StringRedisTemplate          stringRedisTemplate;
 
-    @Value("${zk.connect}")
-    private String                     zkConnectUrl;
+//    @Value("${zk.connect}")
+//    private String                       zkConnectUrl;
+//
+//    @Value("${zk.locknode}")
+//    private String                       zkLockNode;
+//
+//    @Value("${zk.sessionTimeout}")
+//    private int                          zkSessionTimeout;
+//
+//    @Value("${zk.connectTimeout}")
+//    private int                          zkConnectTimeout;
 
-    @Value("${zk.locknode}")
-    private String                     zkLockNode;
-    
     /**
      * 当前业务锁节点名称
      */
-    private static final String        CURRENT_BUSINESS_LOCK_NODE = "task_lock";
+//    private static final String          CURRENT_BUSINESS_LOCK_NODE = "task_lock";
 
     // @PostConstruct
     // public void setConfirmCallback() {
@@ -138,7 +144,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     // rabbitTemplate.setConfirmCallback(this);
     // }
 
-    protected Logger                     logger = LoggerFactory.getLogger(getClass());
+    protected Logger                     logger                     = LoggerFactory.getLogger(getClass());
 
     @Override
     public BossPaginationVo<SmsMtTask> findPage(Map<String, Object> condition) {
@@ -199,31 +205,38 @@ public class SmsMtTaskService implements ISmsMtTaskService {
 
     @Override
     public List<SmsMtTaskPackets> findChildTaskBySid(long sid) {
-        List<SmsMtTaskPackets> childList = taskPacketsMapper.findChildBySid(sid);
+        List<SmsMtTaskPackets> childList = taskPacketsMapper.selectBySid(sid);
 
-        Province province;
         Map<Integer, String> provinceMap = new HashMap<>();
-        for (SmsMtTaskPackets task : childList) {
-            // if (task.getUserId() != null) {
-            // UserModel userModel = userService.getByUserId(task.getUserId());
-            // task.setUserModel(userModel);
-            // }
-
-            if (task.getProvinceCode() == null) {
-                continue;
+        Map<Integer, String> passageMap = new HashMap<>();
+        for (SmsMtTaskPackets taskPackets : childList) {
+            
+            // 组装省份信息
+            if (taskPackets.getProvinceCode() != null && taskPackets.getProvinceCode() > 0) {
+                if (provinceMap.containsKey(taskPackets.getProvinceCode())) {
+                    taskPackets.setProvinceName(provinceMap.get(taskPackets.getProvinceCode()));
+                } else {
+                    // 根据省份代码查询省份名称
+                    Province province = provinceService.get(taskPackets.getProvinceCode());
+                    taskPackets.setProvinceName(province == null ? "未知" : province.getName());
+                    provinceMap.put(taskPackets.getProvinceCode(), taskPackets.getProvinceName());
+                }
             }
 
-            if (provinceMap.containsKey(task.getProvinceCode())) {
-                task.setProvinceName(provinceMap.get(task.getProvinceCode()));
-            } else {
-                // 根据省份代码查询省份名称
-                province = provinceService.get(task.getProvinceCode());
-                task.setProvinceName(province == null ? "未知" : province.getName());
-                provinceMap.put(task.getProvinceCode(), task.getProvinceName());
+            // 组装通道信息
+            if (taskPackets.getFinalPassageId() != null && taskPackets.getFinalPassageId() > 0) {
+                if (passageMap.containsKey(taskPackets.getFinalPassageId())) {
+                    taskPackets.setPassageName(passageMap.get(taskPackets.getFinalPassageId()));
+                } else {
+                    SmsPassage passage = smsPassageService.findById(taskPackets.getFinalPassageId());
+                    taskPackets.setPassageName(passage == null ? "未知" : passage.getName() );
+                    passageMap.put(taskPackets.getFinalPassageId(), taskPackets.getPassageName());
+                }
             }
+            
         }
-        // province = null;
-        // provinceMap = null;
+        provinceMap = null;
+        passageMap = null;
 
         return childList;
     }
@@ -333,7 +346,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
             if (isOk) {
 
                 // 切换通道后直接 重新放置队列中
-                resendToQueue(packets);
+                sendPacketsToQueue(packets);
             }
             return isOk;
 
@@ -419,7 +432,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
 
             // 如果状态为 手动审批通过 （页面操作人员点击），则重新发送到消息队列
             if (status == PacketsApproveStatus.HANDLING_COMPLETE.getCode()) {
-                return resendToQueue(packets);
+                return sendPacketsToQueue(packets);
             }
         } catch (Exception e) {
             logger.error("更改子任务状态失败", e);
@@ -435,9 +448,9 @@ public class SmsMtTaskService implements ISmsMtTaskService {
      * @param source
      * @return
      */
-    private boolean resendToQueue(SmsMtTaskPackets source) {
-        return resendToQueue(source, null);
-    }
+//    private boolean resendToQueue(SmsMtTaskPackets source) {
+//        return resendToQueue(source, taskMapper.selectBySid(source.getSid()));
+//    }
 
     /**
      * TODO 重入待提交队列(每个用户ID单独)
@@ -446,24 +459,23 @@ public class SmsMtTaskService implements ISmsMtTaskService {
      * @param task
      * @return
      */
-    private boolean resendToQueue(SmsMtTaskPackets source, SmsMtTask task) {
-        task = task == null ? taskMapper.selectBySid(source.getSid()) : task;
-        if (task == null) {
-            logger.error("主任务未查到相关数据,SID：{}", source.getSid());
-            return false;
-        }
-        source.setCallback(task.getCallback());
-        source.setAttach(task.getAttach());
-        source.setUserId(task.getUserId());
-        source.setExtNumber(task.getExtNumber());
-        source.setFee(task.getFee());
-
-        List<SmsMtTaskPackets> list = new ArrayList<>();
-        list.add(source);
-
-        // 发送到待提交队列
-        return smsMtSubmitService.sendToSubmitQueue(list);
-    }
+//    private boolean resendToQueue(SmsMtTaskPackets source, SmsMtTask task) {
+//        if (task == null) {
+//            logger.error("主任务未查到相关数据,SID：{}", source.getSid());
+//            return false;
+//        }
+//        source.setCallback(task.getCallback());
+//        source.setAttach(task.getAttach());
+//        source.setUserId(task.getUserId());
+//        source.setExtNumber(task.getExtNumber());
+//        source.setFee(task.getFee());
+//
+//        List<SmsMtTaskPackets> list = new ArrayList<>();
+//        list.add(source);
+//
+//        // 发送到待提交队列
+//        return smsMtSubmitService.sendToSubmitQueue(list);
+//    }
 
     @Override
     public SmsMtTaskPackets getTaskPacketsById(long id) {
@@ -501,7 +513,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
             taskPacketsMapper.updateStatusBySid(sid, PacketsApproveStatus.HANDLING_COMPLETE.getCode());
 
             // 发送到待提交队列
-            smsMtSubmitService.sendToSubmitQueue(taskPacketsMapper.findChildBySid(sid));
+            smsMtSubmitService.sendToSubmitQueue(taskPacketsMapper.selectBySid(sid));
 
             return true;
         } catch (Exception e) {
@@ -542,7 +554,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
                 // 更新主任务状态为“驳回”
                 result += taskMapper.updateApproveStatus(Long.parseLong(taskId), PacketsApproveStatus.REJECT.getCode());
 
-                List<SmsMtTaskPackets> packets = taskPacketsMapper.findChildBySid(task.getSid());
+                List<SmsMtTaskPackets> packets = taskPacketsMapper.selectBySid(task.getSid());
                 if (CollectionUtils.isEmpty(packets)) {
                     continue;
                 }
@@ -782,7 +794,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     public boolean isTaskChildrenHasPassageError(Long sid) {
         return smsMtTaskPacketsMapper.selectPassageErrorCount(sid) > 0;
     }
-
+    
     @Override
     @Transactional
     public ResponseMessage doTaskApproved(String taskIds) {
@@ -804,6 +816,8 @@ public class SmsMtTaskService implements ISmsMtTaskService {
                 logger.info("过滤执行任务后无可用任务ID可用，均在执行中，忽略本次");
                 return new ResponseMessage("任务ID均在其他线程执行中，本次忽略");
             }
+            
+            
 
             List<SmsMtTask> tasks = taskMapper.selectTaskByIds(finalTaskIds);
             if (CollectionUtils.isEmpty(tasks)) {
@@ -827,73 +841,220 @@ public class SmsMtTaskService implements ISmsMtTaskService {
      * @return
      */
     private ResponseMessage doTaskBatchApproved(List<SmsMtTask> tasks) {
-        for (SmsMtTask task : tasks) {
+        // 通道ID下的通道数据
+        Map<Integer, SmsPassage> passageContainer = new HashMap<>();
+        // 短信模板ID和短信模板扩展号码对应关系
+        Map<Long, String> tempalteExtNumberRef = new HashMap<>();
+        
+        // 待更新状态的SID集合，即本次处理成功的SID信息
+//        List<Long> avaiableSids = new ArrayList<>();
+        // 错误信息
+        StringBuilder errorReport = new StringBuilder();
+        
+        int successCounter = 0;
+        M: for (SmsMtTask task : tasks) {
             if (task == null) {
-                continue;
+                continue M;
             }
 
-            boolean isHasError = isTaskChildrenHasPassageError(task.getSid());
-            if (isHasError) {
-                return new ResponseMessage(ResponseMessage.ERROR_CODE,
-                                           String.format("SID:%d 包含通道不可用数据", task.getSid()), false);
+            // 校验子任务中是否包含通道有问题数据
+            if (isTaskChildrenHasPassageError(task.getSid())) {
+                errorReport.append("sid : [" + task.getSid() +"] 包含通道不可用数据;");
+                continue M;
             }
 
-            List<SmsMtTaskPackets> packetsList = findChildTaskBySid(task.getSid());
-            int result;
-            boolean isOk;
-            for (SmsMtTaskPackets packets : packetsList) {
+            // 根据sid获取所有子任务数据
+            List<SmsMtTaskPackets> packetsList = taskPacketsMapper.selectBySid(task.getSid());
+            // 最终需要处理的子任务数据
+            List<SmsMtTaskPackets> finalPacketsList = new ArrayList<>(packetsList.size());
+            C : for (SmsMtTaskPackets packets : packetsList) {
+                
+                // 已完成的数据无需再发送队列，在子任务可能单独放出去了（目前一般不会子任务进行操作）
                 if (packets.getStatus() == PacketsApproveStatus.AUTO_COMPLETE.getCode()
                     || packets.getStatus() == PacketsApproveStatus.HANDLING_COMPLETE.getCode()) {
-                    continue;
-                }
-
-                // 根据子任务ID更新状态为“手动完成”
-                result = taskPacketsMapper.updateStatusById(packets.getId(),
-                                                            PacketsApproveStatus.HANDLING_COMPLETE.getCode());
-                if (result == 0) {
-                    return new ResponseMessage(ResponseMessage.ERROR_CODE, String.format("SID:%d 更新子任务状态失败",
-                                                                                         task.getSid()), false);
+                    continue C;
                 }
 
                 // 重新发送到待提交包中时需要更新状态
                 packets.setStatus(PacketsApproveStatus.HANDLING_COMPLETE.getCode());
-
-                // 根据通道ID查询通道信息
-                SmsPassage passage = smsPassageService.findById(packets.getFinalPassageId());
-                if (passage == null) {
-                    return new ResponseMessage(ResponseMessage.ERROR_CODE,
-                                               String.format("SID:%d 更新子任务状态失败, 通道: %d 数据为空", task.getSid(),
-                                                             packets.getId()), false);
+                
+                // 设置最终通道属性[编码，限速大小，签名模式]
+                if(!setTaskPacketsPassageAttribute(packets, passageContainer)) {
+                    errorReport.append("sid : [" + task.getSid() +"] 包含通道不可用数据;");
+                    continue M;
                 }
-
-                packets.setPassageCode(passage.getCode());
-                packets.setPassageSpeed(passage.getPacketsSize());
-                packets.setPassageSignMode(passage.getSignMode());
-
-                if (packets.getMessageTemplateId() != null
-                    && packets.getMessageTemplateId() != TemplateContext.SUPER_TEMPLATE_ID) {
-                    // 根据模板ID查询模板
-                    MessageTemplate template = smsTemplateService.get(packets.getMessageTemplateId());
-                    if (template == null) {
-                        return new ResponseMessage(ResponseMessage.ERROR_CODE,
-                                                   String.format("SID:%d 更新子任务状态失败, 模板: %d 数据为空", task.getSid(),
-                                                                 packets.getMessageTemplateId()), false);
-                    }
-
-                    packets.setTemplateExtNumber(template.getExtNumber());
+                
+                // 设置短信模板扩展号码
+                if(!setTaskPacketsMessageTemplateExtNumber(packets, tempalteExtNumberRef)) {
+                    errorReport.append("sid : [" + task.getSid() +"] 模板: [" +packets.getMessageTemplateId()+ "]数据为空;");
+                    continue M;
                 }
-
-                isOk = resendToQueue(packets, task);
-                if (!isOk) {
-                    throw new RuntimeException(String.format("SID:%d 审批处理失败", task.getSid()));
-                }
+                
+                copyUserCustomProperties(task, packets);
+                
+                finalPacketsList.add(packets);
             }
-
-            // 更新主任务状态“手动通过”
-            updateStatus(task.getId(), PacketsApproveStatus.HANDLING_COMPLETE.getCode());
+            
+            // 批量发送数据至网关队列
+            if(!sendPacketsListToQueue(finalPacketsList)) {
+                errorReport.append("sid : ["+ task.getSid() +"] 入队失败;");
+                continue M;
+            }
+            
+            // 更新任务状态
+            if(!updateTaskAndPacketsCompleted(task.getSid())) {
+                errorReport.append("sid : [" + task.getSid() +"] 任务更新失败;");
+            }
+            
+            // 累加SID集合信息
+//            avaiableSids.add(task.getSid());
+            successCounter ++;
+        }
+        
+        if(successCounter > 0) {
+            if(StringUtils.isEmpty(errorReport)) {
+                return new ResponseMessage("操作成功");
+            }
+            
+            return new ResponseMessage("主任务共 : [" + tasks.size() +"], 本次处理 : [" + successCounter +"]");
+        }
+        
+        return new ResponseMessage(StringUtils.isEmpty(errorReport) ? "处理失败" : errorReport.toString());
+    }
+    
+    /**
+     * 
+       * TODO 设置通道信息
+       * @param packets
+       * @param passageContainer
+     */
+    private boolean setTaskPacketsPassageAttribute(SmsMtTaskPackets packets, Map<Integer, SmsPassage> passageContainer) {
+        SmsPassage passage = null;
+        if(!passageContainer.containsKey(packets.getFinalPassageId())) {
+            passage = passageContainer.get(packets.getFinalPassageId());
+        } else {
+            passage = smsPassageService.findById(packets.getFinalPassageId());
+            if (passage == null) {
+                return false;
+            }
+            passageContainer.put(packets.getFinalPassageId(), passage);
+        }
+        
+        packets.setPassageCode(passage.getCode());
+        packets.setPassageSpeed(passage.getPacketsSize());
+        packets.setPassageSignMode(passage.getSignMode());
+        
+        return true;
+    }
+    
+    /**
+     * 
+       * TODO 子任务拷贝主任务属性信息（方便值数据传递，MQ进行后续解析）
+       * 
+       * @param source
+       * @param target
+     */
+    private void copyUserCustomProperties(SmsMtTask source, SmsMtTaskPackets target) {
+        source.setCallback(target.getCallback());
+        source.setAttach(target.getAttach());
+        source.setUserId(target.getUserId());
+        source.setExtNumber(target.getExtNumber());
+        source.setFee(target.getFee());
+    }
+    
+    /**
+     * 
+       * TODO 设置通道子任务短信模板扩展号码信息
+       * @param packets
+       * @param tempalteExtNumberRef
+       * @return
+     */
+    private boolean setTaskPacketsMessageTemplateExtNumber(SmsMtTaskPackets packets, Map<Long, String> tempalteExtNumberRef) {
+        // 如果短信模板ID没有，审核通过，则表明不用报备模板
+        if(packets.getMessageTemplateId() == null || packets.getMessageTemplateId() == TemplateContext.SUPER_TEMPLATE_ID) {
+            return true;
+        }
+        
+        if(!tempalteExtNumberRef.containsKey(packets.getMessageTemplateId())) {
+            packets.setTemplateExtNumber(tempalteExtNumberRef.get(packets.getMessageTemplateId()));
+        } else {
+            MessageTemplate template = smsTemplateService.get(packets.getMessageTemplateId());
+            if (template == null) {
+                return false;
+            }
+            tempalteExtNumberRef.put(packets.getMessageTemplateId(), template.getExtNumber());
+            packets.setTemplateExtNumber(template.getExtNumber());
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 
+       * TODO 发送分包数据至网关队列
+       * 
+       * @param finalPacketsList
+       * @return
+     */
+    private boolean sendPacketsListToQueue(List<SmsMtTaskPackets> finalPacketsList) {
+        if(CollectionUtils.isEmpty(finalPacketsList)) {
+            logger.warn("待发送网关队列数据为空");
+            return false;
+        }
+        try {
+            smsMtSubmitService.sendToSubmitQueue(finalPacketsList);
+            
+            return true;
+        } catch (Exception e) {
+            logger.error("待发送网关队列数据入队列失败", e);
+            return false;
+        }
+    }
+    
+    /**
+     * 
+       * TODO 发送分包数据至网关队列
+       * 
+       * @param packets
+       * @return
+     */
+    private boolean sendPacketsToQueue(SmsMtTaskPackets packets) {
+        if(packets == null) {
+            logger.warn("待发送网关队列数据为空");
+            return false;
+        }
+        
+        try {
+            SmsMtTask task = taskMapper.selectBySid(packets.getSid());
+            
+            // 复制用户传递相关值
+            copyUserCustomProperties(task, packets);
+            
+            smsMtSubmitService.sendToSubmitQueue(Arrays.asList(packets));
+            
+            return true;
+        } catch (Exception e) {
+            logger.error("待发送网关队列数据入队列失败", e);
+            return false;
+        }
+    }
+    
+    /**
+     * 
+       * TODO 根据SID同时更新主任务和子任务状态为“手动完成”
+       * @param sid
+       *        任务编号
+       * @return
+     */
+    private boolean updateTaskAndPacketsCompleted(Long sid) {
+        // 根据子任务ID更新状态为“手动完成”
+        int result = taskPacketsMapper.updateStatusById(sid, PacketsApproveStatus.HANDLING_COMPLETE.getCode());
+        if (result == 0) {
+            return false;
         }
 
-        return new ResponseMessage("操作成功");
+        // 更新主任务状态“手动通过”
+        return updateStatus(sid, PacketsApproveStatus.HANDLING_COMPLETE.getCode());
     }
 
     @Override
@@ -1036,7 +1197,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
                     continue;
                 }
 
-                List<SmsMtTaskPackets> packetsList = findChildTaskBySid(task.getSid());
+                List<SmsMtTaskPackets> packetsList = taskPacketsMapper.selectBySid(task.getSid());
                 for (SmsMtTaskPackets packets : packetsList) {
                     if (!resetTaskPassage(task, packets, passageParameter)) {
                         logger.error("子任务：{} 切换通道：{} 失败", packets.getId(), expectPassageId);
@@ -1133,7 +1294,10 @@ public class SmsMtTaskService implements ISmsMtTaskService {
      * @return
      */
     private List<String> filterTaskExecuting(String repeatGroupKey, String... taskIds) {
-        Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
+        //edit by 20180416 介于当前分布式zookeeper 经常超时，待查，而分布式还未上暂时切换为JVM的可重入锁
+//        Lock lock = new ZookeeperLock(zkConnectUrl, zkSessionTimeout, zkConnectTimeout, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
+        
+        Lock lock = new ReentrantLock();
         // 分布式锁开启
         lock.lock();
         try {

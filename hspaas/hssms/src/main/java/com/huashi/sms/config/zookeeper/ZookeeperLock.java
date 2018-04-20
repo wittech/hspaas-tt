@@ -48,6 +48,37 @@ public class ZookeeperLock implements Lock {
      * 当前请求的节点前一个节点
      */
     private String         currentPath;
+    
+    /**
+     * 默认会话超时时间（毫秒）
+     */
+    private static final int DEFAULT_SESSION_TIMEOUT = 15 * 1000;
+    
+    /**
+     * 默认连接超时时间（毫秒）
+     */
+    private static final int DEFAULT_CONNECT_TIMEOUT = 15 * 1000;
+    
+    /**
+     * 
+      *@param zkConnectUrl
+      *@param sessionTimeout
+      *@param connectTimeout
+      *     连接超时时间（毫秒）
+      *@param rootLockPath
+      *@param tmpLockPath
+     */
+    public ZookeeperLock(String zkConnectUrl, int sessionTimeout, int connectTimeout, String rootLockPath, String tmpLockPath) {
+        this.rootLockPath = rootLockPath;
+        this.tmpLockPath = tmpLockPath;
+
+        client = new ZkClient(zkConnectUrl, sessionTimeout, connectTimeout, new SerializableSerializer());
+
+        // 判断有没有LOCK目录，没有则创建
+        if (!this.client.exists(rootLockPath)) {
+            this.client.createPersistent(rootLockPath);
+        }
+    }
 
     /**
      * 
@@ -59,7 +90,7 @@ public class ZookeeperLock implements Lock {
         this.rootLockPath = rootLockPath;
         this.tmpLockPath = tmpLockPath;
 
-        client = new ZkClient(zkConnectUrl, 1000, 1000, new SerializableSerializer());
+        client = new ZkClient(zkConnectUrl, DEFAULT_SESSION_TIMEOUT, DEFAULT_CONNECT_TIMEOUT, new SerializableSerializer());
 
         // 判断有没有LOCK目录，没有则创建
         if (!this.client.exists(rootLockPath)) {

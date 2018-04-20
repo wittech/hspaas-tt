@@ -305,13 +305,8 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
   
-  <select id="findChildBySid" resultMap="BaseResultMap">
-		SELECT t.*,p.name passage_name,s.user_id
-		 FROM sms_mt_task_packets t LEFT JOIN
-		sms_passage p ON
-		t.final_passage_id = p.id
-		 inner join sms_mt_task s on s.sid = t.sid
-		 WHERE t.sid = #{sid}
+  <select id="selectBySid" resultMap="BaseResultMap">
+		SELECT <include refid="Base_Column_List" /> FROM sms_mt_task_packets WHERE sid = #{sid}
 	</select>
 
 	<update id="updateContent">

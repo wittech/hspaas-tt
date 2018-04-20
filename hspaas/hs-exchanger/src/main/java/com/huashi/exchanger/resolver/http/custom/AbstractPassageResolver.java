@@ -28,26 +28,24 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AbstractPassageResolver {
 
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate        stringRedisTemplate;
 
     /**
      * 通道简码对应的处理器实体类关系
      */
-    private static Map<String, Object> CODE_REFRENCE_BEANS = new ConcurrentHashMap<>();
+    private static Map<String, Object> CODE_REFRENCE_BEANS             = new ConcurrentHashMap<>();
 
-    protected Logger logger = LoggerFactory.getLogger(getClass());
+    protected Logger                   logger                          = LoggerFactory.getLogger(getClass());
 
     /**
-     * 下行状态HTTP状态报告REDIS前置（主要用于状态回执报告中没有手机号码，
-     * 顾发送短信需要提前设置MSG_ID和MOBILE对应关系）
+     * 下行状态HTTP状态报告REDIS前置（主要用于状态回执报告中没有手机号码， 顾发送短信需要提前设置MSG_ID和MOBILE对应关系）
      */
-    private static final String REDIS_MT_REPORT_HTTP_PRIFIX_KEY = "mt_http_map";
-
+    private static final String        REDIS_MT_REPORT_HTTP_PRIFIX_KEY = "mt_http_map";
 
     /**
      * 公共状态回执成功码
      */
-    public static final String COMMON_MT_STATUS_SUCCESS_CODE = "DELIVRD";
+    public static final String         COMMON_MT_STATUS_SUCCESS_CODE   = "DELIVRD";
 
     /**
      * TODO 初始化通道简码对应的实体映射
@@ -86,12 +84,13 @@ public abstract class AbstractPassageResolver {
      * TODO 发送短信（提交至通道商）
      *
      * @param parameter 通道参数
-     * @param mobile    手机号码
-     * @param content   短信内容
+     * @param mobile 手机号码
+     * @param content 短信内容
      * @param extNumber 用户扩展号码
      * @return
      */
-    public abstract List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content, String extNumber);
+    public abstract List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content,
+                                                    String extNumber);
 
     /**
      * TODO 下行状态报告回执(推送)
@@ -178,12 +177,16 @@ public abstract class AbstractPassageResolver {
      * @return
      */
     protected static String dateNumberFormat(Object dataNumber) {
+        return dateNumberFormat(dataNumber, null);
+    }
+
+    protected static String dateNumberFormat(Object dataNumber, String format) {
         if (dataNumber == null || StringUtils.isEmpty(dataNumber.toString())) {
             return DateUtil.getNow();
         }
 
         try {
-            SimpleDateFormat ff = new java.text.SimpleDateFormat("yyyyMMddHHmmss");
+            SimpleDateFormat ff = new java.text.SimpleDateFormat(StringUtils.isEmpty(format) ? "yyyyMMddHHmmss" : format);
             return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(ff.parse(dataNumber.toString()));
         } catch (Exception e) {
             return DateUtil.getNow();

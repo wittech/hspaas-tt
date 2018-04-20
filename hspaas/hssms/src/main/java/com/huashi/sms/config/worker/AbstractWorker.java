@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
 
@@ -42,7 +44,12 @@ public abstract class AbstractWorker<E> implements Runnable {
      * 当前时间计时
      */
     protected final AtomicLong timer = new AtomicLong(0);
-
+    
+    /**
+     * 备份数据恢复完成
+     */
+    private final AtomicBoolean backupsRecovered = new AtomicBoolean();
+    
     /**
      * REDIS 队列备份KEY名称前缀
      */
@@ -53,8 +60,8 @@ public abstract class AbstractWorker<E> implements Runnable {
      *
      * @return
      */
-    protected boolean isStop() {
-        return SmsDbPersistenceRunner.isCustomThreadShutdown;
+    protected boolean isApplicationStop() {
+        return SmsDbPersistenceRunner.shutdownSignal;
     }
 
     protected StringRedisTemplate getStringRedisTemplate() {
@@ -104,9 +111,9 @@ public abstract class AbstractWorker<E> implements Runnable {
     private void backupIfFailed(List<E> list) {
         try {
             getStringRedisTemplate().opsForList().rightPushAll(redisBackupKey(), JSON.toJSONString(list));
-            logger.error(jobTitle() + "源数据队列：{} 处理失败，加入失败队列完成：{}，共{}条", redisKey(), redisBackupKey(), list.size());
+            logger.info(jobTitle() + "源数据队列：{} 处理失败，加入失败队列: {} 完成，共{}条", redisKey(), redisBackupKey(), list.size());
         } catch (Exception e) {
-            logger.error(jobTitle() + "源数据队列：{} 处理失败，加入失败队列异常：{}，共{}条", redisKey(), redisBackupKey(), list.size(), e);
+            logger.error(jobTitle() + "源数据队列：{} 处理失败，加入失败队列: {} 异常，共{}条", redisKey(), redisBackupKey(), list.size(), e);
         }
     }
 
@@ -136,6 +143,41 @@ public abstract class AbstractWorker<E> implements Runnable {
     protected void clear(List<E> list) {
         timer.set(0);
         list.clear();
+    }
+    
+    /**
+     * 
+       * TODO 检查并恢复处理失败或者JVM关闭备份数据（入队列前面，优先处理）
+     */
+    protected void recoverFromBackups() {
+        if(backupsRecovered.get()) {
+            return;
+        }
+        
+        try {
+            List<String> list = new ArrayList<>();
+            while(true) {
+                String row = getStringRedisTemplate().opsForList().leftPop(redisBackupKey());
+                if(StringUtils.isEmpty(row)) {
+                    break;
+                }
+                
+                list.add(row);
+            }
+            
+            if(CollectionUtils.isEmpty(list)) {
+                return;
+            }
+            
+            // 采用LEFT 入队，优先处理
+            getStringRedisTemplate().opsForList().leftPushAll(redisKey(), list);
+            logger.error(jobTitle() + "源数据队列：{} 从备份队列 :{} 恢复完成，共{}条", redisKey(), redisBackupKey(), list.size());
+        } catch (Exception e) {
+            logger.error(jobTitle() + "源数据队列：{} 从备份队列 :{} 恢复异常", redisKey(), redisBackupKey(), e);
+        } finally {
+            backupsRecovered.set(true);
+        }
+            
     }
 
     /**
@@ -190,12 +232,18 @@ public abstract class AbstractWorker<E> implements Runnable {
     public void run() {
         List<E> list = new ArrayList<>();
         while (true) {
-            if (isStop()) {
-                logger.info("JVM关闭事件已发起，执行自定义线程池停止...");
+            if (isApplicationStop()) {
                 if (CollectionUtils.isNotEmpty(list)) {
                     logger.info("JVM关闭事件---当前线程处理数据不为空，执行最后一次后关闭线程...");
+                    
+                    
+                    
+                    
                     executeWithTimeCost(list);
                 }
+                
+                // 1、解决Springboot shutdown 优先问题（自定义shutdown要早于spring的，不然服务无法使用）
+                // 2、Rabbitmq 消费必须等所有的初始化完成才开始消费
 
                 break;
             }
@@ -208,9 +256,12 @@ public abstract class AbstractWorker<E> implements Runnable {
             }
 
             try {
-
+                
                 // 时间启动器（开始计时）
                 timeStarter();
+                
+                // 检查备份数据是否有数据产生，如果产生需要恢复（系统启动第一次恢复）
+                recoverFromBackups();
 
                 // 如果本次量达到批量取值数据，则跳出
                 if (list.size() >= scanSize()) {
@@ -228,10 +279,10 @@ public abstract class AbstractWorker<E> implements Runnable {
 
                 // 获取REDIS 队列中的数据
 //                Object o = getStringRedisTemplate().opsForList().rightPopAndLeftPush(redisKey(), redisBackupKey());
-                Object o = getStringRedisTemplate().opsForList().leftPop(redisKey());
+                String row = getStringRedisTemplate().opsForList().leftPop(redisKey());
                 
                 // 执行到redis中没有数据为止
-                if (o == null) {
+                if (StringUtils.isEmpty(row)) {
                     if (CollectionUtils.isNotEmpty(list)) {
                         logger.info("-----------取完，获取size: [" + list.size() + "]");
                         executeWithTimeCost(list);
@@ -241,11 +292,11 @@ public abstract class AbstractWorker<E> implements Runnable {
                 }
 
                 // 根据值对象的类型进行数据解析，填充
-                Object value = JSON.parse(o.toString());
+                Object value = JSON.parse(row);
                 if (value instanceof List) {
-                    list.addAll(JSON.parseArray(o.toString(), getClildType()));
+                    list.addAll(JSON.parseArray(row, getClildType()));
                 } else {
-                    list.add(JSON.parseObject(o.toString(), getClildType()));
+                    list.add(JSON.parseObject(row, getClildType()));
                 }
 
             } catch (Exception e) {

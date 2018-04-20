@@ -21,7 +21,6 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -48,8 +47,6 @@ public class RabbitMessageQueueManager {
 	
 	@Autowired
 	private ApplicationContext applicationContext;
-	@Autowired
-	private DefaultListableBeanFactory defaultListableBeanFactory;
 	
 	@Value("${mq.rabbit.consumers}")
 	private int concurrentConsumers;
@@ -182,10 +179,6 @@ public class RabbitMessageQueueManager {
 		
 		container.addQueueNames(queueName);
 		
-//		defaultListableBeanFactory.registerBeanDefinition(beanName, beanDefinition);
-//		
-//		applicationContext.getbean
-		
 //		container.shutdown();
 		
 		
@@ -193,7 +186,7 @@ public class RabbitMessageQueueManager {
 //		ExecutorService service = Executors.newFixedThreadPool(10);
 //		container.setTaskExecutor(service);
 
-		// 设置是否自动启动
+		// 设置是队列消费者自动启动
 		container.setAutoStartup(true);
 		// 设置拦截器信息
 		// container.setAdviceChain(adviceChain);

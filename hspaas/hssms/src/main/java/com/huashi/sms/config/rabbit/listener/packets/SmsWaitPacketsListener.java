@@ -275,6 +275,10 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS)
     public void onMessage(Message message, Channel channel) throws Exception {
         try {
+            if(message == null) {
+                return;
+            }
+            
             SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
             model.setOriginMobile(model.getMobile());
 
@@ -312,6 +316,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             // 清除ThreadLocal对象，加速GC，减小内存压力
             messageTemplateLocal.remove();
+            // 置分包异常提示计数器清零
+            errorNo.set(0);
         }
     }
 
@@ -624,8 +630,10 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
                     routePassage.addPassageMobilesMapping(passageAccess.getPassageId(), provinceCmcpMobileNumbers.get(provinceCode));
                     routePassage.getPassaegAccesses().put(passageAccess.getPassageId(), passageAccess);
                 } else {
-                    routePassage.setErrorMessage("任务中包含通道不可用数据");
-                    routePassage.addUnknownMobiles(provinceCmcpMobileNumbers.get(provinceCode));
+                    // edit by 20180414 如果未找到相关CMCP的通道及全国通道，则分包异常
+                    model.getErrorMessageReport().append(formatMessage("通道不可用"));
+                    refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(), model.getForceActionsReport());
+                    routePassage.addPassageMobilesMapping(PassageContext.EXCEPTION_PASSAGE_ID, provinceCmcpMobileNumbers.get(provinceCode));
                 }
             }
         }

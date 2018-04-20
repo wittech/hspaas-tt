@@ -32,7 +32,7 @@ public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 		List<SmsMtTask> tasks = new ArrayList<>();
 		List<SmsMtTaskPackets> taskPackets = new ArrayList<>();
 		while (true) {
-			if(isStop()) {
+			if(isApplicationStop()) {
 				logger.info("JVM关闭事件已发起，执行自定义线程池停止...");
 				if(CollectionUtils.isNotEmpty(tasks)) {
 					logger.info("JVM关闭事件---当前线程处理数据不为空，执行最后一次后关闭线程...");
