@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>hsweb</artifactId>
 	<name>融合平台UI</name>
@@ -142,8 +142,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.sgroschupf</groupId>
-			<artifactId>zkclient</artifactId>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-framework</artifactId>
 		</dependency>
 
 		<dependency>

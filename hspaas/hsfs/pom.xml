@@ -150,8 +150,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.sgroschupf</groupId>
-			<artifactId>zkclient</artifactId>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-framework</artifactId>
 		</dependency>
 
 		<dependency>

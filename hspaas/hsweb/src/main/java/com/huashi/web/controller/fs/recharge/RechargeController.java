@@ -6,7 +6,6 @@ package com.huashi.web.controller.fs.recharge;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +16,6 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.bill.bill.model.FluxDiscountModel;
 import com.huashi.bill.bill.service.IBillService;
 import com.huashi.common.user.service.IUserBalanceService;
-import com.huashi.common.util.ExcelUtil;
 import com.huashi.fs.product.service.IFluxProductService;
 import com.huashi.web.controller.BaseController;
 
@@ -138,14 +136,13 @@ public class RechargeController extends BaseController{
 	 */
 	@RequestMapping(value = "/get_product", method = RequestMethod.POST)
 	public @ResponseBody Map<String,Object> getProduct(String filename){
-		String mobleNumbers = ExcelUtil.readExcelFirstColumn(tmpStoreDirectory + filename);
-		if(StringUtils.isEmpty(mobleNumbers)) {
-            {
-                return null;
-            }
-        }
-		
-		return fluxProductService.findListByMobile(mobleNumbers);
+//		String mobleNumbers = ExcelUtil.readExcelFirstColumn(tmpStoreDirectory + filename);
+//		if(StringUtils.isEmpty(mobleNumbers)) {
+//            return null;
+//        }
+//		
+//		return fluxProductService.findListByMobile(mobleNumbers);
+	    return null;
 	}
 	
 	

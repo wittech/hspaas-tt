@@ -3,6 +3,7 @@ package com.huashi.common.user.service;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +19,6 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.bill.pay.constant.PayContext.PaySource;
-import com.huashi.common.config.lock.ZookeeperLock;
 import com.huashi.common.notice.context.MessageContext.ReadStatus;
 import com.huashi.common.notice.dao.EmailSendRecordMapper;
 import com.huashi.common.notice.dao.NotificationMessageMapper;
@@ -97,7 +97,7 @@ public class RegisterService implements IRegisterService {
     /**
      * 当前业务锁节点名称
      */
-    private static final String        CURRENT_BUSINESS_LOCK_NODE = "register";
+//    private static final String        CURRENT_BUSINESS_LOCK_NODE = "register";
 
     @Autowired
     private PlatformTransactionManager platformTransactionManager;
@@ -121,7 +121,9 @@ public class RegisterService implements IRegisterService {
             return false;
         }
 
-        Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
+//        Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
+        
+        Lock lock = new ReentrantLock();
         lock.lock();
 
         // 编程式事务，方便调用，后续需要加入分布式事务TCC模式

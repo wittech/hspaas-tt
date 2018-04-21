@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>hsvs</artifactId>
 	<name>华时语音验证码-语音通知服务</name>
@@ -99,6 +99,11 @@
 			<groupId>com.alibaba</groupId>
 			<artifactId>dubbo</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-framework</artifactId>
+		</dependency>
 
 		<!-- mybatis -->
 		<dependency>
@@ -144,11 +149,6 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.github.sgroschupf</groupId>
-			<artifactId>zkclient</artifactId>
 		</dependency>
 
 		<dependency>

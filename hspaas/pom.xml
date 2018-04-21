@@ -60,7 +60,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.version>1.0.1-SNAPSHOT</project.version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<spring-boot.version>1.5.9.RELEASE</spring-boot.version>
+		<spring-boot.version>1.5.8.RELEASE</spring-boot.version>
 		<spring.version>4.3.12.RELEASE</spring.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<log4j.version>1.2.17</log4j.version>
@@ -76,7 +76,7 @@
 		<commons-collections.version>3.2.2</commons-collections.version>
 		<commons-codec.version>1.10</commons-codec.version>
 		<commons-beanutils.version>1.9.2</commons-beanutils.version>
-		<druid.version>1.1.8</druid.version>
+		<druid.version>1.1.4</druid.version>
 		<shiro.version>1.2.4</shiro.version>
 		<joda-time.version>2.9.1</joda-time.version>
 		<jodd.version>3.6.7</jodd.version>
@@ -84,10 +84,13 @@
 		<antrl4.version>4.5.1</antrl4.version>
 		<guice.version>4.0</guice.version>
 		<mail.version>1.4.7</mail.version>
-		<zkclient.version>0.1</zkclient.version>
 		<dubbo.version>2.6.1</dubbo.version>
-		<dubbo-spring-boot-starter.version>1.0.1</dubbo-spring-boot-starter.version>
-		<kryo.serializers.version>0.37</kryo.serializers.version>
+		
+		<kryo.version>4.0.1</kryo.version>
+        <kryo.serializers.version>0.42</kryo.serializers.version>
+        <fst.version>2.48-jdk-6</fst.version>
+		
+		
 		<quartz.version>2.2.3</quartz.version>
 		<poi.version>3.14</poi.version>
 		<jedis.version>2.9.0</jedis.version>
@@ -96,8 +99,9 @@
 		<ehcache.version>2.10.2</ehcache.version>
 		<jdom.version>2.0.2</jdom.version>
 		<pinyin4j.version>2.5.0</pinyin4j.version>
-		<zookeeper.version>3.4.10</zookeeper.version>
-		<curator.version>3.2.1</curator.version>
+		<zookeeper.version>3.4.9</zookeeper.version>
+		<zkclient.version>0.2</zkclient.version>
+		<curator.version>2.12.0</curator.version>
 		<spring-amqp.verison>1.7.4.RELEASE</spring-amqp.verison>
 		<spring-data-redis.version>1.8.8.RELEASE</spring-data-redis.version>
 		<spring-data-commons.verison>1.13.8.RELEASE</spring-data-commons.verison>
@@ -447,40 +451,39 @@
 				<version>${dubbo.version}</version>
 				<exclusions>
 					<exclusion>
+						<artifactId>spring</artifactId>
+						<groupId>org.springframework</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>httpclient</artifactId>
+						<groupId>org.apache.httpcomponents</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>httpcore</artifactId>
+						<groupId>org.apache.httpcomponents</groupId>
+					</exclusion>
+					<exclusion>
 						<artifactId>log4j</artifactId>
 						<groupId>log4j</groupId>
 					</exclusion>
 				</exclusions>
 			</dependency>
 
-			<!-- springboot dubbo starter -->
 			<dependency>
-				<groupId>com.alibaba.spring.boot</groupId>
-				<artifactId>dubbo-spring-boot-starter</artifactId>
-				<version>${dubbo-spring-boot-starter.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.github.sgroschupf</groupId>
-				<artifactId>zkclient</artifactId>
-				<version>${zkclient.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-log4j12</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>log4j</groupId>
-						<artifactId>log4j</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>de.javakaffee</groupId>
-				<artifactId>kryo-serializers</artifactId>
-				<version>${kryo.serializers.version}</version>
-			</dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>${kryo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.javakaffee</groupId>
+                <artifactId>kryo-serializers</artifactId>
+                <version>${kryo.serializers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.ruedigermoeller</groupId>
+                <artifactId>fst</artifactId>
+                <version>${fst.version}</version>
+            </dependency>
 
 			<dependency>
 				<groupId>com.caucho</groupId>
@@ -522,6 +525,18 @@
 				<groupId>org.apache.zookeeper</groupId>
 				<artifactId>zookeeper</artifactId>
 				<version>${zookeeper.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.101tec</groupId>
+				<artifactId>zkclient</artifactId>
+				<version>${zkclient.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-framework</artifactId>
+				<version>${curator.version}</version>
 			</dependency>
 
 			<!-- 定时任务 -->
@@ -637,22 +652,9 @@
 				<version>${pinyin4j.version}</version>
 			</dependency>
 
-			<!-- curator zookeeper -->
-			<dependency>
-				<groupId>org.apache.curator</groupId>
-				<artifactId>curator-framework</artifactId>
-				<version>${curator.version}</version>
-			</dependency>
-
 			<dependency>
 				<groupId>org.apache.curator</groupId>
 				<artifactId>curator-recipes</artifactId>
-				<version>${curator.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.curator</groupId>
-				<artifactId>curator-client</artifactId>
 				<version>${curator.version}</version>
 			</dependency>
 

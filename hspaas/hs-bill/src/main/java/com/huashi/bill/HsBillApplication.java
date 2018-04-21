@@ -2,9 +2,9 @@ package com.huashi.bill;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 
@@ -20,12 +20,27 @@ public class HsBillApplication {
 	}
 
 	public static void main(String args[]) throws InterruptedException {
-		ApplicationContext ctx = new SpringApplicationBuilder().sources(HsBillApplication.class).web(false).run(args);
+	    ConfigurableApplicationContext configurableApplicationContext = SpringApplication.run(HsBillApplication.class, args);
+        configurableApplicationContext.registerShutdownHook();
 
 		LogUtils.info("----------------华时融合计费中心项目已启动-----------------");
-
-		CountDownLatch closeLatch = ctx.getBean(CountDownLatch.class);
-		closeLatch.await();
+		
+		keepApplicationAlived(configurableApplicationContext);
+	}
+	
+	/**
+	 * 
+	   * TODO 保持应用阻塞，程序存活
+	   * 
+	   * @param configurableApplicationContext
+	 */
+	private static void keepApplicationAlived(ConfigurableApplicationContext configurableApplicationContext) {
+	    CountDownLatch closeLatch = configurableApplicationContext.getBean(CountDownLatch.class);
+        try {
+            closeLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 	}
 
 }

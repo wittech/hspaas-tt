@@ -20,7 +20,6 @@ import com.huashi.common.notice.vo.SmsResponse;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.util.DateUtil;
-import com.huashi.common.util.ExcelUtil;
 import com.huashi.common.util.RandomUtil;
 import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.record.service.ISmsMoMessageService;
@@ -186,14 +185,12 @@ public class SmsRecordController extends BaseController {
 	 */
 	@RequestMapping(value = "/read_file", method = RequestMethod.POST)
 	public @ResponseBody Map<String, Object> readFile(String fileName) {
-		String mobleNumbers = ExcelUtil.readExcelFirstColumn(tmpStoreDirectory + fileName);
-		if (StringUtils.isEmpty(mobleNumbers)) {
-            {
-                return null;
-            }
-        }
+//		String mobleNumbers = ExcelUtil.readExcelFirstColumn(tmpStoreDirectory + fileName);
+//		if (StringUtils.isEmpty(mobleNumbers)) {
+//            return null;
+//        }
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("mobleNumbers", mobleNumbers);
+//		map.put("mobleNumbers", mobleNumbers);
 		map.put("resultCode", "0");
 		return map;
 	}

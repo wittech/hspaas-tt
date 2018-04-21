@@ -76,8 +76,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.sgroschupf</groupId>
-			<artifactId>zkclient</artifactId>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-framework</artifactId>
 		</dependency>
 
 		<dependency>
@@ -138,7 +138,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- Jboss Undertow嵌入式容器 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

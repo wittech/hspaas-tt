@@ -74,14 +74,9 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 
-		<!-- <dependency>
-			<groupId>com.github.sgroschupf</groupId>
-			<artifactId>zkclient</artifactId>
-		</dependency> -->
-
 		<dependency>
 			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-recipes</artifactId>
+			<artifactId>curator-framework</artifactId>
 		</dependency>
 
 		<dependency>
