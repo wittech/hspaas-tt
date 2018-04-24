@@ -41,14 +41,17 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	/**
 	 * CMPP/SGIP/SMGP通道代理发送实例
 	 */
-	public static Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
+	public static volatile Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
 
 	/**
 	 * 通道PROXY 发送错误次数计数器 add by 20170903
 	 */
-	private static Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
+	private static final Map<Integer, Integer> GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
 	
-	public static Map<Integer, RateLimiter> GLOBAL_GATEWAY_RATE_LIMITERS = new HashMap<>();
+	/**
+	 * 通道对应的限流器容器
+	 */
+	public static final Map<Integer, RateLimiter> GLOBAL_GATEWAY_RATE_LIMITERS = new HashMap<>();
 
 	/**
 	 * 默认限流速度
@@ -81,8 +84,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 		try {
 
-			initManageProxy(protocolType, parameter.getPassageId(), tparameter, parameter.getPacketsSize());
-			return true;
+			return setupPassageProxy(protocolType, parameter.getPassageId(), tparameter, parameter.getPacketsSize());
 		} catch (Exception e) {
 			logger.error("通道代理初始化失败，通道信息：{}", JSON.toJSONString(parameter), e);
 			return false;
@@ -115,9 +117,9 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	 *            限速
 	 * @return
 	 */
-	private void initManageProxy(ProtocolType protocolType, Integer passageId, TParameter tparameter, Integer speed) {
+	private boolean setupPassageProxy(ProtocolType protocolType, Integer passageId, TParameter tparameter, Integer speed) {
 		if (passageId == null) {
-			return;
+			return false;
 		}
 
 		Object proxy = null;
@@ -137,11 +139,11 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 		}
 		default:
 			logger.warn("通道协议类型为：{} 无需加载通道代理", protocolType.name());
-			return;
+			return true;
 		}
 
 		if (proxy == null) {
-			return;
+			return false;
 		}
 
 		// 加载通道代理类信息
@@ -151,6 +153,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 		RateLimiter limiter = RateLimiter.create((speed == null || speed == 0) ? DEFAULT_LIMIT_SPEED : speed);
 		GLOBAL_GATEWAY_RATE_LIMITERS.put(passageId, limiter);
 
+		return true;
 	}
 
 	/**

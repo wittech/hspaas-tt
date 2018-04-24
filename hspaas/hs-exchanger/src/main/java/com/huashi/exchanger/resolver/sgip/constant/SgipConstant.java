@@ -29,9 +29,13 @@ public final class SgipConstant {
      */
     public static final int MAX_MESSAGE_UCS2_LENGTH = 140;
 	
-    // 公共状态回执成功码
+    /**
+     * 网关常规状态回执成功码（可在通道模板中自定义）
+     */
  	public static final String COMMON_MT_STATUS_SUCCESS_CODE = "DELIVRD";
 
- 	// SGIP 重连计时(毫秒)
- 	public volatile static Map<Integer, Long> SGIP_RECONNECT_TIMEMILLS = new HashMap<>();
+ 	/**
+ 	 * SGIP 重连计时(毫秒)
+ 	 */
+ 	public static volatile Map<Integer, Long> SGIP_RECONNECT_TIMEMILLS = new HashMap<>();
 }

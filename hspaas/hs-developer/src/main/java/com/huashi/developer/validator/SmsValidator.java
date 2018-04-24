@@ -67,8 +67,9 @@ public class SmsValidator extends Validator {
 
         // 此处需加入是否为后付款，如果为后付则不需判断余额
         // f.用户余额不足（通过计费微服务判断，结合4.1.6中的用户计费规则）
-        boolean balanceEnough = userBalanceService.isBalanceEnough(passportModel.getUserId(),
-                                                                   PlatformType.SEND_MESSAGE_SERVICE, (double) totalFee);
+        boolean balanceEnough = userBalanceService.isBalanceEnough(passportModel.getUserId(), 
+                                                                   PlatformType.SEND_MESSAGE_SERVICE, 
+                                                                   (double) totalFee);
         if (!balanceEnough) {
             throw new ValidateException(CommonApiCode.COMMON_BALANCE_NOT_ENOUGH);
         }
