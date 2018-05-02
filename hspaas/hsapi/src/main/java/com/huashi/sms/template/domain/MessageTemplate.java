@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.huashi.common.user.model.UserModel;
+import com.huashi.sms.template.context.TemplateContext.IgnoreBlacklist;
 
 public class MessageTemplate implements Serializable {
 
@@ -44,6 +45,11 @@ public class MessageTemplate implements Serializable {
 	private Integer priority;
 	
 	private String extNumber;
+	
+	/**
+	 * 忽略手机黑名单拦截 add by 2018-05-02
+	 */
+	private Integer ignoreBlacklist = IgnoreBlacklist.NO.getValue();
 
 	// 用户信息
 	private UserModel userModel;
@@ -219,5 +225,15 @@ public class MessageTemplate implements Serializable {
 	public void setExtNumber(String extNumber) {
 		this.extNumber = extNumber;
 	}
+
+    
+    public Integer getIgnoreBlacklist() {
+        return ignoreBlacklist;
+    }
+
+    
+    public void setIgnoreBlacklist(Integer ignoreBlacklist) {
+        this.ignoreBlacklist = ignoreBlacklist;
+    }
 
 }

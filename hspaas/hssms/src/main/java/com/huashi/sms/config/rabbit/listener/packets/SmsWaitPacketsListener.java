@@ -68,6 +68,7 @@ import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.huashi.sms.task.exception.QueueProcessException;
 import com.huashi.sms.task.model.SmsRoutePassage;
 import com.huashi.sms.template.context.TemplateContext;
+import com.huashi.sms.template.context.TemplateContext.IgnoreBlacklist;
 import com.huashi.sms.template.domain.MessageTemplate;
 import com.huashi.sms.template.service.ISmsTemplateService;
 import com.rabbitmq.client.Channel;
@@ -221,6 +222,17 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             }
         }
     }
+    
+    /**
+     * 
+       * TODO 根据短信模板配置判断是否忽略手机黑名单
+       * 
+       * @return
+     */
+    private boolean isIgnoreBlacklist() {
+        return messageTemplateLocal.get() != null
+                && IgnoreBlacklist.YES.getValue() == messageTemplateLocal.get().getIgnoreBlacklist();
+    }
 
     /**
      * TODO 手机号码处理逻辑，黑名单判断/无效手机号码过滤/运营商分流
@@ -228,17 +240,17 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
      * @param task
      * @return
      */
-    private MobileCatagory doMobileNumberProcess(SmsMtTask task) {
+    private MobileCatagory findOutMatchedMobiles(SmsMtTask task) {
         // 转换手机号码数组
         List<String> mobiles = new ArrayList<>(Arrays.asList(task.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
-
+        
         // 移除上次 黑名单数据（主要针对重新分包黑名单不要重复产生记录）add by 2017-04-08
         if (StringUtils.isNotEmpty(task.getBlackMobiles())) {
             mobiles.removeAll(Arrays.asList(task.getBlackMobiles().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
         }
-
+        
         // 黑名单手机号码
-        List<String> blackMobiles = mobileBlackListService.filterBlacklistMobile(mobiles);
+        List<String> blackMobiles = mobileBlackListService.filterBlacklistMobile(mobiles, isIgnoreBlacklist());
         if (CollectionUtils.isNotEmpty(blackMobiles)) {
             // 移除需要执行的手机号码
             task.setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
@@ -298,7 +310,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
             markContentHasSensitiveWords(model);
 
             // 短信手机号码处理逻辑
-            MobileCatagory mobileCatagory = doMobileNumberProcess(model);
+            MobileCatagory mobileCatagory = findOutMatchedMobiles(model);
             if (mobileCatagory == null) {
                 asyncSendTask(model);
                 return;

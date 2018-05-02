@@ -510,7 +510,16 @@
 		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}  
         </foreach>
-         
+	</select>
+	
+	<select id="selectEqualContent" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" /> 
+		from sms_mt_task where approve_status = 0 and final_content = #{content}
+	</select>
+	
+	<select id="selectLikeContent" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" /> 
+		from sms_mt_task where approve_status = 0 and final_content like '%${content}%'
 	</select>
 	
 </mapper>

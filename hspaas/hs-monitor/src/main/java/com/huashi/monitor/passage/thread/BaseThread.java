@@ -7,7 +7,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+  * TODO 线程抽象基础类
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2018年4月27日 上午10:59:10
+ */
 public abstract class BaseThread {
+    
+    /**
+     * 自定义线程关闭标记（用于钩子回调）
+     */
+    public static volatile boolean shutdownSignal = false;
 
 	// 默认线程休眠20秒
 	public static final int SLEEP_TIME = 5 * 1000;
@@ -21,7 +34,7 @@ public abstract class BaseThread {
 //	private static final int SERVICE_INJECT_FAILED_ALARM_COUNT = 50;
 
 	// 运行中的全部通道
-	public volatile static Map<String, Boolean> PASSAGES_IN_RUNNING = new ConcurrentHashMap<String, Boolean>();
+	public static volatile Map<String, Boolean> PASSAGES_IN_RUNNING = new ConcurrentHashMap<String, Boolean>();
 	
 	// DUBBO服务注入失败次数（主要针对其他依赖服务可能重启或者断开了）
 	protected AtomicInteger serviceInjectFailedCount = new AtomicInteger(0);
@@ -58,4 +71,13 @@ public abstract class BaseThread {
 		
 		return true;
 	}
+	
+	/**
+     * TODO 是否终止执行(JVM 应用程序钩子HOOK设置)
+     *
+     * @return
+     */
+    protected boolean isApplicationStop() {
+        return shutdownSignal;
+    }
 }

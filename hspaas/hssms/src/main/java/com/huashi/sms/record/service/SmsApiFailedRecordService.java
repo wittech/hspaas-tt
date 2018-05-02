@@ -22,12 +22,15 @@ import com.huashi.sms.record.dao.SmsApiFailedRecordMapper;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
 
 /**
- * 短信错误记录接口服务实现类
  * 
- * @author tenx
- *
- */ 
-
+  * TODO 短信接口调用错误记录服务实现类
+  * 
+  * developer 网关鉴权失败/余额不足等...
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2016年4月25日 上午9:49:37
+ */
 @Service
 public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
 

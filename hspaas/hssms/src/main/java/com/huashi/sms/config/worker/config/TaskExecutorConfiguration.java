@@ -18,6 +18,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @Order(1)
 public class TaskExecutorConfiguration {
+    
+    /**
+     * 当前服务器核心CPU个数
+     */
+//    public static final int SERVER_CUP_CORES_COUNT = Runtime.getRuntime().availableProcessors();
 	
 	/**
 	 * 配置线程池

@@ -72,21 +72,23 @@ public interface ISmsMobileBlackListService {
 
 	/**
 	 * 
-	 * TODO 查找全部的黑名单
-	 * 
-	 * @return
-	 */
-	List<String> findAll();
-
-	/**
-	 * 
 	 * TODO 过滤号码中的所有黑名单手机号码
 	 * 
 	 * @param mobiles
+	 * @param isIgnored
+	 *         是否忽略（一般黑名单/回退黑名单）
 	 * @return
 	 */
-	List<String> filterBlacklistMobile(List<String> mobiles);
+	List<String> filterBlacklistMobile(List<String> mobiles, boolean isIgnored);
 
+	/**
+	 * 
+	   * TODO BOSS分页查询分页
+	   * 
+	   * @param pageNum
+	   * @param keyword
+	   * @return
+	 */
 	BossPaginationVo<SmsMobileBlackList> findPage(int pageNum, String keyword);
 	
 	/**

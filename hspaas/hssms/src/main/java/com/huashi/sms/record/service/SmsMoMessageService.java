@@ -37,34 +37,40 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 短信接收记录服务接口类
- *
- * @author tenx
+ * 
+  * TODO 短信接收（上行）记录服务接口类
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2016年4月25日 上午9:54:32
  */
-
 @Service
 public class SmsMoMessageService implements ISmsMoMessageService {
 
-    @Reference
-    private IUserService userService;
-    @Reference
-    private ISystemConfigService systemConfigService;
-    @Autowired
-    private ISmsMtSubmitService smsMtSubmitService;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private RabbitTemplate rabbitTemplate;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    
+    @Reference
+    private IUserService userService;
     @Reference
     private IPushConfigService pushConfigService;
     @Reference
     private ISmsPassageService smsPassageService;
+    @Reference
+    private ISystemConfigService systemConfigService;
+    
     @Autowired
-    private SmsMoMessageReceiveMapper moMessageReceiveMapper;
+    private ISmsMtSubmitService smsMtSubmitService;
     @Autowired
     private SmsMoMessagePushMapper smsMoMessagePushMapper;
     @Autowired
+    private SmsMoMessageReceiveMapper moMessageReceiveMapper;
+    @Autowired
     private ISmsMobileBlackListService smsMobileBlackListService;
+    
+    
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override

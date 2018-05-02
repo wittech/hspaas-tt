@@ -49,7 +49,7 @@ public class PassageMonitorService implements IPassageMonitorService {
     private ISmsMtDeliverService                smsMtDeliverService;
     @Reference
     private ISmsMoMessageService                smsMoMessageService;
-    @Reference
+    @Reference(mock = "return null")
     private ISmsPassageAccessService            smsPassageAccessService;
     @Reference
     private ISmsPassageService                  smsPassageService;

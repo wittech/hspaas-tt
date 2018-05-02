@@ -337,10 +337,13 @@
 		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
 			and s.status = #{sendStatus}
 		</if>
-		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 2">
+		
+		<!-- deliverStatus is 2, it means that has no deliver data, waitting for gateway callback -->
+		<if test="deliverStatus == 2">
 			and sd.status is null
 		</if>
-		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 0 or deliverStatus == 1">
+		<!-- 0: success, 1:failure -->
+		<if test="deliverStatus == 0 or deliverStatus == 1">
 			and sd.status = #{deliverStatus}
 		</if>
 
@@ -378,10 +381,12 @@
 		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
 			and s.status = #{sendStatus}
 		</if>
-		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 2">
+		<!-- deliverStatus is 2, it means that has no deliver data, waitting for gateway callback -->
+		<if test="deliverStatus == 2">
 			and sd.status is null
 		</if>
-		<if test="deliverStatus != null and deliverStatus !='' and deliverStatus == 0 or deliverStatus == 1">
+		<!-- 0: success, 1:failure -->
+		<if test="deliverStatus == 0 or deliverStatus == 1">
 			and sd.status = #{deliverStatus}
 		</if>
 		

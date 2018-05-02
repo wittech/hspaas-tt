@@ -17,7 +17,7 @@ public class ResponseMessage implements Serializable {
 	private String message = "操作成功";
 	private Boolean ok = true;
 	
-	public static final int ERROR_CODE = 1;
+	public static final int ERROR_CODE = -1;
 
 	public int getCode() {
 		return code;

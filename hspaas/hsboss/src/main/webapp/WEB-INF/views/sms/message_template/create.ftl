@@ -100,11 +100,14 @@
                                 <label class="col-xs-2 control-label">模板内容</label>
                                 <div class="col-xs-6">
                                     <textarea class="form-control validate[required,maxSize[1000]]"
-                                              name="content" rows="3"><#if task??>${task.content!''}</#if></textarea>
+                                              name="content" id="content" rows="4" placeholder="#code#为模板通配符"><#if task??>${task.content!''}</#if></textarea>
                                 </div>
                                 <div class="col-xs-1">
+                                	<a href="javascript:void(0);" onclick="insertCode();"
+                                       class="btn btn-success btn-sm">#code#</a>
+                                	&nbsp;
                                     <a href="javascript:void(0);" onclick="addContent();"
-                                       class="btn btn-info btn-sm">添加</a>
+                                       class="btn btn-mint btn-sm">添加(+)</a>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -115,8 +118,21 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-xs-2 control-label">黑名单放行</label>
+                                <div class="col-xs-4">
+                                	 <label class="form-radio form-icon">
+                                	 	<input type="radio" class="blacklist" name="blacklist" value="0" checked /><span class="label label-danger">自动拦截，不放行</span>
+                                	 </label>
+                                	 &nbsp;&nbsp;
+                                	 <label class="form-radio form-icon">
+                                	 	<input type="radio" class="blacklist" name="blacklist" value="1" /><span class="label label-success">不拦截，自动放行</span>
+                                	 </label>
+                                	 <input type="hidden" id="ignoreBlacklist" name="messageTemplate.ignoreBlacklist" value="0" />
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <div class="col-xs-9 col-xs-offset-3">
-                                    <button type="button" onclick="formSubmit();" class="btn btn-primary"
+                                    <button type="button" onclick="formSubmit();" class="btn btn-primary btn-sm"
                                             name="buttonSubmit">提交
                                     </button>
                                 </div>
@@ -151,6 +167,10 @@
 <script type="text/javascript">
     $(function () {
         $('#myform').validationEngine('attach', {promptPosition: "topRight"});
+        
+        $('.blacklist').click(function () {
+            $('#ignoreBlacklist').val($(this).val());
+        });
     });
 
     function formSubmit() {
@@ -190,5 +210,37 @@
     function removeContent(obj){
         $(obj).parent().parent().remove();
     }
+    
+    (function ($) {
+        $.fn.extend({
+            insertAtCaret: function (myValue) {
+                var $t = $(this)[0];
+                if (document.selection) {
+                    this.focus();
+                    sel = document.selection.createRange();
+                    sel.text = myValue;
+                    this.focus();
+                } else
+                    if ($t.selectionStart || $t.selectionStart == '0') {
+                        var startPos = $t.selectionStart;
+                        var endPos = $t.selectionEnd;
+                        var scrollTop = $t.scrollTop;
+                        $t.value = $t.value.substring(0, startPos) + myValue + $t.value.substring(endPos, $t.value.length);
+                        this.focus();
+                        $t.selectionStart = startPos + myValue.length;
+                        $t.selectionEnd = startPos + myValue.length;
+                        $t.scrollTop = scrollTop;
+                    } else {
+                        this.value += myValue;
+                        this.focus();
+                    }
+            }
+        })
+    })(jQuery);
+    
+    function insertCode(){
+    	$("#content").insertAtCaret("#code#");
+    };
+    
 </script>
 </html>

@@ -64,6 +64,9 @@ public class RabbitMessageQueueManager {
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
+//	public static volatile Lock lock = new ReentrantLock();
+//	public static volatile Condition APPLICATION_INIT_COMPLETE_CONDITION = lock.newCondition();
+	
 //	@Resource
 //	private SimpleMessageListenerContainer simpleMessageListenerContainer;
 
@@ -92,8 +95,10 @@ public class RabbitMessageQueueManager {
 			SimpleMessageListenerContainer container = this.messageListenerContainer(queueName, 
 					isDirectProtocol ? directConcurrentConsumers : concurrentConsumers, 
 					channelAwareMessageListener);
-			container.afterPropertiesSet();
-
+//			container.afterPropertiesSet();
+			
+//			APPLICATION_INIT_COMPLETE_CONDITION.await();
+			
 //	        container.addQueueNames(queueName);
 	        if(!container.isRunning()) {
                 container.start();

@@ -56,7 +56,7 @@ import com.huashi.util.HttpClientUtil;
 @Service
 public class SmsMtPushService implements ISmsMtPushService {
 
-    @Reference
+    @Reference(mock = "fail:return+null")
     private IUserService           userService;
     @Autowired
     private SmsMtMessagePushMapper smsMtMessagePushMapper;
@@ -92,7 +92,7 @@ public class SmsMtPushService implements ISmsMtPushService {
             logger.error("待推送可用用户数据为空，无法监听");
             return false;
         }
-
+        
         try {
             for (Integer userId : userIds) {
                 addUserMtPushListener(userId);
@@ -375,8 +375,10 @@ public class SmsMtPushService implements ISmsMtPushService {
     public void setMessageReadyPushConfigurations(List<SmsMtMessageSubmit> submits) {
         try {
             for (SmsMtMessageSubmit submit : submits) {
-                stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()), submit.getMobile(),
-                                                     JSON.toJSONString(submit, new SimplePropertyPreFilter("sid", "userId",
+                stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()),
+                                                     submit.getMobile(),
+                                                     JSON.toJSONString(submit,
+                                                                       new SimplePropertyPreFilter("sid", "userId",
                                                                                                    "msgId", "attach",
                                                                                                    "pushUrl",
                                                                                                    "retryTimes")));

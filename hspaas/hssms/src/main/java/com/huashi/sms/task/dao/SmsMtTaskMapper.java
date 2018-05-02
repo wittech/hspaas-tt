@@ -88,5 +88,21 @@ public interface SmsMtTaskMapper {
      * @return
      */
     List<SmsMtTask> selectTaskByIds(@Param("list") List<String> list);
+    
+    /**
+     * 
+       * TODO 根据短信内容（相等）查询任务信息
+       * @param content
+       * @return
+     */
+    List<SmsMtTask> selectEqualContent(@Param("content") String content);
+    
+    /**
+     * 
+       * TODO 根据短信内容（相等）查询任务信息
+       * @param content
+       * @return
+     */
+    List<SmsMtTask> selectLikeContent(@Param("content") String content);
 
 }

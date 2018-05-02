@@ -61,7 +61,7 @@ public class SmsTemplateService implements ISmsTemplateService {
 	/**
 	 * 全局短信模板（与REDIS 同步采用广播模式）
 	 */
-	public volatile static Map<Integer, Set<String>> GLOBAL_MESSAGE_TEMPLATE = new HashMap<>();
+	public static volatile Map<Integer, Set<String>> GLOBAL_MESSAGE_TEMPLATE = new HashMap<>();
 	private final Object lock = new Object();
 
 	@Override

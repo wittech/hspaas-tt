@@ -46,11 +46,11 @@ public class SmsMobileBlacklistListener extends MessageListenerAdapter {
 			
 			MessageAction action = MessageAction.parse(Integer.parseInt(report[0]));
 			if(MessageAction.ADD == action) {
-				SmsMobileBlackListService.GLOBAL_MOBILE_BLACKLIST.add(report[1]);
-				stringRedisTemplate.opsForSet().add(SmsRedisConstant.RED_MOBILE_BLACKLIST, report[1]);
+				SmsMobileBlackListService.GLOBAL_MOBILE_BLACKLIST.put(report[1], Integer.parseInt(report[2]));
+				stringRedisTemplate.opsForHash().put(SmsRedisConstant.RED_MOBILE_BLACKLIST, report[1], report[2]);
 			} else if(MessageAction.REMOVE == action) {
 				SmsMobileBlackListService.GLOBAL_MOBILE_BLACKLIST.remove(report[1]);
-				stringRedisTemplate.opsForSet().remove(SmsRedisConstant.RED_MOBILE_BLACKLIST, report[1]);
+				stringRedisTemplate.opsForHash().delete(SmsRedisConstant.RED_MOBILE_BLACKLIST, report[1]);
 			}
 			
 		} catch (Exception e) {

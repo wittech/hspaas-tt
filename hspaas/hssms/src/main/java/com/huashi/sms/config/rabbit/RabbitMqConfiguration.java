@@ -232,8 +232,8 @@ public class RabbitMqConfiguration {
 //		ExecutorService service = Executors.newFixedThreadPool(500);
 //		factory.setTaskExecutor(service);
         
-        factory.setAutoStartup(false);
-
+        factory.setAutoStartup(true);
+        
         return factory;
     }
 

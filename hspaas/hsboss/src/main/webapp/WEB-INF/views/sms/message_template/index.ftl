@@ -94,13 +94,12 @@
                             <table id="demo-dt-basic" class="table table-striped table-bordered" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>编号</th>
+                                        <th>序</th>
                                         <th>用户信息</th>
                                         <th>优先级</th>
                                         <th>操作类型</th>
                                         <th>路由类型</th>
                                         <th>状态</th>
-                                        <th>备注</th>
                                         <th>提交时间</th>
                                         <th>通过时间</th>
                                         <th>操作</th>
@@ -116,7 +115,6 @@
                                         <td>${(pl.apptypeText)!}</td>
                                         <td>${(pl.routeTypeText)!}</td>
                                         <td><#if pl.status==0>待审核<#elseif pl.status==1>审核成功<#elseif pl.status==2>审核失败</#if></td>
-                                        <td>${(pl.remark)!}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td><#if pl.approveTime??>${pl.approveTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
                                         <td>
@@ -130,7 +128,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="10" align="right"><b>模板内容：</b>${(pl.content)!}</td>
+                                        <td colspan="8" align="right"><b>内容：</b>${(pl.content)!}</td>
                                     </tr>
                                     </#list>
                                     </#if>

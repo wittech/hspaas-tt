@@ -71,7 +71,7 @@ public class SmsDbPersistenceRunner implements CommandLineRunner {
 		logger.info("===数据库异步持久线程监听已启动");
 		
 		registShutdownHook();
-		logger.info("===JVM钩子函数已启动");		
+		logger.info("===JVM钩子函数已启动");
 	}
 
 	/**

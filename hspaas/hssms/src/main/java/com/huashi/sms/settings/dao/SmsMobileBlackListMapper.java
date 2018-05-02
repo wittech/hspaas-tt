@@ -53,8 +53,15 @@ public interface SmsMobileBlackListMapper {
 	 * 
 	 * @return
 	 */
-	List<String> selectAllMobiles();
+	List<SmsMobileBlackList> selectAllMobiles();
 
+	/**
+	 * 
+	   * TODO 分页查询列表
+	   * 
+	   * @param params
+	   * @return
+	 */
 	List<SmsMobileBlackList> findList(Map<String, Object> params);
 
 	int findCount(Map<String, Object> params);

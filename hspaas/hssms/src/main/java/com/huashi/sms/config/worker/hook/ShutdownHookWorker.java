@@ -1,11 +1,9 @@
 package com.huashi.sms.config.worker.hook;
 
-import com.alibaba.fastjson.TypeReference;
-import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.List;
+import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
 
 /**
  * 
@@ -48,11 +46,5 @@ public class ShutdownHookWorker implements Runnable {
 			threadPoolTaskExecutor.shutdown();
 		}
 		
-	}
-
-	public static void main(String[] args) {
-		
-		
-		System.out.println(new TypeReference<List<String>>(){}.getType());
 	}
 }

@@ -97,9 +97,8 @@
 		#{id,jdbcType=INTEGER}
 	</update>
 
-	<select id="selectAllMobiles" resultType="java.lang.String">
-		select mobile from
-		sms_mobile_blacklist
+	<select id="selectAllMobiles" resultMap="BaseResultMap">
+		select distinct mobile, type from sms_mobile_blacklist
 	</select>
 
 	<!-- 查询用户记录 判断是否重复 -->

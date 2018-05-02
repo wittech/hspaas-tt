@@ -142,14 +142,18 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 	@Bean
 	public FreeMarkerConfig freemarkerConfig() {
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-		configurer.setConfigLocation(new DefaultResourceLoader().getResource(ResourceLoader.CLASSPATH_URL_PREFIX + "freemarker.properties"));
-		configurer.setTemplateLoaderPaths("/WEB-INF/view/");
-		configurer.setDefaultEncoding("UTF-8");
+//		configurer.setConfigLocation(new DefaultResourceLoader().getResource(ResourceLoader.CLASSPATH_URL_PREFIX + "freemarker.properties"));
+//		configurer.setTemplateLoaderPaths("/WEB-INF/view/");
+//		configurer.setDefaultEncoding("UTF-8");
 		
 		Map<String, Object> variables = new HashMap<String, Object>();
 		variables.put("xml_escape", new XmlEscape());
 		
-		configurer.setFreemarkerVariables(variables);
+//		configurer.setFreemarkerVariables(variables);
+		
+//		configurer.setConfiguration(new freemarker.template.Configuration(freemarker.template.Configuration.VERSION_2_3_23));
+		
+//		configurer.setConfiguration(null);
 		return configurer;
 
 	}
