@@ -71,7 +71,8 @@
 		packets_size,
 		connection_size, read_timeout,
 		access_code,
-		ext_number, sign_mode,
+		ext_number,
+		sign_mode,
 		create_time,
 		province_code, sms_template_param)
 		values
@@ -82,11 +83,14 @@
 		#{passageId,jdbcType=INTEGER},
 		#{passageCode,jdbcType=VARCHAR},
 		#{protocol,jdbcType=VARCHAR},
-		#{callType,jdbcType=TINYINT}, #{url,jdbcType=VARCHAR},
+		#{callType,jdbcType=TINYINT},
+		#{url,jdbcType=VARCHAR},
 		#{paramsDefinition,jdbcType=VARCHAR},
 		#{params,jdbcType=VARCHAR},
-		#{resultFormat,jdbcType=VARCHAR}, #{successCode,jdbcType=VARCHAR},
-		#{position,jdbcType=VARCHAR}, #{mobileSize,jdbcType=INTEGER},
+		#{resultFormat,jdbcType=VARCHAR},
+		#{successCode,jdbcType=VARCHAR},
+		#{position,jdbcType=VARCHAR},
+		#{mobileSize,jdbcType=INTEGER},
 		#{packetsSize,jdbcType=INTEGER},
 		#{connectionSize,jdbcType=INTEGER},
 		#{readTimeout,jdbcType=INTEGER},
@@ -412,7 +416,8 @@
 		select
 		<include refid="Base_Column_List" />
 		from sms_passage_access where user_id = #{userId,jdbcType=INTEGER}
-		and cmcp = #{cmcp,jdbcType=INTEGER} and route_type = 0 limit 1
+		and
+		cmcp = #{cmcp,jdbcType=INTEGER} and route_type = 0 limit 1
 	</select>
 
 	<select id="selectByUserIdAndRouteCmcp" resultMap="BaseResultMap">
@@ -464,8 +469,8 @@
 		ext_number
 		from
 		sms_passage_access
-		where url = #{url} and call_type =
-		#{callType}
+		where call_type = #{callType} and url
+		= #{url}
 		limit 1
 	</select>
 

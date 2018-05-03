@@ -16,6 +16,14 @@ import com.huashi.sms.settings.service.ISmsMobileBlackListService;
 import com.huashi.sms.settings.service.ISmsMobileWhiteListService;
 import com.huashi.sms.template.service.ISmsTemplateService;
 
+/**
+ * 
+  * TODO 初始化项目依赖的资源，如REDIS/自定义线程开启等
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2018年5月3日 上午11:18:55
+ */
 @Configuration
 @Order(1)
 public class SmsInitializeRunner implements CommandLineRunner {

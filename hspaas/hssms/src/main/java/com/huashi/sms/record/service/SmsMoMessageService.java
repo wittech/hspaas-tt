@@ -154,6 +154,11 @@ public class SmsMoMessageService implements ISmsMoMessageService {
                     receive.setMsgId(submit.getMsgId());
                     receive.setUserId(submit.getUserId());
                     receive.setSid(submit.getSid() + "");
+                    
+                    // 如果上行回执内容为空，则置一个空格字符
+                    if(StringUtils.isEmpty(receive.getContent())) {
+                        receive.setContent(" ");
+                    }
 
                     // 针对直连协议PassageId反补
                     receive.setPassageId(submit.getPassageId());

@@ -1,6 +1,13 @@
 package com.huashi.sms.passage.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -13,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -32,8 +40,6 @@ import com.huashi.sms.passage.context.PassageContext.PassageStatus;
 import com.huashi.sms.passage.context.PassageContext.RouteType;
 import com.huashi.sms.passage.dao.SmsPassageAccessMapper;
 import com.huashi.sms.passage.dao.SmsPassageGroupDetailMapper;
-import com.huashi.sms.passage.dao.SmsPassageMapper;
-import com.huashi.sms.passage.dao.SmsPassageParameterMapper;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.domain.SmsPassageGroupDetail;
@@ -47,19 +53,24 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     @Reference
     private IUserPassageService userPassageService;
     @Autowired
-    private SmsPassageMapper smsPassageMapper;
+    private ISmsPassageService smsPassageService;
     @Autowired
     private SmsPassageAccessMapper smsPassageAccessMapper;
     @Autowired
     private SmsPassageGroupDetailMapper smsPassageGroupDetailMapper;
     @Autowired
-    private SmsPassageParameterMapper smsPassageParameterMapper;
+    private ISmsPassageParameterService smsPassageParameterService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Reference
     private IPassageMonitorService passageMonitorService;
     @Reference
     private IProvinceService provinceService;
+    
+    /**
+     * 全局可用通道缓存
+     */
+    private static volatile Map<String, SmsPassageAccess> GLOBAL_PASSAGE_ACCESS_CONTAINER = new HashMap<>();
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -197,7 +208,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
                 if (passageMap.containsKey(p.getPassageId())) {
                     p.setPassageIdText(passageMap.get(p.getPassageId()));
                 } else {
-                    SmsPassage smsPassage = smsPassageMapper.selectByPrimaryKey(p.getPassageId());
+                    SmsPassage smsPassage = smsPassageService.findById(p.getPassageId());
                     if (smsPassage != null) {
                         p.setPassageIdText(smsPassage.getName());
                         passageMap.put(p.getPassageId(), smsPassage.getName());
@@ -327,7 +338,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
         SmsPassage smsPassage = detail.getSmsPassage();
 
         try {
-            List<SmsPassageParameter> parameterList = smsPassageParameterMapper.findByPassageId(detail.getPassageId());
+            List<SmsPassageParameter> parameterList = smsPassageParameterService.findByPassageId(detail.getPassageId());
             SmsPassageAccess access = null;
             for (SmsPassageParameter parameter : parameterList) {
                 access = new SmsPassageAccess();
@@ -439,10 +450,59 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     public List<SmsPassageAccess> findPassageBalace() {
         return smsPassageAccessMapper.selectByType(PassageCallType.PASSAGE_BALANCE_GET.getCode());
     }
+    
+    /**
+     * 
+       * TODO 配装可用通道KEY
+       * @param callType
+       * @param passageCode
+       * @return
+     */
+    private static String passageAccessKey(PassageCallType callType, String passageCode) {
+        return callType.getCode() + ":" + (StringUtils.isEmpty(passageCode) ? "" : passageCode);
+    }
 
     @Override
     public SmsPassageAccess getByType(PassageCallType callType, String passageCode) {
-        return smsPassageAccessMapper.getByTypeAndUrl(callType.getCode(), passageCode);
+        String passageAccessKey = passageAccessKey(callType, passageCode);
+        if(GLOBAL_PASSAGE_ACCESS_CONTAINER.containsKey(passageAccessKey)) {
+            return GLOBAL_PASSAGE_ACCESS_CONTAINER.get(passageAccessKey);
+        }
+        
+        SmsPassageAccess access = smsPassageAccessMapper.getByTypeAndUrl(callType.getCode(), passageCode);
+        if(access != null) {
+            GLOBAL_PASSAGE_ACCESS_CONTAINER.put(passageAccessKey, access);
+            return access;
+        }
+        
+        // 获取通道参数信息
+        SmsPassageParameter passageParameter = smsPassageParameterService.getByType(callType, passageCode);
+        if(passageParameter == null) {
+            return null;
+        }
+        
+        access = copyProperties(passageParameter);
+        GLOBAL_PASSAGE_ACCESS_CONTAINER.put(passageAccessKey, access);
+        
+        logger.warn("通道简码： [" + passageCode + "] 调用类型 [" + callType.getName() + "] 可用通道数据为空，参数failover可用");
+        
+        return access;
+    }
+    
+    /**
+     * 
+       * TODO 从通道参数拷贝属性值给可用通道
+       * 
+       * @param passageParameter
+       * @return
+     */
+    private SmsPassageAccess copyProperties(SmsPassageParameter passageParameter) {
+        SmsPassageAccess smsPassageAccess = new SmsPassageAccess();
+        smsPassageAccess.setPassageId(passageParameter.getPassageId());
+        smsPassageAccess.setProtocol(passageParameter.getProtocol());
+        smsPassageAccess.setParams(passageParameter.getParams());
+        smsPassageAccess.setSuccessCode(passageParameter.getSuccessCode());
+        return smsPassageAccess;
     }
 
     @Override

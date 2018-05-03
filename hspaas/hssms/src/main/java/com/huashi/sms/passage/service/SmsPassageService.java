@@ -393,7 +393,7 @@ public class SmsPassageService implements ISmsPassageService {
 	@Override
 	public SmsPassage findById(int id) {
 		try {
-			Object obj = stringRedisTemplate.opsForHash().get(SmsRedisConstant.RED_SMS_PASSAGE, id+"");
+			Object obj = stringRedisTemplate.opsForHash().get(SmsRedisConstant.RED_SMS_PASSAGE, id +"");
 			if(obj != null) {
                 return JSON.parseObject(obj.toString(), SmsPassage.class);
             }

@@ -34,6 +34,7 @@ public class TaskExecutorConfiguration {
 
 		ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
 
+		poolTaskExecutor.setThreadNamePrefix("worker-executor-");
 		// 线程池所使用的缓冲队列
 		poolTaskExecutor.setQueueCapacity(200);
 		// 线程池维护线程的最少数量

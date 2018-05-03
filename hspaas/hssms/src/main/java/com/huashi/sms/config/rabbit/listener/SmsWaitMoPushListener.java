@@ -62,8 +62,6 @@ public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareM
 		} finally {
 			doPushPersistence(report, pushContent, retryResponse, System.currentTimeMillis() - startTime);
 		}
-		
-		
 	}
 	
 	@Override

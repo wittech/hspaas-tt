@@ -330,7 +330,7 @@ public class SmsMtPushService implements ISmsMtPushService {
         // 此处需要查询数据库是否需要有推送设置，无则不推送
         SmsMtMessageSubmit submit = smsMtSubmitService.getByMsgidAndMobile(msgId, mobile);
         if (submit == null) {
-            logger.warn("msg_id : {}, mobile: {} 未找到短信相关提交数据", msgId, mobile);
+//            logger.warn("msg_id : {}, mobile: {} 未找到短信相关提交数据", msgId, mobile);
             return null;
         }
 
@@ -389,13 +389,28 @@ public class SmsMtPushService implements ISmsMtPushService {
             logger.error("设置待推送配置消息: {} 失败", JSON.toJSONString(submits), e);
         }
     }
+    
+    /**
+     * 
+       * TODO 推送守候线程名称
+       * 
+       * @param userId
+       *        用户ID
+       * @param sequence
+       *        序列号
+       * @return
+     */
+    private static String pushThreadName(Integer userId, Integer sequence) {
+        return String.format("push-daemon-thread-%d-%d", userId, sequence == null ? 1 : sequence ++);
+    }
 
     @Override
     public boolean addUserMtPushListener(Integer userId) {
         try {
             for (int i = 0; i < pushThreadPoolSize; i++) {
                 Thread thread = new Thread(new MtReportPushToDeveloperWorker(applicationContext,
-                                                                             getUserPushQueueName(userId)));
+                                                                             getUserPushQueueName(userId)),
+                                                                             pushThreadName(userId, i));
                 thread.start();
             }
             return true;

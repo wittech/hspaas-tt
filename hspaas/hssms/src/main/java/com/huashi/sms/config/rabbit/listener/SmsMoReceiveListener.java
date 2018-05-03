@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,7 +73,7 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 			}
 
 			if (CollectionUtils.isEmpty(receives)) {
-				logger.error("上行报告解析为空");
+				logger.warn("上行报告解析为空 : {}", JSON.toJSONString(message));
 				return;
 			}
 
@@ -85,8 +86,7 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 			smsMoMessageService.doReceiveToException(message);
 		} finally {
 			// 确认消息成功消费
-			channel.basicAck(message.getMessageProperties().getDeliveryTag(),
-					false);
+			channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 		}
 	}
 
@@ -108,11 +108,11 @@ public class SmsMoReceiveListener implements ChannelAwareMessageListener {
 			return null;
 		}
 
-		SmsPassageAccess access = smsPassageAccessService.getByType(
-				PassageCallType.SMS_MO_REPORT_WITH_PUSH, providerCode);
+		SmsPassageAccess access = smsPassageAccessService.getByType(PassageCallType.SMS_MO_REPORT_WITH_PUSH, 
+		                                                            providerCode);
 		if (access == null) {
 			logger.warn("上行报告通道参数无法匹配：{}", jsonObject.toJSONString());
-			jsonObject.put("reason", "状态回执报告通道参数无法匹配");
+			jsonObject.put("reason", "上行报告报告通道参数无法匹配");
 			smsMoMessageService.doReceiveToException(jsonObject);
 			return null;
 		}

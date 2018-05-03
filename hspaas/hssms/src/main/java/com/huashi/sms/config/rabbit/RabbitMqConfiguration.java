@@ -21,6 +21,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.Order;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -40,6 +41,7 @@ import com.huashi.sms.config.rabbit.constant.RabbitConstant;
  */
 @Configuration
 @EnableRabbit
+@Order(4)
 public class RabbitMqConfiguration {
 
     @Value("${mq.rabbit.host}")
@@ -53,29 +55,60 @@ public class RabbitMqConfiguration {
     @Value("${mq.rabbit.vhost}")
     private String mqVhost;
 
+    /**
+     * 初始化消费者数量
+     */
     @Value("${mq.rabbit.consumers}")
     private int concurrentConsumers;
+    
+    /**
+     * 消费者最大数量（当队列堆积过量，则会自动增加消费者，直至达到最大）
+     */
     @Value("${mq.rabbit.maxconsumers}")
     private int maxConcurrentConsumers;
 
+    /**
+     * 每次队列中取数据个数，如果为1则保证消费者间平均消费
+     */
     @Value("${mq.rabbit.prefetch:1}")
     private int rabbitPrefetchCount;
 
+    /**
+     * 
+       * TODO 消息ID生成器（全局单例）
+       * @return
+     */
     @Bean
     public IdGenerator idGenerator() {
         return new IdGenerator(1);
     }
 
+    /**
+     * 
+       * TODO 队列数据序列化，采用jackson2
+       * @return
+     */
     @Bean(name = "messageConverter")
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
+    /**
+     * 
+       * TODO 消息序列化，fastjson(暂未使用)
+       * @return
+     */
     @Bean
     public FastJsonMessageConverter fastjsonMessageConverter() {
         return new FastJsonMessageConverter();
     }
 
+    /**
+     * 
+       * TODO rabbitmq连接配置
+       * 
+       * @return
+     */
     @Bean(name = "rabbitConnectionFactory")
     public ConnectionFactory rabbitConnectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
@@ -86,6 +119,7 @@ public class RabbitMqConfiguration {
         connectionFactory.setVirtualHost(mqVhost);
 
         // 显性设置后才能进行回调函数设置 enable confirm mode
+        // confirm 是为了保障数据发送到队列的必答性（对于发送者）
         connectionFactory.setPublisherReturns(true);
         connectionFactory.setPublisherConfirms(true);
 
@@ -124,7 +158,7 @@ public class RabbitMqConfiguration {
         rabbitAdmin.declareQueue(smsP2PWaitProcessQueue);
         rabbitAdmin.declareBinding(smsP2PWaitProcessBinding);
 
-        // 分包处理完成，待提交网关（上家通道）队列
+        // 分包处理完成，待提交网关（上家通道）队列，因每个队列需要不同的消费者，所以动态控制@SmsWaitSubmitListener
 //		Queue smsWaitSubmitQueue = new Queue(RabbitConstant.MQ_SMS_MT_WAIT_SUBMIT, true, false, false, setQueueFeatures());
 //		Binding smsWaitSubmitBinding = BindingBuilder.bind(smsWaitSubmitQueue).to(exchange)
 //				.with(RabbitConstant.MQ_SMS_MT_WAIT_SUBMIT);

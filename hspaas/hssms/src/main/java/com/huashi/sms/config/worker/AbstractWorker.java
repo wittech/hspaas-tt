@@ -209,7 +209,12 @@ public abstract class AbstractWorker<E> implements Runnable {
         long startTime = System.currentTimeMillis();
         try {
             operate(list);
-            logger.info("job::[" + jobTitle() + "] 执行耗时：{} ms， 共处理：{} 个", System.currentTimeMillis() - startTime, list.size());
+            
+            long timeCost = System.currentTimeMillis() - startTime;
+            if(timeCost > 500 || list.size() > 50) {
+                logger.info("job::[" + jobTitle() + "] 执行耗时：{} ms， 共处理：{} 个", timeCost , list.size());
+            }
+            
         } catch (Exception e) {
             logger.error("job::[" + jobTitle() + "] 执行失败", e);
             backupIfFailed(list);
@@ -265,14 +270,12 @@ public abstract class AbstractWorker<E> implements Runnable {
 
                 // 如果本次量达到批量取值数据，则跳出
                 if (list.size() >= scanSize()) {
-                    logger.info("-----------获取size: [" + list.size() + "]");
                     executeWithTimeCost(list);
                     continue;
                 }
 
                 // 如果本次循环时间超过5秒则跳出
                 if (CollectionUtils.isNotEmpty(list) && System.currentTimeMillis() - timer.get() >= timeout()) {
-                    logger.info("-----------由于超时：size: [" + list.size() + "]");
                     executeWithTimeCost(list);
                     continue;
                 }
@@ -284,7 +287,6 @@ public abstract class AbstractWorker<E> implements Runnable {
                 // 执行到redis中没有数据为止
                 if (StringUtils.isEmpty(row)) {
                     if (CollectionUtils.isNotEmpty(list)) {
-                        logger.info("-----------取完，获取size: [" + list.size() + "]");
                         executeWithTimeCost(list);
                     }
 

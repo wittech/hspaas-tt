@@ -19,7 +19,7 @@ import com.rabbitmq.client.Channel;
 
 /**
  * 
-  * TODO 分包失败，待处理
+  * TODO 针对提交网关失败或者黑名单等逻辑错误进行伪造包处理
   *
   * @author zhengying
   * @version V1.0.0   
