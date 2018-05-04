@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,15 +46,15 @@ public class HttpClientUtil {
     /**
      * 从连接池中获取连接时间
      */
-    private static final int                                 CONNECTION_REQUEST_TIMEOUT = 1 * 1000;
+    private static final int                                                CONNECTION_REQUEST_TIMEOUT = 1 * 1000;
     /**
      * 建立连接时间
      */
-    private static final int                                 CONNECTION_TIMEOUT         = 8 * 1000;
+    private static final int                                                CONNECTION_TIMEOUT         = 8 * 1000;
     /**
      * 数据响应超时时间
      */
-    private static final int                                 SOCKET_READ_TIMEOUT        = 8 * 1000;
+    private static final int                                                SOCKET_READ_TIMEOUT        = 8 * 1000;
 
     /**
      * 本次HTTP连接池
@@ -63,45 +64,60 @@ public class HttpClientUtil {
     /**
      * 默认最大连接池数量（针对整个域名主机）
      */
-    private static final Integer                             DEFAULT_MAX_TOTAL          = 200;
+    private static final Integer                                            DEFAULT_MAX_TOTAL          = 200;
     /**
      * 每个路由最大连接数（真正限制）
      */
-    private static final Integer                             DEFAULT_MAX_PER_ROUTE      = 100;
+    private static final Integer                                            DEFAULT_MAX_PER_ROUTE      = 100;
 
-    private final static Object                              SYN_LOCK                   = new Object();
+    private final static Object                                             SYN_LOCK                   = new Object();
     /**
      * 默认编码
      */
-    private static final String                              ENCODING_UTF_8             = "UTF-8";
+    private static final String                                             ENCODING_UTF_8             = "UTF-8";
 
     /**
      * 成功码
      */
-    private static final int                                 SUCCESS_RESPONSE_CODE      = 200;
+    private static final int                                                SUCCESS_RESPONSE_CODE      = 200;
 
     /**
      * HTTPS协议前缀名
      */
-    private static final String                              HTTPS_PROTOCOL_PREFIX      = "https";
+    private static final String                                             HTTPS_PROTOCOL_PREFIX      = "https";
 
     /**
      * URL HOST和PORT分隔符
      */
-    private static final String                              HOST_SEPARATOR             = ":";
-    
-    private static final Logger                              logger                     = LoggerFactory.getLogger(HttpClientUtil.class);
+    private static final String                                             HOST_SEPARATOR             = ":";
+
+    private static final Logger                                             logger                     = LoggerFactory.getLogger(HttpClientUtil.class);
 
     /**
+     * 推送回执信息，如果用户回执success才算正常接收，否则重试，达到重试上限次数，抛弃
+     */
+    private static final String                                             PUSH_REPONSE_SUCCESS_CODE  = "success";
+
+    /**
+     * 推送重试上限次数
+     */
+    public static final int                                                 PUSH_RETRY_TIMES           = 3;
+    
+    /**
+     * 当前线程起始时间
+     */
+    private static AtomicLong                                               currentStartTime = new AtomicLong(); 
+
+    /**
+     * TODO URL是否为HTTPS
      * 
-       * TODO URL是否为HTTPS
-       * @param url
-       * @return
+     * @param url
+     * @return
      */
     private static boolean isHttpsUrl(String url) {
         return StringUtils.isNotBlank(url) && url.trim().startsWith(HTTPS_PROTOCOL_PREFIX);
     }
-    
+
     /**
      * 获取HttpClient对象
      *
@@ -111,7 +127,7 @@ public class HttpClientUtil {
      */
     private static CloseableHttpClient getHttpClient(String url, Integer maxTotal, Integer maxPerRoute) {
         String hostname = url.split("/")[2];
-        
+
         // HTTP端口默认80，HTTPS默认443
         int port = isHttpsUrl(url) ? 433 : 80;
         if (hostname.contains(HOST_SEPARATOR)) {
@@ -143,7 +159,8 @@ public class HttpClientUtil {
     private static PoolingHttpClientConnectionManager bindHttpClientConnectionManager(int maxTotal, int maxPerRoute) {
         ConnectionSocketFactory plainsf = PlainConnectionSocketFactory.getSocketFactory();
         LayeredConnectionSocketFactory sslsf = SSLConnectionSocketFactory.getSocketFactory();
-        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create().register("http", plainsf).register("https",
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create().register("http",
+                                                                                                                 plainsf).register("https",
                                                                                                                                    sslsf).build();
 
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
@@ -195,7 +212,7 @@ public class HttpClientUtil {
 
         // CloseableHttpClient httpClient =
         // HttpClients.custom().setConnectionManager(cm).setRetryHandler(httpRequestRetryHandler).build();
-        
+
         return cm;
     }
 
@@ -213,7 +230,8 @@ public class HttpClientUtil {
 
         CloseableHttpResponse response = null;
         try {
-            response = getHttpClient(url, DEFAULT_MAX_TOTAL, DEFAULT_MAX_PER_ROUTE).execute(httpget, HttpClientContext.create());
+            response = getHttpClient(url, DEFAULT_MAX_TOTAL, DEFAULT_MAX_PER_ROUTE).execute(httpget,
+                                                                                            HttpClientContext.create());
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity, "utf-8");
             EntityUtils.consume(entity);
@@ -452,13 +470,13 @@ public class HttpClientUtil {
             logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
             // 释放资源
             httpPost.releaseConnection();
-//            if (url.startsWith(HTTPS_PROTOCOL_PREFIX) && httpClient != null) {
-//                try {
-//                    httpClient.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
+            // if (url.startsWith(HTTPS_PROTOCOL_PREFIX) && httpClient != null) {
+            // try {
+            // httpClient.close();
+            // } catch (IOException e) {
+            // e.printStackTrace();
+            // }
+            // }
         }
 
     }
@@ -544,13 +562,13 @@ public class HttpClientUtil {
             logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
             // 释放资源
             httpPost.releaseConnection();
-//            if (url.startsWith(HTTPS_PROTOCOL_PREFIX) && httpClient != null) {
-//                try {
-//                    httpClient.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
+            // if (url.startsWith(HTTPS_PROTOCOL_PREFIX) && httpClient != null) {
+            // try {
+            // httpClient.close();
+            // } catch (IOException e) {
+            // e.printStackTrace();
+            // }
+            // }
         }
     }
 
@@ -633,26 +651,16 @@ public class HttpClientUtil {
             logger.info("URL：{} 请求耗时：{} ms", url, System.currentTimeMillis() - startTime);
             // 释放资源
             httpPost.releaseConnection();
-//            if (url.startsWith(HTTPS_PROTOCOL_PREFIX) && httpClient != null) {
-//                try {
-//                    httpClient.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
+            // if (url.startsWith(HTTPS_PROTOCOL_PREFIX) && httpClient != null) {
+            // try {
+            // httpClient.close();
+            // } catch (IOException e) {
+            // e.printStackTrace();
+            // }
+            // }
         }
     }
-    
-    /**
-     * 推送回执信息，如果用户回执success才算正常接收，否则重试，达到重试上限次数，抛弃
-     */
-    private static final String PUSH_REPONSE_SUCCESS_CODE = "success";
 
-    /**
-     * 推送重试上限次数
-     */
-    public static final int    PUSH_RETRY_TIMES          = 3;
-    
     public static RetryResponse postBody(String url, String body, int currentCount) {
         return postBody(url, body, PUSH_RETRY_TIMES, currentCount);
     }
@@ -667,10 +675,10 @@ public class HttpClientUtil {
      */
     public static RetryResponse postBody(String url, String body, int retryTimes, int currentCount) {
         RetryResponse retryResponse = new RetryResponse();
-        long startTime = System.currentTimeMillis();
+        currentStartTime.set(System.currentTimeMillis());
         if (StringUtils.isEmpty(url) || StringUtils.isEmpty(body)) {
             retryResponse.setResult("URL或内容为空");
-            retryResponse.setTimeCost(System.currentTimeMillis() - startTime);
+            retryResponse.setTimeCost(System.currentTimeMillis() - currentStartTime.get());
             return retryResponse;
         }
 
@@ -689,7 +697,7 @@ public class HttpClientUtil {
             retryResponse = postBody(url, body, retryTimes, currentCount);
         }
 
-        retryResponse.setTimeCost(System.currentTimeMillis() - startTime);
+        retryResponse.setTimeCost(System.currentTimeMillis() - currentStartTime.get());
         retryResponse.setAttemptTimes(currentCount > retryTimes ? retryTimes : currentCount);
         return retryResponse;
     }
