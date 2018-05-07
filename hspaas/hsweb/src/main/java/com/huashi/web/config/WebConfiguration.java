@@ -116,9 +116,9 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(new AuthenticationInterceptor()).addPathPatterns("/**")
-			.excludePathPatterns("/login/**", "/register/**", "/verify_code/**", "/pay_result/**", "/api/**");
-		super.addInterceptors(registry);
+//		registry.addInterceptor(new AuthenticationInterceptor()).addPathPatterns("/**")
+//			.excludePathPatterns("/login/**", "/register/**", "/verify_code/**", "/pay_result/**", "/api/**");
+//		super.addInterceptors(registry);
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfigLocation(new DefaultResourceLoader().getResource(ResourceLoader.CLASSPATH_URL_PREFIX + "freemarker.properties"));
 		
-		configurer.setTemplateLoaderPaths("/WEB-INF/view/");
+		configurer.setTemplateLoaderPaths("/WEB-INF/pages/");
 		configurer.setDefaultEncoding("UTF-8");
 		
 		Map<String, Object> variables = new HashMap<String, Object>();

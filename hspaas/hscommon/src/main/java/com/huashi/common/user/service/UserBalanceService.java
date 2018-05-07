@@ -129,13 +129,11 @@ public class UserBalanceService implements IUserBalanceService {
                 log.setRemark(remark);
 
                 if (isNotice) {
-                    {
-                        notificationMessageService.save(userId,
-                                                        NotificationMessageTemplateType.USER_BALACE_CHANGE,
-                                                        String.format(NotificationMessageTemplateType.USER_BALACE_CHANGE.getContent(),
-                                                                      PlatformType.parse(platformType).getName(),
-                                                                      amount));
-                    }
+                    notificationMessageService.save(userId,
+                                                    NotificationMessageTemplateType.USER_BALACE_CHANGE,
+                                                    String.format(NotificationMessageTemplateType.USER_BALACE_CHANGE.getContent(),
+                                                                  PlatformType.parse(platformType).getName(),
+                                                                  amount));
                 }
 
                 return userBalanceLogMapper.insert(log) > 0;
@@ -223,9 +221,7 @@ public class UserBalanceService implements IUserBalanceService {
         page.setTotalCount(total);
         List<UserBalance> list = userBalanceMapper.findList(userId, page.getStartPosition(), page.getPageSize());
         if (CollectionUtils.isEmpty(list)) {
-            {
-                return null;
-            }
+            return null;
         }
 
         for (UserBalance b : list) {
@@ -252,9 +248,7 @@ public class UserBalanceService implements IUserBalanceService {
             userBalance.setBalance(userBalance.getBalance() + amount);
             userBalance.setUserId(userId);
             if (StringUtils.isNotEmpty(remark)) {
-                {
-                    userBalance.setRemark(remark);
-                }
+                userBalance.setRemark(remark);
             }
             userBalance.setModifyTime(new Date());
             return userBalanceMapper.updateByPrimaryKeySelective(userBalance) > 0;
@@ -266,9 +260,7 @@ public class UserBalanceService implements IUserBalanceService {
     @Override
     public boolean updateBalanceWarning(UserBalance userBalance) {
         if (userBalance == null) {
-            {
-                return false;
-            }
+            return false;
         }
 
         return userBalanceMapper.updateWarning(userBalance) > 0;

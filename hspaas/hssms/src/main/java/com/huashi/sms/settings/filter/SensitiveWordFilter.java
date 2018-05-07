@@ -20,9 +20,12 @@ public class SensitiveWordFilter {
 
 	// private static WordNode[] nodes = new
 	// WordNode[65536];省6W个句柄的空间呗，测试发现，相比使用65536长度数组方式，过滤速度也提高了
-	public volatile static WordFilterSet WORD_FILTER_SET = new WordFilterSet();
-	public volatile static Map<Integer, WordNode> WORD_NODES = new HashMap<Integer, WordNode>(1024, 1);
-	// 敏感词替换的符号
+	public static volatile WordFilterSet WORD_FILTER_SET = new WordFilterSet();
+	public static volatile Map<Integer, WordNode> WORD_NODES = new HashMap<>(1024, 1);
+	
+	/**
+	 * 敏感词替换的符号
+	 */
 	private static final char SIGN = '*';
 
 	// 当前敏感词初始化词库来源于REDIS或者数据库
@@ -55,8 +58,10 @@ public class SensitiveWordFilter {
 		for (String curr : words) {
 			chs = curr.toCharArray();
 			fchar = chs[0];
-			if (!WORD_FILTER_SET.contains(fchar)) {// 没有首字定义
-				WORD_FILTER_SET.add(fchar);// 首字标志位 可重复add,反正判断了，不重复了
+			// 没有首字定义
+			if (!WORD_FILTER_SET.contains(fchar)) {
+				WORD_FILTER_SET.add(fchar);
+				// 首字标志位 可重复add,反正判断了，不重复了
 				fnode = new WordNode(fchar, chs.length == 1);
 				WORD_NODES.put(fchar, fnode);
 			} else {

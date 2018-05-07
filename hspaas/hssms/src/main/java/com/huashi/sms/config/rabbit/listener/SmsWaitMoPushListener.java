@@ -1,24 +1,28 @@
 package com.huashi.sms.config.rabbit.listener;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
-import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
-import com.huashi.sms.passage.context.PassageContext.PushStatus;
-import com.huashi.sms.record.domain.SmsMoMessagePush;
-import com.huashi.sms.record.domain.SmsMoMessageReceive;
-import com.rabbitmq.client.Channel;
+import java.util.Date;
+
+import javax.annotation.Resource;
+
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import java.util.Date;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
+import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.rabbit.AbstartRabbitListener;
+import com.huashi.sms.config.rabbit.constant.RabbitConstant;
+import com.huashi.sms.passage.context.PassageContext.PushStatus;
+import com.huashi.sms.record.domain.SmsMoMessagePush;
+import com.huashi.sms.record.domain.SmsMoMessageReceive;
+import com.huashi.util.HttpClientUtil;
+import com.huashi.util.HttpClientUtil.RetryResponse;
+import com.rabbitmq.client.Channel;
 
 /**
  * 
@@ -29,7 +33,7 @@ import java.util.Date;
   * @date 2016年12月1日 下午2:32:35
  */
 @Component
-public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareMessageListener {
+public class SmsWaitMoPushListener extends AbstartRabbitListener {
 	
 	@Resource
 	private StringRedisTemplate stringRedisTemplate;
@@ -47,15 +51,10 @@ public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareM
 		RetryResponse retryResponse = null;
 		String pushContent = null;
 		try {
-			pushContent = JSON.toJSONString(report, new SimplePropertyPreFilter("sid", "mobile", "content", "destnationNo","receiveTime"), 
-					SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullStringAsEmpty);
-			int retryTimes = report.getRetryTimes() == 0 ? PUSH_RETRY_TIMES : report.getRetryTimes();
-			
-			retryResponse = post(report.getPushUrl(), pushContent, retryTimes,  1);
-			
-			if(logger.isDebugEnabled()) {
-                logger.debug("处理结果：{}, 尝试次数 : {}, 异常信息: {}", retryResponse.getResult(), retryResponse.getAttemptTimes(), retryResponse.getLastThrowable().getMessage());
-            }
+		    pushContent = JSON.toJSONString(report, new SimplePropertyPreFilter("sid", "mobile", "content", "destnationNo","receiveTime"), 
+		                                    SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullStringAsEmpty);
+		    
+		    retryResponse = HttpClientUtil.postBody(report.getPushUrl(), pushContent, 1);
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -67,6 +66,9 @@ public class SmsWaitMoPushListener extends BaseListener implements ChannelAwareM
 	@Override
 	@RabbitListener(queues = RabbitConstant.MQ_SMS_MO_WAIT_PUSH)
 	public void onMessage(Message message, Channel channel) throws Exception {
+	    
+	    checkIsStartingConsumeMessage();
+	    
 		Object object = messageConverter.fromMessage(message);
 		try {
 			if(object == null) {

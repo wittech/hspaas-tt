@@ -45,6 +45,7 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.domain.SmsMtMessagePush;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.util.HttpClientUtil;
+import com.huashi.util.HttpClientUtil.RetryResponse;
 
 /**
  * TODO 下行短信推送服务实现
@@ -340,7 +341,7 @@ public class SmsMtPushService implements ISmsMtPushService {
         pushSettings.put("msgId", msgId);
         pushSettings.put("attach", submit.getAttach());
         pushSettings.put("pushUrl", submit.getPushUrl());
-        pushSettings.put("retryTimes", PUSH_RETRY_TIMES);
+        pushSettings.put("retryTimes", HttpClientUtil.PUSH_RETRY_TIMES);
 
         return pushSettings;
     }
@@ -377,8 +378,7 @@ public class SmsMtPushService implements ISmsMtPushService {
             for (SmsMtMessageSubmit submit : submits) {
                 stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()),
                                                      submit.getMobile(),
-                                                     JSON.toJSONString(submit,
-                                                                       new SimplePropertyPreFilter("sid", "userId",
+                                                     JSON.toJSONString(submit, new SimplePropertyPreFilter("sid", "userId",
                                                                                                    "msgId", "attach",
                                                                                                    "pushUrl",
                                                                                                    "retryTimes")));
@@ -489,8 +489,7 @@ public class SmsMtPushService implements ISmsMtPushService {
     private boolean sendBody(Map<String, List<JSONObject>> urlBodies) {
         try {
             for (Entry<String, List<JSONObject>> urlBody : urlBodies.entrySet()) {
-                doPushPersistence(urlBody.getValue(),
-                                  httpPost(urlBody.getKey(), translateBodies(urlBody.getValue()), PUSH_RETRY_TIMES, 1));
+                doPushPersistence(urlBody.getValue(), HttpClientUtil.postBody(urlBody.getKey(), translateBodies(urlBody.getValue()), 1));
             }
 
             return true;
@@ -498,111 +497,6 @@ public class SmsMtPushService implements ISmsMtPushService {
             logger.error("推送下家状态报文或持久化失败 ", e);
             return false;
         }
-    }
-
-    /**
-     * 推送回执信息，如果用户回执success才算正常接收，否则重试，达到重试上限次数，抛弃
-     */
-    private static final String PUSH_REPONSE_SUCCESS_CODE = "success";
-
-    /**
-     * 推送重试上限次数
-     */
-    private static final int    PUSH_RETRY_TIMES          = 3;
-
-    /**
-     * TODO 调用用户回调地址（递归重试）
-     * 
-     * @param url 推送回调地址（HTTP）
-     * @param body 推送报文内容
-     * @param retryTimes 重试次数（默认3次）
-     * @return
-     */
-    private RetryResponse httpPost(String url, String body, int retryTimes, int currentCount) {
-        RetryResponse retryResponse = new RetryResponse();
-        long startTime = System.currentTimeMillis();
-        if (StringUtils.isEmpty(url) || StringUtils.isEmpty(body)) {
-            retryResponse.setResult("URL或内容为空");
-            retryResponse.setTimeCost(System.currentTimeMillis() - startTime);
-            return retryResponse;
-        }
-
-        try {
-            String result = HttpClientUtil.postReport(url, body);
-            retryResponse.setResult(StringUtils.isEmpty(result) ? PUSH_REPONSE_SUCCESS_CODE : result);
-            retryResponse.setSuccess(true);
-
-        } catch (Exception e) {
-            logger.error("调用用户推送地址解析失败：{}， 错误信息：{}", url, e.getMessage());
-            retryResponse.setResult("调用异常失败，" + e.getMessage());
-        }
-
-        if (!retryResponse.isSuccess() && currentCount <= retryTimes) {
-            currentCount = currentCount + 1;
-            retryResponse = httpPost(url, body, retryTimes, currentCount);
-        }
-
-        retryResponse.setTimeCost(System.currentTimeMillis() - startTime);
-        retryResponse.setAttemptTimes(currentCount > retryTimes ? retryTimes : currentCount);
-        return retryResponse;
-    }
-
-    /**
-     * TODO 重试回执信息
-     * 
-     * @author zhengying
-     * @version V1.0
-     * @date 2018年4月24日 下午11:19:15
-     */
-    private static class RetryResponse {
-
-        /**
-         * 尝试次数
-         */
-        private int     attemptTimes = 0;
-
-        /**
-         * 返回结果
-         */
-        private String  result;
-
-        private boolean isSuccess    = false;
-
-        private long    timeCost;
-
-        public int getAttemptTimes() {
-            return attemptTimes;
-        }
-
-        public void setAttemptTimes(int attemptTimes) {
-            this.attemptTimes = attemptTimes;
-        }
-
-        @SuppressWarnings("unused")
-        public String getResult() {
-            return result;
-        }
-
-        public void setResult(String result) {
-            this.result = result;
-        }
-
-        public boolean isSuccess() {
-            return isSuccess;
-        }
-
-        public void setSuccess(boolean isSuccess) {
-            this.isSuccess = isSuccess;
-        }
-
-        public long getTimeCost() {
-            return timeCost;
-        }
-
-        public void setTimeCost(long timeCost) {
-            this.timeCost = timeCost;
-        }
-
     }
 
     /**

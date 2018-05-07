@@ -10,10 +10,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.BeanUtils;
@@ -39,8 +36,8 @@ import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.service.ISmsProviderService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.rabbit.AbstartRabbitListener;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
-import com.huashi.sms.config.rabbit.listener.packets.BasePacketsSupport;
 import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
 import com.huashi.sms.passage.context.PassageContext.PassageSmsTemplateParam;
 import com.huashi.sms.passage.domain.SmsPassage;
@@ -67,7 +64,7 @@ import com.rabbitmq.client.Channel;
  * @date 2016年10月11日 下午1:20:14
  */
 @Component
-public class SmsWaitSubmitListener extends BasePacketsSupport implements ChannelAwareMessageListener {
+public class SmsWaitSubmitListener extends AbstartRabbitListener {
 
     @Resource
     private RabbitTemplate                    rabbitTemplate;
@@ -97,8 +94,6 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
     private ISmsPassageMessageTemplateService smsPassageMessageTemplateService;
     @Resource
     private ThreadPoolTaskExecutor            threadPoolTaskExecutor;
-
-    private Logger                            logger = LoggerFactory.getLogger(getClass());
 
     /**
      * TODO 处理分包产生的数据，并调用上家通道接口
@@ -534,6 +529,9 @@ public class SmsWaitSubmitListener extends BasePacketsSupport implements Channel
      */
     @Override
     public void onMessage(Message message, Channel channel) throws Exception {
+        
+        checkIsStartingConsumeMessage();
+        
         try {
             Object object = messageConverter.fromMessage(message);
 

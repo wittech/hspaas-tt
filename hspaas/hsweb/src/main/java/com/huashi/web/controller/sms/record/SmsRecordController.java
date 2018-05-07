@@ -33,124 +33,22 @@ import com.huashi.web.controller.BaseController;
  *
  */
 @Controller
-@RequestMapping("/sms/record")
+@RequestMapping("/sms/send")
 public class SmsRecordController extends BaseController {
 
 	// 短信测试内容
 	private final static String TEST_TITLE = "您的短信验证码为";
+
+    @Reference
+    private ISmsMtSubmitService submitService;
+    @Reference
+    private IMessageSendService messageSendService;
+    @Reference
+    private IUserDeveloperService userDeveloperService;
 	@Reference
 	private ISmsMoMessageService moMassageReceiveService;
 	@Reference
 	private ISmsApiFaildRecordService smsApiFailedRecordService;
-	@Reference
-	private ISmsMtSubmitService submitService;
-	@Reference
-	private IMessageSendService messageSendService;
-	@Reference
-	private IUserDeveloperService userDeveloperService;
-
-	/**
-	 * 短信错误记录首页
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/error/index", method = RequestMethod.GET)
-	public String errorIndex(Model model) {
-		model.addAttribute("start_date", DateUtil.getDayGoXday(-7));
-		model.addAttribute("stop_date", DateUtil.getCurrentDate());
-		model.addAttribute("min_date", DateUtil.getMonthXDay(-3));
-		return "/sms/record/error/index";
-	}
-
-	/**
-	 * 短信错误记录数据列表
-	 * 
-	 * @param request
-	 * @param currentPage
-	 * @param phoneNumber
-	 * @param starDate
-	 * @param endDate
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/error/list")
-	public String errorList(String currentPage, String phoneNumber, String starDate, String endDate, Model model) {
-		model.addAttribute("page", smsApiFailedRecordService.findPage(getCurrentUserId(), phoneNumber, starDate,
-				endDate, request.getParameter("currentPage")));
-		return "/sms/record/error/list";
-	}
-
-	/**
-	 * 短信接收记录首页
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/receive/index", method = RequestMethod.GET)
-	public String receiveIndex(Model model) {
-		model.addAttribute("start_date", DateUtil.getDayGoXday(-7));
-		model.addAttribute("stop_date", DateUtil.getCurrentDate());
-		model.addAttribute("min_date", DateUtil.getMonthXDay(-3));
-		return "/sms/record/receive/index";
-	}
-
-	/**
-	 * 短信错误记录数据列表
-	 * 
-	 * @param request
-	 * @param currentPage
-	 * @param phoneNumber
-	 * @param starDate
-	 * @param endDate
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/receive/list")
-	public String receiveList(String currentPage, String phoneNumber, String startDate, String endDate, Model model) {
-		model.addAttribute("page", moMassageReceiveService.findPage(getCurrentUserId(), phoneNumber, startDate, endDate,
-				request.getParameter("currentPage")));
-		return "/sms/record/receive/list";
-	}
-
-	/**
-	 * 短信发送记录首页
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/send/index", method = RequestMethod.GET)
-	public String sendIndex(Model model, String sid,String startDate,String endDate) {
-		if(StringUtils.isNotEmpty(startDate)){
-			model.addAttribute("start_date", startDate);
-		}else{
-			model.addAttribute("start_date", DateUtil.getDayGoXday(-7));
-		}
-		if(StringUtils.isNotEmpty(endDate)){
-			model.addAttribute("stop_date", endDate);
-		}else{
-			model.addAttribute("stop_date", DateUtil.getCurrentDate());
-		}
-		model.addAttribute("min_date", DateUtil.getMonthXDay(-3));
-		model.addAttribute("sid", sid);
-		return "/sms/record/send/index";
-	}
-
-	/**
-	 * 短信发送记录数据列表
-	 * 
-	 * @param request
-	 * @param currentPage
-	 * @param phoneNumber
-	 * @param starDate
-	 * @param endDate
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/send/list")
-	public String sendList(String currentPage, String phoneNumber, String starDate, String endDate, String sid,
-			Model model) {
-		model.addAttribute("page", submitService.findPage(getCurrentUserId(), phoneNumber, starDate, endDate,
-				request.getParameter("currentPage"), sid));
-		return "/sms/record/send/list";
-	}
 
 	/**
 	 * 短信发送
@@ -158,9 +56,9 @@ public class SmsRecordController extends BaseController {
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping(value = "/send/create", method = RequestMethod.GET)
-	public String create(Model model) {
-		return "/sms/record/send/create";
+	@RequestMapping(value = "", method = RequestMethod.GET)
+	public String index(Model model) {
+		return "/console/sms/send_sms";
 	}
 
 	/**
@@ -171,7 +69,7 @@ public class SmsRecordController extends BaseController {
 	 * @param content
 	 * @return
 	 */
-	@RequestMapping(value = "/send_sms", method = RequestMethod.POST)
+	@RequestMapping(value = "/submit", method = RequestMethod.POST)
 	public @ResponseBody SmsResponse sendSms(String mobile, String content) {
 		UserDeveloper d = userDeveloperService.getByUserId(getCurrentUserId());
 
@@ -202,7 +100,7 @@ public class SmsRecordController extends BaseController {
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping(value = "/test/index")
+	@RequestMapping(value = "/test")
 	public String testIndex(Model model) {
 		model.addAttribute("content", TEST_TITLE);
 		model.addAttribute("security_code", RandomUtil.getRandomNum());
@@ -223,24 +121,27 @@ public class SmsRecordController extends BaseController {
 
 		return messageSendService.sendCustomMessage(d.getAppKey(), d.getAppSecret(), mobile, TEST_TITLE + securityCode);
 	}
-
-	@RequestMapping(value = "/multi_send", method = RequestMethod.POST)
-	@ResponseBody
-	public void multiSend(MultipartFile file) {
-		// byte[] fileByte;
-		// try {
-		// fileByte = file.getBytes();
-		// } catch (IOException e) {
-		// throw new RuntimeException("读取上传文件失败");
-		// }
-		//
-		// String fileFormat;
-		// try {
-		// fileFormat = file.getOriginalFilename().split("\\.")[1];
-		// } catch (Exception e) {
-		// throw new RuntimeException("读取上传文件失败");
-		// }
-
-	}
+	
+	/**
+     * 短信发送记录首页
+     * 
+     * @return
+     */
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public String sendIndex(Model model, String sid,String startDate,String endDate) {
+        if(StringUtils.isNotEmpty(startDate)){
+            model.addAttribute("start_date", startDate);
+        }else{
+            model.addAttribute("start_date", DateUtil.getDayGoXday(-7));
+        }
+        if(StringUtils.isNotEmpty(endDate)){
+            model.addAttribute("stop_date", endDate);
+        }else{
+            model.addAttribute("stop_date", DateUtil.getCurrentDate());
+        }
+        model.addAttribute("min_date", DateUtil.getMonthXDay(-3));
+        model.addAttribute("sid", sid);
+        return "/console/sms/send_list";
+    }
 
 }

@@ -134,7 +134,6 @@ public class SmsTemplateService implements ISmsTemplateService {
 				}
 			}
 			
-			logger.info("获取短信大小为：{}", GLOBAL_MESSAGE_TEMPLATE.size());
 			return GLOBAL_MESSAGE_TEMPLATE.get(userId);
 			
 		} catch (Exception e) {

@@ -92,7 +92,6 @@ public class ForbiddenWordsService implements IForbiddenWordsService {
 			Set<String> safeWords) {
 		Set<String> set = filterForbiddenWords(content);
 		if (CollectionUtils.isEmpty(set)) {
-			logger.warn("敏感词库为空");
 			return null;
 		}
 

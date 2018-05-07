@@ -4,11 +4,8 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +18,7 @@ import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.sms.config.rabbit.AbstartRabbitListener;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
@@ -38,7 +36,7 @@ import com.rabbitmq.client.Channel;
  * @date 2016年11月24日 下午11:04:22
  */
 @Component
-public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
+public class SmsWaitReceiptListener extends AbstartRabbitListener {
 
     @Autowired
     private ISmsMtSubmitService smsMtSubmitService;
@@ -51,11 +49,12 @@ public class SmsWaitReceiptListener implements ChannelAwareMessageListener {
     @Autowired
     private ISmsPassageAccessService smsPassageAccessService;
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
-
 	@Override
     @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT)
     public void onMessage(Message message, Channel channel) throws Exception {
+	    
+	    checkIsStartingConsumeMessage();
+	    
         try {
             Object object = messageConverter.fromMessage(message);
             // 处理待提交队列逻辑
