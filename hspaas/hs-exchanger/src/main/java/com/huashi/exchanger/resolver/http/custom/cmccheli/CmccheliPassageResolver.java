@@ -6,7 +6,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.exchanger.domain.ProviderSendResponse;
-import com.huashi.exchanger.resolver.http.HttpClientUtil;
+import com.huashi.exchanger.resolver.http.HttpClientManager;
 import com.huashi.exchanger.resolver.http.custom.AbstractPassageResolver;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
@@ -68,7 +68,7 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
             }
 
             // 转换参数，并调用网关接口，接收返回结果
-            String result = HttpClientUtil.postJson(parameter.getUrl(), headers, sendMtRequestParameter(tparameter, mobile, content, extNumber, parameter.getSmsTemplateId(), buildVariableParamsReport(parameter.getVariableParamNames(), parameter.getVariableParamValues())));
+            String result = HttpClientManager.postJson(parameter.getUrl(), headers, sendMtRequestParameter(tparameter, mobile, content, extNumber, parameter.getSmsTemplateId(), buildVariableParamsReport(parameter.getVariableParamNames(), parameter.getVariableParamValues())));
 
             // 解析返回结果并返回
             return sendResponse(result, parameter.getSuccessCode());
@@ -339,7 +339,7 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
      */
     private void startMoPush(Map<String, Object> headers, String moUrl, String moCallbackUrl, String terminalNo, String successCode) {
         try {
-            String result = HttpClientUtil.postJson(moUrl, headers, sendMoRequestParameter(moCallbackUrl));
+            String result = HttpClientManager.postJson(moUrl, headers, sendMoRequestParameter(moCallbackUrl));
 
             JSONObject response = JSON.parseObject(result);
             String resultCode = response.getString("resultCode");

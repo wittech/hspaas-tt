@@ -1,9 +1,10 @@
-package com.huashi.sms.config.rabbit.listener.packets;
+package com.huashi.sms.config.rabbit.listener;
 
-import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.stereotype.Component;
+
+import com.huashi.sms.config.rabbit.AbstartRabbitListener;
+import com.rabbitmq.client.Channel;
 
 /**
  * 
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
   * @date 2017年4月4日 下午2:38:55
  */
 @Component
-public class SmsP2PWaitPacketsListener extends BasePacketsSupport implements ChannelAwareMessageListener{
+public class SmsP2PWaitPacketsListener extends AbstartRabbitListener{
 
 	@Override
 	public void onMessage(Message message, Channel channel) throws Exception {

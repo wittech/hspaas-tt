@@ -39,15 +39,15 @@ public class SmsMessageBatchTest {
     
     static {
         MOBILE_SIZE = 1;
-        THREAD_SIZE = 128;
+        THREAD_SIZE = 100;
         RQEUST_SIZE = 1;
         
 //        MOBILE_SIZE = 1;
 //        THREAD_SIZE = 1;
 //        RQEUST_SIZE = 1;
         
-        APPKEY = "hsjXxJ2gO75iOK";
-        PASSWORD = "e3293685e23847fce6a8afc532de6dac";
+        APPKEY = "hsABtnntg3uFTS";
+        PASSWORD = "d523e832d112202b966beb909df270b5";
         URL = "http://localhost:8080/sms/send";
 //        String url = "http://dev.hspaas.cn:8080/sms/send";
     }

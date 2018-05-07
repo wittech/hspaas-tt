@@ -1,4 +1,4 @@
-package com.huashi.sms.config.rabbit.listener.packets;
+package com.huashi.sms.config.rabbit.listener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +45,7 @@ import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
+import com.huashi.sms.config.rabbit.AbstartRabbitListener;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.context.PassageContext.PassageStatus;
@@ -81,7 +81,7 @@ import com.rabbitmq.client.Channel;
  * @date 2016年9月8日 下午11:35:54
  */
 @Component
-public class SmsWaitPacketsListener extends BasePacketsSupport implements ChannelAwareMessageListener {
+public class SmsWaitPacketsListener extends AbstartRabbitListener {
 
     @Resource
     private RabbitTemplate rabbitTemplate;
@@ -286,6 +286,9 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Channe
     @Override
     @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS)
     public void onMessage(Message message, Channel channel) throws Exception {
+        
+        checkIsStartingConsumeMessage();
+        
         try {
             if(message == null) {
                 return;

@@ -52,7 +52,7 @@ public class HttpResolver{
         setNecesaryMessageNode(tparameter, mobile, content);
 
         // 转换参数，并调用网关接口，接收返回结果
-        String result = HttpClientUtil.post(parameter.getUrl(), tparameter);
+        String result = HttpClientManager.post(parameter.getUrl(), tparameter);
 
         logger.info("发送接口返回值：{}", result);
 
