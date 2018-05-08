@@ -39,8 +39,8 @@ public class SmsMessageBatchTest {
     
     static {
         MOBILE_SIZE = 1;
-        THREAD_SIZE = 100;
-        RQEUST_SIZE = 1;
+        THREAD_SIZE = 200;
+        RQEUST_SIZE = 10;
         
 //        MOBILE_SIZE = 1;
 //        THREAD_SIZE = 1;
@@ -86,7 +86,7 @@ public class SmsMessageBatchTest {
 
 		CountDownLatch cdl = new CountDownLatch(THREAD_SIZE);
 		
-		for(int i = 0; i< RQEUST_SIZE; i++) {
+		for(int i = 0; i< THREAD_SIZE; i++) {
 		    service.execute(new SendWorker(cdl));
 		}
 		
@@ -98,7 +98,7 @@ public class SmsMessageBatchTest {
         // 协同：让main线程等待任务都完成
         cdl.await();
 
-        System.out.println("任务执行完成，耗时:" + (System.currentTimeMillis() - s1) +"ms");
+        System.out.println("===========任务执行完成，耗时:" + (System.currentTimeMillis() - s1) +"ms==============");
 
         // TODO 再找出最大值
 
@@ -115,7 +115,7 @@ public class SmsMessageBatchTest {
 
 	    @Override
         public void run() {
-	        for (int i = 0; i < THREAD_SIZE; i++) {
+	        for (int i = 0; i < RQEUST_SIZE; i++) {
                 send();
             }
             

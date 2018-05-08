@@ -19,7 +19,6 @@ import com.huashi.developer.model.SmsP2PTemplateModel;
 import com.huashi.developer.prervice.SmsPrervice;
 import com.huashi.developer.response.sms.SmsBalanceResponse;
 import com.huashi.developer.response.sms.SmsSendResponse;
-import com.huashi.developer.util.IpUtil;
 import com.huashi.developer.validator.SmsP2PTemplateValidator;
 import com.huashi.developer.validator.SmsP2PValidator;
 import com.huashi.developer.validator.SmsValidator;
@@ -91,7 +90,7 @@ public class SmsApi extends BasicApiSupport {
         SmsSendResponse response = new SmsSendResponse(JSON.parseObject(message));
         try {
             // 如果处理失败则持久化到DB
-            smsPrervice.saveErrorLog(response.getCode(), request.getRequestURL().toString(), IpUtil.getClientIp(request), request.getParameterMap(), getAppType());
+            smsPrervice.saveErrorLog(response.getCode(), request.getRequestURL().toString(), getClientIp(), request.getParameterMap(), getAppType());
         } catch (Exception e) {
             // 暂时忽略日志打印
 //            logger.error("持久化提交接口错误失败", e);

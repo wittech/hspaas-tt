@@ -1,6 +1,6 @@
 package com.huashi.developer.model;
 
-import com.huashi.developer.validator.ValidateField;
+import com.huashi.developer.validator.annotation.ValidateField;
 
 public class FluxModel extends PassportModel {
 

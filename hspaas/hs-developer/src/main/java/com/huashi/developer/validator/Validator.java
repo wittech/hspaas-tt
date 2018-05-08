@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.exception.ValidateException;
-import com.huashi.developer.util.EncodingUtil;
+import com.huashi.developer.validator.annotation.ValidateField;
 
 /**
  * TODO 基础验证
@@ -97,7 +97,7 @@ public class Validator {
             }
 
             // 如果参数要求是UTF-8编码，需要验证
-            if (vf.utf8() && !EncodingUtil.isUtf8(paramMap.get(vf.value())[0])) {
+            if (vf.utf8() && !isUtf8(paramMap.get(vf.value())[0])) {
                 throw new ValidateException(CommonApiCode.COMMON_REQUEST_ENCODING_ERROR);
             }
 
@@ -113,6 +113,22 @@ public class Validator {
         }
 
         return param;
+    }
+    
+    /**
+     * 
+       * TODO 是否为UTF-8编码
+       * @param value
+       * @return
+     */
+    private boolean isUtf8(String value) {
+//        try {
+//            value.getBytes("utf-8");
+//            return true;
+//        } catch (UnsupportedEncodingException e) {
+//            return false;
+//        }
+        return true;
     }
 
 }

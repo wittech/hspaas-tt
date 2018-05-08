@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.CommonContext.AppType;
-import com.huashi.developer.util.IpUtil;
 import com.huashi.developer.validator.PassportValidator;
 
 public class BasicApiSupport {
@@ -26,11 +25,6 @@ public class BasicApiSupport {
     
     @Autowired
     protected PassportValidator passportValidator;
-
-    protected boolean validate() {
-
-        return true;
-    }
 
     @Override
     public String toString() {
@@ -61,14 +55,46 @@ public class BasicApiSupport {
 
         return AppType.DEVELOPER.getCode();
     }
-
+    
     /**
-     * TODO 获取客户端IP
-     *
+     * 
+     * TODO 获取客户端请求IP
+     * 
      * @return
      */
     protected String getClientIp() {
-        return IpUtil.getClientIp(request);
+        String ip = request.getHeader("x-forwarded-for");
+        if (logger.isDebugEnabled()) {
+            logger.debug("x-forwarded-for = {}", ip);
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Proxy-Client-IP = {}", ip);
+            }
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+            if (logger.isDebugEnabled()) {
+                logger.debug("WL-Proxy-Client-IP = {}", ip);
+            }
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+            if (logger.isDebugEnabled()) {
+                logger.debug("X-Real-IP = {}", ip);
+            }
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+            if (logger.isDebugEnabled()) {
+                logger.debug("RemoteAddr-IP = {}", ip);
+            }
+        }
+        if (StringUtils.isNotEmpty(ip)) {
+            ip = ip.split(",")[0];
+        }
+        return ip;
     }
 
 }

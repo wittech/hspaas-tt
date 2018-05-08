@@ -589,7 +589,10 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         return null;
     }
 
-    private static final CMCP[] CMCPS = new CMCP[]{CMCP.CHINA_MOBILE, CMCP.CHINA_TELECOM, CMCP.CHINA_UNICOM};
+    /**
+     * 运营商枚举
+     */
+    private static final CMCP[] CMCPS = {CMCP.CHINA_MOBILE, CMCP.CHINA_TELECOM, CMCP.CHINA_UNICOM};
 
     /**
      * 根据运营商和路由通道寻找具体的通道信息

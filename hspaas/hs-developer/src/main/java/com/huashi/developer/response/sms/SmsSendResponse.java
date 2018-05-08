@@ -4,13 +4,36 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 
+/**
+ * 
+  * TODO 短信发送回执报告
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2017年5月8日 上午10:34:51
+ */
 public class SmsSendResponse {
 
-	private String code; // 状态码
-	private String message; // 成功发送的短信计费条数
-	private String fee = "0"; // 扣费条数，70个字一条，超出70个字时按每67字一条计
+    /**
+     * 状态码 #com.huashi.constants.OpenApiCode
+     */
+	private String code;
+	
+	/**
+	 * 回执信息描述（中文）
+	 */
+	private String message;
+	
+	/**
+	 * 扣费条数，一般70个字一条，具体看客户的短信首字数配置，超出70个字时按每67字一条计
+	 */
+	private String fee = "0";
 //	private String mobile = ""; // 发送手机号
-	private String sid = ""; // 消息ID
+	
+	/**
+	 * 消息ID，用于后续的状态匹配
+	 */
+	private String sid = "";
 
 	public String getCode() {
 		return code;

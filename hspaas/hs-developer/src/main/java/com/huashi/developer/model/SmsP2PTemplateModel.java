@@ -3,7 +3,7 @@ package com.huashi.developer.model;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
-import com.huashi.developer.validator.ValidateField;
+import com.huashi.developer.validator.annotation.ValidateField;
 
 /**
  * 

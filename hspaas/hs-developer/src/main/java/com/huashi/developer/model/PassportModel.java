@@ -1,8 +1,8 @@
 package com.huashi.developer.model;
 
-import com.huashi.developer.validator.ValidateField;
-
 import java.io.Serializable;
+
+import com.huashi.developer.validator.annotation.ValidateField;
 
 /**
  * TODO 鉴权通行证

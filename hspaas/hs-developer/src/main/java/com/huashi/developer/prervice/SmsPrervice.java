@@ -195,13 +195,13 @@ public class SmsPrervice {
      */
     private long joinTask2Queue(SmsMtTask task) {
         try {
-            // 更新用户余额
-            boolean isSuccess = userBalanceService.deductBalance(task.getUserId(), -task.getTotalFee(),
-                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(), null);
-            if (!isSuccess) {
-                logger.error("用户ID:{} 扣除短信余额：{} 失败", task.getUserId(), task.getTotalFee());
-                throw new QueueProcessException("发送短信扣除短信余额失败");
-            }
+//            // 更新用户余额
+//            boolean isSuccess = userBalanceService.deductBalance(task.getUserId(), -task.getTotalFee(),
+//                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(), "developer call");
+//            if (!isSuccess) {
+//                logger.error("用户ID: [" + task.getUserId() + "] 扣除短信余额 " +task.getTotalFee()+ " 失败");
+//                throw new QueueProcessException("发送短信扣除短信余额失败");
+//            }
 
             task.setSid(idGenerator.generate());
             task.setCreateTime(new Date());

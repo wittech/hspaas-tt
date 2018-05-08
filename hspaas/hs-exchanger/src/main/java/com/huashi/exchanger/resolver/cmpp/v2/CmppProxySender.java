@@ -60,7 +60,7 @@ public class CmppProxySender {
     /**
      * 同步锁，用于保障每次获取proxy连接初始化一次
      */
-    private final Object               lock                 = new Object();
+    private final Object               proxyMonitor                 = new Object();
 
     /**
      * 对于Proxy分发短信的接收
@@ -396,11 +396,11 @@ public class CmppProxySender {
      * @return
      */
     private CmppManageProxy getCmppManageProxy(SmsPassageParameter parameter) {
-        synchronized (lock) {
-            if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-                return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-            }
-
+        if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+            return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+        }
+        
+        synchronized (proxyMonitor) {
             boolean isOk = smsProxyManageService.startProxy(parameter);
             if (!isOk) {
                 return null;
