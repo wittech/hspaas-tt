@@ -319,10 +319,10 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
             }
 
             // 获取用户路由（分省）通道信息
-            SmsRoutePassage passage = getUserRoutePassage(model, mobileCatagory);
+            SmsRoutePassage routePassage = getUserRoutePassage(model, mobileCatagory, model.getUserId());
 
             // 通道分包逻辑
-            doPassagePacketsFinished(model, mobileCatagory, passage);
+            doPassagePacketsFinished(model, mobileCatagory, routePassage);
 
         } catch (Exception e) {
             logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
@@ -538,24 +538,6 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 用户通道处理逻辑
-     *
-     * @param task
-     * @param mobileCatagory
-     * @return
-     */
-    private SmsRoutePassage getUserRoutePassage(SmsMtTask task, MobileCatagory mobileCatagory) {
-        Integer passageGroupId = userPassageService.getByUserIdAndType(task.getUserId(), PlatformType.SEND_MESSAGE_SERVICE.getCode());
-        if (passageGroupId == null) {
-            task.getErrorMessageReport().append("用户通道组未找到");
-            refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(), task.getForceActionsReport());
-            return null;
-        }
-
-        return doRoutePassageByCmcp(task, mobileCatagory, task.getUserId());
-    }
-
-    /**
      * TODO 获取短信路由类型
      * 如果路由类型未确定，则按默认路由进行
      *
@@ -601,7 +583,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
      * @param userId         用户ID
      * @return
      */
-    private SmsRoutePassage doRoutePassageByCmcp(SmsMtTask model, MobileCatagory mobileCatagory, int userId) {
+    private SmsRoutePassage getUserRoutePassage(SmsMtTask model, MobileCatagory mobileCatagory, int userId) {
         SmsPassageAccess passageAccess;
         boolean isAvaiable;
 
