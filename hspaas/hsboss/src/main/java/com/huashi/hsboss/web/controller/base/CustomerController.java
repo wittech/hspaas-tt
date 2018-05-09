@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.huashi.bill.pay.constant.PayContext;
 import com.huashi.common.passage.context.TemplateEnum;
 import com.huashi.common.settings.context.SettingsContext.PushConfigType;
@@ -39,6 +41,7 @@ import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.user.service.IUserSmsConfigService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.fs.passage.domain.FluxPassageGroup;
 import com.huashi.fs.passage.service.IFsPassageGroupService;
 import com.huashi.hsboss.annotation.ViewMenu;
@@ -46,10 +49,8 @@ import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.sms.passage.domain.SmsPassageGroup;
-import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.passage.service.ISmsPassageGroupService;
 import com.jfinal.ext.route.ControllerBind;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * 客户基本信息
@@ -62,29 +63,27 @@ import org.apache.commons.lang3.StringUtils;
 public class CustomerController extends BaseController {
 
     @BY_NAME
-    private IUserService iUserService;
+    private IUserService             iUserService;
     @BY_NAME
-    private IRegisterService iRegisterService;
+    private IRegisterService         iRegisterService;
     @BY_NAME
-    private ISystemConfigService iSystemConfigService;
+    private ISystemConfigService     iSystemConfigService;
     @BY_NAME
-    private IPushConfigService iPushConfigService;
+    private IPushConfigService       iPushConfigService;
     @BY_NAME
     private IUserFluxDiscountService iUserFluxDiscountService;
     @BY_NAME
-    private IUserBalanceService iUserBalanceService;
+    private IUserBalanceService      iUserBalanceService;
     @BY_NAME
-    private IUserPassageService iUserPassageService;
+    private IUserPassageService      iUserPassageService;
     @BY_NAME
-    private ISmsPassageGroupService iSmsPassageGroupService;
+    private ISmsPassageGroupService  iSmsPassageGroupService;
     @BY_NAME
-    private IFsPassageGroupService iFsPassageGroupService;
+    private IFsPassageGroupService   iFsPassageGroupService;
     @BY_NAME
-    private IUserSmsConfigService iUserSmsConfigService;
+    private IUserSmsConfigService    iUserSmsConfigService;
     @BY_NAME
-    private ISmsPassageAccessService iSmsPassageAccessService;
-    @BY_NAME
-    private IUserDeveloperService iUserDeveloperService;
+    private IUserDeveloperService    iUserDeveloperService;
 
     public void index() {
         String fullName = getPara("fullName");
@@ -93,8 +92,8 @@ public class CustomerController extends BaseController {
         String cardNo = getPara("cardNo");
         String state = getPara("state");
         String appkey = getPara("appkey");
-        BossPaginationVo<UserProfile> page = iUserService.findPage(getPN(),
-                fullName, mobile, company, cardNo, state,appkey);
+        BossPaginationVo<UserProfile> page = iUserService.findPage(getPN(), fullName, mobile, company, cardNo, state,
+                                                                   appkey);
 
         setAttr("fullName", fullName);
         setAttr("mobile", mobile);
@@ -102,7 +101,7 @@ public class CustomerController extends BaseController {
         setAttr("cardNo", cardNo);
         setAttr("state", state);
         setAttr("page", page);
-        setAttr("appkey",appkey);
+        setAttr("appkey", appkey);
 
     }
 
@@ -116,32 +115,32 @@ public class CustomerController extends BaseController {
 
         List<SystemConfig> defaultGroupList = iSystemConfigService.findByType(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name());
         List<SmsPassageGroup> smsPassageGroupList = iSmsPassageGroupService.findAll();
-//        List<FluxPassageGroup> fxPassageGroupList = iFsPassageGroupService.findAll();
+        // List<FluxPassageGroup> fxPassageGroupList = iFsPassageGroupService.findAll();
 
         setAttr("balanceConfigMap", balanceConfigMap);
         setAttr("defaultGroupList", defaultGroupList);
         setAttr("fluxConfigList", fluxConfigList);
         setAttr("smsPassageGroupList", smsPassageGroupList);
-        
+
         setAttr("smsReturnRules", SmsReturnRule.values());
         setAttr("smsMessagePass", SmsMessagePass.values());
         setAttr("smsNeedTemplates", SmsNeedTemplate.values());
         setAttr("smsPickupTemplates", SmsPickupTemplate.values());
         setAttr("smsSignatureSources", SmsSignatureSource.values());
-//        setAttr("fxPassageGroupList", fxPassageGroupList);
+        // setAttr("fxPassageGroupList", fxPassageGroupList);
     }
 
     public void create() {
         User user = getModel(User.class, "user");
         boolean checkMobile = iUserService.isUserExistsByMobile(user.getMobile());
-        if(checkMobile){
-            renderResultJson(false,"该手机号码已经存在！");
+        if (checkMobile) {
+            renderResultJson(false, "该手机号码已经存在！");
             return;
         }
-        if(StringUtils.isNotBlank(user.getEmail())){
+        if (StringUtils.isNotBlank(user.getEmail())) {
             boolean checkEmail = iUserService.isUserExistsByEmail(user.getEmail());
-            if(checkEmail){
-                renderResultJson(false,"该Email已经存在！");
+            if (checkEmail) {
+                renderResultJson(false, "该Email已经存在！");
                 return;
             }
         }
@@ -201,11 +200,11 @@ public class CustomerController extends BaseController {
         userFluxDiscount.setLocalCuOff(Double.valueOf(getPara("local_cu")));
 
         String smsSendUrl = getPara("smsSendUrl");
-        int sendUrlFlag = getParaToInt("sendUrlFlag",0);
-        int sendUrlType = getParaToInt("sendUrlType",0);
-        if(sendUrlFlag == 1){
+        int sendUrlFlag = getParaToInt("sendUrlFlag", 0);
+        int sendUrlType = getParaToInt("sendUrlType", 0);
+        if (sendUrlFlag == 1) {
             sendUrlFlag = sendUrlType;
-            if(sendUrlType == 0){
+            if (sendUrlType == 0) {
                 smsSendUrl = "";
             }
         }
@@ -268,18 +267,19 @@ public class CustomerController extends BaseController {
 
         UserFluxDiscount fluxDiscount = iUserFluxDiscountService.getByUserId(userId);
         Map<String, Object> fluxMap = new LinkedHashMap<String, Object>();
-        String[] discountProperty = {"localCmOff", "localCtOff", "localCuOff", "globalCmOff", "globalCtOff", "globalCuOff"};
-        String[] discountName = {"省内移动折扣", "省内电信折扣", "省内联通折扣", "全国移动折扣", "全国电信折扣", "全国联通折扣"};
+        String[] discountProperty = { "localCmOff", "localCtOff", "localCuOff", "globalCmOff", "globalCtOff",
+                "globalCuOff" };
+        String[] discountName = { "省内移动折扣", "省内电信折扣", "省内联通折扣", "全国移动折扣", "全国电信折扣", "全国联通折扣" };
         for (String property : discountProperty) {
             String firstLetter = property.substring(0, 1).toUpperCase();
             String getter = "get" + firstLetter + property.substring(1);
-            Method method = fluxDiscount.getClass().getMethod(getter, new Class[]{});
-            Object value = method.invoke(fluxDiscount, new Object[]{});
+            Method method = fluxDiscount.getClass().getMethod(getter, new Class[] {});
+            Object value = method.invoke(fluxDiscount, new Object[] {});
             fluxMap.put(property, value);
         }
 
         List<UserPassage> passageList = iUserPassageService.findByUserId(userId);
-        setAttr("passageList",passageList);
+        setAttr("passageList", passageList);
         List<SmsPassageGroup> smsPassageGroupList = iSmsPassageGroupService.findAll();
         setAttr("smsPassageGroupList", smsPassageGroupList);
 
@@ -297,9 +297,8 @@ public class CustomerController extends BaseController {
         setAttr("balanceMap", balanceMap);
         setAttr("payTypeMap", payTypeMap);
 
-
         UserDeveloper developer = iUserDeveloperService.getByUserId(userId);
-        setAttr("developer",developer);
+        setAttr("developer", developer);
 
         setAttr("userProfile", profile);
         setAttr("user", user);
@@ -311,48 +310,59 @@ public class CustomerController extends BaseController {
         setAttr("userSmsConfig", iUserSmsConfigService.getByUserId(userId));
     }
 
-    //更新帐号信息
+    // 更新帐号信息
     public void updateUser() {
         User user = getModel(User.class, "user");
 
         User mobileUser = iUserService.getByMobile(user.getMobile());
-        if(mobileUser != null && !mobileUser.getId().equals(user.getId())){
-            renderResultJson(false,"该手机号码已经存在！");
+        if (mobileUser != null && !mobileUser.getId().equals(user.getId())) {
+            renderResultJson(false, "该手机号码已经存在！");
             return;
         }
-        if(StringUtils.isNotBlank(user.getEmail())){
+        if (StringUtils.isNotBlank(user.getEmail())) {
             User emailUser = iUserService.getByEmail(user.getEmail());
-            if(emailUser != null && !emailUser.getId().equals(user.getId())){
-                renderResultJson(false,"该Email已经存在！");
+            if (emailUser != null && !emailUser.getId().equals(user.getId())) {
+                renderResultJson(false, "该Email已经存在！");
                 return;
             }
         }
 
-
-        UserDeveloper developer = getModel(UserDeveloper.class,"developer");
-        renderResultJson(iUserService.updateUserInfo(user,developer));
+        UserDeveloper developer = getModel(UserDeveloper.class, "developer");
+        renderResultJson(iUserService.updateUserInfo(user, developer));
     }
 
-    //更新基础信息
+    // 更新基础信息
     public void updateBasic() {
-    	UserProfile userProfile = getModel(UserProfile.class, "userProfile");
+        UserProfile userProfile = getModel(UserProfile.class, "userProfile");
         String gender = getPara("gender");
         userProfile.setGender(gender);
         renderResultJson(iUserService.updateUserProfile(userProfile));
     }
 
-    //更新短信
+    /**
+     * TODO 更新短信配置信息
+     */
     public void updateSms() {
         int userId = getParaToInt("userId");
-        String smsUpUrl = getPara("smsUpUrl");
-        String balance = getPara("balance_1");
 
+        renderResultJson(iUserService.updateSms(userId, getPara("balance_1"), getParaToInt("smsPayType"),
+                                                getPushConfigs(userId), getParaToInt("smsGroupId"),
+                                                getModel(UserSmsConfig.class, "userSmsConfig")));
+    }
+
+    /**
+     * TODO 组装上/下行推送配置
+     * 
+     * @param userId
+     * @return
+     */
+    private List<PushConfig> getPushConfigs(Integer userId) {
         String smsSendUrl = getPara("smsSendUrl");
-        int sendUrlFlag = getParaToInt("sendUrlFlag",0);
-        int sendUrlType = getParaToInt("sendUrlType",0);
-        if(sendUrlFlag == 1){
+        int sendUrlFlag = getParaToInt("sendUrlFlag", 0);
+        int sendUrlType = getParaToInt("sendUrlType", 0);
+        if (sendUrlFlag == 1) {
             sendUrlFlag = sendUrlType;
-            if(sendUrlType == 0){
+            if (sendUrlType == 0) {
                 smsSendUrl = "";
             }
         }
@@ -366,22 +376,15 @@ public class CustomerController extends BaseController {
         configList.add(smsConfig);
 
         PushConfig smsUpConfig = new PushConfig();
-        smsUpConfig.setUrl(smsUpUrl);
+        smsUpConfig.setUrl(getPara("smsUpUrl"));
         smsUpConfig.setType(PushConfigType.SMS_MO_REPORT.getCode());
         smsUpConfig.setUserId(userId);
         configList.add(smsUpConfig);
-        
-        UserSmsConfig userSmsConfig = getModel(UserSmsConfig.class, "userSmsConfig");
-        userSmsConfig.setUserId(userId);
-        iUserSmsConfigService.update(userSmsConfig);
-        boolean result = iUserService.updateSms(userId, balance,getParaToInt("smsPayType"), configList,getParaToInt("smsGroupId"));
-        if(result){
-            iSmsPassageAccessService.updateByModifyUser(userId);
-        }
-        renderResultJson(result);
+
+        return configList;
     }
 
-    //更新流量
+    // 更新流量
     public void updateFs() {
         String fluxUrl = getPara("fluxUrl");
         int userId = getParaToInt("userId");
@@ -393,11 +396,12 @@ public class CustomerController extends BaseController {
 
         UserFluxDiscount discount = getModel(UserFluxDiscount.class, "userFluxDiscount");
 
-        boolean result = iUserService.updateFs(userId, balance,getParaToInt("fsPayType"), pushConfig, discount,getParaToInt("fsGroupId"));
+        boolean result = iUserService.updateFs(userId, balance, getParaToInt("fsPayType"), pushConfig, discount,
+                                               getParaToInt("fsGroupId"));
         renderResultJson(result);
     }
 
-    //更新语音
+    // 更新语音
     public void updateVs() {
         String voiceUrl = getPara("voiceUrl");
         int userId = getParaToInt("userId");
@@ -407,15 +411,18 @@ public class CustomerController extends BaseController {
         pushConfig.setUrl(voiceUrl);
         pushConfig.setType(PushConfigType.VS_SEND_REPORT.getCode());
 
-        boolean result = iUserService.updateVs(userId, balance,getParaToInt("vsPayType"), pushConfig,getParaToInt("vsGroupId"));
-        renderResultJson(result);
+        renderResultJson(iUserService.updateVs(userId, balance, getParaToInt("vsPayType"), pushConfig,
+                                               getParaToInt("vsGroupId")));
     }
 
+    /**
+     * TODO 禁用/启用
+     */
     public void disabled() {
         renderResultJson(iUserService.changeStatus(getParaToInt("id"), getPara("flag")));
     }
 
-    //设置通道
+    // 设置通道
     public void setPassage() {
         List<UserPassage> list = iUserPassageService.findByUserId(getParaToInt("userId"));
         setAttr("list", list);
@@ -423,18 +430,18 @@ public class CustomerController extends BaseController {
 
     public void selectPasage() {
         int type = getParaToInt("type");
-        if (type == 1) {
+        if (type == PlatformType.SEND_MESSAGE_SERVICE.getCode()) {
             List<SmsPassageGroup> groupList = iSmsPassageGroupService.findAll();
             setAttr("groupList", groupList);
-        } else if (type == 2) {
+        } else if (type == PlatformType.FLUX_SERVICE.getCode()) {
             List<FluxPassageGroup> groupList = iFsPassageGroupService.findAll();
             setAttr("groupList", groupList);
-        } else if (type == 3) {
-            //TODO 实现语音的通道组
+        } else if (type == PlatformType.VOICE_SERVICE.getCode()) {
+            // TODO 实现语音的通道组
         }
     }
 
-    //更新通道
+    // 更新通道
     public void updatePassage() {
         List<UserPassage> list = new ArrayList<UserPassage>();
         String[] groupIds = getPara("groupIds").split(",");
@@ -459,8 +466,8 @@ public class CustomerController extends BaseController {
         String company = getPara("company");
         String cardNo = getPara("cardNo");
         String state = getPara("state");
-        BossPaginationVo<UserProfile> page = iUserService.findPage(getPN(),
-                fullName, mobile, company, cardNo, state, null);
+        BossPaginationVo<UserProfile> page = iUserService.findPage(getPN(), fullName, mobile, company, cardNo, state,
+                                                                   null);
         page.setJumpPageFunction("userJumpPage");
         setAttr("fullName", fullName);
         setAttr("mobile", mobile);
@@ -474,7 +481,7 @@ public class CustomerController extends BaseController {
     /**
      * 密码生成
      */
-    public void generatePassword(){
-    	renderResultJson(true,"生成成功",iUserService.generatePassword());
+    public void generatePassword() {
+        renderResultJson(true, "生成成功", iUserService.generatePassword());
     }
 }

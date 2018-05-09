@@ -28,7 +28,6 @@ import com.huashi.common.settings.context.SettingsContext.SystemConfigType;
 import com.huashi.common.settings.domain.SystemConfig;
 import com.huashi.common.settings.service.ISystemConfigService;
 import com.huashi.common.user.domain.UserDeveloper;
-import com.huashi.common.user.domain.UserPassage;
 import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.vo.BossPaginationVo;
@@ -533,22 +532,22 @@ public class SmsPassageService implements ISmsPassageService {
 		}
 		
 		try {
-			UserPassage userPassage = userPassageService.getByUserIdAndType(Integer.parseInt(userId), PlatformType.SEND_MESSAGE_SERVICE.getCode());
-			if(userPassage == null) {
+			Integer passageGroupId = userPassageService.getByUserIdAndType(Integer.parseInt(userId), PlatformType.SEND_MESSAGE_SERVICE.getCode());
+			if(passageGroupId == null) {
 				logger.error("通道测试用户未配置短信通道组信息");
 				return false;
 			}
 			
-			boolean result = passageGroupService.doChangeGroupPassage(userPassage.getPassageGroupId(), passageId);
+			boolean result = passageGroupService.doChangeGroupPassage(passageGroupId, passageId);
 			if(!result) {
-				logger.error("通道组ID：{}，切换通道ID：{} 失败", userPassage.getPassageGroupId(), passageId);
+				logger.error("通道组ID：{}，切换通道ID：{} 失败", passageGroupId, passageId);
 				return false;
 			}
 			
 			// 更新通道组下 的可用通道相关
-			result = smsPassageAccessService.updateByModifyPassageGroup(userPassage.getPassageGroupId());
+			result = smsPassageAccessService.updateByModifyPassageGroup(passageGroupId);
 			if(!result) {
-				logger.error("通道组ID：{}，切换可用通道失败", userPassage.getPassageGroupId());
+				logger.error("通道组ID：{}，切换可用通道失败", passageGroupId);
 				return false;
 			}
 

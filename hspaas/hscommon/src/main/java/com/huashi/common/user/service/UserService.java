@@ -31,52 +31,57 @@ import com.huashi.common.settings.service.ISystemConfigService;
 import com.huashi.common.user.dao.UserBalanceMapper;
 import com.huashi.common.user.dao.UserFluxDiscountMapper;
 import com.huashi.common.user.dao.UserMapper;
-import com.huashi.common.user.dao.UserPassageMapper;
 import com.huashi.common.user.dao.UserProfileMapper;
 import com.huashi.common.user.domain.User;
 import com.huashi.common.user.domain.UserBalance;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.domain.UserFluxDiscount;
-import com.huashi.common.user.domain.UserPassage;
 import com.huashi.common.user.domain.UserProfile;
+import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.model.UserModel;
 import com.huashi.common.user.util.IdBuilder;
 import com.huashi.common.util.AESUtil;
 import com.huashi.common.util.SecurityUtil;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.constants.CommonContext.PlatformType;
+import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.service.ISmsMtPushService;
 
 @Service
 public class UserService implements IUserService {
 
     @Autowired
-    private UserMapper             userMapper;
+    private UserMapper               userMapper;
     @Autowired
-    private UserProfileMapper      userProfileMapper;
+    private UserProfileMapper        userProfileMapper;
     @Autowired
-    private UserBalanceMapper      userBalanceMapper;
+    private UserBalanceMapper        userBalanceMapper;
     @Autowired
-    private UserPassageMapper      userPassageMapper;
+    private IUserPassageService      userPassageService;
     @Autowired
-    private UserProfileMapper      profileMapper;
+    private UserProfileMapper        profileMapper;
     @Autowired
-    private IUserDeveloperService  developerService;
+    private IUserDeveloperService    developerService;
     @Autowired
-    private IUserDeveloperService  userDeveloperService;
+    private IUserDeveloperService    userDeveloperService;
     @Reference
-    private ISmsMtPushService      smsMtPushService;
+    private ISmsMtPushService        smsMtPushService;
+    @Autowired
+    private IPushConfigService       pushConfigService;
+    @Reference
+    private ISmsPassageAccessService smsPassageAccessService;
+    @Autowired
+    private IUserSmsConfigService    userSmsConfigService;
+    @Autowired
+    private IUserAccountService      userAccountService;
     @Resource
-    private IPushConfigService     pushConfigService;
+    private StringRedisTemplate      stringRedisTemplate;
     @Autowired
-    private IUserAccountService    userAccountService;
-    @Resource
-    private StringRedisTemplate    stringRedisTemplate;
+    private ISystemConfigService     systemConfigService;
     @Autowired
-    private ISystemConfigService   systemConfigService;
-    @Autowired
-    private UserFluxDiscountMapper userFluxDiscountMapper;
+    private UserFluxDiscountMapper   userFluxDiscountMapper;
 
-    private Logger                 logger = LoggerFactory.getLogger(getClass());
+    private Logger                   logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public UserDeveloper save(User user, UserProfile profile) {
@@ -333,20 +338,45 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional(readOnly = false)
     public boolean updateSms(int userId, String balance, int payType, List<PushConfig> pushConfigList,
-                             int passageGroupId) {
+                             int passageGroupId, UserSmsConfig userSmsConfig) {
         try {
-            userBalanceMapper.updateByUserId(new UserBalance(userId, 1, payType, Double.valueOf(balance)));
-            userPassageMapper.updateByUserIdAndType(new UserPassage(userId, 1, passageGroupId));
-            for (PushConfig config : pushConfigList) {
-                pushConfigService.updateByUserId(config);
+            int effect = userBalanceMapper.updateByUserId(new UserBalance(userId,
+                                                                          PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                                          payType, Double.valueOf(balance)));
+
+            if (effect <= 0) {
+                throw new RuntimeException("更新短信余额失败");
             }
-            
+
+            boolean isOk = userPassageService.update(userId, PlatformType.SEND_MESSAGE_SERVICE.getCode(), passageGroupId);
+
+            if (!isOk) {
+                throw new RuntimeException("更新用户通道组配置失败");
+            }
+
+            for (PushConfig config : pushConfigList) {
+                effect = pushConfigService.updateByUserId(config);
+                if (effect <= 0) {
+                    throw new RuntimeException("更新短信推送配置失败");
+                }
+            }
+
+            userSmsConfig.setUserId(userId);
+            isOk = userSmsConfigService.update(userSmsConfig);
+            if (!isOk) {
+                throw new RuntimeException("更新短信基础配置失败");
+            }
+
+            isOk = smsPassageAccessService.updateByModifyUser(userId);
+            if (!isOk) {
+                throw new RuntimeException("更新短信可用通道失败");
+            }
+
             return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            e.printStackTrace();
+            logger.error("更新用户  [" + userId + "] 短信配置失败", e);
             return false;
         }
     }
@@ -356,12 +386,12 @@ public class UserService implements IUserService {
     public boolean updateFs(int userId, String balance, int payType, PushConfig pushConfig,
                             UserFluxDiscount userFluxDiscount, int passageGroupId) {
         try {
-            userBalanceMapper.updateByUserId(new UserBalance(userId, 2, payType, Double.valueOf(balance)));
-            userPassageMapper.updateByUserIdAndType(new UserPassage(userId, 2, passageGroupId));
+            userBalanceMapper.updateByUserId(new UserBalance(userId, PlatformType.FLUX_SERVICE.getCode(), payType, Double.valueOf(balance)));
+            userPassageService.update(userId, PlatformType.FLUX_SERVICE.getCode(), passageGroupId);
             userFluxDiscount.setUserId(userId);
             userFluxDiscountMapper.updateByUserId(userFluxDiscount);
             pushConfigService.updateByUserId(pushConfig);
-            
+
             return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -373,10 +403,10 @@ public class UserService implements IUserService {
     @Transactional(readOnly = false)
     public boolean updateVs(int userId, String balance, int payType, PushConfig pushConfig, int passageGroupId) {
         try {
-            userBalanceMapper.updateByUserId(new UserBalance(userId, 3, payType, Double.valueOf(balance)));
-            userPassageMapper.updateByUserIdAndType(new UserPassage(userId, 3, passageGroupId));
+            userBalanceMapper.updateByUserId(new UserBalance(userId, PlatformType.VOICE_SERVICE.getCode(), payType, Double.valueOf(balance)));
+            userPassageService.update(userId, PlatformType.VOICE_SERVICE.getCode(), passageGroupId);
             pushConfigService.updateByUserId(pushConfig);
-            
+
             return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

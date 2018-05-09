@@ -254,16 +254,16 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     public boolean updateByModifyUser(int userId) {
         try {
             // 根据userId 获取用户短信通道组关系信息
-            UserPassage userPassage = userPassageService.getByUserIdAndType(userId, PassageTemplateType.SMS.getValue());
-            if (userPassage == null) {
+            Integer passageGroupId = userPassageService.getByUserIdAndType(userId, PassageTemplateType.SMS.getValue());
+            if (passageGroupId == null) {
                 logger.error("根据用户：{} 查不到相关短信通道对应关系", userId);
                 return false;
             }
 
             // 根据通道组ID查询通道组详细信息
-            List<SmsPassageGroupDetail> detailList = smsPassageGroupDetailMapper.findPassageByGroupId(userPassage.getPassageGroupId());
+            List<SmsPassageGroupDetail> detailList = smsPassageGroupDetailMapper.findPassageByGroupId(passageGroupId);
             if (CollectionUtils.isEmpty(detailList)) {
-                logger.warn("通道组ID：{} 查不到相关短信通道集合数据", userPassage.getPassageGroupId());
+                logger.warn("通道组ID：{} 查不到相关短信通道集合数据", passageGroupId);
             }
 
             // 根据用户ID删除所有的可用通道信息
@@ -283,7 +283,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
                     continue;
                 }
 
-                replacePassageValue2Access(detail, userId, userPassage.getPassageGroupId());
+                replacePassageValue2Access(detail, userId, passageGroupId);
             }
 
             return true;

@@ -19,6 +19,11 @@ public class CommonRedisConstant {
 	 * 用户短信配置信息
 	 */
 	public static final String RED_USER_SMS_CONFIG = "red_user_sms_config";
+	
+	/**
+     * 用户短信通道
+     */
+    public static final String RED_USER_SMS_PASSAGE = "red_user_sms_passage";
 
 	/**
 	 * 用户服务器IP报备信息

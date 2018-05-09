@@ -102,6 +102,12 @@
 		where id = #{id,jdbcType=INTEGER}
 	</update>
 
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_passage
+	</select>
+
 	<select id="selectByUserIdAndType" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
@@ -120,10 +126,12 @@
 	</delete>
 
 	<update id="updateByUserIdAndType">
-		update hspaas_user_passage set passage_group_id = #{passageGroupId} where user_id = #{userId} and type = #{type}
+		update hspaas_user_passage set passage_group_id =
+		#{passageGroupId} where user_id = #{userId} and type = #{type}
 	</update>
 
 	<select id="getPassageGroupListByGroupId" resultMap="BaseResultMap">
-		select * from hspaas_user_passage where passage_group_id = #{passageGroupId}
+		select *
+		from hspaas_user_passage where passage_group_id = #{passageGroupId}
 	</select>
 </mapper>

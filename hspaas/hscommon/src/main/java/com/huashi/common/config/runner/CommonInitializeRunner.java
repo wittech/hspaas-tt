@@ -14,6 +14,7 @@ import com.huashi.common.settings.service.IPushConfigService;
 import com.huashi.common.settings.service.ISystemConfigService;
 import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.service.IUserDeveloperService;
+import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.user.service.IUserSmsConfigService;
 
@@ -37,6 +38,9 @@ public class CommonInitializeRunner implements CommandLineRunner {
 	private IMobileLocalService mobileLocalService;
 	@Autowired
 	private ISystemConfigService systemConfigService;
+	@Autowired
+    private IUserPassageService userPassageService;
+	
 	
 	@Value("${gate.redis.relaod:1}")
 	private int redisReload;
@@ -56,6 +60,7 @@ public class CommonInitializeRunner implements CommandLineRunner {
 	        initUserDeveloperList();
 	        initUserSmsConfig();
 	        initUserPushConfig();
+	        initUserPassage();
 	        initHostWhiteList();
 	        initProvince();
 	        initProvinceMobileLocal();
@@ -104,6 +109,18 @@ public class CommonInitializeRunner implements CommandLineRunner {
 		userSmsConfigService.reloadToRedis();
 		logger.info("用户短信配置信息初始化完成");
 	}
+	
+	/**
+     * 
+       * TODO 初始化用户通道组参数相关信息
+     */
+    private void initUserPassage() {
+        if(userPassageService.reloadModelToRedis()) {
+            logger.info("用户通道组相关信息初始化成功");
+            return;
+        }
+        logger.error("用户通道组相关初始化失败");
+    }
 	
 	/**
 	 * 

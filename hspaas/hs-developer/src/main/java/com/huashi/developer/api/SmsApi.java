@@ -58,6 +58,24 @@ public class SmsApi extends BasicApiSupport {
             return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
         }
     }
+    
+//    private SmsModel model() {
+//        SmsModel smsModel = new SmsModel();
+//        smsModel.setAppkey("aaaa");
+//        smsModel.setAppsecret("bbb");
+//        smsModel.setAppType(1);
+//        smsModel.setAttach("aaaa");
+//        smsModel.setContent("【华时】测试诶荣");
+//        smsModel.setCallback("http://sms.hspaas.cn/callback");
+//        smsModel.setExtNumber("12");
+//        smsModel.setFee(1);
+//        smsModel.setMobile("18809099981");
+//        smsModel.setTimestamp("223243");
+//        smsModel.setUserId(1);
+//        smsModel.setTotalFee(1);
+//        
+//        return smsModel;
+//    }
 
     /**
      * TODO 普通点对点提交短信

@@ -40,7 +40,7 @@ public class SmsMessageBatchTest {
     static {
         MOBILE_SIZE = 1;
         THREAD_SIZE = 200;
-        RQEUST_SIZE = 10;
+        RQEUST_SIZE = 5;
         
 //        MOBILE_SIZE = 1;
 //        THREAD_SIZE = 1;

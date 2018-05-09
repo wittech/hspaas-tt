@@ -34,7 +34,6 @@ import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.context.UserSettingsContext.SmsSignatureSource;
-import com.huashi.common.user.domain.UserPassage;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.common.user.service.IUserPassageService;
@@ -511,10 +510,10 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
      * @param task
      */
     private void markContentHasSensitiveWords(SmsMtTask task) {
-        // 判断敏感词开关是否开启
-        if (forbiddenWordsService.isForbiddenWordsAllowPassed()) {
-            return;
-        }
+        // 判断敏感词开关是否开启 edit by 20180509
+//        if (forbiddenWordsService.isForbiddenWordsAllowPassed()) {
+//            return;
+//        }
 
         // 短信模板报备白名单词汇（如果本次内容包含此词汇不算作敏感词）
         String whiteWordsRecord = messageTemplateLocal.get() == null ? null : messageTemplateLocal.get().getWhiteWord();
@@ -546,8 +545,8 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
      * @return
      */
     private SmsRoutePassage getUserRoutePassage(SmsMtTask task, MobileCatagory mobileCatagory) {
-        UserPassage userPassage = userPassageService.getByUserIdAndType(task.getUserId(), PlatformType.SEND_MESSAGE_SERVICE.getCode());
-        if (userPassage == null) {
+        Integer passageGroupId = userPassageService.getByUserIdAndType(task.getUserId(), PlatformType.SEND_MESSAGE_SERVICE.getCode());
+        if (passageGroupId == null) {
             task.getErrorMessageReport().append("用户通道组未找到");
             refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(), task.getForceActionsReport());
             return null;
