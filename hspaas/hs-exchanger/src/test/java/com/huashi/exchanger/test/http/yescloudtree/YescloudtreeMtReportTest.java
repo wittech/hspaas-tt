@@ -41,7 +41,7 @@ private Logger logger = LoggerFactory.getLogger(getClass());
 	
 	@Test
 	public void test() {
-		List<SmsMtMessageDeliver> list = resolver.mtPullDeliver(RequestTemplateHandler.parse(parameter.getParams()), 
+		List<SmsMtMessageDeliver> list = resolver.mtDeliver(RequestTemplateHandler.parse(parameter.getParams()), 
 				parameter.getUrl(), parameter.getSuccessCode());
 		
 		logger.info(JSON.toJSONString(list));

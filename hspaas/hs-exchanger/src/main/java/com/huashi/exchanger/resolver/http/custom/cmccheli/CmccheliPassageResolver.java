@@ -14,6 +14,7 @@ import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -318,8 +319,8 @@ public class CmccheliPassageResolver extends AbstractPassageResolver {
     }
 
     @Override
-    public Object balance(Object param) {
-        return 0;
+    public Double balance(TParameter tparameter, String url, Integer passageId) {
+        return 0d;
     }
 
     @Override

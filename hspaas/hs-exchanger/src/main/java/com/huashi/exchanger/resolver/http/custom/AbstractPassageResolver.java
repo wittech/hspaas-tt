@@ -1,22 +1,23 @@
 package com.huashi.exchanger.resolver.http.custom;
 
-import com.huashi.common.util.DateUtil;
-import com.huashi.exchanger.domain.ProviderSendResponse;
-import com.huashi.exchanger.template.vo.TParameter;
-import com.huashi.sms.passage.domain.SmsPassageParameter;
-import com.huashi.sms.record.domain.SmsMoMessageReceive;
-import com.huashi.sms.record.domain.SmsMtMessageDeliver;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.huashi.common.util.DateUtil;
+import com.huashi.exchanger.resolver.http.HttpPassageResolver;
+import com.huashi.exchanger.template.vo.TParameter;
+import com.huashi.sms.record.domain.SmsMoMessageReceive;
+import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 
 /**
  * TODO HTTP基础处理器
@@ -25,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version V1.0
  * @date 2018年01月27日 下午10:07:37
  */
-public abstract class AbstractPassageResolver {
+public abstract class AbstractPassageResolver implements HttpPassageResolver{
 
     @Resource
     private StringRedisTemplate        stringRedisTemplate;
@@ -33,7 +34,7 @@ public abstract class AbstractPassageResolver {
     /**
      * 通道简码对应的处理器实体类关系
      */
-    private static Map<String, Object> CODE_REFRENCE_BEANS             = new ConcurrentHashMap<>();
+    private static Map<String, HttpPassageResolver> CODE_REFRENCE_BEANS             = new HashMap<>();
 
     protected Logger                   logger                          = LoggerFactory.getLogger(getClass());
 
@@ -71,26 +72,14 @@ public abstract class AbstractPassageResolver {
      * @param code 通道简码
      * @return
      */
-    public static AbstractPassageResolver getInstance(String code) {
-        Object instance = CODE_REFRENCE_BEANS.get(code);
+    public static HttpPassageResolver getInstance(String code) {
+        HttpPassageResolver instance = CODE_REFRENCE_BEANS.get(code);
         if (instance == null) {
             throw new RuntimeException("通道简码：[" + code + "] 未找到相关http处理器");
         }
 
-        return (AbstractPassageResolver) instance;
+        return instance;
     }
-
-    /**
-     * TODO 发送短信（提交至通道商）
-     *
-     * @param parameter 通道参数
-     * @param mobile 手机号码
-     * @param content 短信内容
-     * @param extNumber 用户扩展号码
-     * @return
-     */
-    public abstract List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content,
-                                                    String extNumber);
 
     /**
      * TODO 下行状态报告回执(推送)
@@ -99,7 +88,7 @@ public abstract class AbstractPassageResolver {
      * @return
      */
     public List<SmsMtMessageDeliver> mtDeliver(String report, String successCode) {
-        throw new RuntimeException("not support, it must be implement");
+        throw new RuntimeException("not support");
     }
 
     /**
@@ -110,8 +99,8 @@ public abstract class AbstractPassageResolver {
      * @param successCode
      * @return
      */
-    public List<SmsMtMessageDeliver> mtPullDeliver(TParameter tparameter, String url, String successCode) {
-        throw new RuntimeException("not support, it must be implement");
+    public List<SmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
+        throw new RuntimeException("not support");
     }
 
     /**
@@ -121,7 +110,7 @@ public abstract class AbstractPassageResolver {
      * @return
      */
     public List<SmsMoMessageReceive> moReceive(String report, Integer passageId) {
-        throw new RuntimeException("not support, it must be implement");
+        throw new RuntimeException("not support");
     }
 
     /**
@@ -132,17 +121,9 @@ public abstract class AbstractPassageResolver {
      * @param passageId
      * @return
      */
-    public List<SmsMoMessageReceive> moPullReceive(TParameter tparameter, String url, Integer passageId) {
-        throw new RuntimeException("not support, it must be implement");
+    public List<SmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
+        throw new RuntimeException("not support");
     }
-
-    /**
-     * TODO 用户余额查询
-     *
-     * @param param
-     * @return
-     */
-    protected abstract Object balance(Object param);
 
     /**
      * TODO 处理器简码（必须唯一）
@@ -186,7 +167,8 @@ public abstract class AbstractPassageResolver {
         }
 
         try {
-            SimpleDateFormat ff = new java.text.SimpleDateFormat(StringUtils.isEmpty(format) ? "yyyyMMddHHmmss" : format);
+            SimpleDateFormat ff = new java.text.SimpleDateFormat(
+                                                                 StringUtils.isEmpty(format) ? "yyyyMMddHHmmss" : format);
             return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(ff.parse(dataNumber.toString()));
         } catch (Exception e) {
             return DateUtil.getNow();

@@ -190,9 +190,9 @@ public class DianjiPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public Object balance(Object param) {
-		return 0;
-	}
+    public Double balance(TParameter tparameter, String url, Integer passageId) {
+        return 0d;
+    }
 
 	@Override
 	public String code() {

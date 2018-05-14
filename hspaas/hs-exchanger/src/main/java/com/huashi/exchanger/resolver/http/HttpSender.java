@@ -29,7 +29,7 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
   * @date 2017年12月28日 上午10:00:17
  */
 @Component
-public class HttpResolver{
+public class HttpSender{
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     
@@ -155,7 +155,7 @@ public class HttpResolver{
      * @return
      */
     private List<SmsMtMessageDeliver> customStatusTranslate(SmsPassageAccess access, TParameter tparameter) {
-        return AbstractPassageResolver.getInstance(tparameter.customPassage()).mtPullDeliver(tparameter, access.getUrl(), access.getSuccessCode());
+        return AbstractPassageResolver.getInstance(tparameter.customPassage()).mtDeliver(tparameter, access.getUrl(), access.getSuccessCode());
     }
 
     /**
@@ -178,7 +178,7 @@ public class HttpResolver{
      * @return
      */
     private List<SmsMoMessageReceive> customMoTranslate(SmsPassageAccess access, TParameter tparameter) {
-        return AbstractPassageResolver.getInstance(tparameter.customPassage()).moPullReceive(tparameter, access.getUrl(), access.getPassageId());
+        return AbstractPassageResolver.getInstance(tparameter.customPassage()).moReceive(tparameter, access.getUrl(), access.getPassageId());
     }
 
     /**

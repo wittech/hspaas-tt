@@ -43,7 +43,7 @@ private Logger logger = LoggerFactory.getLogger(getClass());
 	@Test
 	public void test() {
 		
-		List<SmsMoMessageReceive> list = resolver.moPullReceive(RequestTemplateHandler.parse(parameter.getParams()), 
+		List<SmsMoMessageReceive> list = resolver.moReceive(RequestTemplateHandler.parse(parameter.getParams()), 
 				parameter.getUrl(), passageId);
 		
 		logger.info(JSON.toJSONString(list));

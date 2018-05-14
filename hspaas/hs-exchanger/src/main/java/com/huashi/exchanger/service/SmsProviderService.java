@@ -20,7 +20,7 @@ import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.exception.DataEmptyException;
 import com.huashi.exchanger.exception.ExchangeProcessException;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppProxySender;
-import com.huashi.exchanger.resolver.http.HttpResolver;
+import com.huashi.exchanger.resolver.http.HttpSender;
 import com.huashi.exchanger.resolver.sgip.SgipProxySender;
 import com.huashi.exchanger.resolver.smgp.SmgpProxySender;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
@@ -32,7 +32,7 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 public class SmsProviderService implements ISmsProviderService {
 
 	@Autowired
-	private HttpResolver httpResolver;
+	private HttpSender httpResolver;
 	@Autowired
 	private CmppProxySender cmppProxySender;
 	@Autowired

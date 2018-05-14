@@ -285,9 +285,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public Object balance(Object param) {
-		return 0;
-	}
+    public Double balance(TParameter tparameter, String url, Integer passageId) {
+        return 0d;
+    }
 
 	@Override
 	public String code() {
@@ -295,7 +295,7 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public List<SmsMtMessageDeliver> mtPullDeliver(TParameter tparameter, String url, String successCode) {
+	public List<SmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
 		try {
 			String result = HttpClientManager.post(url, request(tparameter));
 			
@@ -308,7 +308,7 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public List<SmsMoMessageReceive> moPullReceive(TParameter tparameter, String url, Integer passageId) {
+	public List<SmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
 		
 		try {
 			String result = HttpClientManager.post(url, request(tparameter));
