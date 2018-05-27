@@ -297,15 +297,12 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
             
             SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
             model.setOriginMobile(model.getMobile());
-            long l0 = System.currentTimeMillis();
-            logger.error("messageConverter: " + (l0 - start) + "ms");
-
             
             // 用户短信配置中心数据
             UserSmsConfig smsConfig = getSmsConfig(model);
             
             long l1 = System.currentTimeMillis();
-            logger.error("getSmsConfig: " + (l1 - l0) + "ms");
+            logger.error("getSmsConfig: " + (l1 - start) + "ms");
 
             // 获取短信模板信息
             loadSmsTemplateByContent(model, smsConfig);
@@ -708,6 +705,21 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
             messageTemplateLocal.set(template);
         }
     }
+    
+    /**
+     * 
+       * TODO 根据短信模板限速/限量值判断是否放行
+       * 
+       * @return
+     */
+    private boolean checkPassedByThreshold() {
+        // 如果提交频率为0并且一天内上限大于等于9999则不限制提交任何（也无需记录用户访问轨迹） edit by 20170813
+        if(messageTemplateLocal.get().getSubmitInterval() == 0 && messageTemplateLocal.get().getLimitTimes() >= 9999) {
+            return true;
+        }
+        
+        return false;
+    }
 
     /**
      * 判断用户手机号码是超限/超速
@@ -718,6 +730,11 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
      */
     private boolean isSameMobileOutOfRange(SmsMtTask task, UserSmsConfig smsConfig) {
         fillTemplateAttributes(smsConfig);
+        
+        // 免校验放行 edit by 20180527
+        if(checkPassedByThreshold()) {
+            return true;
+        }
 
         // 根据userId获取白名单手机号码数据
         Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(task.getUserId());

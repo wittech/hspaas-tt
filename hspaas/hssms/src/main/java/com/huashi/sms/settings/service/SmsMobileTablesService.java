@@ -95,11 +95,6 @@ public class SmsMobileTablesService implements ISmsMobileTablesService {
 	public int checkMobileIsBeyondExpected(int userId, Long templateId, String mobile, 
 			int maxSpeed, int maxLimit) {
 		
-		// 如果提交频率为0并且一天内上限大于等于9999则不限制提交任何（也无需记录用户访问轨迹） edit by 20170813
-		if(maxSpeed == 0 && maxLimit >= 9999) {
-            return NICE_PASSED;
-        }
-		
 		Integer _sendTotalCount = null;
 		try {
 		    // 如果上限次数为0，则不允许提交任何
