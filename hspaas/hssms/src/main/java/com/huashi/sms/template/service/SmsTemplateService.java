@@ -113,7 +113,7 @@ public class SmsTemplateService implements ISmsTemplateService {
 			logger.warn("REDIS 短信模板设置失败", e);
 		}
 	}
-
+	
 	/**
 	 * 
 	 * TODO 查询REDIS
@@ -456,7 +456,13 @@ public class SmsTemplateService implements ISmsTemplateService {
 		stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_USER_MESSAGE_TEMPLATE + "*"));
 		
 		for (MessageTemplate template : list) {
-			pushToRedis(template.getUserId(), template);
+		    try {
+	            stringRedisTemplate.opsForZSet().add(getKey(template.getUserId()), JSON.toJSONString(template), template.getPriority().doubleValue());
+	            
+	        } catch (Exception e) {
+	            logger.warn("REDIS 短信模板设置失败", e);
+	            return false;
+	        }
 		}
 		
 		return true;

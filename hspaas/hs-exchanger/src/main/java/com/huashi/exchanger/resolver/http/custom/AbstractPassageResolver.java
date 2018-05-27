@@ -88,7 +88,7 @@ public abstract class AbstractPassageResolver implements HttpPassageResolver{
      * @return
      */
     public List<SmsMtMessageDeliver> mtDeliver(String report, String successCode) {
-        throw new RuntimeException("not support");
+        throw new UnsupportedOperationException("not support");
     }
 
     /**
@@ -100,7 +100,7 @@ public abstract class AbstractPassageResolver implements HttpPassageResolver{
      * @return
      */
     public List<SmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
-        throw new RuntimeException("not support");
+        throw new UnsupportedOperationException("not support");
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class AbstractPassageResolver implements HttpPassageResolver{
      * @return
      */
     public List<SmsMoMessageReceive> moReceive(String report, Integer passageId) {
-        throw new RuntimeException("not support");
+        throw new UnsupportedOperationException("not support");
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class AbstractPassageResolver implements HttpPassageResolver{
      * @return
      */
     public List<SmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
-        throw new RuntimeException("not support");
+        throw new UnsupportedOperationException("not support");
     }
 
     /**

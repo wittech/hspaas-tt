@@ -2,18 +2,21 @@ package com.huashi.web.controller;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.alibaba.fastjson.JSONObject;
+import com.huashi.common.vo.PaginationVo;
 import com.huashi.common.vo.SessionUser;
 import com.huashi.web.context.WebConstants;
 
@@ -159,5 +162,62 @@ public class BaseController {
      */
     protected boolean isAllowedSms() {
         return true;
+    }
+
+    /**
+     * TODO 转换layui分页类
+     * 
+     * @param webPage
+     * @return
+     */
+    protected <T> LayuiPage parseLayuiPage(PaginationVo<T> webPage) {
+        return parseLayuiPage(webPage, "", "");
+    }
+
+    /**
+     * TODO 转换成layui分页类
+     * 
+     * @param webPage
+     * @param msg
+     * @param code
+     * @return
+     */
+    protected <T> LayuiPage parseLayuiPage(PaginationVo<T> webPage, String msg, String code) {
+        if (webPage == null || CollectionUtils.isEmpty(webPage.getList())) {
+            return null;
+        }
+
+        LayuiPage layuiPage = new LayuiPage();
+
+        layuiPage.setCode(code);
+        layuiPage.setMsg(msg);
+        layuiPage.setCount(webPage.getTotalRecord());
+        layuiPage.put(LayuiPage.DATA_NAME, webPage.getList());
+
+        return layuiPage;
+
+    }
+
+    protected static class LayuiPage extends HashMap<String, Object> {
+
+        private static final String CODE_NAME        = "code";
+        private static final String MSG_NAME         = "msg";
+        private static final String COUNT_NAME       = "count";
+        private static final String DATA_NAME        = "data";
+
+        private static final long   serialVersionUID = -3570363967052980674L;
+
+        public void setCode(String code) {
+            put(CODE_NAME, code);
+        }
+
+        public void setMsg(String msg) {
+            put(MSG_NAME, msg);
+        }
+
+        public void setCount(int count) {
+            put(COUNT_NAME, count);
+        }
+
     }
 }

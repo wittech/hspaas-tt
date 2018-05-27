@@ -47,7 +47,6 @@ import com.huashi.sms.passage.service.ISmsPassageMessageTemplateService;
 import com.huashi.sms.passage.service.ISmsPassageService;
 import com.huashi.sms.passage.service.SmsPassageMessageTemplateService;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
-import com.huashi.sms.record.service.ISmsMtPushService;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
 import com.huashi.sms.signature.service.ISignatureExtNoService;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
@@ -82,8 +81,6 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
 
     @Autowired
     private ISmsMtSubmitService               smsSubmitService;
-    @Autowired
-    private ISmsMtPushService                 smsMtPushService;
     @Autowired
     private ISmsPassageService                smsPassageService;
     @Autowired

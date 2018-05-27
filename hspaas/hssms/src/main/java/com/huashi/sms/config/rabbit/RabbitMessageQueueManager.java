@@ -19,9 +19,7 @@ import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.druid.util.StringUtils;
@@ -44,9 +42,6 @@ public class RabbitMessageQueueManager {
 	private MessageConverter messageConverter;
 	@Resource
 	private ConnectionFactory rabbitConnectionFactory;
-	
-	@Autowired
-	private ApplicationContext applicationContext;
 	
 	@Value("${mq.rabbit.consumers}")
 	private int concurrentConsumers;

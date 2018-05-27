@@ -213,15 +213,15 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         int _currentPage = PaginationVo.parse(currentPage);
 
         Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("userId", userId);
+//        paramMap.put("userId", userId);
         if (StringUtils.isNotBlank(sid)) {
             paramMap.put("sid", sid);
         }
         if (StringUtils.isNotBlank(mobile)) {
             paramMap.put("mobile", mobile);
         }
-        paramMap.put("startDate", DateUtil.getSecondDate(startDate + " 00:00:01").getTime());
-        paramMap.put("endDate", DateUtil.getSecondDate(endDate + " 23:59:59").getTime());
+//        paramMap.put("startDate", DateUtil.getSecondDate(startDate + " 00:00:01").getTime());
+//        paramMap.put("endDate", DateUtil.getSecondDate(endDate + " 23:59:59").getTime());
         int totalRecord = smsMtMessageSubmitMapper.findCount(paramMap);
         if (totalRecord == 0) {
             return null;

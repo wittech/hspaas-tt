@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant.MessageAction;
 import com.huashi.sms.settings.service.SmsMobileBlackListService;
@@ -52,6 +53,8 @@ public class SmsMobileBlacklistListener extends MessageListenerAdapter {
 				SmsMobileBlackListService.GLOBAL_MOBILE_BLACKLIST.remove(report[1]);
 				stringRedisTemplate.opsForHash().delete(SmsRedisConstant.RED_MOBILE_BLACKLIST, report[1]);
 			}
+			
+			logger.info("黑名单广播通知数据：{} 成功", JSON.toJSONString(report));
 			
 		} catch (Exception e) {
 			logger.warn("黑名单订阅数据失败", e);

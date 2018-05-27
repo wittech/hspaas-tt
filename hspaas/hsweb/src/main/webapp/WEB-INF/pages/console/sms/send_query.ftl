@@ -66,7 +66,7 @@
         // 表格渲染
         var tableIns = table.render({
             elem: '#dateTable'                  //指定原始表格元素选择器（推荐id选择器）
-            , height: vipTable.getFullHeight()    //容器高度
+            // , height: vipTable.getFullHeight()    //容器高度
             , cols: [[
                 , {field: 'id', title: '序', width: 80}
                 , {field: 'sid', title: 'SID', width: 120}
@@ -77,13 +77,14 @@
                 , {field: 'receiveStatus', title: '回执状态', width: 120}
                 , {field: 'pushInfo', title: '推送信息', width: 120}
             ]]
-            , url: './../json/data_table.json'
-            , method: 'get'
+            , url: '${rc.contextPath}/sms/send/page'
+            , method: 'post'
             , page: true
             , limits: [30, 60, 90, 150, 300]
             , limit: 30 //默认采用30
             , loading: false
             , done: function (res, curr, count) {
+            
                 //如果是异步请求数据方式，res即为你接口返回的信息。
                 //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
                 console.log(res);

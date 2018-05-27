@@ -62,6 +62,7 @@ public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 
 				// 如果本次循环时间超过5秒则跳出
 				if (CollectionUtils.isNotEmpty(tasks) && System.currentTimeMillis() - timer.get() >= timeout()) {
+				    logger.info("-----------超时size:{}", tasks.size());
 					operate(tasks, taskPackets);
 					continue;
 				}

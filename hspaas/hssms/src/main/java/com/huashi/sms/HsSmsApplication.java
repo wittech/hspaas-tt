@@ -2,7 +2,6 @@ package com.huashi.sms;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ImportResource;
 
 import com.huashi.common.util.LogUtils;
@@ -12,9 +11,8 @@ import com.huashi.common.util.LogUtils;
 public class HsSmsApplication {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext configurableApplicationContext = SpringApplication.run(HsSmsApplication.class,
-                                                                                              args);
-        configurableApplicationContext.registerShutdownHook();
+        SpringApplication.run(HsSmsApplication.class, args);
+        // configurableApplicationContext.registerShutdownHook();
 
         LogUtils.info("华时短信服务项目已启动");
     }

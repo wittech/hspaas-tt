@@ -7,7 +7,7 @@
                     <a href="javascript:;"><i class="layui-icon">&#xe620;</i>短信平台</a>
                     <dl class="layui-nav-child">
                         <dd><a href="javascript:;" href-url="${rc.contextPath}/sms/send"><i class="layui-icon">&#xe621;</i>发送短信</a></dd>
-                        <dd><a href="javascript:;" href-url="${rc.contextPath}/sms/send/list"><i class="layui-icon">&#xe621;</i>短信发送记录</a></dd>
+                        <dd><a href="javascript:;" href-url="${rc.contextPath}/sms/send/query"><i class="layui-icon">&#xe621;</i>短信发送记录</a></dd>
                         <#-- 
                         	<dd><a href="javascript:;" href-url="demo/btn.html"><i class="layui-icon">&#xe621;</i>短信接收记录</a></dd>
                         	<dd><a href="javascript:;" href-url="demo/btn.html"><i class="layui-icon">&#xe621;</i>调用接口失败记录</a></dd>

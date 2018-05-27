@@ -481,6 +481,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
                 return;
             }
 
+            long start = System.currentTimeMillis();
             int result = 0;
             if (CollectionUtils.isNotEmpty(tasks)) {
                 result = taskMapper.batchInsert(tasks);
@@ -488,6 +489,8 @@ public class SmsMtTaskService implements ISmsMtTaskService {
                     result = taskPacketsMapper.batchInsert(taskPackets);
                 }
             }
+            
+            logger.info("处理任务耗时：{} 共处理 ：{} 个， 子任务： {} 个", (System.currentTimeMillis() - start), tasks.size(), taskPackets.size());
 
             if (result == 0) {
                 throw new RuntimeException("数据执行失败");

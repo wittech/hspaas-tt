@@ -39,8 +39,8 @@ public class SmsMessageBatchTest {
     
     static {
         MOBILE_SIZE = 1;
-        THREAD_SIZE = 200;
-        RQEUST_SIZE = 5;
+        THREAD_SIZE = 100;
+        RQEUST_SIZE = 20;
         
 //        MOBILE_SIZE = 1;
 //        THREAD_SIZE = 1;
@@ -82,7 +82,7 @@ public class SmsMessageBatchTest {
 
 
 	public static void main(String[] args) throws InterruptedException {
-		ExecutorService service = Executors.newFixedThreadPool(50);
+		ExecutorService service = Executors.newFixedThreadPool(64);
 
 		CountDownLatch cdl = new CountDownLatch(THREAD_SIZE);
 		

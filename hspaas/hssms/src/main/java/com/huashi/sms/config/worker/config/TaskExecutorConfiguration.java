@@ -38,7 +38,7 @@ public class TaskExecutorConfiguration {
 		// 线程池所使用的缓冲队列
 		poolTaskExecutor.setQueueCapacity(200);
 		// 线程池维护线程的最少数量
-		poolTaskExecutor.setCorePoolSize(20);
+		poolTaskExecutor.setCorePoolSize(64);
 		// 线程池维护线程的最大数量
 		poolTaskExecutor.setMaxPoolSize(200);
 		// 线程池维护线程所允许的空闲时间

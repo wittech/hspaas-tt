@@ -240,16 +240,8 @@ public abstract class AbstractWorker<E> implements Runnable {
             if (isApplicationStop()) {
                 if (CollectionUtils.isNotEmpty(list)) {
                     logger.info("JVM关闭事件---当前线程处理数据不为空，执行最后一次后关闭线程...");
-                    
-                    
-                    
-                    
                     executeWithTimeCost(list);
                 }
-                
-                // 1、解决Springboot shutdown 优先问题（自定义shutdown要早于spring的，不然服务无法使用）
-                // 2、Rabbitmq 消费必须等所有的初始化完成才开始消费
-
                 break;
             }
 
