@@ -301,29 +301,17 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
             // 用户短信配置中心数据
             UserSmsConfig smsConfig = getSmsConfig(model);
             
-            long l1 = System.currentTimeMillis();
-            logger.error("getSmsConfig: " + (l1 - start) + "ms");
-
             // 获取短信模板信息
             loadSmsTemplateByContent(model, smsConfig);
-            
-            long l2 = System.currentTimeMillis();
-            logger.error("loadSmsTemplateByContent: " + (l2 - l1) + "ms");
 
             // 校验同模板下手机号码是否超速，超量
             if (!isSameMobileOutOfRange(model, smsConfig)) {
                 asyncSendTask(model);
                 return;
             }
-            
-            long l3 = System.currentTimeMillis();
-            logger.error("isSameMobileOutOfRange: " + (l3 - l2) + "ms");
 
             // 如果短信内容包含敏感词，打标记
             markContentHasSensitiveWords(model);
-            
-            long l4 = System.currentTimeMillis();
-            logger.error("markContentHasSensitiveWords: " + (l4 - l3) + "ms");
 
             // 短信手机号码处理逻辑
             MobileCatagory mobileCatagory = findOutMatchedMobiles(model);
@@ -331,25 +319,17 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
                 asyncSendTask(model);
                 return;
             }
-            
-            long l5 = System.currentTimeMillis();
-            logger.error("findOutMatchedMobiles: " + (l5 - l4) + "ms");
 
             // 获取用户路由（分省）通道信息
             SmsRoutePassage routePassage = getUserRoutePassage(model, mobileCatagory, model.getUserId());
-            long l6 = System.currentTimeMillis();
-            logger.error("getUserRoutePassage: " + (l6 - l5) + "ms");
 
             // 通道分包逻辑
             doPassagePacketsFinished(model, mobileCatagory, routePassage);
-            
-            long l7 = System.currentTimeMillis();
-            logger.error("doPassagePacketsFinished: " + (l7 - l6) + "ms");
 
         } catch (Exception e) {
             logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
         } finally {
-            logger.error("##############耗时：{} MS", System.currentTimeMillis() - start);
+            logger.error("##############分包总耗时：{} ms", System.currentTimeMillis() - start);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             // 清除ThreadLocal对象，加速GC，减小内存压力
             messageTemplateLocal.remove();
