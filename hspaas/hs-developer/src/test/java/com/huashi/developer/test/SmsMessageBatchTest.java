@@ -40,7 +40,7 @@ public class SmsMessageBatchTest {
     static {
         MOBILE_SIZE = 1;
         THREAD_SIZE = 100;
-        RQEUST_SIZE = 20;
+        RQEUST_SIZE = 50;
         
 //        MOBILE_SIZE = 1;
 //        THREAD_SIZE = 1;
@@ -63,7 +63,7 @@ public class SmsMessageBatchTest {
 	public static boolean send() {
 		String mobile = getMobiles();
 
-		String content = String.format("【华时科技】您的短信验证码为%s，请尽快完成后续操作。", RandomUtil.getRandomNum());
+		String content = String.format("【华时科技】您的领取验证码 咨询是%s，推出如非本人发送请忽略该入会员信息。", RandomUtil.getRandomNum());
 
 		System.out.println(Thread.currentThread().getName() + "-> 短信内容：" + content);
 

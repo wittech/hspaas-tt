@@ -17,6 +17,6 @@
 	<!--uncomment this if you want to test dubbo's monitor -->
 	<!-- <dubbo:monitor protocol="registry"/> -->
 
-	<!-- <dubbo:annotation package="com.huashi" /> -->
+	<dubbo:annotation package="com.huashi" />
 
 </beans>

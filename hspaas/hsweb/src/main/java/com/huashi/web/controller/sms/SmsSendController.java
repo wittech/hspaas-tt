@@ -19,7 +19,6 @@ import com.huashi.common.notice.vo.SmsResponse;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.util.DateUtil;
-import com.huashi.common.util.RandomUtil;
 import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
@@ -33,9 +32,6 @@ import com.huashi.web.controller.BaseController;
 @Controller
 @RequestMapping("/sms/send")
 public class SmsSendController extends BaseController {
-
-    // 短信测试内容
-    private final static String       TEST_TITLE = "您的短信验证码为";
 
     @Reference
     private ISmsMtSubmitService       submitService;
@@ -54,7 +50,7 @@ public class SmsSendController extends BaseController {
      * @param model
      * @return
      */
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public String index(Model model) {
         return "/console/sms/send_sms";
     }
@@ -91,33 +87,6 @@ public class SmsSendController extends BaseController {
     }
 
     /**
-     * TODO 短信测试 首页
-     * 
-     * @param model
-     * @return
-     */
-    @RequestMapping(value = "/test")
-    public String testIndex(Model model) {
-        model.addAttribute("content", TEST_TITLE);
-        model.addAttribute("security_code", RandomUtil.getRandomNum());
-        return "/sms/record/test/index";
-    }
-
-    /**
-     * TODO 短信测试
-     * 
-     * @param mobile
-     * @param content
-     * @return
-     */
-    @RequestMapping(value = "/test/send", method = RequestMethod.POST)
-    public @ResponseBody SmsResponse send(String mobile, String securityCode) {
-        UserDeveloper d = userDeveloperService.getByUserId(getCurrentUserId());
-
-        return messageSendService.sendCustomMessage(d.getAppKey(), d.getAppSecret(), mobile, TEST_TITLE + securityCode);
-    }
-
-    /**
      * 短信发送记录首页
      * 
      * @return
@@ -125,16 +94,16 @@ public class SmsSendController extends BaseController {
     @RequestMapping(value = "/query", method = RequestMethod.GET)
     public String query(Model model, String sid, String startDate, String endDate) {
         if (StringUtils.isNotEmpty(startDate)) {
-            model.addAttribute("start_date", startDate);
+            model.addAttribute("startDate", startDate);
         } else {
-            model.addAttribute("start_date", DateUtil.getDayGoXday(-7));
+            model.addAttribute("startDate", DateUtil.getDayGoXday(-7));
         }
         if (StringUtils.isNotEmpty(endDate)) {
-            model.addAttribute("stop_date", endDate);
+            model.addAttribute("endDate", endDate);
         } else {
-            model.addAttribute("stop_date", DateUtil.getCurrentDate());
+            model.addAttribute("endDate", DateUtil.getCurrentDate());
         }
-        model.addAttribute("min_date", DateUtil.getMonthXDay(-3));
+        model.addAttribute("minDate", DateUtil.getMonthXDay(-3));
         model.addAttribute("sid", sid);
         return "/console/sms/send_query";
     }
@@ -152,10 +121,8 @@ public class SmsSendController extends BaseController {
      */
     @RequestMapping(value = "/page")
     @ResponseBody
-    public LayuiPage page(String currentPage, String phoneNumber, String starDate, String endDate, String sid,
-                          Model model) {
-        return parseLayuiPage(submitService.findPage(getCurrentUserId(), phoneNumber, starDate, endDate,
-                                                     request.getParameter("currentPage"), sid));
+    public LayuiPage page(String currentPage, String mobile, String starDate, String endDate, Model model) {
+        return parseLayuiPage(submitService.findPage(getCurrentUserId(), mobile, starDate, endDate,currentPage, null));
     }
 
 }

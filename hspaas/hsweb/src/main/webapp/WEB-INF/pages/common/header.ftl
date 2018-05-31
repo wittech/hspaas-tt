@@ -1,35 +1,44 @@
-<!-- header -->
-<div class="layui-header my-header">
-    <a href="${rc.contextPath}/">
-        <!--<img class="my-header-logo" src="" alt="logo">-->
-        <div class="my-header-logo">华时融合平台</div>
-    </a>
-    <div class="my-header-btn">
-        <button class="layui-btn layui-btn-small btn-nav"><i class="layui-icon">&#xe65f;</i></button>
-    </div>
-
-    <!-- 顶部左侧添加选项卡监听 -->
-    <ul class="layui-nav" lay-filter="side-top-left">
-        <!--<li class="layui-nav-item"><a href="javascript:;" href-url="demo/btn.html"><i class="layui-icon">&#xe621;</i>按钮</a></li>
-        <li class="layui-nav-item">
-            <a href="javascript:;"><i class="layui-icon">&#xe621;</i>基础</a>
-            <dl class="layui-nav-child">
-                <dd><a href="javascript:;" href-url="demo/btn.html"><i class="layui-icon">&#xe621;</i>按钮</a></dd>
-                <dd><a href="javascript:;" href-url="demo/form.html"><i class="layui-icon">&#xe621;</i>表单</a></dd>
-            </dl>
-        </li>-->
-    </ul>
-
-    <!-- 顶部右侧添加选项卡监听 -->
-    <ul class="layui-nav my-header-user-nav" lay-filter="side-top-right">
-        <li class="layui-nav-item"><a href="javascript:;" class="pay" href-url="">当前余额</a></li>
-        <li class="layui-nav-item">
-            <a class="name" href="javascript:;"><img src="${rc.contextPath}/assets/static/image/code.png" alt="logo"> ${(Session["LOGIN_USER_SESSION_KEY"].mobile)!'18809099999'} </a>
-            <dl class="layui-nav-child">
-                <dd><a href="javascript:;" href-url="${rc.contextPath}/user/profile"><i class="layui-icon">&#xe621;</i>我的信息</a></dd>
-                <dd><a href="${rc.contextPath}/logout"><i class="layui-icon">&#x1006;</i>退出</a></dd>
-            </dl>
-        </li>
-    </ul>
-
+<div class="layui-header">
+	<div class="layui-logo">华时融合平台</div>
+	<div class="layui-logo kit-logo-mobile">华时融合平台</div>
+	<div class="admin-side-full">
+		<i class="fa fa-arrows-alt" aria-hidden="true" title="全屏"></i>
+	</div>
+	<div class="admin-side-config">
+		<i class="fa fa-cog" aria-hidden="true" title="配置开发者信息"></i>
+	</div>
+	<ul kit-one-level class="layui-nav layui-layout-left kit-nav top-nav">
+	</ul>
+	<ul class="layui-nav layui-layout-right kit-nav" style="margin-right:20px;">
+		<li class="layui-nav-item">
+			<a href="javascript:;" id="myAccount">
+				<i class="layui-icon">&#xe63f;</i> 短信余额: ${(smsBalance)!"未知"}
+			</a>
+		</li>
+		<li class="layui-nav-item" style="width:170px;">
+			<a href="javascript:;">
+				<span id="userName">${(Session["LOGIN_USER_SESSION_KEY"].mobile)!'18809099999'}</span>
+			</a>
+			<dl class="layui-nav-child">
+				<dd id="myProfile">
+					<a href="javascript:;"><i class="fa fa-user-circle" aria-hidden="true"></i> 个人信息</a>
+				</dd>
+				<dd id="updatePwd">
+					<a href="javascript:;"><i class="fa fa-gear" aria-hidden="true"></i> 修改密码</a>
+				</dd>
+				<#-- 
+				<dd id="lock">
+					<a href="javascript:;">
+						<i class="fa fa-lock" aria-hidden="true" style="padding-right: 3px;padding-left: 1px;"></i> 锁屏 (Alt+L)
+					</a>
+				</dd>
+				-->
+				<dd id="logout">
+					<a href="javascript:;" data-url="${rc.contextPath}/logout">
+						<i class="fa fa-sign-out" aria-hidden="true"></i> 注销
+					</a>
+				</dd>
+			</dl>
+		</li>
+	</ul>
 </div>

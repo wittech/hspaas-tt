@@ -1,7 +1,8 @@
-<!-- footer -->
-<#--
-<div class="layui-footer my-footer">
-    <p>华时融合平台v2.5.6</p>
-    <p>copyright © 2015-2018 京ICP备15044067号</p>
+<div class="layui-footer">
+	<!-- 底部固定区域 -->
+	<div class="layui-main" style="width: 100%; text-align: center;">
+		<p>2015 - 2018 &copy;
+			<a href="http://www.hspaas.cn" target="_blank">http://www.hspaas.cn</a>
+		</p>
+	</div>
 </div>
--->

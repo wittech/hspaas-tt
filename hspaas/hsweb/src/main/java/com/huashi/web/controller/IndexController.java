@@ -65,7 +65,7 @@ public class IndexController extends BaseController {
     @PermissionClear
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login() {
-        return "/member/login/login";
+        return "/login/login";
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
@@ -146,16 +146,16 @@ public class IndexController extends BaseController {
      */
     @RequestMapping(value = "/console", method = RequestMethod.GET)
     public String console(Model model) {
-//        if (!super.isLogin()) {
-//            return login();
-//        }
+        if (!super.isLogin()) {
+            return login();
+        }
 //
-//        model.addAttribute("accountBalance", userAccountService.getAccountByUserId(getCurrentUserId()));
-//        model.addAttribute("developer", userDeveloperService.getByUserId(getCurrentUserId()));
+        model.addAttribute("accountBalance", userAccountService.getAccountByUserId(getCurrentUserId()));
+        model.addAttribute("developer", userDeveloperService.getByUserId(getCurrentUserId()));
 //        model.addAttribute("notifications", notificationService.findTopList());
-//        model.addAttribute("balanceRemind", balanceRemindService.selectByUserId(getCurrentUserId()));
+        model.addAttribute("balanceRemind", balanceRemindService.selectByUserId(getCurrentUserId()));
 //
-//        this.balance(model);
+        this.balance(model);
         return "/console/console";
     }
     
@@ -180,7 +180,7 @@ public class IndexController extends BaseController {
                 continue;
             }
             if (PlatformType.SEND_MESSAGE_SERVICE.getCode() == balance.getType()) {
-                model.addAttribute("messageBalance", balance.getBalance());
+                model.addAttribute("smsBalance", balance.getBalance());
             } else if (PlatformType.FLUX_SERVICE.getCode() == balance.getType()) {
                 model.addAttribute("fluxBalance", balance.getBalance());
             } else if (PlatformType.VOICE_SERVICE.getCode() == balance.getType()) {

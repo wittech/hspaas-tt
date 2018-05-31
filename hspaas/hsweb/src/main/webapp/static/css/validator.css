@@ -1,0 +1,71 @@
+.onShow {
+	background:
+		url(../images/validator/onShow.png)
+		no-repeat;
+	padding-left: 20px;
+	margin-left: 10px;
+	margin-bottom : 5px;
+	font-size: 12px;
+	line-height: 18px;
+	vertical-align: middle;
+	color: #3e3e3e;
+}
+
+.onShow div {
+	margin-top : 10px;
+}
+
+.onFocus {
+	background: #FFF
+		url(../images/validator/onFocus.png)
+		no-repeat;
+	padding-left: 20px;
+	margin-bottom : 5px;
+	margin-left: 10px;
+	font-size: 12px;
+	line-height: 18px;
+	vertical-align: middle;
+	color: #3e3e3e;
+}
+
+.onError {
+	background: #FFF
+		url(../images/validator/onError.png)
+		no-repeat;
+	padding-left: 20px;
+	margin-bottom : 5px;
+	margin-left: 10px;
+	font-size: 12px;
+	line-height: 18px;
+	vertical-align: middle;
+	color: #ff3f13;
+}
+
+.onCorrect {
+	background: #FFF
+		url(../images/validator/onCorrect.png)
+		no-repeat;
+	padding-left: 20px;
+	margin-left: 10px;
+	font-size: 12px;
+	line-height: 18px;
+	vertical-align: middle;
+	color: #3e3e3e;
+}
+
+.onLoad {
+	background: #FFF
+		url(../images/validator/onLoad.png)
+		no-repeat 3px 3px;
+	padding-left: 20px;
+	margin-left: 10px;
+	margin-bottom : 5px;
+	font-size: 12px;
+	line-height: 18px;
+	vertical-align: middle;
+	color: #3e3e3e;
+}
+
+.inputOnShow {
+	color: #999999
+}

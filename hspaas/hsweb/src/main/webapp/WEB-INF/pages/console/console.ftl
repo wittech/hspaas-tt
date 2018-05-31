@@ -1,72 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>控制台首页 - 华时融合平台</title>
-    <#include "/common/assets.ftl"/>
-</head>
-<body>
 
-<!-- layout admin -->
-<div class="layui-layout layui-layout-admin">
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>控制台 - 华时融合平台</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+
+	<link rel="stylesheet" href="${rc.contextPath}/static/plugins/layui2/css/layui.css" media="all" />
+	<link rel="stylesheet" href="${rc.contextPath}/static/plugins/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="${rc.contextPath}/static/build/css/app.css" media="all">
+	<link rel="stylesheet" href="${rc.contextPath}/static/css/global2.css" media="all">
+	<link rel="stylesheet" href="${rc.contextPath}/static/build/css/themes/default.css" media="all" id="skin" kit-skin />
+</head>
+
+<body class="kit-theme">
+<div class="layui-layout layui-layout-admin kit-layout-admin">
 	<#include "/common/header.ftl"/>
 
+	<#-- 菜单栏 -->
 	<#include "/common/sidebar.ftl"/>
 	
-	<!-- body -->
-	<div class="layui-body my-body">
-	    <div class="layui-tab layui-tab-card my-tab" lay-filter="card" lay-allowClose="true">
-	        <ul class="layui-tab-title">
-	            <li class="layui-this" lay-id="1"><span><i class="layui-icon">&#xe638;</i>欢迎页</span></li>
-	        </ul>
-	        <div class="layui-tab-content">
-	            <div class="layui-tab-item layui-show">
-	                <iframe id="iframe" src="${rc.contextPath}/dashboard" frameborder="0"></iframe>
-	            </div>
-	        </div>
-	    </div>
+	<div class="layui-body" id="container">
+		<!-- 内容主体区域 -->
+		<div style="padding: 15px;">数据加载中,请稍等...</div>
 	</div>
-    
-    <#include "/common/footer.ftl"/>
+
+	<#include "/common/footer.ftl"/>
+
+	<!--锁屏模板 start-->
+	<script type="text/template" id="lock-temp">
+		<div class="admin-header-lock" id="lock-box">
+			<div class="admin-header-lock-img">
+				<img id="headPortrait2" src="${rc.contextPath}/static/images/0.jpg"/>
+			</div>
+			<div class="admin-header-lock-name" id="lockUserName"></div>
+			<input type="text" class="admin-header-lock-input" value="输入密码解锁.." name="lockPwd" id="lockPwd" />
+			<button class="layui-btn layui-btn-sm" id="unlock">解锁</button>
+		</div>
+	</script>
+	<!--锁屏模板 end -->
 </div>
-
-<#--
-<div class="my-pay-box none">
-    <div><img src="./frame/static/image/zfb.png" alt="支付宝"><p>支付宝</p></div>
-    <div><img src="./frame/static/image/wx.png" alt="微信"><p>微信</p></div>
-</div>
- -->
-
-<!-- 右键菜单 -->
-<div class="my-dblclick-box none">
-    <table class="layui-tab dblclick-tab">
-        <tr class="card-refresh">
-            <td><i class="layui-icon">&#x1002;</i>刷新当前标签</td>
-        </tr>
-        <tr class="card-close">
-            <td><i class="layui-icon">&#x1006;</i>关闭当前标签</td>
-        </tr>
-        <tr class="card-close-all">
-            <td><i class="layui-icon">&#x1006;</i>关闭所有标签</td>
-        </tr>
-    </table>
-</div>
-
-<script type="text/javascript" src="${rc.contextPath}/assets/layui/layui.js"></script>
-<script type="text/javascript" src="${rc.contextPath}/assets/static/js/vip_comm.js"></script>
-<script type="text/javascript">
-layui.use(['layer','vip_nav'], function () {
-
-    // 操作对象
-    var layer       = layui.layer
-        ,vipNav     = layui.vip_nav
-        ,$          = layui.jquery;
-
-    // 顶部左侧菜单生成 [请求地址,过滤ID,是否展开,携带参数]
-    vipNav.top_left('./json/nav_top_left.json','side-top-left',false);
-    // 主体菜单生成 [请求地址,过滤ID,是否展开,携带参数]
-    vipNav.main('./json/nav_main.json','side-main',true);
-
-});
-</script>
+<script src="${rc.contextPath}/static/js/custom_defines.js"></script>
+<script src="${rc.contextPath}/static/plugins/layui2/layui.js?v=2.2.2"></script>
+<script src="${rc.contextPath}/static/js/index/index2.js?v=20171204"></script>
 </body>
+
 </html>

@@ -418,12 +418,14 @@ public class UserService implements IUserService {
     public boolean updatePasword(int userId, String plainPassword, String newPassword) {
         User user = getById(userId);
         if (user == null) {
-            throw new RuntimeException("用户数据异常");
+            logger.error("用户 ： [ "+ userId+ "]数据异常");
+            return false;
         }
 
         boolean isSuccess = SecurityUtil.verify(user.getPassword(), plainPassword, user.getSalt());
         if (!isSuccess) {
-            throw new RuntimeException("用户原密码校验失败");
+            logger.error("用户 ： [ "+ userId+ "]原密码校验失败");
+            return false;
         }
 
         user.setSalt(SecurityUtil.salt());

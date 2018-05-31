@@ -1,0 +1,181 @@
+/* 更改默认样式 */
+.layui-layout-admin .layui-logo {
+    color: #ffffff;
+    font-size: 16px;
+}
+
+.layui-layout-admin .layui-logo {
+    width: 192px;
+}
+
+.layui-layout-left {
+    left: 260px;
+}
+
+.layui-side-scroll {
+    overflow-y: scroll;
+}
+
+.kit-layout-admin .layui-body {
+    left: 190px;
+    z-index: 999;
+    background-color: #ffffff;
+}
+
+.kit-layout-admin .kit-body-folded,.kit-layout-admin .kit-footer-folded {
+    left: 40px
+}
+
+.kit-layout-admin .layui-footer {
+    z-index: 999;
+    left: 0;
+}
+
+.layui-larry-search{
+    width: 220px;
+    position: absolute;
+    left: 320px;
+    top: 15px;
+}
+
+.layui-nav .layui-nav-item a {
+    padding: 0 25px;
+}
+
+.component .layui-input{height: 30px; line-height: 30px; padding-left: 12px; background-color: #424652; background-color: rgba(255,255,255,.05); border: none 0; color: #fff; font-size: 12px;}
+.component .layui-form-select .layui-edge{display: none; border-top-color: #999;}
+.component .layui-form-select dl{top: 36px; color: #000; background-color: rgba(255,255,255,.9)}
+
+
+.admin-side-toggle,.admin-side-full,.admin-side-config{
+    position: absolute; cursor: pointer;
+    z-index: 19940201;
+    left: 200px;
+    color: white;
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    background-color: #1AA094;
+    line-height: 30px;
+    top: 25%;
+}
+.admin-side-toggle:hover, .admin-side-full:hover, .admin-side-config:hover{
+    background-color: #5FB878;
+}
+
+.admin-side-config{
+    left: 240px;
+}
+
+.tree-title{
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    border-bottom: 1px solid #009688;
+    color: #000;
+    background: #fff;
+}
+
+.admin-main {margin: 15px 5px;}
+
+/*lock*/
+.admin-header-lock{
+    width: 320px; height: 150px; padding: 20px; position: relative; text-align: center;
+}
+.admin-header-lock-img{
+    width: 60px; height: 60px; margin: 0 auto;
+}
+.admin-header-lock-img img{
+    width: 60px; height: 60px; border-radius: 100%;
+}
+.admin-header-lock-name{
+    color: #009688;margin: 8px 0 15px 0;
+}
+.admin-header-lock-input{
+    width: 150px; color: #FFFFFF; height: 30px; border: 0;background-color: #009688; padding: 0 7px; border-radius: 2px;
+}
+
+
+.layui-form-search {
+    margin-bottom: 8px;
+    clear: both;
+}
+
+.layui-input-search, .layui-select-search .layui-input{
+    display: block;
+    width: 100%;
+    padding-left: 10px;
+}
+
+.layui-input-search, .layui-select-search .layui-input {
+    height: 28px;
+    line-height: 28px;
+    border: 1px solid #e6e6e6;
+    background-color: #fff;
+    border-radius: 2px;
+}
+
+.layui-select-search .layui-form-select dl{
+    top: 28px;
+}
+
+.layui-search-label {
+    float: left;
+    display: block;
+    padding: 0 15px;
+    width: 80px;
+    font-weight: 400;
+    text-align: right;
+    line-height: 28px;
+    position: relative;
+}
+
+.layui-advance-search{
+    display:none;
+    padding:5px 0;
+}
+
+.fa-pr5{
+    padding-right: 5px;
+}
+
+.tree-title{
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    border-bottom: 1px solid #009688;
+    color: #000;
+    background: #eee;
+}
+
+.layui-upload-img {
+    width: 92px;
+    height: 92px;
+    margin: 0 10px 10px 0;
+}
+
+.required{
+    color: #ff0000;
+}
+
+.site-h1 {
+    margin-bottom: 20px;
+    line-height: 60px;
+    padding-bottom: 10px;
+    color: #393D49;
+    border-bottom: 1px solid #eee;
+    font-size: 28px;
+    font-weight: 300;
+}
+
+.site-changelog .layui-timeline-title .layui-badge-rim {
+    top: -20px;
+    float: right;
+    right: 40%;
+    font-size: 12px;
+}
+
+.kit-layui-body{
+    bottom: 0;
+    border-left: solid 2px #1AA094;
+}

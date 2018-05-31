@@ -116,9 +116,9 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-//		registry.addInterceptor(new AuthenticationInterceptor()).addPathPatterns("/**")
-//			.excludePathPatterns("/login/**", "/register/**", "/verify_code/**", "/pay_result/**", "/api/**");
-//		super.addInterceptors(registry);
+		registry.addInterceptor(new AuthenticationInterceptor()).addPathPatterns("/**")
+			.excludePathPatterns("/login/**", "/register/**", "/verify_code/**", "/pay_result/**", "/api/**");
+		super.addInterceptors(registry);
 	}
 
 	@Override

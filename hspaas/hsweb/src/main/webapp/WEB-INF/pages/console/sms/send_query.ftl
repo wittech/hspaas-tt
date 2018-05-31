@@ -1,125 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-     <title>短信发送记录 - 华时融合平台</title>
-     <#include "/common/assets.ftl"/>
+    <meta charset="utf-8">
+    <title>短信发送记录 - 短信平台 - 华时融合平台</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/static/plugins/layui2/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/static/css/global.css" media="all">
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/table.css" />
+    <link rel="stylesheet" href="/static/build/css/themes/default.css" media="all" id="skin" kit-skin />
 </head>
-<body class="body">
 
-<!-- 工具集 -->
-<div class="my-btn-box">
-	<span class="fl">
-        <a class="layui-btn btn-add btn-default" id="btn-refresh"><i class="layui-icon">&#x1002;</i></a>
-    </span>
-    <span class="fr">
-    	<span class="layui-form-label">搜索条件：</span>
-        <div class="layui-input-inline">
-            <input type="text" id="startDate" name="startDate" autocomplete="off" placeholder="请选择发送开始日期" value="${(startDate)!}" class="layui-input">
+<body class="kit-theme">
+<div style="margin: 0;">
+   
+        <div class="admin-main">
+            <form class="layui-form" action="">
+            <blockquote class="layui-elem-quote">
+                <a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-sm" id="export">
+                    <i class="fa fa-file-excel-o fa-pr5" aria-hidden="true"></i>
+                </a>
+                <div style="float:right;">
+                    <div class="layui-form-search" style="margin:0;">
+                        <label class="layui-search-label">手机号码</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="mobile" placeholder="支持模糊查询.." autocomplete="off" class="layui-input-search">
+                        </div>
+                        <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
+                        <a href="javascript:;" id="openSearch" class="layui-btn layui-btn-sm layui-btn-primary">更多条件查询</a>
+                    </div>
+                </div>
+            </blockquote>
+            <div class="layui-advance-search">
+                    <div class="layui-form-search">
+                        <div class="layui-inline">
+                            <label class="layui-search-label">开始日期</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" value="${(startDate)!}">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-search-label">截止日期</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" value="${(endDate)!}">
+                            </div>
+                        </div>
+                        <#--
+                        <div class="layui-inline">
+                            <label class="layui-search-label">发送状态</label>
+                            <div class="layui-input-inline layui-select-search">
+                                <select name="status" lay-filter="status">
+                                    <option value="0">请选择状态</option>
+                                    <option value="1">发送成功</option>
+                                    <option value="2">发送失败</option>
+                                </select>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+            </div>
+            </form>
+            <fieldset class="layui-elem-field">
+                <div class="layui-field-box layui-form">
+                    <!-- data list box -->
+                    <table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
+                    <!-- data list toolbar -->
+                    <script type="text/html" id="toolbar">
+                        <a href="javascript:;" lay-event="view" class="layui-btn layui-btn-normal layui-btn-xs">预览</a>
+                        <a href="javascript:;" lay-event="edit" class="layui-btn layui-btn-xs">修改</a>
+                        <a href="javascript:;" lay-event="del" class="layui-btn layui-btn-danger layui-btn-xs">注销</a>
+                    </script>
+                </div>
+            </fieldset>
         </div>
-        
-        <div class="layui-input-inline">
-            <input type="text" id="stopDate" name="stopDate" autocomplete="off" placeholder="请选择发送截止日期" value="${(stopDate)!}" class="layui-input">
-        </div>
-        <div class="layui-input-inline">
-            <input type="text" autocomplete="off" placeholder="请输入手机号码" value="${(mobile)!}" class="layui-input">
-        </div>
-        <button class="layui-btn mgl-20">查询</button>
-        <button class="layui-btn layui-btn-disabled">清空</button>
-    </span>
-</div>
+    </div>
 
-<!-- 表格 -->
-<div id="dateTable"></div>
+<script type="text/javascript" src="/static/js/date_format.js"></script>
 
-<script src="${rc.contextPath}/assets/layui/layui.js" charset="utf-8"></script>
-<script type="text/javascript">
-	// 配置扩展方法路径
-	layui.config({
-	    base: '${rc.contextPath}/assets/static/js/'
-	}).extend({
-	    vip_nav: 'vip_nav'
-	    , vip_tab: 'vip_tab'
-	    , vip_table: 'vip_table'
-	});
+<script type="text/html" id="send_status">
+	{{ getFormatDateByLong(d.createTime, "yyyy-MM-dd hh:mm:ss") }}
 </script>
-<script type="text/javascript">
 
-    // layui方法
-    layui.use(['table', 'form', 'layer', 'vip_table', 'laydate'], function () {
-
-        // 操作对象
-        var form = layui.form
-                , table = layui.table
-                , layer = layui.layer
-                , vipTable = layui.vip_table
-                , laydate = layui.laydate
-                , $ = layui.jquery;
-                
-        //日期
-        laydate.render({
-            elem: '#startDate'
-        });
-        laydate.render({
-            elem: '#stopDate'
-        });
-        
-        // 表格渲染
-        var tableIns = table.render({
-            elem: '#dateTable'                  //指定原始表格元素选择器（推荐id选择器）
-            // , height: vipTable.getFullHeight()    //容器高度
-            , cols: [[
-                , {field: 'id', title: '序', width: 80}
-                , {field: 'sid', title: 'SID', width: 120}
-                , {field: 'mobile', title: '手机号码', width: 120}
-                , {field: 'sendTime', title: '发送时间', width: 180}
-                , {field: 'sendStatus', title: '发送状态', width: 120}
-                , {field: 'receiveTime', title: '回执时间', width: 180}
-                , {field: 'receiveStatus', title: '回执状态', width: 120}
-                , {field: 'pushInfo', title: '推送信息', width: 120}
-            ]]
-            , url: '${rc.contextPath}/sms/send/page'
-            , method: 'post'
-            , page: true
-            , limits: [30, 60, 90, 150, 300]
-            , limit: 30 //默认采用30
-            , loading: false
-            , done: function (res, curr, count) {
-            
-                //如果是异步请求数据方式，res即为你接口返回的信息。
-                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
-                console.log(res);
-
-                //得到当前页码
-                console.log(curr);
-
-                //得到数据总量
-                console.log(count);
-            }
-        });
-
-        // 获取选中行
-        table.on('checkbox(dataCheck)', function (obj) {
-            layer.msg('123');
-            console.log(obj.checked); //当前是否选中状态
-            console.log(obj.data); //选中行的相关数据
-            console.log(obj.type); //如果触发的是全选，则为：all，如果触发的是单选，则为：one
-        });
-
-        // 刷新
-        $('#btn-refresh').on('click', function () {
-            tableIns.reload();
-        });
-
-
-        // you code ...
-
-    });
+<script type="text/html" id="deliver_status">
+	{{ getFormatDateByLong(d.createTime, "yyyy-MM-dd hh:mm:ss") }}
 </script>
-<!-- 表格操作按钮集 -->
-<script type="text/html" id="barOption">
-    <a class="layui-btn layui-btn-mini" lay-event="detail">查看</a>
-    <a class="layui-btn layui-btn-mini layui-btn-normal" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-mini layui-btn-danger" lay-event="del">删除</a>
+
+<script type="text/html" id="date_format">
+	{{ getFormatDateByLong(d.createTime, "yyyy-MM-dd hh:mm:ss") }}
 </script>
+
+<script type="text/javascript" src="/static/js/custom_defines.js"></script>
+<script type="text/javascript" src="/static/plugins/layui2/layui.js"></script>
+<script type="text/javascript" src="/static/js/sms/send_query.js?v=20171204"></script>
 </body>
+
 </html>

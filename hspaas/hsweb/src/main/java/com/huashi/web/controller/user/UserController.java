@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.common.user.domain.User;
 import com.huashi.common.user.domain.UserProfile;
+import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.web.controller.BaseController;
 
@@ -20,6 +21,8 @@ public class UserController extends BaseController {
 
 	@Reference
 	private IUserService userService;
+	@Reference
+    private IUserDeveloperService userDeveloperService;
 
 	@RequestMapping("/index")
 	public String index(Model m) {
@@ -35,11 +38,12 @@ public class UserController extends BaseController {
 	 * @param session
 	 * @return
 	 */
-	@RequestMapping("/basis")
-	public String basis(Model m) {
+	@RequestMapping("/profile")
+	public String profile(Model m) {
 		m.addAttribute("user", userService.getById(getCurrentUserId()));
 		m.addAttribute("userBase", userService.getProfileByUserId(getCurrentUserId()));
-		return "/user/basis";
+		m.addAttribute("developer", userDeveloperService.getByUserId(getCurrentUserId()));
+		return "/console/user/profile";
 	}
 
 	/**
@@ -49,21 +53,10 @@ public class UserController extends BaseController {
 	 * @param id
 	 * @return
 	 */
-	@RequestMapping(value = "/update_submit", method = RequestMethod.POST)
+	@RequestMapping(value = "/profile_update", method = RequestMethod.POST)
 	public @ResponseBody boolean update(UserProfile record, HttpSession session) {
 		record.setUserId(getCurrentUserId());
 		return userService.updateByUserId(record);
-	}
-	
-
-	/**
-	 * 跳转修改密码
-	 * @return
-	 */
-	@RequestMapping(value = "/password", method = RequestMethod.GET)
-	public String password(Model m,String id) {
-		m.addAttribute("id", id);
-		return "/user/password";
 	}
 	
 	/**
@@ -91,34 +84,28 @@ public class UserController extends BaseController {
 		}
 	}
 	
-	
 	/**
-	 * 修改密码
-	 * @return
-	 */
-	@RequestMapping(value = "/update_password", method = RequestMethod.POST)
-	@ResponseBody
-	public boolean updatePassword(String plainPassword, String newPassword) {
-		try {
-			return userService.updatePasword(getCurrentUserId(), plainPassword, newPassword);
-		} catch (Exception e) {
-			// 可以通过e.getMessage() 获取错误信息
-			return false;
-		}
-	}
+     * 跳转修改密码
+     * @return
+     */
+    @RequestMapping(value = "/password", method = RequestMethod.GET)
+    public String password() {
+        return "/console/user/password";
+    }
+    
+    /**
+     * 修改密码
+     * @return
+     */
+    @RequestMapping(value = "/update_password", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean updatePassword(String oldPwd, String newPwd) {
+        try {
+            return userService.updatePasword(getCurrentUserId(), oldPwd, newPwd);
+        } catch (Exception e) {
+            // 可以通过e.getMessage() 获取错误信息
+            return false;
+        }
+    }
 
-	/**
-	 * 原密码校验
-	 * @return
-	 */
-	@RequestMapping(value = "/password_exists", method = RequestMethod.POST)
-	@ResponseBody
-	public boolean passwordExists(String plainPassword) {
-		try {
-			return userService.passwordExists(getCurrentUserId(), plainPassword);
-		} catch (Exception e) {
-			// 可以通过e.getMessage() 获取错误信息
-			return false;
-		}
-	}
 }

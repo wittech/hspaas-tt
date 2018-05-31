@@ -41,7 +41,7 @@ public class RegisterController extends BaseController {
 	 */
 	@RequestMapping(value = "/fill_email", method = RequestMethod.GET)
 	public String fillEmail(Model model) {
-		return "/member/register/fill_email";
+		return "/register/fill_email";
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class RegisterController extends BaseController {
                 return fillEmail(model);
             }
         }
-		return "/member/register/fill_message";
+		return "/register/fill_message";
 	}
 
 	/**
@@ -179,7 +179,7 @@ public class RegisterController extends BaseController {
 		model.addAttribute("email", email);
 		session.removeAttribute(EMAIL_VERIFY_PASSED);
 		session.removeAttribute(DEFAULT_CAPTCHA_SMS_CODE_KEY);
-		return "/member/register/complete";
+		return "/register/complete";
 	}
 
 }
