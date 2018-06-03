@@ -1,5 +1,19 @@
 package com.huashi.sms.record.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -23,18 +37,6 @@ import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.settings.constant.MobileBlacklistType;
 import com.huashi.sms.settings.domain.SmsMobileBlackList;
 import com.huashi.sms.settings.service.ISmsMobileBlackListService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 
@@ -166,7 +168,7 @@ public class SmsMoMessageService implements ISmsMoMessageService {
                     count++;
 
                     // 判断是否包含退订关键词，如果包含直接加入黑名单
-                    doMobileJoinBlacklist(receive.getMobile(), receive.getContent(), String.format("SID:%d,MSG_ID:%s", submit.getSid(), submit.getMsgId()));
+                    joinBlacklistIfMatched(receive.getMobile(), receive.getContent(), String.format("SID:%d,MSG_ID:%s", submit.getSid(), submit.getMsgId()));
 
                     PushConfig pushConfig = pushConfigService.getByUserId(submit.getUserId(), CallbackUrlType.SMS_MO.getCode());
                     if (pushConfig == null || StringUtils.isEmpty(pushConfig.getUrl())) {
@@ -182,15 +184,14 @@ public class SmsMoMessageService implements ISmsMoMessageService {
                 }
             }
 
-
-            // 提交至待DB持久队列
-            stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_MO_RECEIVE_LIST, JSON.toJSONString(list));
-
+            // 插入DB
+            moMessageReceiveMapper.batchInsert(list);
+            
             return count;
 
         } catch (Exception e) {
-            logger.error("处理待回执信息REDIS失败，失败信息：{}", JSON.toJSONString(list), e);
-            throw new RuntimeException("短信上行报告失败");
+            logger.error("处理待回执信息失败，失败信息：{}", JSON.toJSONString(list), e);
+            return 0;
         }
     }
 
@@ -200,7 +201,7 @@ public class SmsMoMessageService implements ISmsMoMessageService {
      * @param mobile
      * @param content
      */
-    private void doMobileJoinBlacklist(String mobile, String content, String remark) {
+    private void joinBlacklistIfMatched(String mobile, String content, String remark) {
         // 判断回复内容是否包含 黑名单词库内容，如果包括则直接加入黑名单
         String[] words = systemConfigService.getBlacklistWords();
         if (words == null || words.length == 0) {

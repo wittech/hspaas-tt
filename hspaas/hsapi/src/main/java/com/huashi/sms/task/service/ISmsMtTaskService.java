@@ -73,7 +73,7 @@ public interface ISmsMtTaskService {
 	 * @param task
 	 * @return
 	 */
-	boolean save(SmsMtTask task);
+	void save(SmsMtTask task);
 
 	/**
 	 * 
@@ -166,7 +166,7 @@ public interface ISmsMtTaskService {
 	 * @return
 	 */
 	SmsMtTaskPackets getTaskPacketsById(long id);
-
+	
 	/**
 	 * 
 	 * TODO 批量插入任务信息
@@ -175,7 +175,7 @@ public interface ISmsMtTaskService {
 	 * @param taskPackets
 	 * @return
 	 */
-	void batchSave(List<SmsMtTask> tasks, List<SmsMtTaskPackets> taskPackets) throws RuntimeException;
+	void batchSave(List<SmsMtTask> tasks, List<SmsMtTaskPackets> taskPackets);
 
 	/**
 	 *  TODO 主任务强制通过

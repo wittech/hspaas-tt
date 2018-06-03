@@ -7,7 +7,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.context.ApplicationContext;
 
 import com.alibaba.fastjson.JSON;
-import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.AbstractWorker;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
@@ -121,7 +120,8 @@ public class SmsTaskPersistenceWorker extends AbstractWorker<SmsMtTask>{
 
 	@Override
 	protected String redisKey() {
-		return SmsRedisConstant.RED_DB_MESSAGE_TASK_LIST;
+//		return SmsRedisConstant.RED_DB_MESSAGE_TASK_LIST;
+		return null;
 	}
 
 	@Override

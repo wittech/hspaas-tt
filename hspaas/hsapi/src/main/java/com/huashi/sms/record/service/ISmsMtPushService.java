@@ -24,7 +24,7 @@ public interface ISmsMtPushService {
 	   * 
 	   * @param list
 	 */
-	int savePushMessage(List<SmsMtMessagePush> pushes);
+	void savePushMessage(List<SmsMtMessagePush> pushes);
 	
 	/**
 	 * 

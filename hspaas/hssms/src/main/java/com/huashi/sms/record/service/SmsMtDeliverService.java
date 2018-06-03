@@ -54,12 +54,15 @@ public class SmsMtDeliverService implements ISmsMtDeliverService {
     }
 
     @Override
-    public int batchInsert(List<SmsMtMessageDeliver> list) {
+//    @Async("asyncTaskExecutor")
+    public void batchInsert(List<SmsMtMessageDeliver> list) {
         if (CollectionUtils.isEmpty(list)) {
-            return 0;
+            return;
         }
 
-        return smsMtMessageDeliverMapper.batchInsert(list);
+        long start = System.currentTimeMillis();
+        smsMtMessageDeliverMapper.batchInsert(list);
+        logger.info("回执数据插入耗时：{} ms", (System.currentTimeMillis() - start));
     }
 
     @Override
@@ -83,10 +86,12 @@ public class SmsMtDeliverService implements ISmsMtDeliverService {
             // 将待推送消息发送至用户队列进行处理（2017-03-20 合包处理），异步执行
             threadPoolTaskExecutor.submit(new JoinPushQueueThread(smsMtPushService, delivers));
 //             smsMtPushService.compareAndPushBody(delivers);
+            
+            batchInsert(delivers);
 
             // 提交至待DB持久队列
-            stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_STATUS_RECEIVE_LIST,
-                                                       JSON.toJSONString(delivers));
+//            stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_STATUS_RECEIVE_LIST,
+//                                                       JSON.toJSONString(delivers));
 
             return delivers.size();
         } catch (Exception e) {

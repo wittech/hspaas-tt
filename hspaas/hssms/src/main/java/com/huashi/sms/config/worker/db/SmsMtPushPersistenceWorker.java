@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.context.ApplicationContext;
 
-import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.AbstractWorker;
 import com.huashi.sms.record.domain.SmsMtMessagePush;
 import com.huashi.sms.record.service.ISmsMtPushService;
@@ -34,7 +33,8 @@ public class SmsMtPushPersistenceWorker extends AbstractWorker<SmsMtMessagePush>
 
     @Override
     protected String redisKey() {
-        return SmsRedisConstant.RED_DB_MESSAGE_MT_PUSH_LIST;
+        return null;
+//        return SmsRedisConstant.RED_DB_MESSAGE_MT_PUSH_LIST;
     }
 
     @Override

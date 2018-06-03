@@ -91,36 +91,25 @@ public class SmsRedisConstant {
 
     //** -----------------------------------异步DB 相关（分布式） ----------------------------------------------**/
 
-    /**
-     * redis中 待持久化主任务信息
-     */
-    public static String RED_DB_MESSAGE_TASK_LIST = "db_message_task_list";
+//    /**
+//     * redis中 待持久化主任务信息
+//     */
+//    public static String RED_DB_MESSAGE_TASK_LIST = "db_message_task_list";
 
     /**
      * 待持久化短信提交信息
      */
-    public static String RED_DB_MESSAGE_SUBMIT_LIST = "db_message_submit_list";
+//    public static String RED_DB_MESSAGE_SUBMIT_LIST = "db_message_submit_list";
 
     /**
      * 短信回执信息(下行状态)
      */
-    public static String RED_DB_MESSAGE_STATUS_RECEIVE_LIST = "db_message_status_receive_list";
+//    public static String RED_DB_MESSAGE_STATUS_RECEIVE_LIST = "db_message_status_receive_list";
 
     /**
      * 短信下行推送信息
      */
-    public static String RED_DB_MESSAGE_MT_PUSH_LIST = "db_message_mt_push_list";
-
-    /**
-     * 短信回执信息(上行信息)
-     */
-    public static String RED_DB_MESSAGE_MO_RECEIVE_LIST = "db_message_mo_receive_list";
-
-    /**
-     * 短信上行推送信息
-     */
-    public static String RED_DB_MESSAGE_MO_PUSH_LIST = "db_message_mo_push_list";
-
+//    public static String RED_DB_MESSAGE_MT_PUSH_LIST = "db_message_mt_push_list";
 
     //**------------------------------------------------------------------------------------------------**/
 

@@ -31,7 +31,6 @@ import com.huashi.common.util.DateUtil;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.CommonContext.PlatformType;
-import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.rabbit.RabbitMessageQueueManager;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant.WordsPriority;
@@ -331,12 +330,16 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     }
 
     @Override
-    public int batchInsertSubmit(List<SmsMtMessageSubmit> list) {
+//    @Async("asyncTaskExecutor")
+    public void batchInsertSubmit(List<SmsMtMessageSubmit> list) {
         if (CollectionUtils.isEmpty(list)) {
-            return 0;
+            return;
         }
-
-        return smsMtMessageSubmitMapper.batchInsert(list);
+        
+        long start = System.currentTimeMillis();
+        smsMtMessageSubmitMapper.batchInsert(list);
+        
+        logger.info("提交数据插入耗时：{} ms", (System.currentTimeMillis() - start));
         // SqlSession session = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
         // SmsMtMessagesmsMtMessageSubmitMapper smsMtMessageSubmitMapper =
         // session.getMapper(SmsMtMessagesmsMtMessageSubmitMapper.class);
@@ -404,9 +407,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
             delivers.add(deliver);
         }
 
-        // 加入REDIS 待持久化队列
-        stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
-                                                   JSON.toJSONString(submits));
+        batchInsertSubmit(submits);
 
         // 判断短信是否需要推送，需要则设置推送设置信息
         setPushConfigurationIfNecessary(submits);

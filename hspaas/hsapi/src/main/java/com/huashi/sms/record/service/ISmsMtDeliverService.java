@@ -23,7 +23,7 @@ public interface ISmsMtDeliverService {
        * @param list
        * @return
      */
-    int batchInsert(List<SmsMtMessageDeliver> list);
+    void batchInsert(List<SmsMtMessageDeliver> list);
     
     /**
      * 

@@ -35,7 +35,6 @@ import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.service.ISmsProviderService;
-import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.rabbit.AbstartRabbitListener;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
@@ -356,12 +355,14 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     private void persistSubmitMessage(List<SmsMtMessageSubmit> submits) {
         try {
             // 当数据量大于阈值时无需REDIS汇聚，直接调用批量入库接口
-            if (submits.size() >= DIRECT_PERSISTENT_SIZE_THRESHOLD) {
-                smsSubmitService.batchInsertSubmit(submits);
-            } else {
-                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
-                                                           JSON.toJSONString(submits));
-            }
+//            if (submits.size() >= DIRECT_PERSISTENT_SIZE_THRESHOLD) {
+//                smsSubmitService.batchInsertSubmit(submits);
+//            } else {
+//                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
+//                                                           JSON.toJSONString(submits));
+//            }
+            
+            smsSubmitService.batchInsertSubmit(submits);
 
             // 判断并设置推送信息
             smsSubmitService.setPushConfigurationIfNecessary(submits);

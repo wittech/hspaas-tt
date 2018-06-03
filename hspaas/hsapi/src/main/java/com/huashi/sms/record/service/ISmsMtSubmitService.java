@@ -95,7 +95,7 @@ public interface ISmsMtSubmitService {
 	 * @param list
 	 * @return
 	 */
-	int batchInsertSubmit(List<SmsMtMessageSubmit> list);
+	void batchInsertSubmit(List<SmsMtMessageSubmit> list);
 
 	/**
 	 * 

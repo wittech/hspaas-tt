@@ -11,12 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.huashi.sms.config.worker.db.SmsDeliverPersistenceWorker;
-import com.huashi.sms.config.worker.db.SmsMoPersistenceWorker;
-import com.huashi.sms.config.worker.db.SmsMoPushPersistenceWorker;
-import com.huashi.sms.config.worker.db.SmsMtPushPersistenceWorker;
-import com.huashi.sms.config.worker.db.SmsSubmitPersistenceWorker;
-import com.huashi.sms.config.worker.db.SmsTaskPersistenceWorker;
 import com.huashi.sms.config.worker.fork.MtReportFailoverPushWorker;
 import com.huashi.sms.config.worker.hook.ShutdownHookWorker;
 
@@ -50,17 +44,13 @@ public class SmsDbPersistenceRunner implements CommandLineRunner {
 		for (int i = 0; i < threadPoolSize; i++) {
 			
 			// 任务持久化线程
-			threadPoolTaskExecutor.execute(new SmsTaskPersistenceWorker(applicationContext));
-			// 处理完成提交数据（下行）
-			threadPoolTaskExecutor.execute(new SmsSubmitPersistenceWorker(applicationContext));
-			// 上家状态回执数据（下行）
-			threadPoolTaskExecutor.execute(new SmsDeliverPersistenceWorker(applicationContext));
-			// 推送开发者调用数据（下行）
-			threadPoolTaskExecutor.execute(new SmsMtPushPersistenceWorker(applicationContext));
-			// 上家上行短信内容数据（上行）
-			threadPoolTaskExecutor.execute(new SmsMoPersistenceWorker(applicationContext));
-			// 推送开发者上行数据（上行）
-			threadPoolTaskExecutor.execute(new SmsMoPushPersistenceWorker(applicationContext));
+//			threadPoolTaskExecutor.execute(new SmsTaskPersistenceWorker(applicationContext));
+//			// 处理完成提交数据（下行）
+//			threadPoolTaskExecutor.execute(new SmsSubmitPersistenceWorker(applicationContext));
+//			// 上家状态回执数据（下行）
+//			threadPoolTaskExecutor.execute(new SmsDeliverPersistenceWorker(applicationContext));
+//			// 推送开发者调用数据（下行）
+//			threadPoolTaskExecutor.execute(new SmsMtPushPersistenceWorker(applicationContext));
 			
 			// 用户下行状态延迟推送（针对上家下行状态报告回复过快而短信提交记录未入库情况，后续延迟推送）
 			threadPoolTaskExecutor.execute(new MtReportFailoverPushWorker(applicationContext));

@@ -26,7 +26,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -81,9 +80,11 @@ public class SmsMtPushService implements ISmsMtPushService {
     private static final String    PUSH_BODY_SUBPACKAGE_KEY = "pushUrl";
 
     @Override
-    @Transactional
-    public int savePushMessage(List<SmsMtMessagePush> pushes) {
-        return smsMtMessagePushMapper.batchInsert(pushes);
+//    @Async("asyncTaskExecutor")
+    public void savePushMessage(List<SmsMtMessagePush> pushes) {
+        long start = System.currentTimeMillis();
+        smsMtMessagePushMapper.batchInsert(pushes);
+        logger.info("推送数据插入耗时：{} ms", (System.currentTimeMillis() - start));
     }
 
     @Override
@@ -536,8 +537,7 @@ public class SmsMtPushService implements ISmsMtPushService {
         // 删除待推送消息信息
         stringRedisTemplate.delete(waitPushMsgIdRedisKeys);
         // 发送数据至带持久队列中
-        stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_MT_PUSH_LIST,
-                                                   JSON.toJSONString(persistPushesList));
+        savePushMessage(persistPushesList);
 
         push = null;
         persistPushesList = null;
