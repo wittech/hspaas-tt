@@ -30,7 +30,10 @@ layui.use(['element', 'tree', 'table', 'form', 'laydate'], function() {
     var currpage = 1;
 
     var loadTableData = function() {
+    	var loading = layer.msg("数据加载中...");
+    	
     	searchObj.currentPage = currpage;
+    	searchObj.sid = $.trim($("#sid").val());
     	searchObj.mobile = $.trim($("#mobile").val());
     	searchObj.startDate = $.trim($("#startDate").val());
     	searchObj.endDate = $.trim($("#endDate").val());
@@ -41,24 +44,30 @@ layui.use(['element', 'tree', 'table', 'form', 'laydate'], function() {
             ,cellMinWidth: 50
             , cols: [[
                   {type:'numbers'}
-	              , {field: 'sid', title: 'sid', width: 120}
+	              , {field: 'sid', title: 'sid', width: 200}
 	              , {field: 'mobile', title: '手机号码', width: 120}
 	              , {field: 'createTime', title: '发送时间', width: 180, templet: '#date_format'}
 	              , {field: 'status', title: '发送状态', width: 120,
 	            	  templet: '<div>{{ d.status == 0 ?"发送成功":"发送失败" }}</div>', sort: true}
-	              , {field: 'messageDeliver', title: '回执时间', width: 180,
-	            	  templet: '<div>{{ d.messageDeliver != undefined ? d.messageDeliver.deliverTime:"--" }}</div>'}
+//	              , {field: 'messageDeliver', title: '回执时间', width: 180,
+//	            	  templet: '<div>{{ d.messageDeliver != undefined ? d.messageDeliver.deliverTime:"--" }}</div>'}
 	              , {field: 'receiveStatus', title: '回执状态', width: 120, sort: true,
-	            	  templet: '<div>{{ d.messageDeliver == undefined ? "--": (d.messageDeliver.status == 0 ? "回执成功" : d.messageDeliver.statusCode) }}</div>'}
-	              , {field: 'content', title: '短信内容', width: 500}
+	            	  templet: '<div>{{ d.messageDeliver == undefined ? "待回执" : (d.messageDeliver.status == 0 ? "回执成功" : "回执失败") }}</div>'}
+	              , {field: 'content', title: '短信内容'}
 	          ]]
             ,url: server_domain + "/sms/send/page"
             ,where: searchObj
             ,method: 'GET'
-            ,page: true
+            ,page: {
+	            layout: ['count', 'prev', 'page', 'next', 'skip']
+	            ,groups: 5
+	            ,first: true
+	            ,last: true
+	         }
             ,even: true
             ,done: function(res, curr, count){
                 currpage = curr;
+                layer.close(loading);
             }
         });
     };

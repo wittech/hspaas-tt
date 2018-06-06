@@ -212,15 +212,15 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         int _currentPage = PaginationVo.parse(currentPage);
 
         Map<String, Object> paramMap = new HashMap<>();
-//        paramMap.put("userId", userId);
+        paramMap.put("userId", userId);
         if (StringUtils.isNotBlank(sid)) {
             paramMap.put("sid", sid);
         }
         if (StringUtils.isNotBlank(mobile)) {
             paramMap.put("mobile", mobile);
         }
-//        paramMap.put("startDate", DateUtil.getSecondDate(startDate + " 00:00:01").getTime());
-//        paramMap.put("endDate", DateUtil.getSecondDate(endDate + " 23:59:59").getTime());
+        paramMap.put("startDate", DateUtil.getSecondDate(startDate + " 00:00:01").getTime());
+        paramMap.put("endDate", DateUtil.getSecondDate(endDate + " 23:59:59").getTime());
         int totalRecord = smsMtMessageSubmitMapper.findCount(paramMap);
         if (totalRecord == 0) {
             return null;
@@ -230,17 +230,14 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         paramMap.put("end", PaginationVo.DEFAULT_RECORD_PER_PAGE);
 
         List<SmsMtMessageSubmit> dataList = smsMtMessageSubmitMapper.findList(paramMap);
-        for (SmsMtMessageSubmit record : dataList) {
-            if (record.getUserId() != null) {
-                record.setUserModel(userService.getByUserId(record.getUserId()));
-            }
-            if (record.getNeedPush()) {
-                record.setMessagePush(pushMapper.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
-            }
-            if (record.getStatus() == 0) {
-                record.setMessageDeliver(smsMtDeliverService.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
-            }
-        }
+//        for (SmsMtMessageSubmit record : dataList) {
+//            if (record.getNeedPush()) {
+//                record.setMessagePush(pushMapper.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
+//            }
+//            if (record.getStatus() == 0) {
+//                record.setMessageDeliver(smsMtDeliverService.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
+//            }
+//        }
         return new PaginationVo<>(dataList, _currentPage, totalRecord);
     }
 
@@ -330,16 +327,13 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     }
 
     @Override
-//    @Async("asyncTaskExecutor")
     public void batchInsertSubmit(List<SmsMtMessageSubmit> list) {
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
         
-        long start = System.currentTimeMillis();
         smsMtMessageSubmitMapper.batchInsert(list);
         
-        logger.info("提交数据插入耗时：{} ms", (System.currentTimeMillis() - start));
         // SqlSession session = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
         // SmsMtMessagesmsMtMessageSubmitMapper smsMtMessageSubmitMapper =
         // session.getMapper(SmsMtMessagesmsMtMessageSubmitMapper.class);

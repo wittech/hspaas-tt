@@ -130,32 +130,6 @@ layui.define(['element', 'nprogress', 'form', 'table', 'loader', 'tab', 'navbar'
                 // });
 
                 //处理顶部一级菜单
-                var onelevel = layui.onelevel;
-                if (onelevel.hasElem()) {
-                    onelevel.set({
-                        remote: {
-                            url: server_domain+'/admin/user/oneLevel'
-                        },
-                        onClicked: function(id) {
-                            if(id){
-                                navbar.set({
-                                    remote: {
-                                        url: server_domain+'/admin/user/leftMenu?systemId='+id
-                                    }
-                                }).render(function(data) {
-                                    //设置title
-                                    tab.tabAdd(data);
-                                });
-                                $.getJSON(server_domain + "/admin/menu/get?menuId="+id, function(data){
-                                    $('#systemTitle').html(data.result.menuName);
-                                });
-                            }
-                        },
-                        renderAfter: function(elem) {
-                            elem.find('li').eq(0).click(); //模拟点击第一个
-                        }
-                    }).render();
-                }
             }
 
             // ripple start

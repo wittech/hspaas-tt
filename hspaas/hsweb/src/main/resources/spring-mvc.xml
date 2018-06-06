@@ -25,7 +25,7 @@
 	<bean id="freemarkerConfig"
 		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
 		<property name="configLocation" value="classpath:freemarker.properties" />
-		<property name="templateLoaderPath" value="/WEB-INF/view/" />
+		<property name="templateLoaderPath" value="/WEB-INF/pages/" />
 		<property name="freemarkerVariables">
 			<map>
 				<entry key="xml_escape" value="fmXmlEscape" />

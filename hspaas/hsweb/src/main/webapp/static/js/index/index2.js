@@ -9,7 +9,7 @@ layui.config({
 		,form = layui.form;
 
 	var userCache = layui.data(userCacheName);
-	var homepage = server_domain +"/sms/send/query";
+	var homepage = server_domain +"/user/profile";
 	if(userCache.homepage){
 		homepage = userCache.homepage;
 	}

@@ -262,19 +262,16 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     @Override
-//    @Async("asyncTaskExecutor")
     public void save(SmsMtTask task) {
         if (task == null || CollectionUtils.isEmpty(task.getPackets())) {
             logger.error("任务数据 [ " + JSON.toJSONString(task) + "] 为空，处理失败");
             return;
         }
 
-        long start = System.currentTimeMillis();
         int effect = taskMapper.insertSelective(task);
         if (effect > 0) {
             taskPacketsMapper.batchInsert(task.getPackets());
         }
-        logger.info("主任务插入耗时为：{} ms", (System.currentTimeMillis() - start));
     }
 
     @Override

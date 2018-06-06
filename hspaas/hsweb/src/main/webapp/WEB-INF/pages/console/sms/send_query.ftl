@@ -24,9 +24,12 @@
                 </a>
                 <div style="float:right;">
                     <div class="layui-form-search" style="margin:0;">
-                        <label class="layui-search-label">手机号码</label>
+                    	<label class="layui-search-label">检索条件</label>
                         <div class="layui-input-inline">
-                            <input type="text" name="mobile" placeholder="支持模糊查询.." autocomplete="off" class="layui-input-search">
+                            <input type="text" id="sid" name="sid" placeholder="消息ID" autocomplete="off" class="layui-input-search">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" id="mobile" name="mobile" placeholder="手机号码" autocomplete="off" class="layui-input-search">
                         </div>
                         <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
                         <a href="javascript:;" id="openSearch" class="layui-btn layui-btn-sm layui-btn-primary">更多条件查询</a>
@@ -93,7 +96,7 @@
 
 <script type="text/javascript" src="/static/js/custom_defines.js"></script>
 <script type="text/javascript" src="/static/plugins/layui2/layui.js"></script>
-<script type="text/javascript" src="/static/js/sms/send_query.js?v=20171204"></script>
+<script type="text/javascript" src="/static/js/sms/send_query.js?v=201806030212"></script>
 </body>
 
 </html>
