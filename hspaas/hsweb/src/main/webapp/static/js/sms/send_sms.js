@@ -38,11 +38,11 @@ layui.use(['form', 'element', 'laydate', 'upload'], function(){
             url: server_domain + "/sms/send/submit",
             data: data.field,
             type: "POST",
-            success: function (data) {
-            	if(data.code == "0") {
+            success: function (result) {
+            	if(result.code == "0") {
             		layer.msg('发送成功');
             	} else {
-            		layer.msg('发送失败:[' + data.msg + "]");
+            		layer.msg('发送失败:[' + result.msg + "]");
             	}
             },
             error: function (data) {

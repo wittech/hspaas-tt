@@ -301,13 +301,10 @@
 		s.attach, s.passage_id,
 		s.need_push, s.push_url,s.create_time,
 		s.create_unixtime, s.status, s.remark, s.msg_id,s.destnation_no,
-
 		sd.mobile deliver_mobile,sd.id deliver_id,sd.status_code
 		deliver_status_code,
-		sd.status
-		deliver_status,sd.deliver_time,sd.create_time
+		sd.status deliver_status,sd.deliver_time,sd.create_time
 		deliver_create_time,sd.remark deliver_remark
-
 		from
 		sms_mt_message_submit s
 		left join sms_mt_message_deliver sd on

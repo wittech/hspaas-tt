@@ -54,15 +54,12 @@ public class SmsMtDeliverService implements ISmsMtDeliverService {
     }
 
     @Override
-//    @Async("asyncTaskExecutor")
     public void batchInsert(List<SmsMtMessageDeliver> list) {
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
 
-        long start = System.currentTimeMillis();
         smsMtMessageDeliverMapper.batchInsert(list);
-        logger.info("回执数据插入耗时：{} ms", (System.currentTimeMillis() - start));
     }
 
     @Override

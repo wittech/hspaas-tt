@@ -80,7 +80,6 @@ public class SmsMtPushService implements ISmsMtPushService {
     private static final String    PUSH_BODY_SUBPACKAGE_KEY = "pushUrl";
 
     @Override
-//    @Async("asyncTaskExecutor")
     public void savePushMessage(List<SmsMtMessagePush> pushes) {
         long start = System.currentTimeMillis();
         smsMtMessagePushMapper.batchInsert(pushes);
