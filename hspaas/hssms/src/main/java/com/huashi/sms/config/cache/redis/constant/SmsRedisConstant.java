@@ -123,13 +123,19 @@ public class SmsRedisConstant {
 
     //** -----------------------------------广播通知数据 相关 ----------------------------------------------**/
     /**
-     * 手机号码黑名单数据
+     * 手机号码黑名单订阅频道定义
      */
     public static final String BROADCAST_MOBILE_BLACKLIST_TOPIC = "broadcast_mobile_blacklist_topic";
+    
     /**
-     * 短信模板数据
+     * 短信模板订阅频道定义
      */
     public static final String BROADCAST_MESSAGE_TEMPLATE_TOPIC = "broadcast_message_template_topic";
+    
+    /**
+     * 可用通道订阅频道定义
+     */
+    public static final String BROADCAST_PASSAGE_ACCESS_TOPIC = "broadcast_passage_access_topic";
 
     /**
      * TODO 消息操作动作

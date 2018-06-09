@@ -26,6 +26,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.cache.redis.pubsub.SmsMessageTemplateListener;
 import com.huashi.sms.config.cache.redis.pubsub.SmsMobileBlacklistListener;
+import com.huashi.sms.config.cache.redis.pubsub.SmsPassageAccessListener;
 import com.huashi.sms.config.cache.redis.serializer.RedisObjectSerializer;
 
 @Configuration
@@ -150,14 +151,34 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 		return template;
 	}
 	
+	/**
+	 * 
+	   * TODO 黑名单数据变更广播通知监听配置
+	   * @return
+	 */
 	@Bean
     MessageListenerAdapter smsMobileBlacklistMessageListener() {
         return new MessageListenerAdapter(new SmsMobileBlacklistListener(stringRedisTemplate()));
     }
 	
+	/**
+	 * 
+	   * TODO 短信模板变更广播通知监听配置
+	   * @return
+	 */
 	@Bean
     MessageListenerAdapter smsMessageTemplateMessageListener() {
         return new MessageListenerAdapter(new SmsMessageTemplateListener());
+    }
+	
+	/**
+     * 
+       * TODO 短信模板变更广播通知监听配置
+       * @return
+     */
+    @Bean
+    MessageListenerAdapter smsPassageAccessMessageListener() {
+        return new MessageListenerAdapter(new SmsPassageAccessListener());
     }
 
     @Bean
@@ -166,6 +187,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         container.setConnectionFactory(jedisConnectionFactory());
         container.addMessageListener(smsMobileBlacklistMessageListener(), mobileBlacklistTopic());
         container.addMessageListener(smsMessageTemplateMessageListener(), messageTemplateTopic());
+        container.addMessageListener(smsPassageAccessMessageListener(), passageAccessTopic());
         return container;
     }
 
@@ -177,6 +199,11 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     @Bean
     ChannelTopic messageTemplateTopic() {
         return new ChannelTopic(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC);
+    }
+    
+    @Bean
+    ChannelTopic passageAccessTopic() {
+        return new ChannelTopic(SmsRedisConstant.BROADCAST_PASSAGE_ACCESS_TOPIC);
     }
 
 }

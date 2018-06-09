@@ -40,7 +40,7 @@ public interface ISmsPassageAccessService {
 	 * 
 	 * @param userId
 	 *            用户编号
-	 * @param route
+	 * @param routeType
 	 *            路由类型
 	 * @param cmcp
 	 *            运营商
@@ -48,7 +48,7 @@ public interface ISmsPassageAccessService {
 	 *            省份代码
 	 * @return
 	 */
-	SmsPassageAccess get(int userId, int route, int cmcp, int provinceCode);
+	SmsPassageAccess get(int userId, int routeType, int cmcp, int provinceCode);
 
 	/**
 	 * 根据id获取对象信息

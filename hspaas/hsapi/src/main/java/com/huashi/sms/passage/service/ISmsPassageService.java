@@ -52,6 +52,13 @@ public interface ISmsPassageService {
 
 	List<SmsPassage> findAll();
 
+	/**
+	 * 
+	   * TODO 根据通道ID获取通道详细信息
+	   * 
+	   * @param id
+	   * @return
+	 */
 	SmsPassage findById(int id);
 
 	/**

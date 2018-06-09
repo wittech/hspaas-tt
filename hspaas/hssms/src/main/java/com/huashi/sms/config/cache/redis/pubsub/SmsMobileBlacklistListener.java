@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
@@ -20,7 +19,6 @@ import com.huashi.sms.settings.service.SmsMobileBlackListService;
   * @version V1.0   
   * @date 2017年9月3日 上午12:14:25
  */
-@Component
 public class SmsMobileBlacklistListener extends MessageListenerAdapter {
 
 	public SmsMobileBlacklistListener(StringRedisTemplate stringRedisTemplate) {

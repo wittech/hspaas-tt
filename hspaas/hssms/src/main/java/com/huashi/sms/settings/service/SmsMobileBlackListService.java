@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -61,11 +62,16 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
     /**
      * 全局手机号码（与REDIS 同步采用广播模式）
      */
-    public static volatile Map<String, Integer> GLOBAL_MOBILE_BLACKLIST = new HashMap<>();
+    public static volatile Map<String, Integer> GLOBAL_MOBILE_BLACKLIST = new ConcurrentHashMap<>();
     
-//    public static volatile Set<String> GLOBAL_MOBILE_BLACKLIST = new HashSet<String>();
-
-    private static Map<String, Object> response(String code, String msg) {
+    /**
+     * 
+       * TODO 消息拼接返回
+       * @param code
+       * @param msg
+       * @return
+     */
+    private Map<String, Object> response(String code, String msg) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put("result_code", code);
         resultMap.put("result_msg", msg);
@@ -249,6 +255,7 @@ public class SmsMobileBlackListService implements ISmsMobileBlackListService {
      */
     private void publishToRedis(MessageAction action, String mobile, Integer type) {
         try {
+            
             stringRedisTemplate.convertAndSend(SmsRedisConstant.BROADCAST_MOBILE_BLACKLIST_TOPIC, String.format("%d:%s:%d", action.getCode(), mobile, type));
         } catch (Exception e) {
             logger.error("加入黑名单数据错误", e);
