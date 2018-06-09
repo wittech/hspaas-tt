@@ -30,7 +30,7 @@ public class RabbitConstant {
      * @date 2016年10月4日 下午10:20:05
      */
     public enum WordsPriority {
-        L10(10, new String[] { "验证码", "动态码" }), L5(5, new String[] { "分钟" }), L1(1, new String[] { "回复TD" }),
+        L10(10, new String[] { "验证码", "动态码", "校验码" }), L5(5, new String[] { "分钟", "" }), L1(1, new String[] { "回复TD" }),
         DEFAULT(3, new String[] { "" });
 
         private int      level;

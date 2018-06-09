@@ -72,7 +72,7 @@
 							<div class="form-group">
                                 <label class="col-xs-3 control-label">优先级</label>
                                 <div class="col-xs-5">
-                                    <input type="text" class="form-control validate[required,maxSize[100],custom[number],min[1]]" name="smsPriorityWords.priority" id="priority" value="${smsPriorityWords.priority!''}" placeholder="请输入优先级"/>
+                                    <input type="text" class="form-control validate[required,maxSize[100],custom[number],min[1]]" name="smsPriorityWords.priority" id="priority" value="${smsPriorityWords.priority!''}" placeholder="优先级[1-10]，越大越优先处理"/>
                                 </div>
                             </div>
 

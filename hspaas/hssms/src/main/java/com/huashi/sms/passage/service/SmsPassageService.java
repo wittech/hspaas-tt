@@ -331,7 +331,11 @@ public class SmsPassageService implements ISmsPassageService {
                 throw new RuntimeException("更新通道状态失败");
             }
 			
-			boolean isOk = smsPassageAccessService.updateAccessStatus(passageId, status);
+			// 更新REDIS资源数据
+			updateSmsPassageStatus(passageId, status);
+			
+			// edit by 20180609 禁用/启用都需要重新筛查通道组相关信息（首选通道，备用通道需要及时切换回来）
+			boolean isOk = smsPassageAccessService.updateByModifyPassage(passageId);
 			if(!isOk) {
                 throw new RuntimeException("更新可用通道状态失败");
             }
@@ -482,6 +486,38 @@ public class SmsPassageService implements ISmsPassageService {
 			return false;
 		}
 	}
+    
+    /**
+     * 
+       * TODO 更新REDIS 通道的状态信息
+       * @param passageId
+       * @param status
+       * @return
+     */
+    private boolean updateSmsPassageStatus(int passageId, int status) {
+        try {
+            SmsPassage smsPassage = null;
+            Object object = stringRedisTemplate.opsForHash().get(SmsRedisConstant.RED_SMS_PASSAGE, passageId + "");
+            if(object != null) {
+                smsPassage = JSON.parseObject(object.toString(), SmsPassage.class);
+            } else {
+                smsPassage = findById(passageId);
+            }
+            
+            if(smsPassage != null) {
+                smsPassage.setStatus(status);
+                stringRedisTemplate.opsForHash().put(SmsRedisConstant.RED_SMS_PASSAGE, smsPassage.getId()+"", JSON.toJSONString(smsPassage));
+                return true;
+            }
+            
+            logger.error("REDIS 更新短信通道数据失败");
+            return false;
+            
+        } catch (Exception e) {
+            logger.warn("REDIS 加载短信通道数据失败", e);
+            return false;
+        }
+    }
 
 	@Override
 	@Transactional

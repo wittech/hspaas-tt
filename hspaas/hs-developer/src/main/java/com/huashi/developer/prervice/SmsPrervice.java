@@ -195,13 +195,13 @@ public class SmsPrervice {
      */
     private long joinTask2Queue(SmsMtTask task) {
         try {
-//            // 更新用户余额
-//            boolean isSuccess = userBalanceService.deductBalance(task.getUserId(), -task.getTotalFee(),
-//                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(), "developer call");
-//            if (!isSuccess) {
-//                logger.error("用户ID: [" + task.getUserId() + "] 扣除短信余额 " +task.getTotalFee()+ " 失败");
-//                throw new QueueProcessException("发送短信扣除短信余额失败");
-//            }
+            // 更新用户余额
+            boolean isSuccess = userBalanceService.deductBalance(task.getUserId(), -task.getTotalFee(),
+                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(), "developer call");
+            if (!isSuccess) {
+                logger.error("用户ID: [" + task.getUserId() + "] 扣除短信余额 " +task.getTotalFee()+ " 失败");
+                throw new QueueProcessException("发送短信扣除短信余额失败");
+            }
 
             task.setSid(idGenerator.generate());
             task.setCreateTime(new Date());
@@ -211,17 +211,6 @@ public class SmsPrervice {
 
             // 判断队列的优先级别
             int priority = WordsPriority.getLevel(task.getContent());
-            // if(WordsPriority.L10.getLevel() == priority) {
-            // stringRedisTemplate.opsForList().rightPush(SmsConstant.RED_TASK_PERSISTENCE_HIGH,
-            // JSON.toJSONString(task));
-            // } else {
-            // if(WordsPriority.L1.getLevel() == priority)
-            // stringRedisTemplate.opsForList().rightPush(SmsConstant.RED_TASK_PERSISTENCE_LOW,
-            // JSON.toJSONString(task));
-            // if(WordsPriority.L1.getLevel() == priority)
-            // stringRedisTemplate.opsForList().leftPush(SmsConstant.RED_TASK_PERSISTENCE_LOW,
-            // JSON.toJSONString(task));
-            // }
 
             String queueName = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS;
             if (TaskSubmitType.POINT_TO_POINT.getCode() == task.getSubmitType()

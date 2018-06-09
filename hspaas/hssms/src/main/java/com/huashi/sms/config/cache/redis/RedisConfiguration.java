@@ -173,7 +173,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 	
 	/**
      * 
-       * TODO 短信模板变更广播通知监听配置
+       * TODO 可用通道变更广播通知监听配置
        * @return
      */
     @Bean
