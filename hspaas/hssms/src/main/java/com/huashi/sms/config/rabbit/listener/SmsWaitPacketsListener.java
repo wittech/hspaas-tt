@@ -361,7 +361,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         } catch (Exception e) {
             logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
         } finally {
-            logger.error("##############分包总耗时：{} ms", System.currentTimeMillis() - start);
+            logger.warn("##############分包总耗时：{} ms", System.currentTimeMillis() - start);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             // 清除ThreadLocal对象，加速GC，减小内存压力
             smsMtTaskLocal.remove();
@@ -746,7 +746,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         }
 
         // 根据userId获取白名单手机号码数据
-//        Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(smsMtTaskLocal.get().getUserId());
+        Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(smsMtTaskLocal.get().getUserId());
 
         // 转换手机号码数组
         List<String> mobiles = new ArrayList<>(
@@ -760,9 +760,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         for (String mobile : mobiles) {
             // 判断手机号码是否是用户的白名单手机号码，是则不拦截 add by 2017-06-26
             // edit by zhengying 20171126 加入批量查询白名单手机号码功能
-//            if (CollectionUtils.isNotEmpty(whiteMobiles) && whiteMobiles.contains(mobile)) {
-//                continue;
-//            }
+            if (CollectionUtils.isNotEmpty(whiteMobiles) && whiteMobiles.contains(mobile)) {
+                continue;
+            }
 
             // 判断短信发送是否超速
             int beyondExpected = smsMobileTablesService.checkMobileIsBeyondExpected(smsMtTaskLocal.get().getUserId(),

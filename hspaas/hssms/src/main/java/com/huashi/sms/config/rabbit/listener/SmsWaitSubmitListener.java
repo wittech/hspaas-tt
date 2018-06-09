@@ -354,20 +354,11 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
      */
     private void persistSubmitMessage(List<SmsMtMessageSubmit> submits) {
         try {
-            // 当数据量大于阈值时无需REDIS汇聚，直接调用批量入库接口
-//            if (submits.size() >= DIRECT_PERSISTENT_SIZE_THRESHOLD) {
-//                smsSubmitService.batchInsertSubmit(submits);
-//            } else {
-//                stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_SUBMIT_LIST,
-//                                                           JSON.toJSONString(submits));
-//            }
-            
             smsSubmitService.batchInsertSubmit(submits);
 
             // 判断并设置推送信息
             smsSubmitService.setPushConfigurationIfNecessary(submits);
 
-            logger.info("待提交信息已提交至REDIS队列完成");
         } catch (Exception e) {
             logger.error("处理待提交信息REDIS失败，失败信息：{}", JSON.toJSONString(submits), e);
         }
