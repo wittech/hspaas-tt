@@ -23,12 +23,13 @@ import com.huashi.developer.model.SmsModel;
 import com.huashi.developer.model.SmsP2PModel;
 import com.huashi.developer.model.SmsP2PTemplateModel;
 import com.huashi.developer.response.sms.SmsBalanceResponse;
-import com.huashi.developer.response.sms.SmsSendResponse;
+import com.huashi.developer.response.sms.SmsApiResponse;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
 import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.task.context.TaskContext.TaskSubmitType;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.exception.QueueProcessException;
+import com.huashi.sms.template.service.ISmsTemplateService;
 
 /**
  * TODO 短信前置服务
@@ -38,9 +39,9 @@ import com.huashi.sms.task.exception.QueueProcessException;
  * @date 2017年4月6日 下午1:29:15
  */
 @Service
-public class SmsPrervice {
+public class SmsPrervice extends AbstractPrervice{
 
-    Logger                            logger = LoggerFactory.getLogger(getClass());
+    private final Logger              logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private IdGenerator               idGenerator;
@@ -58,24 +59,26 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendMessage(SmsModel model) {
+    public SmsApiResponse sendMessage(SmsModel model) {
         SmsMtTask task = new SmsMtTask();
 
         BeanUtils.copyProperties(model, task);
         task.setAppType(model.getAppType());
 
         try {
+            
+            smsTemplateService.get(id)
 
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new SmsSendResponse(model.getTotalFee(), sid);
+                return new SmsApiResponse(model.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {
             logger.error("发送短信至队列错误， {}", e);
         }
 
-        return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+        return new SmsApiResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
     }
 
     /**
@@ -84,7 +87,7 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendP2PMessage(SmsP2PModel model) {
+    public SmsApiResponse sendP2PMessage(SmsP2PModel model) {
         SmsMtTask task = new SmsMtTask();
 
         BeanUtils.copyProperties(model, task);
@@ -97,14 +100,14 @@ public class SmsPrervice {
 
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new SmsSendResponse(model.getTotalFee(), sid);
+                return new SmsApiResponse(model.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {
             logger.error("发送短信至队列错误， {}", e);
         }
 
-        return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+        return new SmsApiResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
     }
 
     /**
@@ -113,7 +116,7 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendP2PTemplateMessage(SmsP2PTemplateModel model) {
+    public SmsApiResponse sendP2PTemplateMessage(SmsP2PTemplateModel model) {
         SmsMtTask task = new SmsMtTask();
 
         BeanUtils.copyProperties(model, task);
@@ -124,14 +127,14 @@ public class SmsPrervice {
 
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new SmsSendResponse(model.getTotalFee(), sid);
+                return new SmsApiResponse(model.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {
             logger.error("发送短信至队列错误， {}", e);
         }
 
-        return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+        return new SmsApiResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
     }
 
     /**

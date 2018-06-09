@@ -341,10 +341,13 @@ public class SmsTemplateService implements ISmsTemplateService {
 			throw new RuntimeException(String.format("模板内容包含敏感词：%s", words));
 		}
 		template.setCreateTime(new Date());
+		
+		template.setStatus(ApproveStatus.WAITING.getValue());
 		// 融合平台判断 后台添加 状态默认
-		if (AppType.WEB.getCode() == template.getAppType()) {
-			template.setStatus(ApproveStatus.WAITING.getValue());
-		}
+//		if (AppType.WEB.getCode() == template.getAppType()) {
+//			template.setStatus(ApproveStatus.WAITING.getValue());
+//		}
+		
 		template.setRegexValue(parseContent2Regex(template.getContent()));
 		
 		if(template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
@@ -401,7 +404,8 @@ public class SmsTemplateService implements ISmsTemplateService {
 	 */
 	private static String parseContent2Regex(String content) {
 		// modify 变量内容 增加不可见字符
-		content = content.replaceAll("#[a-z]*[0-9]*[A-Z]*#", "[\\\\s\\\\S]*").replaceAll("\\{[a-z]*[0-9]*[A-Z]*\\}",
+//	    content = content.replaceAll("#[a-z]*[0-9]*[A-Z]*#",
+		content = content.replaceAll("{$a-z]*[0-9]*[A-Z]*}", "[\\\\s\\\\S]*").replaceAll("\\{[a-z]*[0-9]*[A-Z]*\\}",
 				"[\\\\s\\\\S]*");
 		// 去掉末尾可以增加空格等不可见字符，以免提供商模板不通过
 		// return prefix+oriStr+"\\s*$";

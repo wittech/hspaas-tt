@@ -17,7 +17,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
-import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.constants.OpenApiCode;
 import com.huashi.sms.record.dao.SmsApiFailedRecordMapper;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
 
@@ -69,7 +69,7 @@ public class SmsApiFailedRecordService implements ISmsApiFaildRecordService {
         }
 
 		for (SmsApiFailedRecord mr : list) {
-			CommonApiCode code = CommonApiCode.parse(mr.getRespCode());
+			OpenApiCode.ApiReponseCode code = OpenApiCode.ApiReponseCode.parse(mr.getRespCode());
 			mr.setErrorCodeText(code == null ? "" : code.getMessage());
 		}
 

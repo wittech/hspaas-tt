@@ -87,8 +87,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
     private StringRedisTemplate                stringRedisTemplate;
 
     @Autowired
-    private ISmsTemplateService                smsTemplateService;
-    @Autowired
     private IForbiddenWordsService             forbiddenWordsService;
     @Autowired
     private ISmsPassageAccessService           smsPassageAccessService;

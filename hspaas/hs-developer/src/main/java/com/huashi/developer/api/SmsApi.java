@@ -14,7 +14,7 @@ import com.huashi.developer.model.SmsP2PModel;
 import com.huashi.developer.model.SmsP2PTemplateModel;
 import com.huashi.developer.prervice.SmsPrervice;
 import com.huashi.developer.response.sms.SmsBalanceResponse;
-import com.huashi.developer.response.sms.SmsSendResponse;
+import com.huashi.developer.response.sms.SmsApiResponse;
 import com.huashi.developer.util.IpUtil;
 import com.huashi.developer.validator.SmsP2PTemplateValidator;
 import com.huashi.developer.validator.SmsP2PValidator;
@@ -39,7 +39,7 @@ public class SmsApi extends BasicApiSupport {
      * @return
      */
     @RequestMapping(value = "/send", method = {RequestMethod.POST, RequestMethod.GET})
-    public SmsSendResponse send() {
+    public SmsApiResponse send() {
         try {
             SmsModel model = smsValidator.validate(request.getParameterMap(), getClientIp());
             model.setAppType(getAppType());
@@ -50,7 +50,7 @@ public class SmsApi extends BasicApiSupport {
             return saveInvokeFailedRecord(e.getMessage());
         } catch (Exception e) {
             logger.error("用户短信发送失败", e);
-            return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+            return new SmsApiResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
         }
     }
 
@@ -60,7 +60,7 @@ public class SmsApi extends BasicApiSupport {
      * @return
      */
     @RequestMapping(value = "/p2p")
-    public SmsSendResponse p2pSend() {
+    public SmsApiResponse p2pSend() {
         try {
             SmsP2PModel model = smsP2PValidator.validate(request.getParameterMap(), getClientIp());
             model.setAppType(getAppType());
@@ -71,7 +71,7 @@ public class SmsApi extends BasicApiSupport {
             return saveInvokeFailedRecord(e.getMessage());
         } catch (Exception e) {
             logger.error("用户普通点对点短信发送失败", e);
-            return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+            return new SmsApiResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
         }
     }
 
@@ -81,8 +81,8 @@ public class SmsApi extends BasicApiSupport {
      * @param message
      * @return
      */
-    private SmsSendResponse saveInvokeFailedRecord(String message) {
-        SmsSendResponse response = new SmsSendResponse(JSON.parseObject(message));
+    private SmsApiResponse saveInvokeFailedRecord(String message) {
+        SmsApiResponse response = new SmsApiResponse(JSON.parseObject(message));
         try {
             // 如果处理失败则持久化到DB
             smsPrervice.saveErrorLog(response.getCode(), request.getRequestURL().toString(), IpUtil.getClientIp(request), request.getParameterMap(), getAppType());
@@ -99,7 +99,7 @@ public class SmsApi extends BasicApiSupport {
      * @return
      */
     @RequestMapping(value = "/p2p_template")
-    public SmsSendResponse p2pTemplateSend() {
+    public SmsApiResponse p2pTemplateSend() {
         try {
             SmsP2PTemplateModel model = smsP2PTemplateValidator.validate(request.getParameterMap(), getClientIp());
             model.setAppType(getAppType());
@@ -113,7 +113,7 @@ public class SmsApi extends BasicApiSupport {
                 return saveInvokeFailedRecord(e.getMessage());
             }
 
-            return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+            return new SmsApiResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
         }
     }
 
@@ -133,7 +133,7 @@ public class SmsApi extends BasicApiSupport {
             // 如果失败则存储错误日志
             String code = CommonApiCode.COMMON_SERVER_EXCEPTION.getCode();
             if (e instanceof ValidateException) {
-                SmsSendResponse response = saveInvokeFailedRecord(e.getMessage());
+                SmsApiResponse response = saveInvokeFailedRecord(e.getMessage());
                 if (response != null) {
                     code = response.getCode();
                 }

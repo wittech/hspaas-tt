@@ -22,7 +22,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.notice.vo.SmsResponse;
 import com.huashi.common.util.SecurityUtil;
 import com.huashi.constants.OpenApiCode;
-import com.huashi.constants.OpenApiCode.CommonApiCode;
 
 public class MessageSendUtil {
 
@@ -62,8 +61,8 @@ public class MessageSendUtil {
             }
         } catch (IOException e) {
             logger.error("短信发送失败", e);
-            return new SmsResponse(mobile, CommonApiCode.COMMON_SERVER_EXCEPTION.getCode(),
-                                   CommonApiCode.COMMON_SERVER_EXCEPTION.getMessage());
+            return new SmsResponse(mobile, OpenApiCode.ApiReponseCode.SERVER_EXCEPTION.getCode(),
+                                   OpenApiCode.ApiReponseCode.SERVER_EXCEPTION.getMessage());
         } finally {
             // 关闭连接,释放资源
             try {
