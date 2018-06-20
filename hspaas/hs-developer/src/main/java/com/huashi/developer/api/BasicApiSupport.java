@@ -7,12 +7,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.developer.util.IpUtil;
-import com.huashi.developer.validator.PassportValidator;
 
 public class BasicApiSupport {
 
@@ -24,14 +22,6 @@ public class BasicApiSupport {
     @Resource
     protected HttpServletResponse response;
     
-    @Autowired
-    protected PassportValidator passportValidator;
-
-    protected boolean validate() {
-
-        return true;
-    }
-
     @Override
     public String toString() {
         return JSON.toJSONString(request.getParameterMap());

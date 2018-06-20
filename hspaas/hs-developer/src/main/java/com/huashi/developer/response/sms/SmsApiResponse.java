@@ -4,14 +4,15 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
+import com.huashi.constants.OpenApiCode;
 import com.huashi.constants.OpenApiCode.ApiReponseCode;
 
 public class SmsApiResponse implements Serializable {
 
     private static final long serialVersionUID = 746495195378955865L;
     private String            code             = ApiReponseCode.SUCCESS.getCode(); // 状态码
-    private String            msg;                                                      // 成功发送的短信计费条数
-    private List<JSONObject>  rets             = null;                                  // 处理结果
+    private String            msg;                                                // 成功发送的短信计费条数
+    private List<JSONObject>  rets             = null;                            // 处理结果
 
     public String getCode() {
         return code;
@@ -44,6 +45,25 @@ public class SmsApiResponse implements Serializable {
 
     public SmsApiResponse() {
         super();
+    }
+
+    public SmsApiResponse(String code, String msg, List<JSONObject> rets) {
+        super();
+        this.code = code;
+        this.msg = msg;
+        this.rets = rets;
+    }
+
+    public SmsApiResponse(String code, String msg) {
+        super();
+        this.code = code;
+        this.msg = msg;
+    }
+    
+    public SmsApiResponse(OpenApiCode.ApiReponseCode apiCode) {
+        super();
+        this.code = apiCode.getCode();
+        this.msg = apiCode.getMessage();
     }
 
 }

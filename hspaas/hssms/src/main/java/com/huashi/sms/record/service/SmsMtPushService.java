@@ -36,7 +36,6 @@ import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.fork.MtReportPushToDeveloperWorker;
-import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
 import com.huashi.sms.passage.context.PassageContext.PushStatus;
 import com.huashi.sms.record.dao.SmsMtMessagePushMapper;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
@@ -69,6 +68,11 @@ public class SmsMtPushService implements ISmsMtPushService {
     private ApplicationContext     applicationContext;
     // @Resource
     // private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    
+    /**
+     * 回执成功状态码
+     */
+    private static final String DELIVED_SUCCESS_CODE = "DELIVED";
 
     private Logger                 logger                   = LoggerFactory.getLogger(getClass());
 
@@ -161,11 +165,13 @@ public class SmsMtPushService implements ISmsMtPushService {
      */
     private boolean subQueue(JSONObject body, SmsMtMessageDeliver deliver, Map<Integer, List<JSONObject>> userBodies) {
         // edit by zhengying 将SID转型为string（部分客户提到推送到客户侧均按照字符类型去解析，顾做了转义）
-        body.put("sid", body.getLong("sid").toString());
+        body.put("sendId", body.getLong("sid").toString());
         body.put("mobile", deliver.getMobile());
-        body.put("status", deliver.getStatusCode());
-        body.put("receiveTime", deliver.getDeliverTime());
-        body.put("errorMsg", deliver.getStatus() == DeliverStatus.SUCCESS.getValue() ? "" : deliver.getStatusCode());
+        
+        // 必填参数。短信状态，2=成功，3=失败
+        body.put("status", DELIVED_SUCCESS_CODE.equalsIgnoreCase(deliver.getStatusCode()) ? "2" : "3");
+        body.put("sendTime", deliver.getDeliverTime());
+        body.put("reportStatus", deliver.getStatusCode());
 
         try {
             // 如果本次处理的用户ID已经包含在上下文处理集合中，则直接追加即可

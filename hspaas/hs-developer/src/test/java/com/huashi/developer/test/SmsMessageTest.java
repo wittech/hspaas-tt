@@ -17,7 +17,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.util.RandomUtil;
 import com.huashi.common.util.SecurityUtil;
 import com.huashi.constants.CommonContext.AppType;
-import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.constants.OpenApiCode;
 
 public class SmsMessageTest {
 
@@ -70,7 +70,7 @@ public class SmsMessageTest {
 		
 		System.out.println(JSON.toJSONString(result));
 		
-		Assert.assertTrue(result.get("code").toString(), result.get("code").toString().equals(CommonApiCode.COMMON_SUCCESS.getCode()+""));
+		Assert.assertTrue(result.get("code").toString(), result.get("code").toString().equals(OpenApiCode.SUCCESS+""));
 	}
 
 //	String post(String url, String content) {

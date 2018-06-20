@@ -3,7 +3,6 @@ package com.huashi.sms.config.rabbit.listener.packets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,13 +35,10 @@ import com.huashi.common.settings.service.IPushConfigService;
 import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.context.UserBalanceConstant;
-import com.huashi.common.user.context.UserSettingsContext.SmsSignatureSource;
 import com.huashi.common.user.domain.UserPassage;
-import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.user.service.IUserSmsConfigService;
-import com.huashi.common.util.PatternUtil;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PlatformType;
@@ -67,7 +63,6 @@ import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsProcessStatus;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
-import com.huashi.sms.task.exception.QueueProcessException;
 import com.huashi.sms.task.model.SmsRoutePassage;
 import com.huashi.sms.template.context.TemplateContext;
 import com.huashi.sms.template.domain.MessageTemplate;
@@ -114,11 +109,14 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
     private JmsMessagingTemplate               jmsMessagingTemplate;
     @Autowired
     private MappingJackson2MessageConverter    messageConverter;
-
+    @Autowired
+    private ISmsTemplateService                smsTemplateService;
+    
     /**
      * 根据当前用户ID和短信内容提取出的短信模板信息
      */
     private final ThreadLocal<MessageTemplate> messageTemplateLocal = new ThreadLocal<>();
+
 
     /**
      * 错误序列号计数器
@@ -172,7 +170,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
         task.setProcessStatus(StringUtils.isEmpty(task.getErrorMessageReport())
                               || CollectionUtils.isEmpty(task.getPackets()) ? PacketsProcessStatus.PROCESS_COMPLETE.getCode() : PacketsProcessStatus.PROCESS_EXCEPTION.getCode());
 
-        task.setMessageTemplateId(messageTemplateLocal.get() == null ? null : messageTemplateLocal.get().getId());
         task.setForceActions(task.getForceActionsReport().toString());
 
         // 如果正在分包或者分包异常，则审核状态为待审核
@@ -301,29 +298,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
     // }
 
     /**
-     * TODO 验证数据有效性并返回用户短信配置信息
-     *
-     * @param task
-     */
-    private UserSmsConfig getSmsConfig(SmsMtTask task) {
-        if (task == null) {
-            throw new QueueProcessException("待处理任务数据为空");
-        }
-
-        if (StringUtils.isEmpty(task.getMobile())) {
-            throw new QueueProcessException("手机号码为空");
-        }
-
-        UserSmsConfig userSmsConfig = userSmsConfigService.getByUserId(task.getUserId());
-        if (userSmsConfig == null) {
-            userSmsConfigService.save(task.getUserId(), UserBalanceConstant.WORDS_SIZE_PER_NUM, task.getExtNumber());
-            task.getErrorMessageReport().append(formatMessage("户短信配置为空，需要更新"));
-        }
-
-        return userSmsConfig;
-    }
-
-    /**
      * TODO 保存子任务
      *
      * @param task 主任务
@@ -345,12 +319,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
 
         smsMtTaskPackets.setContent(task.getContent());
         smsMtTaskPackets.setMobileSize(mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length);
-
-        // edit by zhengying 20170621 针对短信模板加入扩展号码逻辑
-        if (messageTemplateLocal.get() != null) {
-            smsMtTaskPackets.setMessageTemplateId(messageTemplateLocal.get().getId());
-            smsMtTaskPackets.setTemplateExtNumber(messageTemplateLocal.get().getExtNumber());
-        }
 
         if (passageAccess != null) {
             smsMtTaskPackets.setPassageId(passageAccess.getPassageId());
@@ -377,8 +345,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
         // boolean isAvaiable = isHsAdmin(task.getAppKey());
 
         // 短信模板ID为空，短信包含敏感词及其他错误信息，短信通道为空 均至状态为 待人工处理
-        if (passageAccess == null || StringUtils.isNotEmpty(smsMtTaskPackets.getRemark())
-            || messageTemplateLocal.get() == null || messageTemplateLocal.get().getId() == null) {
+        if (passageAccess == null || StringUtils.isNotEmpty(smsMtTaskPackets.getRemark())) {
             smsMtTaskPackets.setStatus(PacketsApproveStatus.WAITING.getCode());
         } else {
             smsMtTaskPackets.setStatus(PacketsApproveStatus.AUTO_COMPLETE.getCode());
@@ -420,38 +387,6 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
     }
 
     /**
-     * TODO 校验短信签名相关内容
-     *
-     * @param task
-     * @param smsConfig
-     */
-    private void checkContentSignature(SmsMtTask task, UserSmsConfig smsConfig) {
-        // 如果用户不携带签名模式（一客一签模式），模板匹配需要考虑时候将原短信内容基础上加入签名进行匹配
-        if (smsConfig.getSignatureSource() != null
-            && smsConfig.getSignatureSource() == SmsSignatureSource.HSPAAS_AUTO_APPEND.getValue()) {
-
-            if (StringUtils.isEmpty(smsConfig.getSignatureContent())) {
-                task.getErrorMessageReport().append(formatMessage("短信内容强制签名但用户签名内容未设置"));
-            } else {
-                task.setContent(String.format("【%s】%s", smsConfig.getSignatureContent(), task.getContent()));
-            }
-
-        } else {
-
-            // 如果签名为客户自维护，则需要判断签名相关信息
-            if (!PatternUtil.isContainsSignature(task.getContent())) {
-                task.getErrorMessageReport().append(formatMessage("用户短信内容不包含签名"));
-            }
-
-            // 判断短信内容是否包含多个签名 edit by 20170610 暂时屏蔽
-            // if (PatternUtil.isMultiSignatures(model.getContent())) {
-            // model.getErrorMessageReport().append(formatMessage("用户短信内容包含多个签名"));
-            // }
-
-        }
-    }
-
-    /**
      * TODO 标记短信是否有敏感词
      *
      * @param task
@@ -463,18 +398,20 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
         }
 
         // 短信模板报备白名单词汇（如果本次内容包含此词汇不算作敏感词）
-        String whiteWordsRecord = messageTemplateLocal.get() == null ? null : messageTemplateLocal.get().getWhiteWord();
+//        String whiteWordsRecord = messageTemplateLocal.get() == null ? null : messageTemplateLocal.get().getWhiteWord();
 
         // 判断短信内容是否包含敏感词
         Set<String> filterWords;
-        if (StringUtils.isEmpty(whiteWordsRecord)) {
-            filterWords = forbiddenWordsService.filterForbiddenWords(task.getContent());
-
-        } else {
-            // 报备的免审敏感词（报备后对敏感词有效）
-            Set<String> whiteWordsSet = new HashSet<>(Arrays.asList(whiteWordsRecord.split("\\|")));
-            filterWords = forbiddenWordsService.filterForbiddenWords(task.getContent(), whiteWordsSet);
-        }
+//        if (StringUtils.isEmpty(whiteWordsRecord)) {
+//            filterWords = forbiddenWordsService.filterForbiddenWords(task.getContent());
+//
+//        } else {
+//            // 报备的免审敏感词（报备后对敏感词有效）
+//            Set<String> whiteWordsSet = new HashSet<>(Arrays.asList(whiteWordsRecord.split("\\|")));
+//            filterWords = forbiddenWordsService.filterForbiddenWords(task.getContent(), whiteWordsSet);
+//        }
+        
+        filterWords = forbiddenWordsService.filterForbiddenWords(task.getContent());
 
         if (CollectionUtils.isNotEmpty(filterWords)) {
             task.setForbiddenWords(StringUtils.join(filterWords, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
@@ -509,11 +446,13 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
      * @return
      */
     private Integer getMessageRouteType() {
-        if (messageTemplateLocal.get() == null || messageTemplateLocal.get().getRouteType() == null) {
-            return RouteType.DEFAULT.getValue();
-        }
-
-        return messageTemplateLocal.get().getRouteType();
+//        if (messageTemplateLocal.get() == null || messageTemplateLocal.get().getRouteType() == null) {
+//            return RouteType.DEFAULT.getValue();
+//        }
+//
+//        return messageTemplateLocal.get().getRouteType();
+        
+        return RouteType.DEFAULT.getValue();
     }
 
     /**
@@ -620,33 +559,17 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
      * @param task
      * @param smsConfig
      */
-    private void loadSmsTemplateByContent(SmsMtTask task, UserSmsConfig smsConfig) {
-        // 短信签名判断
-        checkContentSignature(task, smsConfig);
-
-        MessageTemplate template;
-        // 短信是否免审
-        if (!smsConfig.getMessagePass()) {
-            template = new MessageTemplate();
-            template.setId(TemplateContext.SUPER_TEMPLATE_ID);
-            template.setRouteType(RouteType.DEFAULT.getValue());
-            template.setSubmitInterval(smsConfig.getSubmitInterval());
-            template.setLimitTimes(smsConfig.getLimitTimes());
-
-        } else {
-            // 根据短信内容匹配模板，短信模板需要报备而查出的短信模板为空则提至人工处理信息中
-            template = smsTemplateService.getByContent(task.getUserId(), task.getContent());
-            if (template == null) {
-                task.getErrorMessageReport().append(formatMessage("用户短信模板未报备"));
-                refillForceActions(PacketsActionPosition.SMS_TEMPLATE_MISSED.getPosition(),
-                                   task.getForceActionsReport());
-            }
+    private void loadSmsTemplateByContent(SmsMtTask task) {
+        // 根据短信内容匹配模板，短信模板需要报备而查出的短信模板为空则提至人工处理信息中
+        MessageTemplate template = smsTemplateService.getByContent(task.getUserId(), task.getContent());
+        if (template == null) {
+            task.getErrorMessageReport().append(formatMessage("用户短信模板未报备"));
+            refillForceActions(PacketsActionPosition.SMS_TEMPLATE_MISSED.getPosition(),
+                               task.getForceActionsReport());
         }
 
         // 如果模板不为空则设置线程内模板变量
-        if (template != null) {
-            messageTemplateLocal.set(template);
-        }
+        messageTemplateLocal.set(template);
     }
 
     /**
@@ -656,8 +579,8 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
      * @param smsConfig
      * @return
      */
-    private boolean isSameMobileOutOfRange(SmsMtTask task, UserSmsConfig smsConfig) {
-        fillTemplateAttributes(smsConfig);
+    private boolean isSameMobileOutOfRange(SmsMtTask task) {
+        fillTemplateAttributes();
 
         // 根据userId获取白名单手机号码数据
         Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(task.getUserId());
@@ -722,24 +645,15 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
      *
      * @param smsConfig
      */
-    private void fillTemplateAttributes(UserSmsConfig smsConfig) {
-        MessageTemplate template = messageTemplateLocal.get();
-        if (template == null) {
-            template = new MessageTemplate();
-            template.setId(TemplateContext.SUPER_TEMPLATE_ID);
-            template.setLimitTimes(smsConfig.getLimitTimes());
-            template.setSubmitInterval(smsConfig.getSubmitInterval());
-        } else {
-            if (template.getLimitTimes() == null) {
-                template.setLimitTimes(TemplateContext.DEFAULT_LIMIT_TIMES);
-            }
-
-            if (template.getSubmitInterval() == null) {
-                template.setSubmitInterval(TemplateContext.DEFAULT_SUBMIT_INTERVAL);
-            }
-
+    private void fillTemplateAttributes() {
+        
+        if (messageTemplateLocal.get().getLimitTimes() == null) {
+            messageTemplateLocal.get().setLimitTimes(TemplateContext.DEFAULT_LIMIT_TIMES);
         }
-        messageTemplateLocal.set(template);
+
+        if (messageTemplateLocal.get().getSubmitInterval() == null) {
+            messageTemplateLocal.get().setSubmitInterval(TemplateContext.DEFAULT_SUBMIT_INTERVAL);
+        }
     }
 
     /**
@@ -841,20 +755,17 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
     }
 
     @Override
-    @JmsListener(destination = ActiveMqConstant.MQ_SMS_MT_WAIT_PROCESS, concurrency = "4-10")
+    @JmsListener(destination = ActiveMqConstant.MQ_SMS_MT_WAIT_PROCESS)
     public void onMessage(Message message) {
         try {
             SmsMtTask model = (SmsMtTask) messageConverter.fromMessage(message);
             model.setOriginMobile(model.getMobile());
 
-            // 用户短信配置中心数据
-            UserSmsConfig smsConfig = getSmsConfig(model);
-
             // 获取短信模板信息
-            loadSmsTemplateByContent(model, smsConfig);
+            loadSmsTemplateByContent(model);
 
             // 校验同模板下手机号码是否超速，超量
-            if (!isSameMobileOutOfRange(model, smsConfig)) {
+            if (!isSameMobileOutOfRange(model)) {
                 asyncSendTask(model);
                 return;
             }
