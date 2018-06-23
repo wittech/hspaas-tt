@@ -36,7 +36,7 @@ public interface ISmsTemplateService {
 	 * @param template
 	 * @return
 	 */
-	boolean save(MessageTemplate template);
+	long save(MessageTemplate template);
 
 	/**
 	 * 

@@ -72,7 +72,7 @@ public class SmsMtPushService implements ISmsMtPushService {
     /**
      * 回执成功状态码
      */
-    private static final String DELIVED_SUCCESS_CODE = "DELIVED";
+    private static final String DELIVED_SUCCESS_CODE = "DELIVRD";
 
     private Logger                 logger                   = LoggerFactory.getLogger(getClass());
 
@@ -441,11 +441,12 @@ public class SmsMtPushService implements ISmsMtPushService {
             RetryResponse response = null;
             String content = null;
             Long startTime = null;
+            
             for (String url : urlBodies.keySet()) {
                 startTime = System.currentTimeMillis();
-                content = JSON.toJSONString(urlBodies.get(url), new SimplePropertyPreFilter("sid", "mobile", "attach",
-                                                                                            "status", "receiveTime",
-                                                                                            "errorMsg"),
+                content = JSON.toJSONString(urlBodies.get(url), new SimplePropertyPreFilter("sendId", "mobile",
+                                                                                            "status", "reportStatus",
+                                                                                            "sendTime"),
                                             SerializerFeature.WriteMapNullValue,
                                             SerializerFeature.WriteNullStringAsEmpty);
 
@@ -575,8 +576,9 @@ public class SmsMtPushService implements ISmsMtPushService {
             // 暂时先用作批量处理ID
             push.setResponseContent(System.nanoTime() + "");
             push.setResponseMilliseconds(timeCost);
-            push.setContent(JSON.toJSONString(report, new SimplePropertyPreFilter("sid", "mobile", "attach", "status",
-                                                                                  "receiveTime", "errorMsg"),
+            push.setContent(JSON.toJSONString(report, new SimplePropertyPreFilter("sendId", "mobile",
+                                                                                  "status", "reportStatus",
+                                                                                  "sendTime"),
                                               SerializerFeature.WriteMapNullValue,
                                               SerializerFeature.WriteNullStringAsEmpty));
             push.setCreateTime(new Date());

@@ -21,6 +21,7 @@ import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.context.UserContext.UserStatus;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.service.IUserBalanceService;
+import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.util.IdGenerator;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.constants.CommonContext.PlatformType;
@@ -56,6 +57,8 @@ public class SmsPrervice extends AbstractPrervice {
     private IUserBalanceService       userBalanceService;
     @Reference
     private ISmsApiFaildRecordService smsApiFaildRecordService;
+    @Reference
+    protected IUserDeveloperService             userDeveloperService;
 
     @Autowired
     private SmsTemplatePrervice       smsTemplatePrervice;
@@ -81,9 +84,15 @@ public class SmsPrervice extends AbstractPrervice {
             String mobile = getValue("mobile", paramsMap);
             // 签名
             String sign = getValue("sign", paramsMap);
-
+            
             // 1、判断是否必填参数为空
             checkIfNecessary(appId, modeId, mobile, sign);
+            
+            // 若不传，视为立即发送；若传值，则会在sendTime表示的时间点开始发送。格式为：yyyyMMddHHmmss如：20161123143022
+            String sendTime = getValue("sendTime", paramsMap);
+            if(StringUtils.isNotEmpty(sendTime)) {
+                throw new ValidateException(ApiReponseCode.SNED_TIME_INVALID);
+            } 
 
             SmsMtTask task = new SmsMtTask();
 
@@ -122,9 +131,6 @@ public class SmsPrervice extends AbstractPrervice {
 
             // 判断余额是否够用
             checkBalanceAvaiable(task);
-
-            // 若不传，视为立即发送；若传值，则会在sendTime表示的时间点开始发送。格式为：yyyyMMddHHmmss如：20161123143022
-            // String sendTime = getValue("sendTime", paramsMap);
 
             // 状态通知地址
             String notifyUrl = getValue("notifyUrl", paramsMap);

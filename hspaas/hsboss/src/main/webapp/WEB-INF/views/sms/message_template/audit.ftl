@@ -56,12 +56,6 @@
                                         </div>
                                        </div>
                                     <div class="form-group">
-                                        <label class="col-xs-1 control-label">审核备注</label>
-                                        <div class="col-xs-5">
-                                             <textarea class="form-control validate[required,maxSize[1000]]" name="messageTemplate.remark" id="remark" rows="8"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
                                         <div class="col-xs-9 col-xs-offset-3">
                                             <button type="button" onclick="formSubmit();" class="btn btn-primary" name="buttonSubmit">提交</button>
                                         </div>
@@ -91,7 +85,7 @@
 				return;
 			}
 			$.ajax({
-	  			url:'${BASE_PATH}/sms/message_template/update',
+	  			url:'${BASE_PATH}/sms/message_template/auditSubmit',
 	  			dataType:'json',
 	  			data:$('#myform').serialize(),
 	  			type:'post',

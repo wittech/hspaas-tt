@@ -29,7 +29,7 @@ public class OpenApiCode {
      * @date 2016年9月21日 上午12:00:33
      */
     public enum ApiReponseCode {
-        SUCCESS("0", "业务校验成功"), 
+        SUCCESS("0", "成功"), 
             REQUEST_EXCEPTION("101", "必填项为空"),
             SMS_CONTEXT_TOO_LONG("102", "短信长度不能超过670字符度"),
             APPKEY_INVALID("103", "应用不存在"), 

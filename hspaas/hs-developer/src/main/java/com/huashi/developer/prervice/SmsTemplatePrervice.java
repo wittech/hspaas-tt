@@ -1,25 +1,55 @@
 package com.huashi.developer.prervice;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.huashi.common.user.context.UserContext.UserStatus;
+import com.huashi.common.user.domain.UserDeveloper;
+import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.util.LogUtils;
 import com.huashi.constants.OpenApiCode.ApiReponseCode;
 import com.huashi.developer.exception.ValidateException;
 import com.huashi.developer.response.sms.SmsApiResponse;
 import com.huashi.sms.template.context.TemplateContext.ApproveStatus;
 import com.huashi.sms.template.domain.MessageTemplate;
+import com.huashi.sms.template.service.ISmsTemplateService;
 
 @Service
 public class SmsTemplatePrervice extends AbstractPrervice {
+    
+    @Reference
+    protected IUserDeveloperService             userDeveloperService;
+    @Reference
+    protected ISmsTemplateService               smsTemplateService;
 
     private void checkSign(String appKey, int appId, String title, String modeSign, String context, String location,
                            int type, String timestamp, String sign) throws ValidateException {
         // (appKey+appId+ title+modeSign+context+location+type+timestamp)
         String targetSign = appKey + appId + title + modeSign + context + location + type + timestamp;
+
+        try {
+            targetSign = sign(targetSign);
+            if (!targetSign.equals(sign)) {
+                throw new ValidateException(ApiReponseCode.AUTHENTICATION_FAILED);
+            }
+
+        } catch (Exception e) {
+            logger.error("校验签名失败", e);
+            throw new ValidateException(ApiReponseCode.AUTHENTICATION_FAILED);
+        }
+    }
+    
+    private void checkSign(String appKey, int appId, String modeId, String title, String modeSign, String context, String location,
+                           String timestamp, String sign) throws ValidateException {
+        // (appKey+appId+ title+modeSign+context+location+type+timestamp)
+        String targetSign = appKey+appId+modeId+title+modeSign+context+location+timestamp;
 
         try {
             targetSign = sign(targetSign);
@@ -87,7 +117,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
 
         checkTitle(title);
 
-        checkSign(sign);
+        checkSign(modeSign);
 
         checkContext(context);
 
@@ -96,6 +126,35 @@ public class SmsTemplatePrervice extends AbstractPrervice {
         String appKey = getAppkey(appId);
 
         checkSign(appKey, appId, title, modeSign, context, location, type, timestamp, sign);
+    }
+    
+    /**
+     * TODO 校验数据
+     * 
+     * @param appId
+     * @param title
+     * @param modeSign
+     * @param context
+     * @param location
+     * @param type
+     * @param timestamp
+     * @param sign
+     * @throws ValidateException 
+     */
+    private void verify(int appId, String modeId, String title, String modeSign, String context, String location, 
+                        String timestamp, String sign) throws ValidateException {
+
+        checkTitle(title);
+
+        checkSign(modeSign);
+
+        checkContext(context);
+
+        checkTimestampExpired(timestamp);
+
+        String appKey = getAppkey(appId);
+
+        checkSign(appKey, appId, modeId, title, modeSign, context, location, timestamp, sign);
     }
 
     /**
@@ -122,14 +181,17 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             String timestamp = paramsMap.get("timestamp")[0];
             String sign = paramsMap.get("sign")[0];
 
+            String finalContext = context;
             if (StringUtils.isNotEmpty(modeSign)) {
                 // 后置签名
                 if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
-                    context = context + modeSign;
+                    finalContext = context + modeSign;
                 } else {
-                    context = modeSign + context;
+                    finalContext = modeSign + context;
                 }
             }
+            
+            finalContext = replaceVariable(finalContext);
 
             // 校验数据
             verify(appId, title, modeSign, context, location, type, timestamp, sign);
@@ -137,11 +199,18 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             MessageTemplate template = new MessageTemplate();
             template.setUserId(appId);
             template.setRemark(title);
-            template.setContent(context);
+            template.setContent(finalContext);
             template.setNoticeMode(type);
-            boolean isOk = smsTemplateService.save(template);
-            if (isOk) {
-                return new SmsApiResponse();
+            long id = smsTemplateService.save(template);
+            if (id > 0) {
+                
+                List<JSONObject> rets = new ArrayList<>();
+                
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("modeId", id + "");
+                rets.add(jsonObject);
+                
+                return new SmsApiResponse(ApiReponseCode.SUCCESS.getCode(), "成功", rets);
             }
 
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
@@ -177,29 +246,29 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             String modeSign = paramsMap.get("modeSign")[0];
             String context = paramsMap.get("context")[0];
 
-            // type 模版短信类型，必填参数 1:行业短信 2:营销短信
-            int type = Integer.parseInt(paramsMap.get("type")[0]);
             String timestamp = paramsMap.get("timestamp")[0];
             String sign = paramsMap.get("sign")[0];
 
+            String finalContext = context;
             if (StringUtils.isNotEmpty(modeSign)) {
                 // 后置签名
                 if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
-                    context = context + modeSign;
+                    finalContext = context + modeSign;
                 } else {
-                    context = modeSign + context;
+                    finalContext = modeSign + context;
                 }
             }
+            
+            finalContext = replaceVariable(finalContext);
 
             // 校验数据
-            verify(appId, title, modeSign, context, location, type, timestamp, sign);
+            verify(appId, modeId, title, modeSign, context, location, timestamp, sign);
 
             MessageTemplate template = new MessageTemplate();
             template.setId(Long.valueOf(modeId));
             template.setUserId(appId);
             template.setRemark(title);
-            template.setContent(context);
-            template.setNoticeMode(type);
+            template.setContent(finalContext);
             boolean isOk = smsTemplateService.update(template);
             if (isOk) {
                 return new SmsApiResponse();
@@ -231,12 +300,11 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             }
 
             int appId = Integer.parseInt(paramsMap.get("appId")[0]);
-            String title = paramsMap.get("title")[0];
             String timestamp = paramsMap.get("timestamp")[0];
             String sign = paramsMap.get("sign")[0];
 
             // 校验数据
-            verify(appId, title, timestamp, sign);
+            verify(appId, modeId, timestamp, sign);
 
             boolean isOk = smsTemplateService.deleteById(Long.valueOf(modeId));
             if (isOk) {
@@ -374,5 +442,42 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             LogUtils.error("根据表达式查询短信内容参数异常", e);
             return null;
         }
+    }
+    
+    public static String replaceVariable(String content) {
+        if (StringUtils.isEmpty(content)) {
+            return null;
+        }
+        
+        for(int i=0;i<=20;i++) {
+            content = content.replace("${var"+i+"}", "#code#");
+        }
+        
+        return content;
+    }
+    
+    public static void main(String[] args) {
+        String content = "h哈哈阿道夫${var1}开始看看IE${var3}";
+        
+        System.out.println(replaceVariable(content));
+    }
+    
+    /**
+     * TODO 根据appid获取appkey(实际是我司的密钥，不是开发者编号)
+     * 
+     * @param appId
+     * @return
+     */
+    private String getAppkey(int appId) throws ValidateException{
+        UserDeveloper userDeveloper = userDeveloperService.getByUserId(appId);
+        if (userDeveloper == null) {
+            throw new ValidateException(ApiReponseCode.APPKEY_INVALID);
+        }
+
+        if (userDeveloper.getStatus() == UserStatus.NO.getValue()) {
+            throw new ValidateException(ApiReponseCode.API_DEVELOPER_INVALID);
+        }
+
+        return userDeveloper.getAppSecret();
     }
 }

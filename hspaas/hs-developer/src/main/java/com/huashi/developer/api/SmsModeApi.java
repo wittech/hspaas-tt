@@ -1,9 +1,11 @@
 package com.huashi.developer.api;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSONObject;
 import com.huashi.developer.prervice.SmsTemplatePrervice;
 import com.huashi.developer.response.sms.SmsApiResponse;
 
@@ -15,8 +17,17 @@ public class SmsModeApi extends BasicApiSupport {
     private SmsTemplatePrervice smsTemplatePrervice;
 
     @RequestMapping(value = "/addMode")
-    public SmsApiResponse addMode() {
-        return smsTemplatePrervice.addTemplate(request.getParameterMap());
+    public JSONObject addMode() {
+        SmsApiResponse response = smsTemplatePrervice.addTemplate(request.getParameterMap());
+        
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", response.getCode());
+        jsonObject.put("msg", response.getMsg());
+        
+        if(CollectionUtils.isNotEmpty(response.getRets())) {
+            jsonObject.put("rets",response.getRets().get(0));
+        }
+        return jsonObject;
     }
 
     @RequestMapping(value = "/updMode")

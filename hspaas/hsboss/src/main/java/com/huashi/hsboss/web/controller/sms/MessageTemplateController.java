@@ -148,6 +148,11 @@ public class MessageTemplateController extends BaseController {
 		MessageTemplate template = iSmsTemplateService.get(id);
 		setAttr("messageTemplate", template);
 	}
+	
+	public void auditSubmit() {
+	    MessageTemplate template = getModel(MessageTemplate.class, "messageTemplate");
+        renderResultJson(iSmsTemplateService.approve(template.getId(), template.getStatus(), getLoginName()));
+	}
 
 	public void delete() {
 		long id = getParaToLong("id");

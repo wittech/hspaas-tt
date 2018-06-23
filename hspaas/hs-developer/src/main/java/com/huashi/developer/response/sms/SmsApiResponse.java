@@ -10,9 +10,9 @@ import com.huashi.constants.OpenApiCode.ApiReponseCode;
 public class SmsApiResponse implements Serializable {
 
     private static final long serialVersionUID = 746495195378955865L;
-    private String            code             = ApiReponseCode.SUCCESS.getCode(); // 状态码
-    private String            msg;                                                // 成功发送的短信计费条数
-    private List<JSONObject>  rets             = null;                            // 处理结果
+    private String            code             = ApiReponseCode.SUCCESS.getCode();   // 状态码
+    private String            msg              = ApiReponseCode.SUCCESS.getMessage(); // 成功发送的短信计费条数
+    private List<JSONObject>  rets             = null;                               // 处理结果
 
     public String getCode() {
         return code;
@@ -59,7 +59,7 @@ public class SmsApiResponse implements Serializable {
         this.code = code;
         this.msg = msg;
     }
-    
+
     public SmsApiResponse(OpenApiCode.ApiReponseCode apiCode) {
         super();
         this.code = apiCode.getCode();

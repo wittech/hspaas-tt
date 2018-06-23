@@ -7,24 +7,14 @@ import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.huashi.common.user.context.UserContext.UserStatus;
-import com.huashi.common.user.domain.UserDeveloper;
-import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.util.SecurityUtil;
 import com.huashi.constants.OpenApiCode.ApiReponseCode;
 import com.huashi.developer.constant.PassportConstant;
 import com.huashi.developer.exception.ValidateException;
-import com.huashi.sms.template.service.ISmsTemplateService;
 
 public class AbstractPrervice {
 
     protected final Logger                      logger              = LoggerFactory.getLogger(getClass());
-
-    @Reference
-    protected IUserDeveloperService             userDeveloperService;
-    @Reference
-    protected ISmsTemplateService               smsTemplateService;
 
     protected String sign(String originText) throws ValidateException {
         try {
@@ -56,26 +46,6 @@ public class AbstractPrervice {
         }
     }
 
-    /**
-     * TODO 根据appid获取appkey(实际是我司的密钥，不是开发者编号)
-     * 
-     * @param appId
-     * @return
-     */
-    protected String getAppkey(int appId) throws ValidateException{
-        UserDeveloper userDeveloper = userDeveloperService.getByUserId(appId);
-        if (userDeveloper == null) {
-            throw new ValidateException(ApiReponseCode.APPKEY_INVALID);
-        }
-
-        if (userDeveloper.getStatus() == UserStatus.NO.getValue()) {
-            throw new ValidateException(ApiReponseCode.API_DEVELOPER_INVALID);
-        }
-
-        return userDeveloper.getAppSecret();
-
-    }
-    
     /**
      * 
        * TODO 获取数据

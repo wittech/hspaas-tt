@@ -1,8 +1,6 @@
 package com.huashi.sms.config.cache.redis;
 
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,7 +23,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import redis.clients.jedis.JedisPoolConfig;
 
-import com.alibaba.druid.util.StringUtils;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.cache.redis.pubsub.SmsMessageTemplateListener;
 import com.huashi.sms.config.cache.redis.pubsub.SmsMobileBlacklistListener;
@@ -37,6 +32,12 @@ import com.huashi.sms.config.cache.redis.serializer.RedisObjectSerializer;
 @EnableCaching
 @Order(1)
 public class RedisConfiguration extends CachingConfigurerSupport {
+
+	@Value("${redis.host}")
+	private String host;
+
+	@Value("${redis.port}")
+	private int port;
 
 	@Value("${redis.password}")
 	private String password;
@@ -74,15 +75,6 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 	private Integer softMinEvictableIdleTimeMillis;
 	@Value("${redis.pool.numTestsPerEvictionRun}")
 	private Integer numTestsPerEvictionRun;
-	
-	@Value("${redis.cluster.nodes}")
-    private String  clusterNodes;
-
-    @Value("${redis.cluster.timeout}")
-    private Integer clusterTimeout;
-
-    @Value("${redis.cluster.maxRedirects:5}")
-    private Integer clusterMaxRedirects;
 
 	@Bean
 	public JedisPoolConfig jedisPoolConfig() {
@@ -101,48 +93,24 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 		config.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
 		return config;
 	}
-	
-	public Iterable<RedisNode> redisNodes() {
-        if (StringUtils.isEmpty(clusterNodes)) {
-            throw new IllegalArgumentException("Redis cluster nodes can not be null");
-        }
 
-        Set<RedisNode> redisNoes = new HashSet<>();
-        String[] nodes = clusterNodes.split(",");
-        for (String node : nodes) {
-            String[] ipPort = node.split(":");
-            redisNoes.add(new RedisNode(ipPort[0].trim(), Integer.valueOf(ipPort[1])));
-        }
-
-        return redisNoes;
-    }
-
-    @Bean
-    public RedisClusterConfiguration redisClusterConfiguration() {
-        RedisClusterConfiguration redisClusterConfiguration = new RedisClusterConfiguration();
-        redisClusterConfiguration.setClusterNodes(redisNodes());
-        redisClusterConfiguration.setMaxRedirects(clusterMaxRedirects);
-
-        return redisClusterConfiguration;
-    }
-
-    @Bean(name = "jedisConnectionFactory")
-    public JedisConnectionFactory redisSmsConnectionFactory(RedisClusterConfiguration redisClusterConfiguration,
-                                                            JedisPoolConfig jedisPoolConfig) {
-        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisClusterConfiguration, jedisPoolConfig);
-//      jedisConnectionFactory.setHostName(host);
-//      jedisConnectionFactory.setPort(port);
-        jedisConnectionFactory.setPassword(password);
-        jedisConnectionFactory.setUsePool(true);
-        jedisConnectionFactory.setDatabase(database);
-        
-        return jedisConnectionFactory;
-    }
+	@Bean(name = "jedisConnectionFactory")
+	public JedisConnectionFactory jedisConnectionFactory() {
+		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(jedisPoolConfig());
+		jedisConnectionFactory.setUsePool(true);
+		jedisConnectionFactory.setHostName(host);
+		jedisConnectionFactory.setPort(port);
+		jedisConnectionFactory.setPassword(password);
+		jedisConnectionFactory.setDatabase(database);
+		jedisConnectionFactory.setTimeout(timeout);
+		
+		return jedisConnectionFactory;
+	}
 
 	@Bean(name = "stringRedisTemplate")
-	public StringRedisTemplate stringRedisTemplate(JedisConnectionFactory jedisConnectionFactory) {
+	public StringRedisTemplate stringRedisTemplate() {
 		StringRedisTemplate template = new StringRedisTemplate();
-		template.setConnectionFactory(jedisConnectionFactory);
+		template.setConnectionFactory(jedisConnectionFactory());
 		
 		return template;
 	}
@@ -182,21 +150,31 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 		return template;
 	}
 	
+	/**
+	 * 
+	   * TODO 黑名单数据变更广播通知监听配置
+	   * @return
+	 */
 	@Bean
-    MessageListenerAdapter smsMobileBlacklistMessageListener(JedisConnectionFactory jedisConnectionFactory) {
-        return new MessageListenerAdapter(new SmsMobileBlacklistListener(stringRedisTemplate(jedisConnectionFactory)));
+    MessageListenerAdapter smsMobileBlacklistMessageListener() {
+        return new MessageListenerAdapter(new SmsMobileBlacklistListener(stringRedisTemplate()));
     }
 	
+	/**
+	 * 
+	   * TODO 短信模板变更广播通知监听配置
+	   * @return
+	 */
 	@Bean
     MessageListenerAdapter smsMessageTemplateMessageListener() {
         return new MessageListenerAdapter(new SmsMessageTemplateListener());
     }
-
+	
     @Bean
-    RedisMessageListenerContainer redisContainer(JedisConnectionFactory jedisConnectionFactory) {
+    RedisMessageListenerContainer redisContainer() {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(jedisConnectionFactory);
-        container.addMessageListener(smsMobileBlacklistMessageListener(jedisConnectionFactory), mobileBlacklistTopic());
+        container.setConnectionFactory(jedisConnectionFactory());
+        container.addMessageListener(smsMobileBlacklistMessageListener(), mobileBlacklistTopic());
         container.addMessageListener(smsMessageTemplateMessageListener(), messageTemplateTopic());
         return container;
     }
