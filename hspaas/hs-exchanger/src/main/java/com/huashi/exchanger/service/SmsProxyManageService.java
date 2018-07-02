@@ -15,6 +15,8 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.huashi.constants.CommonContext.ProtocolType;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppManageProxy;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppProxySender;
+import com.huashi.exchanger.resolver.cmpp.v3.Cmpp3ManageProxy;
+import com.huashi.exchanger.resolver.cmpp.v3.Cmpp3ProxySender;
 import com.huashi.exchanger.resolver.sgip.SgipManageProxy;
 import com.huashi.exchanger.resolver.sgip.SgipProxySender;
 import com.huashi.exchanger.resolver.sgip.constant.SgipConstant;
@@ -33,6 +35,10 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 	@Autowired
 	private CmppProxySender cmppProxySender;
+	@Autowired
+    private Cmpp3ProxySender cmpp3ProxySender;
+	
+	
 	@Autowired
 	private SgipProxySender sgipProxySender;
 	@Autowired
@@ -124,9 +130,12 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 		Object proxy = null;
 		switch (protocolType) {
-		case CMPP2:
+		case CMPP2: {
+		    proxy = loadCmppManageProxy(passageId, tparameter.getCmppConnectAttrs());
+            break;
+		}
 		case CMPP3: {
-			proxy = loadCmppManageProxy(passageId, tparameter.getCmppConnectAttrs());
+			proxy = loadCmpp3ManageProxy(passageId, tparameter.getCmppConnectAttrs());
 			break;
 		}
 		case SGIP: {
@@ -193,6 +202,44 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 		}
 		
 	}
+	
+	/**
+     * 
+     * TODO 加载CMPP代理信息
+     * 
+     * @param passageId
+     * @param attrs
+     * @return
+     */
+    private Cmpp3ManageProxy loadCmpp3ManageProxy(Integer passageId, Map<String, Object> attrs) {
+        Object object = getManageProxy(passageId);
+        if (object != null) {
+            try {
+                ((Cmpp3ManageProxy) object).close();
+                GLOBAL_PROXIES.remove(passageId);
+            } catch (Exception e) {
+                logger.error("CMPP3关闭失败", e);
+            }
+        }
+
+        Cmpp3ManageProxy cmpp3ManageProxy =  null;
+        try {
+            cmpp3ManageProxy = new Cmpp3ManageProxy(cmpp3ProxySender, passageId, new Args(attrs));
+
+            logger.info("CMPP3通道：{} 初始化连接成功", passageId);
+
+            return cmpp3ManageProxy;
+        } catch (Exception e) {
+            // 重新初始化连接，如果发生异常并且连接不为空，则需要清理连接资源
+            if(cmpp3ManageProxy != null && cmpp3ManageProxy.getConn() != null) {
+                cmpp3ManageProxy.getConn().close();
+            }
+            
+            logger.error("获取CMPP3代理失败", e);
+            return null;
+        }
+        
+    }
 
 	/**
 	 * 

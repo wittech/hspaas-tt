@@ -20,6 +20,7 @@ import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.exception.DataEmptyException;
 import com.huashi.exchanger.exception.ExchangeProcessException;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppProxySender;
+import com.huashi.exchanger.resolver.cmpp.v3.Cmpp3ProxySender;
 import com.huashi.exchanger.resolver.http.HttpSender;
 import com.huashi.exchanger.resolver.sgip.SgipProxySender;
 import com.huashi.exchanger.resolver.smgp.SmgpProxySender;
@@ -35,6 +36,10 @@ public class SmsProviderService implements ISmsProviderService {
 	private HttpSender httpResolver;
 	@Autowired
 	private CmppProxySender cmppProxySender;
+	
+	@Autowired
+    private Cmpp3ProxySender cmpp3ProxySender;
+	
 	@Autowired
 	private SgipProxySender sgipProxySender;
 	@Autowired
@@ -153,10 +158,12 @@ public class SmsProviderService implements ISmsProviderService {
 		case WEBSERVICE: {
 			break;
 		}
-		// 当前CMPP2和CMPP3均走统一逻辑
-		case CMPP2 :
+		case CMPP2 : {
+		    list = cmppProxySender.send(parameter, extNumber, mobile, content);
+            break;
+		}
 		case CMPP3 : {
-			list = cmppProxySender.send(parameter, extNumber, mobile, content);
+			list = cmpp3ProxySender.send(parameter, extNumber, mobile, content);
 			break;
 		}
 		case SGIP : {

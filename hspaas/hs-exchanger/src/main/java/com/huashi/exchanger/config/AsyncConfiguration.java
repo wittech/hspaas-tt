@@ -17,8 +17,8 @@ public class AsyncConfiguration {
      * 
      * @return
      */
-    @Bean(name = "asyncTaskExcutor")
-    public AsyncTaskExecutor storageTaskExcutor() {
+    @Bean(name = "asyncTaskExecutor")
+    public AsyncTaskExecutor asyncTaskExcutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setThreadNamePrefix("Async-Executor-");
         executor.setCorePoolSize(10);
@@ -33,4 +33,5 @@ public class AsyncConfiguration {
 
         return executor;
     }
+    
 }

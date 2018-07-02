@@ -114,5 +114,5 @@ public final class CmppConstant {
     /**
      * 点播业务使用的LinkID，非点播类业务的MT流程不使用该字段。
      */
-    public static final String LINK_ID                       = "20";
+    public static final String LINK_ID                       = "";
 }
