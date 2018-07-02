@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -43,38 +44,73 @@ import com.huawei.insa2.comm.cmpp.message.CMPPSubmitRepMessage;
 @Component
 public class CmppProxySender {
 
-    private Logger                     logger               = LoggerFactory.getLogger(getClass());
+    private Logger                 logger       = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private ISmsProxyManageService     smsProxyManageService;
+    private ISmsProxyManageService smsProxyManageService;
 
     @Resource
-    private RabbitTemplate             rabbitTemplate;
+    private RabbitTemplate         rabbitTemplate;
 
     /**
      * 长短信消息ID映射（因为长短信会有多次消息报告回执，但实际只需要解析任何一条有意义的即可） KEY: 因为长短信需要多次代理发送交互，所以产生多次MSG_ID，顾KEY存每一次的消息ID
      * VALUE：存储的是发送给HSSMS应用的msgId,即只存长短信中的第一次索引对应的msgId
      */
-//    private static List<String> ignoredMsgIds = new ArrayList<>();
+    // private static List<String> ignoredMsgIds = new ArrayList<>();
 
     /**
      * 同步锁，用于保障每次获取proxy连接初始化一次
      */
-    private final Object               proxyMonitor                 = new Object();
+    private final Object           proxyMonitor = new Object();
+
+    /**
+     * 异步线程连接池
+     */
+    @Resource
+    private AsyncTaskExecutor      asyncTaskExecutor;
 
     /**
      * 对于Proxy分发短信的接收
      * 
      * @param msg
      */
-    // @Async("asyncTaskExcutor")
     public void doProcessDeliverMessage(CMPPMessage msg) {
-        CMPPDeliverMessage deliverMsg = (CMPPDeliverMessage) msg;
-        // deliverMsg.getRegisteredDeliver()等于0时，为上行短信；等于1时为状态报告
-        if (deliverMsg.getRegisteredDeliver() == 0) {
-            moReceive(deliverMsg);
-        } else {
-            mtDeliver(deliverMsg);
+        if (msg == null) {
+            return;
+        }
+
+        // edit by 20180623加入异步处理回执，为了加速释放CMPP连接
+        asyncTaskExecutor.execute(new AsyncDeliverHandler(msg, this));
+    }
+
+    /**
+     * 
+      * TODO 异步CMPP回执状态/上行报告处理线程
+      * 
+      * @author zhengying
+      * @version V1.0   
+      * @date 2018年6月23日 下午10:55:32
+     */
+    private static class AsyncDeliverHandler extends Thread {
+
+        private CMPPMessage     cmppMessage;
+        private CmppProxySender cmppProxySender;
+
+        public AsyncDeliverHandler(CMPPMessage cmppMessage, CmppProxySender cmppProxySender) {
+            super();
+            this.cmppMessage = cmppMessage;
+            this.cmppProxySender = cmppProxySender;
+        }
+
+        @Override
+        public void run() {
+            CMPPDeliverMessage deliverMsg = (CMPPDeliverMessage) cmppMessage;
+            // deliverMsg.getRegisteredDeliver()等于0时，为上行短信；等于1时为状态报告
+            if (deliverMsg.getRegisteredDeliver() == 0) {
+                cmppProxySender.moReceive(deliverMsg);
+            } else {
+                cmppProxySender.mtDeliver(deliverMsg);
+            }
         }
     }
 
@@ -322,7 +358,7 @@ public class CmppProxySender {
                            // 0xa4cb800); //new Date();
 
         // 是否属于长短信
-//        boolean isLongtext = false;
+        // boolean isLongtext = false;
         int tpUdhi = CmppConstant.TP_UDHI;
         // 全都改成以 UTF 16 格式提交
         List<byte[]> contentList = getLongByte(content, feeByWords);
@@ -330,7 +366,7 @@ public class CmppProxySender {
             // 长短信格式发送 增加协议头 改变编码方式
             tpUdhi = 1;
             msgFmt = CmppConstant.MSG_FMT_UCS2;
-//            isLongtext = true;
+            // isLongtext = true;
         }
 
         CMPPSubmitMessage submitMsg = null;
@@ -349,14 +385,12 @@ public class CmppProxySender {
                 submitRepMsg = repMsg;
             }
 
-            
-
             // 存入单条长短信对应关系数据
-//            if (isLongtext && index > 1) {
-//                ignoredMsgIds.add(getMsgId(repMsg.getMsgId()));
-//            }
+            // if (isLongtext && index > 1) {
+            // ignoredMsgIds.add(getMsgId(repMsg.getMsgId()));
+            // }
         }
-        
+
         return submitRepMsg;
     }
 
@@ -399,7 +433,7 @@ public class CmppProxySender {
         if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
             return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
         }
-        
+
         synchronized (proxyMonitor) {
             boolean isOk = smsProxyManageService.startProxy(parameter);
             if (!isOk) {
@@ -426,15 +460,15 @@ public class CmppProxySender {
 
         try {
             String msgId = getMsgId(report.getStatusMsgId());
-            if(StringUtils.isEmpty(msgId)) {
+            if (StringUtils.isEmpty(msgId)) {
                 return;
             }
-            
-            if(isInIgnoredMsgId(msgId)) {
+
+            if (isInIgnoredMsgId(msgId)) {
                 logger.info("CMPP状态报告, msgId: {} 长短信已处理，忽略", msgId);
                 return;
             }
-            
+
             // 发送时手机号码拼接86，回执需去掉86前缀
             String mobile = report.getSrcterminalId();
             if (mobile != null && mobile.startsWith("86")) {
@@ -476,15 +510,15 @@ public class CmppProxySender {
      * @return
      */
     private boolean isInIgnoredMsgId(String msgId) {
-        if(StringUtils.isEmpty(msgId)) {
+        if (StringUtils.isEmpty(msgId)) {
             return true;
         }
-        
+
         // 如果长短信消息ID映射关系中不存在，则证明非长短信模式，直接返回
-//        if (ignoredMsgIds.contains(msgId)) {
-//            ignoredMsgIds.remove(msgId);
-//            return true;
-//        }
+        // if (ignoredMsgIds.contains(msgId)) {
+        // ignoredMsgIds.remove(msgId);
+        // return true;
+        // }
 
         return false;
     }
