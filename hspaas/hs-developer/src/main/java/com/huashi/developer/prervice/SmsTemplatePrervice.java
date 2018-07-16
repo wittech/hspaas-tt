@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.user.context.UserContext.UserStatus;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.service.IUserDeveloperService;
@@ -23,11 +24,16 @@ import com.huashi.sms.template.service.ISmsTemplateService;
 
 @Service
 public class SmsTemplatePrervice extends AbstractPrervice {
-    
+
     @Reference
-    protected IUserDeveloperService             userDeveloperService;
+    protected IUserDeveloperService userDeveloperService;
     @Reference
-    protected ISmsTemplateService               smsTemplateService;
+    protected ISmsTemplateService   smsTemplateService;
+
+    /**
+     * 参数定义前缀
+     */
+    private static final String     PARAM_NAME_PREFIX = "var";
 
     private void checkSign(String appKey, int appId, String title, String modeSign, String context, String location,
                            int type, String timestamp, String sign) throws ValidateException {
@@ -45,11 +51,11 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             throw new ValidateException(ApiReponseCode.AUTHENTICATION_FAILED);
         }
     }
-    
-    private void checkSign(String appKey, int appId, String modeId, String title, String modeSign, String context, String location,
-                           String timestamp, String sign) throws ValidateException {
+
+    private void checkSign(String appKey, int appId, String modeId, String title, String modeSign, String context,
+                           String location, String timestamp, String sign) throws ValidateException {
         // (appKey+appId+ title+modeSign+context+location+type+timestamp)
-        String targetSign = appKey+appId+modeId+title+modeSign+context+location+timestamp;
+        String targetSign = appKey + appId + modeId + title + modeSign + context + location + timestamp;
 
         try {
             targetSign = sign(targetSign);
@@ -91,7 +97,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
      * TODO 校验模板内容
      * 
      * @param context
-     * @throws ValidateException 
+     * @throws ValidateException
      */
     private void checkContext(String context) throws ValidateException {
         if (StringUtils.isEmpty(context) || context.trim().length() > 348) {
@@ -110,7 +116,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
      * @param type
      * @param timestamp
      * @param sign
-     * @throws ValidateException 
+     * @throws ValidateException
      */
     private void verify(int appId, String title, String modeSign, String context, String location, int type,
                         String timestamp, String sign) throws ValidateException {
@@ -127,7 +133,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
 
         checkSign(appKey, appId, title, modeSign, context, location, type, timestamp, sign);
     }
-    
+
     /**
      * TODO 校验数据
      * 
@@ -139,9 +145,9 @@ public class SmsTemplatePrervice extends AbstractPrervice {
      * @param type
      * @param timestamp
      * @param sign
-     * @throws ValidateException 
+     * @throws ValidateException
      */
-    private void verify(int appId, String modeId, String title, String modeSign, String context, String location, 
+    private void verify(int appId, String modeId, String title, String modeSign, String context, String location,
                         String timestamp, String sign) throws ValidateException {
 
         checkTitle(title);
@@ -190,7 +196,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
                     finalContext = modeSign + context;
                 }
             }
-            
+
             finalContext = replaceVariable(finalContext);
 
             // 校验数据
@@ -203,23 +209,23 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             template.setNoticeMode(type);
             long id = smsTemplateService.save(template);
             if (id > 0) {
-                
+
                 List<JSONObject> rets = new ArrayList<>();
-                
+
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("modeId", id + "");
                 rets.add(jsonObject);
-                
+
                 return new SmsApiResponse(ApiReponseCode.SUCCESS.getCode(), "成功", rets);
             }
 
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
         } catch (Exception e) {
-            if(e instanceof ValidateException) {
-                ValidateException ve = (ValidateException)e;
+            if (e instanceof ValidateException) {
+                ValidateException ve = (ValidateException) e;
                 return new SmsApiResponse(ve.getApiReponseCode().getCode(), ve.getApiReponseCode().getMessage());
             }
-            
+
             logger.error("添加短信模板: [{}] 错误", JSON.toJSONString(paramsMap), e);
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
         }
@@ -258,7 +264,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
                     finalContext = modeSign + context;
                 }
             }
-            
+
             finalContext = replaceVariable(finalContext);
 
             // 校验数据
@@ -276,11 +282,11 @@ public class SmsTemplatePrervice extends AbstractPrervice {
 
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
         } catch (Exception e) {
-            if(e instanceof ValidateException) {
-                ValidateException ve = (ValidateException)e;
+            if (e instanceof ValidateException) {
+                ValidateException ve = (ValidateException) e;
                 return new SmsApiResponse(ve.getApiReponseCode().getCode(), ve.getApiReponseCode().getMessage());
             }
-            
+
             logger.error("修改短信模板: [{}] 错误", JSON.toJSONString(paramsMap), e);
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
         }
@@ -314,11 +320,11 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
 
         } catch (Exception e) {
-            if(e instanceof ValidateException) {
-                ValidateException ve = (ValidateException)e;
+            if (e instanceof ValidateException) {
+                ValidateException ve = (ValidateException) e;
                 return new SmsApiResponse(ve.getApiReponseCode().getCode(), ve.getApiReponseCode().getMessage());
             }
-            
+
             logger.error("删除短信模板: [{}] 错误", JSON.toJSONString(paramsMap), e);
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
         }
@@ -362,11 +368,11 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
 
         } catch (Exception e) {
-            if(e instanceof ValidateException) {
-                ValidateException ve = (ValidateException)e;
+            if (e instanceof ValidateException) {
+                ValidateException ve = (ValidateException) e;
                 return new SmsApiResponse(ve.getApiReponseCode().getCode(), ve.getApiReponseCode().getMessage());
             }
-            
+
             logger.error("查询短信模板: [{}] 错误", JSON.toJSONString(paramsMap), e);
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
         }
@@ -398,7 +404,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
      * @return
      * @throws ValidateException
      */
-    public MessageTemplate getById(Long id, String vars) throws ValidateException {
+    public MessageTemplate getById(Long id, String parameter) throws ValidateException {
         MessageTemplate mode = smsTemplateService.get(id);
         if (mode == null) {
             throw new ValidateException(ApiReponseCode.TEMPLATE_NOT_EXISTS);
@@ -408,9 +414,9 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             throw new ValidateException(ApiReponseCode.TEMPLATE_INVALID);
         }
 
-        String content = beBornContentByRegex(mode.getContent(), vars);
+        String content = beBornContentByRegex(mode.getContent(), parameter);
         if (StringUtils.isEmpty(content)) {
-            logger.error("根据模板ID: [" + id + "]和变量内容：[" + vars + "] ");
+            logger.error("根据模板ID: [" + id + "]和变量内容：[" + parameter + "] ");
             throw new ValidateException(ApiReponseCode.SERVER_EXCEPTION);
         }
 
@@ -422,53 +428,57 @@ public class SmsTemplatePrervice extends AbstractPrervice {
      * TODO 根据表达式提取内容中变量对应的值
      * 
      * @param content 短信内容
-     * @param regex 表达式
-     * @param paramSize 参数数量
+     * @param parameter 表达式
      * @return
      */
-    public static String beBornContentByRegex(String content, String vars) {
+    public static String beBornContentByRegex(String content, String parameter) {
         if (StringUtils.isEmpty(content)) {
             return null;
         }
+        
+        if(StringUtils.isEmpty(parameter)) {
+            return content;
+        }
 
-        String[] varArr = vars.split("\\|");
+        Map<String, String> varsMap = JSON.parseObject(parameter, new TypeReference<Map<String, String>>() {
+        });
         try {
-            for (String v : varArr) {
-                content = content.replaceFirst("#code#", v);
+            for (int i = 1; i <= varsMap.size(); i++) {
+                content = content.replaceFirst("#code#", PARAM_NAME_PREFIX + i);
             }
-
+            
             return content;
         } catch (Exception e) {
             LogUtils.error("根据表达式查询短信内容参数异常", e);
             return null;
         }
     }
-    
+
     public static String replaceVariable(String content) {
         if (StringUtils.isEmpty(content)) {
             return null;
         }
-        
-        for(int i=0;i<=20;i++) {
-            content = content.replace("${var"+i+"}", "#code#");
+
+        for (int i = 0; i <= 20; i++) {
+            content = content.replace("${var" + i + "}", "#code#");
         }
-        
+
         return content;
     }
-    
+
     public static void main(String[] args) {
         String content = "h哈哈阿道夫${var1}开始看看IE${var3}";
-        
+
         System.out.println(replaceVariable(content));
     }
-    
+
     /**
      * TODO 根据appid获取appkey(实际是我司的密钥，不是开发者编号)
      * 
      * @param appId
      * @return
      */
-    private String getAppkey(int appId) throws ValidateException{
+    private String getAppkey(int appId) throws ValidateException {
         UserDeveloper userDeveloper = userDeveloperService.getByUserId(appId);
         if (userDeveloper == null) {
             throw new ValidateException(ApiReponseCode.APPKEY_INVALID);

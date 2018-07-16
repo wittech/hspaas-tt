@@ -5,10 +5,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.context.UserContext.UserStatus;
@@ -58,7 +61,7 @@ public class SmsPrervice extends AbstractPrervice {
     @Reference
     private ISmsApiFaildRecordService smsApiFaildRecordService;
     @Reference
-    protected IUserDeveloperService             userDeveloperService;
+    protected IUserDeveloperService   userDeveloperService;
 
     @Autowired
     private SmsTemplatePrervice       smsTemplatePrervice;
@@ -81,21 +84,20 @@ public class SmsPrervice extends AbstractPrervice {
             // 模板ID
             String modeId = getValue("modeId", paramsMap);
             // 手机号码，不能超狗500个
-            String mobile = getValue("mobile", paramsMap);
+            String mobileParams = getValue("mobilepara", paramsMap);
             // 签名
             String sign = getValue("sign", paramsMap);
-            
+
             // 1、判断是否必填参数为空
-            checkIfNecessary(appId, modeId, mobile, sign);
-            
+            checkIfNecessary(appId, modeId, mobileParams, sign);
+
             // 若不传，视为立即发送；若传值，则会在sendTime表示的时间点开始发送。格式为：yyyyMMddHHmmss如：20161123143022
             String sendTime = getValue("sendTime", paramsMap);
-            if(StringUtils.isNotEmpty(sendTime)) {
+            if (StringUtils.isNotEmpty(sendTime)) {
                 throw new ValidateException(ApiReponseCode.SNED_TIME_INVALID);
-            } 
+            }
 
             SmsMtTask task = new SmsMtTask();
-
             UserDeveloper userDeveloper = userDeveloperService.getByUserId(Integer.parseInt(appId));
             // 应用不存在
             if (userDeveloper == null) {
@@ -110,54 +112,79 @@ public class SmsPrervice extends AbstractPrervice {
             task.setUserId(Integer.parseInt(appId));
 
             // 校验签名是否正确
-            verifySign(appId, userDeveloper.getAppSecret(), mobile, sign);
-
-            // 变量内容
-            String vars = getValue("vars", paramsMap);
-
-            MessageTemplate messageTemplate = smsTemplatePrervice.getById(Long.valueOf(modeId), vars);
-            task.setContent(messageTemplate.getContent());
-            task.setMessageTemplateId(messageTemplate.getId());
-
-            if (StringUtils.isEmpty(mobile) || mobile.trim().length() < 11) {
+            verifySign(appId, userDeveloper.getAppSecret(), mobileParams, sign);
+            
+            List<String> paramCol = JSON.parseObject(mobileParams, new TypeReference<List<String>>(){});
+            if(CollectionUtils.isEmpty(paramCol)) {
                 throw new ValidateException(ApiReponseCode.MOBILE_INVALID);
             }
+            
+            List<SmsMtTask> tasks = new ArrayList<SmsMtTask>();
+            for(String param : paramCol) {
+                SmsMtTask target = new SmsMtTask();
+                BeanUtils.copyProperties(task, target);
+                
+                Map<String, String> paramMap = JSON.parseObject(param, new TypeReference<Map<String, String>>(){});
+                // 手机号码
+                String mobile =  paramMap.get("mobile");
+                
+                String parameter = paramMap.get("parameter");
+                
+                MessageTemplate messageTemplate = smsTemplatePrervice.getById(Long.valueOf(modeId), parameter);
+                target.setContent(messageTemplate.getContent());
+                target.setMessageTemplateId(messageTemplate.getId());
 
-            if (mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length > 500) {
-                throw new ValidateException(ApiReponseCode.MOBILES_OUT_RANGE);
-            }
+                if (StringUtils.isEmpty(mobile) || mobile.trim().length() < 11) {
+                    throw new ValidateException(ApiReponseCode.MOBILE_INVALID);
+                }
 
-            task.setMobile(mobile);
+                if (mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length > 500) {
+                    throw new ValidateException(ApiReponseCode.MOBILES_OUT_RANGE);
+                }
 
-            // 判断余额是否够用
-            checkBalanceAvaiable(task);
+                target.setMobile(mobile);
 
-            // 状态通知地址
-            String notifyUrl = getValue("notifyUrl", paramsMap);
-            // 备用字段
-            String userParams = getValue("userParams", paramsMap);
-            task.setCallback(notifyUrl);
-            task.setAttach(userParams);
-            task.setAppType(AppType.DEVELOPER.getCode());
-            task.setIp(ip);
+                // 判断余额是否够用
+                checkBalanceAvaiable(target);
 
-            // 接入号
-            // String fromNo = getValue("fromNo", paramsMap);
-            // task.setExtNumber(fromNo);
+                // 状态通知地址
+                String notifyUrl = getValue("notifyUrl", paramsMap);
+                // 备用字段
+                String userParams = getValue("userParams", paramsMap);
+                target.setCallback(notifyUrl);
+                target.setAttach(userParams);
+                target.setAppType(AppType.DEVELOPER.getCode());
+                target.setIp(ip);
 
-            long sid = joinTask2Queue(task);
-            if (sid != 0L) {
-                task.setSid(sid);
-                return formatResonse(task);
-            }
+                // 接入号
+                // String fromNo = getValue("fromNo", paramsMap);
+                // target.setExtNumber(fromNo);
 
-            return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION); 
-        } catch (Exception e) {
-            if(e instanceof ValidateException) {
-                ValidateException ve = (ValidateException)e;
-                return new SmsApiResponse(ve.getApiReponseCode().getCode(), ve.getApiReponseCode().getMessage());
+                tasks.add(target);
             }
             
+            // 遍历所有通过判断的任务信息，并发送至短信中心
+            List<JSONObject> rets = new ArrayList<>();
+            for(SmsMtTask tt : tasks) {
+                long sid = joinTask2Queue(tt);
+                if (sid != 0L) {
+                    tt.setSid(sid);
+                    rets.addAll(formatResonse(tt));
+                }
+            }
+            
+            // 如果有效的回执信息不为空，则表明数据正常
+            if(CollectionUtils.isNotEmpty(rets)) {
+                return new SmsApiResponse(OpenApiCode.SUCCESS, "", rets);
+            }
+
+            return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
+        } catch (Exception e) {
+            if (e instanceof ValidateException) {
+                ValidateException ve = (ValidateException) e;
+                return new SmsApiResponse(ve.getApiReponseCode().getCode(), ve.getApiReponseCode().getMessage());
+            }
+
             logger.error("发送个短信: [{}] 错误", JSON.toJSONString(paramsMap), e);
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
         }
@@ -219,35 +246,34 @@ public class SmsPrervice extends AbstractPrervice {
      * 
      * @param appId
      * @param modeId
-     * @param mobile
+     * @param mobileParams
      * @param sign
      * @throws ValidateException
      */
-    private void checkIfNecessary(String appId, String modeId, String mobile, String sign) throws ValidateException {
-        if (StringUtils.isEmpty(appId) || StringUtils.isEmpty(modeId) || StringUtils.isEmpty(mobile)
+    private void checkIfNecessary(String appId, String modeId, String mobileParams, String sign) throws ValidateException {
+        if (StringUtils.isEmpty(appId) || StringUtils.isEmpty(modeId) || StringUtils.isEmpty(mobileParams)
             || StringUtils.isEmpty(sign)) {
             throw new ValidateException(ApiReponseCode.REQUEST_EXCEPTION);
         }
     }
 
     /**
+     * TODO 组装成功回执信息
      * 
-       * TODO 组装成功回执信息
-       * 
-       * @param task
-       * @return
+     * @param task
+     * @return
      */
-    private SmsApiResponse formatResonse(SmsMtTask task) {
+    private List<JSONObject> formatResonse(SmsMtTask task) {
         List<JSONObject> rets = new ArrayList<>();
-        for(String mobile : task.getMobiles()) {
+        for (String mobile : task.getMobiles()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("respCode", OpenApiCode.SUCCESS);
             jsonObject.put("mobile", mobile);
             jsonObject.put("sendId", task.getSid().toString());
-            
+
             rets.add(jsonObject);
         }
-        return new SmsApiResponse(OpenApiCode.SUCCESS, "", rets);
+        return rets;
     }
 
     /**
