@@ -441,41 +441,6 @@ public class SmsMtTaskService implements ISmsMtTaskService {
         return false;
     }
 
-    /**
-     * TODO 重发发送到队列中
-     *
-     * @param source
-     * @return
-     */
-    // private boolean resendToQueue(SmsMtTaskPackets source) {
-    // return resendToQueue(source, taskMapper.selectBySid(source.getSid()));
-    // }
-
-    /**
-     * TODO 重入待提交队列(每个用户ID单独)
-     *
-     * @param source
-     * @param task
-     * @return
-     */
-    // private boolean resendToQueue(SmsMtTaskPackets source, SmsMtTask task) {
-    // if (task == null) {
-    // logger.error("主任务未查到相关数据,SID：{}", source.getSid());
-    // return false;
-    // }
-    // source.setCallback(task.getCallback());
-    // source.setAttach(task.getAttach());
-    // source.setUserId(task.getUserId());
-    // source.setExtNumber(task.getExtNumber());
-    // source.setFee(task.getFee());
-    //
-    // List<SmsMtTaskPackets> list = new ArrayList<>();
-    // list.add(source);
-    //
-    // // 发送到待提交队列
-    // return smsMtSubmitService.sendToSubmitQueue(list);
-    // }
-
     @Override
     public SmsMtTaskPackets getTaskPacketsById(long id) {
         return taskPacketsMapper.selectByPrimaryKey(id);
@@ -869,7 +834,6 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     @Override
-    @Transactional
     public int approvedBySameContent(String content, boolean isLikePattern) {
         Map<String[], List<SmsMtTask>> taskMap = findTasksByContent(content, isLikePattern);
         if (MapUtils.isEmpty(taskMap)) {

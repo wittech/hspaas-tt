@@ -10,9 +10,20 @@ package com.huashi.developer.response.sms;
  */
 public class SmsBalanceResponse {
 
-	private String code; // 状态码
-	private String balance; // 余额
-	private String type; // 付费方式: @Enum BalancePayType
+	/**
+	 * 状态码
+	 */
+	private String code;
+
+	/**
+	 * 余额
+	 */
+	private String balance;
+
+	/**
+	 * 付费方式: @Enum BalancePayType
+	 */
+	private String type;
 
 	public String getCode() {
 		return code;

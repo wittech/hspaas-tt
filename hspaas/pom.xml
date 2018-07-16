@@ -85,12 +85,9 @@
 		<guice.version>4.0</guice.version>
 		<mail.version>1.4.7</mail.version>
 		<dubbo.version>2.6.1</dubbo.version>
-		
 		<kryo.version>4.0.1</kryo.version>
         <kryo.serializers.version>0.42</kryo.serializers.version>
         <fst.version>2.48-jdk-6</fst.version>
-		
-		
 		<quartz.version>2.2.3</quartz.version>
 		<poi.version>3.14</poi.version>
 		<jedis.version>2.9.0</jedis.version>
@@ -385,13 +382,6 @@
 				<version>${shiro.version}</version>
 			</dependency>
 
-			<!-- ehcache -->
-			<dependency>
-				<groupId>net.sf.ehcache</groupId>
-				<artifactId>ehcache</artifactId>
-				<version>${ehcache.version}</version>
-			</dependency>
-
 			<!-- joda-time -->
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -567,13 +557,6 @@
 						<artifactId>spring-boot-starter-logging</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-
-			<!-- log4j -->
-			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<version>1.2.17</version>
 			</dependency>
 
 			<!-- POI excel word 操作类 -->

@@ -43,24 +43,19 @@ import com.huawei.insa2.comm.cmpp.message.CMPPSubmitRepMessage;
 @Component
 public class CmppProxySender {
 
-    private Logger                 logger       = LoggerFactory.getLogger(getClass());
+    private Logger                                       logger                = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private ISmsProxyManageService smsProxyManageService;
+    private ISmsProxyManageService                       smsProxyManageService;
 
     @Resource
-    private RabbitTemplate         rabbitTemplate;
+    private RabbitTemplate                               rabbitTemplate;
 
     /**
      * 长短信消息ID映射（因为长短信会有多次消息报告回执，但实际只需要解析任何一条有意义的即可） KEY: 因为长短信需要多次代理发送交互，所以产生多次MSG_ID，顾KEY存每一次的消息ID
      * VALUE：存储的是发送给HSSMS应用的msgId,即只存长短信中的第一次索引对应的msgId
      */
     // private static List<String> ignoredMsgIds = new ArrayList<>();
-
-    /**
-     * 同步锁，用于保障每次获取proxy连接初始化一次
-     */
-    private final Object           proxyMonitor = new Object();
 
     /**
      * 对于Proxy分发短信的接收
@@ -391,17 +386,18 @@ public class CmppProxySender {
     }
 
     /**
-     * TODO 获取CMPP 代理类
+     * TODO 获取CMPP 代理类（采用延迟加载方式）
      * 
      * @param parameter
      * @return
+     * @throws InterruptedException
      */
     private CmppManageProxy getCmppManageProxy(SmsPassageParameter parameter) {
-        if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-            return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-        }
-
-        synchronized (proxyMonitor) {
+        synchronized (parameter.getPassageId()) {
+            if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+                return (CmppManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
+            }
+            
             boolean isOk = smsProxyManageService.startProxy(parameter);
             if (!isOk) {
                 return null;

@@ -2,6 +2,7 @@ package com.huashi.exchanger.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +48,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	/**
 	 * CMPP/SGIP/SMGP通道代理发送实例
 	 */
-	public static volatile Map<Integer, Object> GLOBAL_PROXIES = new HashMap<>();
+	public static volatile Map<Integer, Object> GLOBAL_PROXIES = new ConcurrentHashMap<>();
 
 	/**
 	 * 通道PROXY 发送错误次数计数器 add by 20170903

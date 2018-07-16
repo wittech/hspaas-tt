@@ -51,8 +51,6 @@ public class SmgpProxySender {
 	@Resource
 	private RabbitTemplate rabbitTemplate;
 
-	private final Object lock = new Object();
-
 	/**
 	 * 对于Proxy分发短信的接收
 	 * 
@@ -361,7 +359,7 @@ public class SmgpProxySender {
 	 * @return
 	 */
 	public SmgpManageProxy getSmgpManageProxy(SmsPassageParameter parameter) {
-		synchronized (lock) {
+		synchronized (parameter.getPassageId()) {
 			if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
 				return (SmgpManageProxy) SmsProxyManageService
 						.getManageProxy(parameter.getPassageId());

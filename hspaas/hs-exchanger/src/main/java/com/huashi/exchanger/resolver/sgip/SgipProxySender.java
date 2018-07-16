@@ -51,8 +51,6 @@ public class SgipProxySender {
 	@Resource
 	private RabbitTemplate rabbitTemplate;
 
-	private final Object lock = new Object();
-
 	private final AtomicInteger LONG_MESSGE_CONTENT_COUNTER = new AtomicInteger(
 			1);
 
@@ -370,7 +368,7 @@ public class SgipProxySender {
 	 * @return
 	 */
 	public SgipManageProxy getSgipManageProxy(SmsPassageParameter parameter) {
-		synchronized (lock) {
+		synchronized (parameter.getPassageId()) {
 			if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
 				return (SgipManageProxy) SmsProxyManageService
 						.getManageProxy(parameter.getPassageId());
