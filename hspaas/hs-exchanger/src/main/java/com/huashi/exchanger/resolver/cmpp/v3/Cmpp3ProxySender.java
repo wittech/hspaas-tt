@@ -7,15 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -25,9 +19,8 @@ import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.exchanger.config.RabbitMqConfiguration;
 import com.huashi.exchanger.domain.ProviderSendResponse;
+import com.huashi.exchanger.resolver.AbstractSmProxySender;
 import com.huashi.exchanger.resolver.cmpp.constant.CmppConstant;
-import com.huashi.exchanger.service.ISmsProxyManageService;
-import com.huashi.exchanger.service.SmsProxyManageService;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
@@ -41,26 +34,13 @@ import com.huawei.insa2.comm.cmpp30.message.CMPP30SubmitMessage;
 import com.huawei.insa2.comm.cmpp30.message.CMPP30SubmitRepMessage;
 
 @Component
-public class Cmpp3ProxySender {
-
-    private Logger                 logger       = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private ISmsProxyManageService smsProxyManageService;
-
-    @Resource
-    private RabbitTemplate         rabbitTemplate;
-
+public class Cmpp3ProxySender extends AbstractSmProxySender{
+    
     /**
      * 长短信消息ID映射（因为长短信会有多次消息报告回执，但实际只需要解析任何一条有意义的即可） KEY: 因为长短信需要多次代理发送交互，所以产生多次MSG_ID，顾KEY存每一次的消息ID
      * VALUE：存储的是发送给HSSMS应用的msgId,即只存长短信中的第一次索引对应的msgId
      */
     // private static List<String> ignoredMsgIds = new ArrayList<>();
-
-    /**
-     * 同步锁，用于保障每次获取proxy连接初始化一次
-     */
-    private final Object           proxyMonitor = new Object();
 
     /**
      * 对于Proxy分发短信的接收
@@ -239,7 +219,7 @@ public class Cmpp3ProxySender {
                 throw new RuntimeException("CMPP 参数信息为空");
             }
 
-            Cmpp3ManageProxy cmppManageProxy = getCmppManageProxy(parameter);
+            Cmpp3ManageProxy cmppManageProxy = (Cmpp3ManageProxy)getSmManageProxy(parameter);
             if (cmppManageProxy == null) {
                 logger.error("CMPP代理获取失败，手机号码：{}， 短信内容：{}，扩展号码：{}", mobile, content, extNumber);
 
@@ -394,30 +374,6 @@ public class Cmpp3ProxySender {
     }
 
     /**
-     * TODO 获取CMPP 代理类
-     * 
-     * @param parameter
-     * @return
-     */
-    private Cmpp3ManageProxy getCmppManageProxy(SmsPassageParameter parameter) {
-        if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-            return (Cmpp3ManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-        }
-
-        synchronized (proxyMonitor) {
-            boolean isOk = smsProxyManageService.startProxy(parameter);
-            if (!isOk) {
-                return null;
-            }
-
-            // 重新初始化后将错误计数器归零
-            smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
-
-            return (Cmpp3ManageProxy) SmsProxyManageService.getManageProxy(parameter.getPassageId());
-        }
-    }
-
-    /**
      * TODO CMPP下行状态报文
      * 
      * @param report
@@ -539,22 +495,6 @@ public class Cmpp3ProxySender {
         } catch (Exception e) {
             logger.error("CMPP上行解析失败 {}", JSON.toJSONString(report), e);
             throw new RuntimeException("CMPP上行解析失败");
-        }
-    }
-
-    /***
-     * TODO 网关断开下发通知
-     * 
-     * @param passageId
-     */
-    public void onTerminate(Integer passageId) {
-        logger.info("Cmpp onTerminate, passageId : {} ", passageId);
-        Object myProxy = SmsProxyManageService.getManageProxy(passageId);
-        if (myProxy != null) {
-            ((Cmpp3ManageProxy) myProxy).close();
-            logger.info("myProxy.getConnState() : {}, passageId : {} ", ((Cmpp3ManageProxy) myProxy).getConnState(),
-                        passageId);
-            SmsProxyManageService.GLOBAL_PROXIES.remove(passageId);
         }
     }
 }

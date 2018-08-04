@@ -388,13 +388,16 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 	 * @param passageId
 	 * @return
 	 */
-	public static Object getManageProxy(Integer passageId) {
+	@Override
+	public Object getManageProxy(Integer passageId) {
 		return GLOBAL_PROXIES.get(passageId);
 	}
 
 	@Override
 	public boolean stopProxy(Integer passageId) {
+	    logger.info("stopProxy, passageId : {} ", passageId);
 		if(!isProxyAvaiable(passageId)) {
+		    logger.warn("PassageId ["+passageId+"] has shutdown ");
 			return true;
 		}
 		
@@ -414,6 +417,8 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 			}
 			
 			GLOBAL_PROXIES.remove(passageId);
+			
+			logger.warn("PassageId ["+passageId+"] shutdown finished");
 			return true;
 		} catch (Exception e) {
 			logger.error("停止代理异常", e);

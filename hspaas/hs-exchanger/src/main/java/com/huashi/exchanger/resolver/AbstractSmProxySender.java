@@ -1,0 +1,69 @@
+package com.huashi.exchanger.resolver;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.huashi.exchanger.service.ISmsProxyManageService;
+import com.huashi.sms.passage.domain.SmsPassageParameter;
+
+public abstract class AbstractSmProxySender {
+
+    @Autowired
+    protected ISmsProxyManageService            smsProxyManageService;
+
+    @Resource
+    protected RabbitTemplate                    rabbitTemplate;
+
+    protected final Logger                      logger             = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 通道ID锁
+     */
+    protected static final Map<Integer, Object> passageLockMonitor = new ConcurrentHashMap<>();
+
+    private void addPassageLockMonitor(Integer passageId) {
+        passageLockMonitor.putIfAbsent(passageId, new Object());
+    }
+
+    /**
+     * TODO 获取直连对象的代理信息（不同通道间初始化互不影响）
+     * 
+     * @param parameter
+     * @return
+     */
+    protected Object getSmManageProxy(SmsPassageParameter parameter) {
+        addPassageLockMonitor(parameter.getPassageId());
+
+        synchronized (passageLockMonitor.get(parameter.getPassageId())) {
+            if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
+                return smsProxyManageService.getManageProxy(parameter.getPassageId());
+            }
+
+            boolean isOk = smsProxyManageService.startProxy(parameter);
+            if (!isOk) {
+                return null;
+            }
+
+            // 重新初始化后将错误计数器归零
+            smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
+
+            return smsProxyManageService.getManageProxy(parameter.getPassageId());
+        }
+    }
+
+    /**
+     * TODO 断开直连协议连接
+     * 
+     * @param passageId
+     */
+    public void onTerminate(Integer passageId) {
+        smsProxyManageService.stopProxy(passageId);
+    }
+}

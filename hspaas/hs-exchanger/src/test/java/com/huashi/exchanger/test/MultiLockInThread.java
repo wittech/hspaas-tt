@@ -1,13 +1,15 @@
 package com.huashi.exchanger.test;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 public class MultiLockInThread {
 
-    static int            THREAD_NUM = 10;
-    static CountDownLatch cdl        = new CountDownLatch(THREAD_NUM);
+    static int                          THREAD_NUM     = 10;
+    static CountDownLatch               cdl            = new CountDownLatch(THREAD_NUM);
 
-    private static int           i          = 0;
+    private static Map<Integer, Object> passageMonitor = new ConcurrentHashMap<>();
 
     private static class MyThread extends Thread {
 
@@ -22,14 +24,11 @@ public class MultiLockInThread {
         public void run() {
             try {
                 cdl.await();
-                
-                synchronized (passageId) {
-                    for(int j=0;j<10;j++) {
-                        i++;
-                        System.out.println(Thread.currentThread().getName() + "-------------"+ passageId + "--------" + i);
-                    }
-                }
-                
+
+                lockMonitor(passageId);
+
+                print(passageId);
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -37,10 +36,23 @@ public class MultiLockInThread {
         }
     }
 
-    public static void main(String[] args) {
+    private static int counter = 0;
 
+    private static void lockMonitor(Integer passage) {
+        passageMonitor.putIfAbsent(passage, new Object());
+    }
+
+    private static void print(Integer passageId) {
+        synchronized (passageMonitor.get(passageId)) {
+            System.out.println(Thread.currentThread().getName() + "------" + passageId + "_____" + counter);
+            counter++;
+        }
+
+    }
+
+    public static void main(String[] args) {
         for (int i = 0; i < THREAD_NUM; i++) {
-            Thread thread = new MyThread(new Integer(i));
+            Thread thread = new MyThread(new Integer(1));
             thread.start();
             cdl.countDown();
         }
