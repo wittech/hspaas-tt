@@ -13,6 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.huashi.exchanger.service.ISmsProxyManageService;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
 
+/**
+ * 
+  * TODO 直连抽象类
+  * 
+  * @author zhengying
+  * @version V1.0   
+  * @date 2018年8月5日 上午12:21:38
+ */
 public abstract class AbstractSmProxySender {
 
     @Autowired

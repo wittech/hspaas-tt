@@ -345,7 +345,13 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 				return false;
 			}
 			
-		} else if (passage instanceof SgipManageProxy) {
+		} else if (passage instanceof Cmpp3ManageProxy) {
+		    Cmpp3ManageProxy prxoy = (Cmpp3ManageProxy) passage;
+            if (prxoy.getConn() == null) {
+                return false;
+            }
+            
+        } else if (passage instanceof SgipManageProxy) {
 			SgipManageProxy prxoy = (SgipManageProxy) passage;
 			if (prxoy.getConn() == null) {
 				return false;
@@ -407,7 +413,11 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 				CmppManageProxy prxoy = (CmppManageProxy) passage;
 				prxoy.close();
 				
-			} else if (passage instanceof SgipManageProxy) {
+			} else if (passage instanceof Cmpp3ManageProxy) {
+			    Cmpp3ManageProxy prxoy = (Cmpp3ManageProxy) passage;
+                prxoy.close();
+                
+            } else if (passage instanceof SgipManageProxy) {
 				SgipManageProxy prxoy = (SgipManageProxy) passage;
 				prxoy.close();
 				

@@ -228,7 +228,8 @@ public class CmppProxySender extends AbstractSmProxySender {
             // 接入号码（如果扩展号码不为空，则加入扩展号码）
             String srcTerminalId = tparameter.getString("src_terminal_id")
                                    + (StringUtils.isEmpty(extNumber) ? "" : extNumber);
-
+            
+            long startTime = System.currentTimeMillis();
             // 获取发送回执信息
             CMPPSubmitRepMessage submitRepMsg = getCMPPSubmitResponseMessage(tparameter.getString("service_id"),
                                                                              tparameter.getString("spid"),
@@ -236,6 +237,8 @@ public class CmppProxySender extends AbstractSmProxySender {
                                                                              StringUtils.isEmpty(tparameter.getString("mobile")) ? "000" : tparameter.getString("mobile"),
                                                                              srcTerminalId, mobile, content, "",
                                                                              cmppManageProxy, parameter.getFeeByWords());
+            
+            logger.info("CMPP 通道ID ["+parameter.getPassageId()+"]，提交耗时：" + (System.currentTimeMillis() - startTime) + "ms");
 
             if (submitRepMsg == null) {
                 logger.error("CMPPSubmitRepMessage 网关提交信息为空");

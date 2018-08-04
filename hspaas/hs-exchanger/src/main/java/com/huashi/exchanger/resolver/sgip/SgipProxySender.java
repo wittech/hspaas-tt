@@ -21,7 +21,6 @@ import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.AbstractSmProxySender;
 import com.huashi.exchanger.resolver.cmpp.constant.CmppConstant;
 import com.huashi.exchanger.resolver.sgip.constant.SgipConstant;
-import com.huashi.exchanger.service.SmsProxyManageService;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
@@ -404,20 +403,4 @@ public class SgipProxySender extends AbstractSmProxySender {
         }
     }
 
-    /***
-     * TODO 网关断开下发通知
-     * 
-     * @param passageId
-     */
-    public void onTerminate(Integer passageId) {
-        logger.info("Sgip onTerminate, passageId : {} ", passageId);
-        Object myProxy = smsProxyManageService.getManageProxy(passageId);
-        if (myProxy != null) {
-            ((SgipManageProxy) myProxy).stopService();
-            ((SgipManageProxy) myProxy).close();
-            logger.info("myProxy.getConnState() : {}, passageId : {} ", ((SgipManageProxy) myProxy).getConnState(),
-                        passageId);
-            SmsProxyManageService.GLOBAL_PROXIES.remove(passageId);
-        }
-    }
 }
