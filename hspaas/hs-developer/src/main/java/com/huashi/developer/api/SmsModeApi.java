@@ -10,7 +10,7 @@ import com.huashi.developer.prervice.SmsTemplatePrervice;
 import com.huashi.developer.response.sms.SmsApiResponse;
 
 @RestController
-@RequestMapping(value = "/api/mode")
+@RequestMapping(value = "/api/smsMode")
 public class SmsModeApi extends BasicApiSupport {
     
     @Autowired
