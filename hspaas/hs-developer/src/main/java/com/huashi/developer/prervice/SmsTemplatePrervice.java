@@ -191,9 +191,9 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             if (StringUtils.isNotEmpty(modeSign)) {
                 // 后置签名
                 if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
-                    finalContext = context + modeSign;
+                    finalContext = context + "【" + modeSign + "】";
                 } else {
-                    finalContext = modeSign + context;
+                    finalContext = "【" + modeSign + "】" + context;
                 }
             }
 
@@ -259,9 +259,9 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             if (StringUtils.isNotEmpty(modeSign)) {
                 // 后置签名
                 if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
-                    finalContext = context + modeSign;
+                    finalContext = context + "【" + modeSign + "】";
                 } else {
-                    finalContext = modeSign + context;
+                    finalContext = "【" + modeSign + "】" + context;
                 }
             }
 
