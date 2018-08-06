@@ -1,5 +1,6 @@
 package com.huashi.exchanger.service;
 
+import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -282,6 +283,17 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
 			return sgipManageProxy;
 		} catch (Exception e) {
+		    if(e instanceof BindException) {
+		        // 如果错误信息为绑定异常，则睡眠1秒后，递归重试方法
+		        logger.error("Sgip error msg : ["+e.getMessage()+"] ,sleep 1000 ms, retry.."); 
+		        try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+		        return loadSgipManageProxy(passageId, attrs);
+		    }
+		    
 			if(sgipManageProxy != null && sgipManageProxy.getConn() != null) {
 				sgipManageProxy.stopService();
 				sgipManageProxy.close();
@@ -419,6 +431,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
                 
             } else if (passage instanceof SgipManageProxy) {
 				SgipManageProxy prxoy = (SgipManageProxy) passage;
+                prxoy.stopService();
 				prxoy.close();
 				
 			} else if (passage instanceof SmgpManageProxy) {
