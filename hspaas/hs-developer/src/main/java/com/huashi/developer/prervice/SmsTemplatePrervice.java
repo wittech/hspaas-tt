@@ -1,8 +1,10 @@
 package com.huashi.developer.prervice;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -29,11 +31,6 @@ public class SmsTemplatePrervice extends AbstractPrervice {
     protected IUserDeveloperService userDeveloperService;
     @Reference
     protected ISmsTemplateService   smsTemplateService;
-
-    /**
-     * 参数定义前缀
-     */
-    private static final String     PARAM_NAME_PREFIX = "var";
 
     private void checkSign(String appKey, int appId, String title, String modeSign, String context, String location,
                            int type, String timestamp, String sign) throws ValidateException {
@@ -197,8 +194,6 @@ public class SmsTemplatePrervice extends AbstractPrervice {
                 }
             }
 
-            finalContext = replaceVariable(finalContext);
-
             // 校验数据
             verify(appId, title, modeSign, context, location, type, timestamp, sign);
 
@@ -264,8 +259,6 @@ public class SmsTemplatePrervice extends AbstractPrervice {
                     finalContext = "【" + modeSign + "】" + context;
                 }
             }
-
-            finalContext = replaceVariable(finalContext);
 
             // 校验数据
             verify(appId, modeId, title, modeSign, context, location, timestamp, sign);
@@ -443,8 +436,11 @@ public class SmsTemplatePrervice extends AbstractPrervice {
         Map<String, String> varsMap = JSON.parseObject(parameter, new TypeReference<Map<String, String>>() {
         });
         try {
-            for (int i = 1; i <= varsMap.size(); i++) {
-                content = content.replaceFirst("#code#", PARAM_NAME_PREFIX + i);
+            
+            for(Entry<String, String>  entry: varsMap.entrySet()) {
+                String paramName = entry.getKey();
+                String paramValue = entry.getValue();
+                content = content.replace("${" + paramName + "}", paramValue);
             }
             
             return content;
@@ -453,23 +449,16 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             return null;
         }
     }
-
-    public static String replaceVariable(String content) {
-        if (StringUtils.isEmpty(content)) {
-            return null;
-        }
-
-        for (int i = 0; i <= 20; i++) {
-            content = content.replace("${var" + i + "}", "#code#");
-        }
-
-        return content;
-    }
-
+    
     public static void main(String[] args) {
-        String content = "h哈哈阿道夫${var1}开始看看IE${var3}";
-
-        System.out.println(replaceVariable(content));
+        String content = "【测试】你好,${name},您的验证码为${code},有效期${time}";
+        
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("name", "张三");
+        map.put("code", "323432");
+        map.put("time", "5分钟");
+        
+        System.out.println(beBornContentByRegex(content, JSON.toJSONString(map)));
     }
 
     /**
