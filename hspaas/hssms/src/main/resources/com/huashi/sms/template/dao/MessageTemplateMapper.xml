@@ -24,9 +24,12 @@
 		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
 	</resultMap>
 	<sql id="Base_Column_List">
-		id, user_id, content, status, app_type, create_time, approve_time,
-		approve_user, remark, notice_mode, mobile, regex_value, submit_interval, limit_times,
-		white_word, route_type, priority, ext_number
+		id, user_id, content, status, app_type, create_time,
+		approve_time,
+		approve_user, remark, notice_mode, mobile, regex_value,
+		submit_interval, limit_times,
+		white_word, route_type, priority,
+		ext_number
 	</sql>
 	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
 		parameterType="java.lang.Long">
@@ -36,27 +39,40 @@
 		where id = #{id,jdbcType=BIGINT}
 	</select>
 	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-		delete from sms_message_template
+		delete from
+		sms_message_template
 		where id = #{id,jdbcType=BIGINT}
 	</delete>
 	<insert id="insert" parameterType="com.huashi.sms.template.domain.MessageTemplate">
-		<selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
 			SELECT LAST_INSERT_ID()
 		</selectKey>
 		insert into sms_message_template (user_id, content, status,
-		app_type, create_time, approve_time,
+		app_type,
+		create_time, approve_time,
 		approve_user, remark, notice_mode,
-		mobile, regex_value, submit_interval,
+		mobile,
+		regex_value, submit_interval,
 		limit_times, white_word, route_type,
 		priority, ext_number)
-		values (#{userId,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR},
-		#{status,jdbcType=INTEGER}, #{appType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{approveTime,jdbcType=TIMESTAMP},
-		#{approveUser,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},
-		#{noticeMode,jdbcType=INTEGER}, #{mobile,jdbcType=VARCHAR}, #{regexValue,jdbcType=VARCHAR}, #{submitInterval,jdbcType=INTEGER},
-		#{limitTimes,jdbcType=INTEGER}, #{whiteWord,jdbcType=VARCHAR},
-		#{routeType,jdbcType=INTEGER}, #{priority,jdbcType=INTEGER}), #{extNumber,jdbcType=VARCHAR}
+		values (#{userId,jdbcType=INTEGER},
+		#{content,jdbcType=VARCHAR},
+		#{status,jdbcType=INTEGER},
+		#{appType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+		#{approveTime,jdbcType=TIMESTAMP},
+		#{approveUser,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR},
+		#{noticeMode,jdbcType=INTEGER},
+		#{mobile,jdbcType=VARCHAR}, #{regexValue,jdbcType=VARCHAR},
+		#{submitInterval,jdbcType=INTEGER},
+		#{limitTimes,jdbcType=INTEGER},
+		#{whiteWord,jdbcType=VARCHAR},
+		#{routeType,jdbcType=INTEGER},
+		#{priority,jdbcType=INTEGER}), #{extNumber,jdbcType=VARCHAR}
 	</insert>
-	<insert id="insertSelective" useGeneratedKeys="true" keyProperty="id" parameterType="com.huashi.sms.template.domain.MessageTemplate">
+	<insert id="insertSelective" useGeneratedKeys="true"
+		keyProperty="id" parameterType="com.huashi.sms.template.domain.MessageTemplate">
 		<selectKey resultType="java.lang.Long" keyProperty="id"
 			order="AFTER">
 			SELECT LAST_INSERT_ID()
@@ -227,35 +243,57 @@
 		where id = #{id,jdbcType=BIGINT}
 	</update>
 	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.template.domain.MessageTemplate">
-		update sms_message_template
+		update
+		sms_message_template
 		set user_id = #{userId,jdbcType=INTEGER},
-		content = #{content,jdbcType=VARCHAR},
+		content =
+		#{content,jdbcType=VARCHAR},
 		status = #{status,jdbcType=INTEGER},
 		app_type = #{appType,jdbcType=INTEGER},
-		create_time = #{createTime,jdbcType=TIMESTAMP},
-		approve_time = #{approveTime,jdbcType=TIMESTAMP},
-		approve_user = #{approveUser,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		approve_time =
+		#{approveTime,jdbcType=TIMESTAMP},
+		approve_user =
+		#{approveUser,jdbcType=VARCHAR},
 		remark = #{remark,jdbcType=VARCHAR},
 		notice_mode = #{noticeMode,jdbcType=INTEGER},
-		mobile = #{mobile,jdbcType=VARCHAR},
-		regex_value = #{regexValue,jdbcType=VARCHAR},
-		submit_interval = #{submitInterval,jdbcType=INTEGER},
-		limit_times = #{limitTimes,jdbcType=INTEGER},
-		white_word = #{whiteWord,jdbcType=VARCHAR},
-		route_type = #{routeType,jdbcType=INTEGER},
+		mobile =
+		#{mobile,jdbcType=VARCHAR},
+		regex_value =
+		#{regexValue,jdbcType=VARCHAR},
+		submit_interval =
+		#{submitInterval,jdbcType=INTEGER},
+		limit_times =
+		#{limitTimes,jdbcType=INTEGER},
+		white_word =
+		#{whiteWord,jdbcType=VARCHAR},
+		route_type =
+		#{routeType,jdbcType=INTEGER},
 		priority = #{priority,jdbcType=INTEGER},
 		ext_number = #{extNumber,jdbcType=VARCHAR}
-		where id = #{id,jdbcType=BIGINT}
+		where id =
+		#{id,jdbcType=BIGINT}
 	</update>
 
 	<select id="getCountByUserId" resultType="java.lang.Integer"
 		parameterType="java.util.Map">
 		select count(*) from sms_message_template where user_id = #{userId}
+		<if test="ids!=null and ids.length!=0">
+			and id in
+			<foreach collection="ids" item="item" index="index" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
 		<if test="status != null">
 			and status = #{status}
 		</if>
-		<if test="content != null">
-			and content like CONCAT('%',#{content},'%')
+		<if test="notice_mode != null">
+			and notice_mode = #{noticeMode}
+		</if>
+		<if test="remark != null">
+			and remark like CONCAT('%',#{remark},'%')
 		</if>
 	</select>
 
@@ -264,11 +302,21 @@
 		select
 		<include refid="Base_Column_List" />
 		from sms_message_template where user_id = #{userId}
+		<if test="ids!=null and ids.length!=0">
+			and id in
+			<foreach collection="ids" item="item" index="index" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
 		<if test="status != null">
 			and status = #{status}
 		</if>
-		<if test="content != null">
-			and content like CONCAT(#{content},'%')
+		<if test="notice_mode != null">
+			and notice_mode = #{noticeMode}
+		</if>
+		<if test="remark != null">
+			and remark like CONCAT('%',#{remark},'%')
 		</if>
 		order by create_time desc
 		limit #{pageRecord} offset #{startPage}
@@ -307,7 +355,8 @@
 	<select id="findAvaiableByUserId" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
-		from sms_message_template where user_id = #{userId} and status = 1 order by priority
+		from sms_message_template where user_id = #{userId} and status = 1
+		order by priority
 	</select>
 
 	<select id="findAvaiableByUserIdAndType" resultMap="BaseResultMap">

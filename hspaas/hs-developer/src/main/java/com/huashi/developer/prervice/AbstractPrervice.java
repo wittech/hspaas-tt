@@ -16,14 +16,21 @@ public class AbstractPrervice {
 
     protected final Logger                      logger              = LoggerFactory.getLogger(getClass());
 
-    protected String sign(String originText) throws ValidateException {
+    protected String sign(String originText, boolean isNeedEncode) throws ValidateException {
         try {
-            originText = URLEncoder.encode(originText, "UTF-8");
+            if(isNeedEncode) {
+                originText = URLEncoder.encode(originText, "UTF-8");
+            }
+            
             return SecurityUtil.md5Hex(originText);
         } catch (Exception e) {
             logger.error("生成签名失败", e);
             throw new ValidateException(ApiReponseCode.SERVER_EXCEPTION);
         }
+    }
+    
+    protected String sign(String originText) throws ValidateException {
+        return sign(originText, true);
     }
 
     /**

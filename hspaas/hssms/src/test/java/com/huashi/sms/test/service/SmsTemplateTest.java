@@ -18,9 +18,5 @@ public class SmsTemplateTest{
 	
 	@Test
 	public void test() {
-		
-		for(int i=0; i<1000; i++) {
-			smsTemplateService.getByContent(82, "ssss");
-		}
 	}
 }

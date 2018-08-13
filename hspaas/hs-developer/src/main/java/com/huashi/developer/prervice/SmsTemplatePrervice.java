@@ -1,11 +1,11 @@
 package com.huashi.developer.prervice;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,9 @@ import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.user.context.UserContext.UserStatus;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.service.IUserDeveloperService;
+import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.LogUtils;
+import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.OpenApiCode.ApiReponseCode;
 import com.huashi.developer.exception.ValidateException;
 import com.huashi.developer.response.sms.SmsApiResponse;
@@ -53,6 +55,23 @@ public class SmsTemplatePrervice extends AbstractPrervice {
                            String location, String timestamp, String sign) throws ValidateException {
         // (appKey+appId+ title+modeSign+context+location+type+timestamp)
         String targetSign = appKey + appId + modeId + title + modeSign + context + location + timestamp;
+
+        try {
+            targetSign = sign(targetSign);
+            if (!targetSign.equals(sign)) {
+                throw new ValidateException(ApiReponseCode.AUTHENTICATION_FAILED);
+            }
+
+        } catch (Exception e) {
+            logger.error("校验签名失败", e);
+            throw new ValidateException(ApiReponseCode.AUTHENTICATION_FAILED);
+        }
+    }
+
+    private void checkSign(String appKey, int appId, String modeId, String title, int type, Integer status, Integer pageNo, Integer pageSize,
+                           String timestamp, String sign) throws ValidateException {
+        // (appKey+appId+modeId+title+type+status+ pageNo+pageSize+timestamp)
+        String targetSign = appKey + appId + modeId + title + type + status + pageNo + pageSize+ timestamp;
 
         try {
             targetSign = sign(targetSign);
@@ -160,6 +179,16 @@ public class SmsTemplatePrervice extends AbstractPrervice {
         checkSign(appKey, appId, modeId, title, modeSign, context, location, timestamp, sign);
     }
 
+    private void verify(int appId, String modeId, String title, Integer type, Integer status, Integer pageNo,
+                        Integer pageSize, String timestamp, String sign) throws ValidateException {
+
+        checkTimestampExpired(timestamp);
+
+        String appKey = getAppkey(appId);
+        
+        checkSign(appKey, appId, modeId, title, type, status, pageNo, pageSize, timestamp, sign);
+    }
+
     /**
      * TODO 添加模板
      * 
@@ -201,7 +230,9 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             template.setUserId(appId);
             template.setRemark(title);
             template.setContent(finalContext);
+            template.setRegexValue(modeSign);
             template.setNoticeMode(type);
+            template.setMobile(location);
             long id = smsTemplateService.save(template);
             if (id > 0) {
 
@@ -268,6 +299,8 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             template.setUserId(appId);
             template.setRemark(title);
             template.setContent(finalContext);
+            template.setRegexValue(modeSign);
+            template.setMobile(location);
             boolean isOk = smsTemplateService.update(template);
             if (isOk) {
                 return new SmsApiResponse();
@@ -326,39 +359,30 @@ public class SmsTemplatePrervice extends AbstractPrervice {
 
     public SmsApiResponse queryTemplate(Map<String, String[]> paramsMap) {
         try {
-
-            String modeId = paramsMap.get("modeId")[0];
-            if (StringUtils.isEmpty(modeId)) {
-                throw new ValidateException(ApiReponseCode.TEMPLATE_INVALID);
+            if (paramsMap.get("appId") == null) {
+                throw new ValidateException(ApiReponseCode.REQUEST_EXCEPTION);
             }
-
-            int appId = Integer.parseInt(paramsMap.get("appId")[0]);
+            
+            Integer appId = Integer.parseInt(paramsMap.get("appId")[0]);
+            String modeId = paramsMap.get("modeId")[0];
             String title = paramsMap.get("title")[0];
-            // 签名位置
-            String location = paramsMap.get("location")[0];
-            // 签名值
-            String modeSign = paramsMap.get("modeSign")[0];
-            String context = paramsMap.get("context")[0];
-
             // type 模版短信类型，必填参数 1:行业短信 2:营销短信
             int type = Integer.parseInt(paramsMap.get("type")[0]);
+            Integer status = Integer.parseInt(paramsMap.get("status")[0]);
+            Integer pageNo = Integer.parseInt(paramsMap.get("pageNo")[0]);
+            Integer pageSize = Integer.parseInt(paramsMap.get("pageSize")[0]);
             String timestamp = paramsMap.get("timestamp")[0];
             String sign = paramsMap.get("sign")[0];
+            
             // 校验数据
-            verify(appId, title, modeSign, context, location, type, timestamp, sign);
-
-            MessageTemplate template = new MessageTemplate();
-            template.setId(Long.valueOf(modeId));
-            template.setUserId(appId);
-            template.setRemark(title);
-            template.setContent(context);
-            template.setNoticeMode(type);
-            boolean isOk = smsTemplateService.update(template);
-            if (isOk) {
+            verify(appId, modeId, title, type, status, pageNo, pageSize, timestamp, sign);
+            
+            PaginationVo<MessageTemplate> pageList = smsTemplateService.findPage(appId, modeId, title, type, status, pageNo, pageSize);
+            if(CollectionUtils.isEmpty(pageList.getList())) {
                 return new SmsApiResponse();
             }
-
-            return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
+            
+            return new SmsApiResponse(ApiReponseCode.SUCCESS.getCode(), ApiReponseCode.SUCCESS.getMessage(), pageResult(pageList.getList()));
 
         } catch (Exception e) {
             if (e instanceof ValidateException) {
@@ -368,6 +392,53 @@ public class SmsTemplatePrervice extends AbstractPrervice {
 
             logger.error("查询短信模板: [{}] 错误", JSON.toJSONString(paramsMap), e);
             return new SmsApiResponse(ApiReponseCode.SERVER_EXCEPTION);
+        }
+    }
+    
+    private List<JSONObject> pageResult(List<MessageTemplate> list) {
+//        {"appId":12,"modeId":"100001","title":"注册","modeSign":"测试1",
+//        "context ":"亲爱的用户：${var1}，您好，欢迎注册本系统","location":1, 
+//        "type":1,"status":1,"modifyTime":"2017-03-06 12:51:47"}
+        List<JSONObject> pageResult = new ArrayList<>();
+        for(MessageTemplate template : list) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("appId", template.getUserId());
+            jsonObject.put("modeId", template.getId().toString());
+            jsonObject.put("title", template.getRemark());
+            jsonObject.put("modeSign", template.getRegexValue());
+             
+            // 签名位置 0:尾部1:头部
+            Integer location = Integer.parseInt(template.getMobile());
+            String context  = template.getContent();
+            jsonObject.put("location", location);
+            if(location == 0) {
+                context = context.substring(0, context.lastIndexOf("【"));
+            } else {
+                context = context.substring(context.lastIndexOf("】") + 1, context.length());
+            }
+            jsonObject.put("context", context);
+            jsonObject.put("status", transferBdStatus(template.getStatus()));
+            jsonObject.put("modifyTime", DateUtil.getSecondStr(template.getCreateTime()));
+            
+            pageResult.add(jsonObject);
+        }
+        
+        return pageResult;
+    }
+    
+    /**
+     * TODO 转义大数据定义的状态 大数据： 1:审核中，2:审核通过，3:审核失败
+     * 
+     * @param status
+     * @return
+     */
+    private static int transferBdStatus(Integer status) {
+        if (status == null || status == ApproveStatus.WAITING.getValue()) {
+            return 1;
+        } else if (status == ApproveStatus.SUCCESS.getValue()) {
+            return 2;
+        } else {
+            return 3;
         }
     }
 
@@ -428,37 +499,47 @@ public class SmsTemplatePrervice extends AbstractPrervice {
         if (StringUtils.isEmpty(content)) {
             return null;
         }
-        
-        if(StringUtils.isEmpty(parameter)) {
+
+        if (StringUtils.isEmpty(parameter)) {
             return content;
         }
 
         Map<String, String> varsMap = JSON.parseObject(parameter, new TypeReference<Map<String, String>>() {
         });
         try {
-            
-            for(Entry<String, String>  entry: varsMap.entrySet()) {
+
+            for (Entry<String, String> entry : varsMap.entrySet()) {
                 String paramName = entry.getKey();
                 String paramValue = entry.getValue();
                 content = content.replace("${" + paramName + "}", paramValue);
             }
-            
+
             return content;
         } catch (Exception e) {
             LogUtils.error("根据表达式查询短信内容参数异常", e);
             return null;
         }
     }
-    
+
     public static void main(String[] args) {
-        String content = "【测试】你好,${name},您的验证码为${code},有效期${time}";
+        String context = "【测试】你好,${name},您的验证码为${code},有效期${time}【测试】";
+
+//        Map<String, String> map = new HashMap<String, String>();
+//        map.put("name", "张三");
+//        map.put("code", "323432");
+//        map.put("time", "5分钟");
+//
+//        System.out.println(beBornContentByRegex(content, JSON.toJSONString(map)));
         
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("name", "张三");
-        map.put("code", "323432");
-        map.put("time", "5分钟");
+        int location = 0;
         
-        System.out.println(beBornContentByRegex(content, JSON.toJSONString(map)));
+        if(location == 0) {
+            context = context.substring(0, context.lastIndexOf("【"));
+        } else {
+            context = context.substring(context.indexOf("】") + 1, context.length());
+        }
+        
+        System.out.println(context);
     }
 
     /**

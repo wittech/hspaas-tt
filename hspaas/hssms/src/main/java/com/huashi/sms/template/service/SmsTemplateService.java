@@ -10,7 +10,6 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,6 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.user.service.IUserSmsConfigService;
-import com.huashi.common.util.PatternUtil;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.CommonContext.AppType;
@@ -61,34 +59,56 @@ public class SmsTemplateService implements ISmsTemplateService {
      * 全局短信模板（与REDIS 同步采用广播模式）
      */
     public volatile static Map<Integer, Set<String>> GLOBAL_MESSAGE_TEMPLATE = new HashMap<>();
-    private final Object                             lock                    = new Object();
 
     @Override
-    public PaginationVo<MessageTemplate> findPage(int userId, String status, String content, String currentPage) {
-        int _currentPage = PaginationVo.parse(currentPage);
-
+    public PaginationVo<MessageTemplate> findPage(int userId, String modeIds, String title, Integer type,
+                                                  Integer status, Integer pageNo, Integer pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
-        if (StringUtils.isNotEmpty(status)) {
-            params.put("status", status);
+        if (StringUtils.isNotEmpty(modeIds)) {
+            params.put("ids", modeIds.split(","));
         }
-        if (StringUtils.isNotEmpty(content)) {
-            params.put("content", content);
+        if (status != null) {
+            params.put("status", transferStatus(status));
         }
+        if (StringUtils.isNotEmpty(title)) {
+            params.put("remark", title);
+        }
+        
+        if (type != null) {
+            params.put("notice_mode", type);
+        }
+        
         int totalRecord = messageTemplateMapper.getCountByUserId(params);
         if (totalRecord == 0) {
             return null;
         }
 
-        params.put("startPage", PaginationVo.getStartPage(_currentPage));
-        params.put("pageRecord", PaginationVo.DEFAULT_RECORD_PER_PAGE);
+        params.put("startPage", PaginationVo.getStartPage(pageNo));
+        params.put("pageRecord", pageSize == null ? PaginationVo.DEFAULT_RECORD_PER_PAGE : pageSize);
 
         List<MessageTemplate> list = messageTemplateMapper.findPageListByUserId(params);
         if (list == null || list.isEmpty()) {
             return null;
         }
 
-        return new PaginationVo<>(list, _currentPage, totalRecord);
+        return new PaginationVo<>(list, pageNo, totalRecord);
+    }
+
+    /**
+     * TODO 转义大数据定义的状态 大数据： 1:审核中，2:审核通过，3:审核失败
+     * 
+     * @param status
+     * @return
+     */
+    private static int transferStatus(Integer status) {
+        if (status == null || status == 1) {
+            return ApproveStatus.WAITING.getValue();
+        } else if (status == 2) {
+            return ApproveStatus.SUCCESS.getValue();
+        } else {
+            return ApproveStatus.FAIL.getValue();
+        }
     }
 
     private String getKey(int userId) {
@@ -110,35 +130,6 @@ public class SmsTemplateService implements ISmsTemplateService {
             stringRedisTemplate.convertAndSend(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC, "all");
         } catch (Exception e) {
             logger.warn("REDIS 短信模板设置失败", e);
-        }
-    }
-
-    /**
-     * TODO 查询REDIS
-     * 
-     * @param userId
-     */
-    private Set<String> getFromRedis(int userId) {
-        try {
-
-            if (MapUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE)
-                || CollectionUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE.get(userId))) {
-                synchronized (lock) {
-                    Set<String> set = stringRedisTemplate.opsForZSet().reverseRangeByScore(getKey(userId), 0, 1000);
-                    if (CollectionUtils.isEmpty(set)) {
-                        return null;
-                    }
-
-                    GLOBAL_MESSAGE_TEMPLATE.put(userId, set);
-                }
-            }
-
-            logger.info("获取短信大小为：{}", GLOBAL_MESSAGE_TEMPLATE.size());
-            return GLOBAL_MESSAGE_TEMPLATE.get(userId);
-
-        } catch (Exception e) {
-            logger.warn("REDIS 短信模板设置失败", e);
-            return null;
         }
     }
 
@@ -178,7 +169,7 @@ public class SmsTemplateService implements ISmsTemplateService {
             return false;
         }
 
-        template.setRegexValue(parseContent2Regex(template.getContent()));
+//        template.setRegexValue(parseContent2Regex(template.getContent()));
         template.setCreateTime(td.getCreateTime());
         int result = messageTemplateMapper.updateByPrimaryKeySelective(template);
         if (result > 0) {
@@ -240,95 +231,6 @@ public class SmsTemplateService implements ISmsTemplateService {
         return page;
     }
 
-    /**
-     * TODO 由REDIS查询短信模板
-     * 
-     * @param userId
-     * @param content
-     * @return
-     */
-    private MessageTemplate getTemplateFromRedis(int userId, String content) {
-        try {
-            // 超级模板表达式
-            String superTemplateRegex = "^[\\s\\S]*$";
-            MessageTemplate superTemplate = null;
-            Set<String> texts = getFromRedis(userId);
-            if (CollectionUtils.isNotEmpty(texts)) {
-                for (String text : texts) {
-                    MessageTemplate template = JSON.parseObject(text, MessageTemplate.class);
-                    if (template == null) {
-                        logger.warn("LOOP当前值为空");
-                        continue;
-                    }
-
-                    if (StringUtils.isEmpty(template.getRegexValue())) {
-                        continue;
-                    }
-
-                    if (superTemplateRegex.equalsIgnoreCase(template.getRegexValue())) {
-                        superTemplate = template;
-                        continue;
-                    }
-
-                    // 如果普通短信模板存在，则以普通模板为主
-                    if (PatternUtil.isRight(template.getRegexValue(), content)) {
-                        return template;
-                    }
-
-                }
-            }
-
-            // 如果普通短信模板未找到，判断是否找到超级模板，有则直接返回
-            if (superTemplate != null) {
-                return superTemplate;
-            }
-        } catch (Exception e) {
-            logger.error("短信模板REDIS查询失败", e);
-        }
-        return null;
-    }
-
-    private MessageTemplate getTemplateFromDb(int userId, String content) {
-        // REDIS没查到
-        // MessageTemplate superTemplate = null;
-        List<MessageTemplate> list = messageTemplateMapper.findAvaiableByUserId(userId);
-        if (CollectionUtils.isEmpty(list)) {
-            return null;
-        }
-
-        for (MessageTemplate template : list) {
-            if (StringUtils.isEmpty(template.getRegexValue())) {
-                continue;
-            }
-
-            // if (TEMPLATE_SUPER_REGEX.equalsIgnoreCase(template.getRegexValue())) {
-            // superTemplate = template;
-            // continue;
-            // }
-
-            // 如果普通短信模板存在，则以普通模板为主
-            if (PatternUtil.isRight(template.getRegexValue(), content)) {
-                return template;
-            }
-        }
-
-        // 如果普通短信模板未找到，判断是否找到超级模板，有则直接返回
-        // if (superTemplate != null)
-        // return superTemplate;
-
-        return null;
-    }
-
-    @Override
-    public MessageTemplate getByContent(int userId, String content) {
-        MessageTemplate template = getTemplateFromRedis(userId, content);
-        if (template != null) {
-            return template;
-        }
-
-        return getTemplateFromDb(userId, content);
-    }
-
     @Override
     public long save(MessageTemplate template) {
         if (StringUtils.isEmpty(template.getContent())) {
@@ -347,17 +249,18 @@ public class SmsTemplateService implements ISmsTemplateService {
         // template.setStatus(ApproveStatus.WAITING.getValue());
         // }
 
-        template.setRegexValue(parseContent2Regex(template.getContent()));
+        // 暂时用做 存储签名使用
+//        template.setRegexValue(parseContent2Regex(template.getContent()));
 
         if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
             pushToRedis(template.getUserId(), template);
         }
-        
+
         int result = messageTemplateMapper.insertSelective(template);
-        if(result > 0) {
+        if (result > 0) {
             return template.getId();
         }
-        
+
         return 0;
     }
 
@@ -380,7 +283,7 @@ public class SmsTemplateService implements ISmsTemplateService {
             template.setId(null);
             template.setContent(content);
             template.setCreateTime(new Date());
-            template.setRegexValue(parseContent2Regex(content));
+//            template.setRegexValue(parseContent2Regex(content));
 
             long result = messageTemplateMapper.insertSelective(template);
             if (result <= 0) {
@@ -397,23 +300,6 @@ public class SmsTemplateService implements ISmsTemplateService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
         return allResult;
-    }
-
-    /**
-     * TODO 内容转换正则表达式
-     * 
-     * @param content
-     * @return
-     */
-    private static String parseContent2Regex(String content) {
-        // modify 变量内容 增加不可见字符
-        // content = content.replaceAll("#[a-z]*[0-9]*[A-Z]*#",
-        content = content.replaceAll("#[a-z]*[0-9]*[A-Z]*#", "[\\\\s\\\\S]*").replaceAll("\\{[a-z]*[0-9]*[A-Z]*\\}",
-                                                                                         "[\\\\s\\\\S]*");
-        // 去掉末尾可以增加空格等不可见字符，以免提供商模板不通过
-        // return prefix+oriStr+"\\s*$";
-        return String.format("^%s$", content);
-
     }
 
     @Override
@@ -434,8 +320,10 @@ public class SmsTemplateService implements ISmsTemplateService {
 
     @Override
     public boolean isContentMatched(long id, String content) {
-        MessageTemplate template = get(id);
-        return template != null && PatternUtil.isRight(template.getRegexValue(), content);
+        
+        return true;
+//        MessageTemplate template = get(id);
+//        return template != null && PatternUtil.isRight(template.getRegexValue(), content);
     }
 
     private void reloadUserTemplate(int userId) {

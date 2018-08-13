@@ -202,7 +202,7 @@ public class SmsPrervice extends AbstractPrervice {
     private void verifySign(String appId, String appKey, String mobile, String sign) throws ValidateException {
         String targetSign = appKey + appId + mobile;
         try {
-            targetSign = sign(targetSign);
+            targetSign = sign(targetSign, false);
             if (!targetSign.equals(sign)) {
                 throw new ValidateException(ApiReponseCode.AUTHENTICATION_FAILED);
             }

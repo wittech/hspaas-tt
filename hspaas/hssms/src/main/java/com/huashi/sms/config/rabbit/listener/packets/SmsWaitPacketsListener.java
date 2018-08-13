@@ -559,9 +559,9 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
      * @param task
      * @param smsConfig
      */
-    private void loadSmsTemplateByContent(SmsMtTask task) {
+    private void loadSmsTemplateById(SmsMtTask task) {
         // 根据短信内容匹配模板，短信模板需要报备而查出的短信模板为空则提至人工处理信息中
-        MessageTemplate template = smsTemplateService.getByContent(task.getUserId(), task.getContent());
+        MessageTemplate template = smsTemplateService.get(task.getMessageTemplateId());
         if (template == null) {
             task.getErrorMessageReport().append(formatMessage("用户短信模板未报备"));
             refillForceActions(PacketsActionPosition.SMS_TEMPLATE_MISSED.getPosition(),
@@ -762,7 +762,7 @@ public class SmsWaitPacketsListener extends BasePacketsSupport implements Messag
             model.setOriginMobile(model.getMobile());
 
             // 获取短信模板信息
-            loadSmsTemplateByContent(model);
+            loadSmsTemplateById(model);
 
             // 校验同模板下手机号码是否超速，超量
             if (!isSameMobileOutOfRange(model)) {
