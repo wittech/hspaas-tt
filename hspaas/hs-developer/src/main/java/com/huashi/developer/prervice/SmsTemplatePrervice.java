@@ -68,13 +68,39 @@ public class SmsTemplatePrervice extends AbstractPrervice {
         }
     }
 
-    private void checkSign(String appKey, int appId, String modeId, String title, int type, Integer status, Integer pageNo, Integer pageSize,
+    private void checkSign(String appKey, int appId, String modeId, String title, Integer type, Integer status, Integer pageNo, Integer pageSize,
                            String timestamp, String sign) throws ValidateException {
         // (appKey+appId+modeId+title+type+status+ pageNo+pageSize+timestamp)
-        String targetSign = appKey + appId + modeId + title + type + status + pageNo + pageSize+ timestamp;
+        
+        String targetSign = appKey + appId;
+        if(StringUtils.isNotEmpty(modeId)) {
+            targetSign += modeId;
+        }
+        
+        if(StringUtils.isNotEmpty(title)) {
+            targetSign += title;
+        }
+        
+        if(type != null) {
+            targetSign += type;
+        }
+        
+        if(status != null) {
+            targetSign += status;
+        }
+        
+        if(pageNo != null) {
+            targetSign += pageNo;
+        }
+        
+        if(pageSize != null) {
+            targetSign += pageSize;
+        }
+        
+        targetSign += timestamp;
 
         try {
-            targetSign = sign(targetSign);
+            targetSign = sign(targetSign, false);
             if (!targetSign.equals(sign)) {
                 throw new ValidateException(ApiReponseCode.AUTHENTICATION_FAILED);
             }
@@ -364,13 +390,37 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             }
             
             Integer appId = Integer.parseInt(paramsMap.get("appId")[0]);
-            String modeId = paramsMap.get("modeId")[0];
-            String title = paramsMap.get("title")[0];
+            String modeId = null;
+            if(paramsMap.containsKey("modeId")) {
+                modeId = paramsMap.get("modeId")[0];
+            }
+            
+            String title = null;
+            if(paramsMap.containsKey("title")) {
+                title = paramsMap.get("title")[0];
+            }
+            
             // type 模版短信类型，必填参数 1:行业短信 2:营销短信
-            int type = Integer.parseInt(paramsMap.get("type")[0]);
-            Integer status = Integer.parseInt(paramsMap.get("status")[0]);
-            Integer pageNo = Integer.parseInt(paramsMap.get("pageNo")[0]);
-            Integer pageSize = Integer.parseInt(paramsMap.get("pageSize")[0]);
+            Integer type = null;
+            if(paramsMap.containsKey("type")) {
+                type = Integer.parseInt(paramsMap.get("type")[0]);
+            }
+            
+            Integer status = null;
+            if(paramsMap.containsKey("status")) {
+                status = Integer.parseInt(paramsMap.get("status")[0]);
+            }
+            
+            Integer pageNo = null;
+            if(paramsMap.containsKey("pageNo")) {
+                pageNo = Integer.parseInt(paramsMap.get("pageNo")[0]);
+            }
+            
+            Integer pageSize = null;
+            if(paramsMap.containsKey("pageSize")) {
+                pageSize = Integer.parseInt(paramsMap.get("pageSize")[0]);
+            }
+            
             String timestamp = paramsMap.get("timestamp")[0];
             String sign = paramsMap.get("sign")[0];
             
@@ -521,25 +571,22 @@ public class SmsTemplatePrervice extends AbstractPrervice {
         }
     }
 
-    public static void main(String[] args) {
-        String context = "【测试】你好,${name},您的验证码为${code},有效期${time}【测试】";
-
-//        Map<String, String> map = new HashMap<String, String>();
-//        map.put("name", "张三");
-//        map.put("code", "323432");
-//        map.put("time", "5分钟");
-//
-//        System.out.println(beBornContentByRegex(content, JSON.toJSONString(map)));
+    public static void main(String[] args) throws ValidateException {
+        Integer appId = 132;
+        String title = null;
+        String modeId = null;
+        Integer type = null;
+        Integer status = null;
+        Integer pageNo = null;
+        Integer pageSize = null;
+        String timestamp = "1534476532632";
+        String sign = "73d904315c6f43e1293d73a243f3fa63";
         
-        int location = 0;
+//        264c08df8afe154d627fd32df341d1d4
+//        264c08df8afe154d627fd32df341d1d4
+        SmsTemplatePrervice previce = new SmsTemplatePrervice();
         
-        if(location == 0) {
-            context = context.substring(0, context.lastIndexOf("【"));
-        } else {
-            context = context.substring(context.indexOf("】") + 1, context.length());
-        }
-        
-        System.out.println(context);
+        previce.verify(appId, modeId, title, type, status, pageNo, pageSize, timestamp, sign);
     }
 
     /**
