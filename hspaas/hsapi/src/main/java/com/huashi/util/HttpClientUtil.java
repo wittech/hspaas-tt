@@ -621,6 +621,8 @@ public class HttpClientUtil {
 
             BasicHttpEntity httpEntity = new BasicHttpEntity();
             httpEntity.setContent(new ByteArrayInputStream(content.getBytes(encoding)));
+            httpEntity.setContentEncoding(encoding);    
+            httpEntity.setContentType("application/json"); 
             httpPost.setEntity(httpEntity);
 
             // 提交post请求

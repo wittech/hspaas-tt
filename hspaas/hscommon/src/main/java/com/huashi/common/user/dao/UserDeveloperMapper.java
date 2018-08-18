@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import com.huashi.common.user.domain.UserDeveloper;
 
 public interface UserDeveloperMapper {
+
     int deleteByPrimaryKey(Integer id);
 
     int insert(UserDeveloper record);
@@ -18,40 +19,53 @@ public interface UserDeveloperMapper {
     int updateByPrimaryKeySelective(UserDeveloper record);
 
     int updateByPrimaryKey(UserDeveloper record);
+
+    /**
+     * TODO 根据用户编号获取接口信息（有效状态）
+     * 
+     * @param userId
+     * @return
+     */
+    UserDeveloper selectAvaiableByUserId(int userId);
     
     /**
-	 * 
-	 * TODO 根据用户编号获取接口信息
-	 * 
-	 * @param userId
-	 * @return
-	 */
-	UserDeveloper selectByUserId(int userId);
+     * TODO 根据用户编号获取接口信息
+     * 
+     * @param userId
+     * @return
+     */
+    UserDeveloper selectByUserId(int userId);
 
-	/**
-	 * 
-	 * TODO 根据接口账号查询开发者信息
-	 * 
-	 * @param appkey
-	 * @return
-	 */
-	UserDeveloper selectByAppkey(@Param("appkey") String appkey);
-	
-	/**
-	 * 
-	 * TODO 根据接口账号查询开发者信息
-	 * 
-	 * @param appkey
-	 * @return
-	 */
-	UserDeveloper selectByAppkeyAndSecret(@Param("appkey") String appkey, 
-			@Param("appsecret") String appSecret);
-	
-	/**
-	 * 
-	   * TODO 查询全部
-	   * @return
-	 */
-	List<UserDeveloper> selectAll();
-	
+    /**
+     * TODO 根据接口账号查询开发者信息
+     * 
+     * @param appkey
+     * @return
+     */
+    UserDeveloper selectByAppkey(@Param("appkey") String appkey);
+
+    /**
+     * TODO 根据接口账号查询开发者信息
+     * 
+     * @param appkey
+     * @return
+     */
+    UserDeveloper selectByAppkeyAndSecret(@Param("appkey") String appkey, @Param("appsecret") String appSecret);
+
+    /**
+     * TODO 更新开发者账号状态信息
+     * 
+     * @param userId
+     * @param status
+     * @return
+     */
+    int updateDeveloperStatus(@Param("userId") int userId, @Param("status") int status);
+
+    /**
+     * TODO 查询全部
+     * 
+     * @return
+     */
+    List<UserDeveloper> selectAll();
+
 }

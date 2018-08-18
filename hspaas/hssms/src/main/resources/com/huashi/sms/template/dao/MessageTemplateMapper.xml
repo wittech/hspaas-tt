@@ -24,6 +24,8 @@
 		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
 		<result column="ignore_blacklist" property="ignoreBlacklist"
 			jdbcType="INTEGER" />
+		<result column="ignore_forbidden_words" property="ignoreForbiddenWords"
+			jdbcType="INTEGER" />
 	</resultMap>
 	<sql id="Base_Column_List">
 		id, user_id, content, status, app_type, create_time,
@@ -31,7 +33,7 @@
 		approve_user, remark, notice_mode, mobile, regex_value,
 		submit_interval, limit_times,
 		white_word, route_type, priority,
-		ext_number, ignore_blacklist
+		ext_number, ignore_blacklist, ignore_forbidden_words
 	</sql>
 	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
 		parameterType="java.lang.Long">
@@ -57,7 +59,7 @@
 		mobile,
 		regex_value, submit_interval,
 		limit_times, white_word, route_type,
-		priority, ext_number, ignore_blacklist)
+		priority, ext_number, ignore_blacklist, ignore_forbidden_words)
 		values (#{userId,jdbcType=INTEGER},
 		#{content,jdbcType=VARCHAR},
 		#{status,jdbcType=INTEGER},
@@ -72,7 +74,8 @@
 		#{whiteWord,jdbcType=VARCHAR},
 		#{routeType,jdbcType=INTEGER},
 		#{priority,jdbcType=INTEGER}, #{extNumber,jdbcType=VARCHAR},
-		#{ignoreBlacklist,jdbcType=INTEGER})
+		#{ignoreBlacklist,jdbcType=INTEGER}, 
+		#{ignoreForbiddenWords,jdbcType=INTEGER})
 	</insert>
 	<insert id="insertSelective" parameterType="com.huashi.sms.template.domain.MessageTemplate">
 		<selectKey resultType="java.lang.Long" keyProperty="id"
@@ -135,6 +138,9 @@
 			<if test="ignoreBlacklist != null">
 				ignore_blacklist,
 			</if>
+			<if test="ignoreForbiddenWords != null">
+				ignore_forbidden_words,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="userId != null">
@@ -190,6 +196,9 @@
 			</if>
 			<if test="ignoreBlacklist != null">
 				#{ignoreBlacklist,jdbcType=INTEGER},
+			</if>
+			<if test="ignoreForbiddenWords != null">
+				#{ignoreForbiddenWords,jdbcType=INTEGER},
 			</if>
 		</trim>
 	</insert>
@@ -250,6 +259,9 @@
 			<if test="ignoreBlacklist != null">
 				ignore_blacklist = #{ignoreBlacklist,jdbcType=INTEGER},
 			</if>
+			<if test="ignoreForbiddenWords != null">
+				ignore_forbidden_words = #{ignoreForbiddenWords,jdbcType=INTEGER},
+			</if>
 		</set>
 		where id = #{id,jdbcType=BIGINT}
 	</update>
@@ -283,7 +295,8 @@
 		#{routeType,jdbcType=INTEGER},
 		priority = #{priority,jdbcType=INTEGER},
 		ext_number = #{extNumber,jdbcType=VARCHAR},
-		ignore_blacklist = #{ignoreBlacklist,jdbcType=INTEGER}
+		ignore_blacklist = #{ignoreBlacklist,jdbcType=INTEGER},
+		ignore_forbidden_words = #{ignoreForbiddenWords,jdbcType=INTEGER}
 		where id =
 		#{id,jdbcType=BIGINT}
 	</update>

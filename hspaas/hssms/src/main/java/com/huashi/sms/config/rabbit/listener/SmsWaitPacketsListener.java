@@ -66,6 +66,7 @@ import com.huashi.sms.task.model.SmsRoutePassage;
 import com.huashi.sms.task.service.ISmsMtTaskService;
 import com.huashi.sms.template.context.TemplateContext;
 import com.huashi.sms.template.context.TemplateContext.IgnoreBlacklist;
+import com.huashi.sms.template.context.TemplateContext.IgnoreForbiddenWords;
 import com.huashi.sms.template.domain.MessageTemplate;
 import com.huashi.sms.template.service.ISmsTemplateService;
 import com.rabbitmq.client.Channel;
@@ -246,6 +247,16 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
+     * TODO 根据短信模板配置判断是否忽略敏感词信息，强制放行
+     * 
+     * @return
+     */
+    private boolean isIgnoreForbiddenWords() {
+        return messageTemplateLocal.get() != null
+               && IgnoreForbiddenWords.YES.getValue() == messageTemplateLocal.get().getIgnoreForbiddenWords();
+    }
+
+    /**
      * TODO 手机号码处理逻辑，黑名单判断/无效手机号码过滤/运营商分流
      *
      * @return
@@ -327,7 +338,6 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
 
         checkIsStartingConsumeMessage();
 
-        long start = System.currentTimeMillis();
         try {
 
             // 用户短信配置中心数据
@@ -361,7 +371,6 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         } catch (Exception e) {
             logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
         } finally {
-            logger.warn("##############分包总耗时：{} ms", System.currentTimeMillis() - start);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             // 清除ThreadLocal对象，加速GC，减小内存压力
             smsMtTaskLocal.remove();
@@ -542,10 +551,11 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
      * TODO 标记短信是否有敏感词
      */
     private void markContentHasSensitiveWords() {
-        // 判断敏感词开关是否开启 edit by 20180509
-        // if (forbiddenWordsService.isForbiddenWordsAllowPassed()) {
-        // return;
-        // }
+        // 判断是否忽略敏感词信息，及时包含敏感词信息也免检查 add by 20180818
+        // 此需求主要针对通知类短信（对响应失效有一定要求），短信模板对应的客户是安全可控用户，触及部分很边缘化的敏感词，顾无需拦截
+        if (isIgnoreForbiddenWords()) {
+            return;
+        }
 
         // 短信模板报备白名单词汇（如果本次内容包含此词汇不算作敏感词）
         String whiteWordsRecord = messageTemplateLocal.get() == null ? null : messageTemplateLocal.get().getWhiteWord();
@@ -629,7 +639,8 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
             Set<Integer> provinceCodes = provinceCmcpMobileNumbers.keySet();
             for (Integer provinceCode : provinceCodes) {
                 // 获取可用通道
-                SmsPassageAccess passageAccess = getPassageAccess(routePassage.getUserId(), routeType, cmcp.getCode(), provinceCode);
+                SmsPassageAccess passageAccess = getPassageAccess(routePassage.getUserId(), routeType, cmcp.getCode(),
+                                                                  provinceCode);
                 if (passageAccess != null) {
                     routePassage.addPassageMobilesMapping(passageAccess.getPassageId(),
                                                           provinceCmcpMobileNumbers.get(provinceCode));
@@ -639,7 +650,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
                     smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("通道不可用"));
                     refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(),
                                        smsMtTaskLocal.get().getForceActionsReport());
-                    
+
                     // 如果没有可用通道，则直接将省份手机号码进行分配异常通道
                     routePassage.addPassageMobilesMapping(PassageContext.EXCEPTION_PASSAGE_ID,
                                                           provinceCmcpMobileNumbers.get(provinceCode));

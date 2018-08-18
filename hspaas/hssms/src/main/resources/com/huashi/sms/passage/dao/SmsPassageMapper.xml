@@ -215,7 +215,7 @@
 				name like '%${keyword}%'
 			</if>
 		</where>
-		order by id desc limit #{start},#{end}
+		order by status asc, id desc limit #{start},#{end}
 	</select>
 
 	<select id="findCount" resultType="java.lang.Integer">

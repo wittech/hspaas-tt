@@ -5,235 +5,247 @@ import java.util.Date;
 
 import com.huashi.common.user.model.UserModel;
 import com.huashi.sms.template.context.TemplateContext.IgnoreBlacklist;
+import com.huashi.sms.template.context.TemplateContext.IgnoreForbiddenWords;
 
 public class MessageTemplate implements Serializable {
 
-	private static final long serialVersionUID = 3361058935868304392L;
+    private static final long serialVersionUID     = 3361058935868304392L;
 
-	private Long id;
+    private Long              id;
 
-	private Integer userId;
+    private Integer           userId;
 
-	private String content;
+    private String            content;
 
-	private Integer status;
+    private Integer           status;
 
-	private Integer appType;
+    private Integer           appType;
 
-	private Date createTime;
+    private Date              createTime;
 
-	private Date approveTime;
+    private Date              approveTime;
 
-	private String approveUser;
+    private String            approveUser;
 
-	private String remark;
+    private String            remark;
 
-	private Integer noticeMode;
+    private Integer           noticeMode;
 
-	private String mobile;
+    private String            mobile;
 
-	private String regexValue;
+    private String            regexValue;
 
-	private Integer submitInterval;
+    private Integer           submitInterval;
 
-	private Integer limitTimes;
+    private Integer           limitTimes;
 
-	private String whiteWord;
+    private String            whiteWord;
 
-	private Integer routeType;
+    private Integer           routeType;
 
-	private Integer priority;
-	
-	private String extNumber;
-	
-	/**
-	 * 忽略手机黑名单拦截 add by 2018-05-02
-	 */
-	private Integer ignoreBlacklist = IgnoreBlacklist.NO.getValue();
+    private Integer           priority;
 
-	// 用户信息
-	private UserModel userModel;
-	// 路由类型名称
-	private String routeTypeText;
-	// 平台类型名称
-	private String apptypeText;
+    private String            extNumber;
 
-	public Long getId() {
-		return id;
-	}
+    /**
+     * 忽略手机黑名单拦截 add by 2018-05-02
+     */
+    private Integer           ignoreBlacklist      = IgnoreBlacklist.NO.getValue();
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * 忽略手机敏感词拦截 add by 2018-08-18
+     */
+    private Integer           ignoreForbiddenWords = IgnoreForbiddenWords.NO.getValue();
 
-	public Integer getUserId() {
-		return userId;
-	}
+    // 用户信息
+    private UserModel         userModel;
+    // 路由类型名称
+    private String            routeTypeText;
+    // 平台类型名称
+    private String            apptypeText;
 
-	public void setUserId(Integer userId) {
-		this.userId = userId;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setContent(String content) {
-		this.content = content == null ? null : content.trim();
-	}
+    public Integer getUserId() {
+        return userId;
+    }
 
-	public Integer getStatus() {
-		return status;
-	}
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
+    public String getContent() {
+        return content;
+    }
 
-	public Integer getAppType() {
-		return appType;
-	}
+    public void setContent(String content) {
+        this.content = content == null ? null : content.trim();
+    }
 
-	public void setAppType(Integer appType) {
-		this.appType = appType;
-	}
+    public Integer getStatus() {
+        return status;
+    }
 
-	public Date getCreateTime() {
-		return createTime;
-	}
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
+    public Integer getAppType() {
+        return appType;
+    }
 
-	public Date getApproveTime() {
-		return approveTime;
-	}
+    public void setAppType(Integer appType) {
+        this.appType = appType;
+    }
 
-	public void setApproveTime(Date approveTime) {
-		this.approveTime = approveTime;
-	}
+    public Date getCreateTime() {
+        return createTime;
+    }
 
-	public String getApproveUser() {
-		return approveUser;
-	}
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
 
-	public void setApproveUser(String approveUser) {
-		this.approveUser = approveUser == null ? null : approveUser.trim();
-	}
+    public Date getApproveTime() {
+        return approveTime;
+    }
 
-	public String getRemark() {
-		return remark;
-	}
+    public void setApproveTime(Date approveTime) {
+        this.approveTime = approveTime;
+    }
 
-	public void setRemark(String remark) {
-		this.remark = remark == null ? null : remark.trim();
-	}
+    public String getApproveUser() {
+        return approveUser;
+    }
 
-	public Integer getNoticeMode() {
-		return noticeMode;
-	}
+    public void setApproveUser(String approveUser) {
+        this.approveUser = approveUser == null ? null : approveUser.trim();
+    }
 
-	public void setNoticeMode(Integer noticeMode) {
-		this.noticeMode = noticeMode;
-	}
+    public String getRemark() {
+        return remark;
+    }
 
-	public String getMobile() {
-		return mobile;
-	}
+    public void setRemark(String remark) {
+        this.remark = remark == null ? null : remark.trim();
+    }
 
-	public void setMobile(String mobile) {
-		this.mobile = mobile == null ? null : mobile.trim();
-	}
+    public Integer getNoticeMode() {
+        return noticeMode;
+    }
 
-	public String getRegexValue() {
-		return regexValue;
-	}
+    public void setNoticeMode(Integer noticeMode) {
+        this.noticeMode = noticeMode;
+    }
 
-	public void setRegexValue(String regexValue) {
-		this.regexValue = regexValue == null ? null : regexValue.trim();
-	}
+    public String getMobile() {
+        return mobile;
+    }
 
-	public Integer getSubmitInterval() {
-		return submitInterval;
-	}
+    public void setMobile(String mobile) {
+        this.mobile = mobile == null ? null : mobile.trim();
+    }
 
-	public void setSubmitInterval(Integer submitInterval) {
-		this.submitInterval = submitInterval;
-	}
+    public String getRegexValue() {
+        return regexValue;
+    }
 
-	public Integer getLimitTimes() {
-		return limitTimes;
-	}
+    public void setRegexValue(String regexValue) {
+        this.regexValue = regexValue == null ? null : regexValue.trim();
+    }
 
-	public void setLimitTimes(Integer limitTimes) {
-		this.limitTimes = limitTimes;
-	}
+    public Integer getSubmitInterval() {
+        return submitInterval;
+    }
 
-	public String getWhiteWord() {
-		return whiteWord;
-	}
+    public void setSubmitInterval(Integer submitInterval) {
+        this.submitInterval = submitInterval;
+    }
 
-	public void setWhiteWord(String whiteWord) {
-		this.whiteWord = whiteWord == null ? null : whiteWord.trim();
-	}
+    public Integer getLimitTimes() {
+        return limitTimes;
+    }
 
-	public Integer getRouteType() {
-		return routeType;
-	}
+    public void setLimitTimes(Integer limitTimes) {
+        this.limitTimes = limitTimes;
+    }
 
-	public void setRouteType(Integer routeType) {
-		this.routeType = routeType;
-	}
+    public String getWhiteWord() {
+        return whiteWord;
+    }
 
-	public Integer getPriority() {
-		return priority;
-	}
+    public void setWhiteWord(String whiteWord) {
+        this.whiteWord = whiteWord == null ? null : whiteWord.trim();
+    }
 
-	public void setPriority(Integer priority) {
-		this.priority = priority;
-	}
+    public Integer getRouteType() {
+        return routeType;
+    }
 
-	public UserModel getUserModel() {
-		return userModel;
-	}
+    public void setRouteType(Integer routeType) {
+        this.routeType = routeType;
+    }
 
-	public void setUserModel(UserModel userModel) {
-		this.userModel = userModel;
-	}
+    public Integer getPriority() {
+        return priority;
+    }
 
-	public String getRouteTypeText() {
-		return routeTypeText;
-	}
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
 
-	public void setRouteTypeText(String routeTypeText) {
-		this.routeTypeText = routeTypeText;
-	}
+    public UserModel getUserModel() {
+        return userModel;
+    }
 
-	public String getApptypeText() {
-		return apptypeText;
-	}
+    public void setUserModel(UserModel userModel) {
+        this.userModel = userModel;
+    }
 
-	public void setApptypeText(String apptypeText) {
-		this.apptypeText = apptypeText;
-	}
+    public String getRouteTypeText() {
+        return routeTypeText;
+    }
 
-	public String getExtNumber() {
-		return extNumber;
-	}
+    public void setRouteTypeText(String routeTypeText) {
+        this.routeTypeText = routeTypeText;
+    }
 
-	public void setExtNumber(String extNumber) {
-		this.extNumber = extNumber;
-	}
+    public String getApptypeText() {
+        return apptypeText;
+    }
 
-    
+    public void setApptypeText(String apptypeText) {
+        this.apptypeText = apptypeText;
+    }
+
+    public String getExtNumber() {
+        return extNumber;
+    }
+
+    public void setExtNumber(String extNumber) {
+        this.extNumber = extNumber;
+    }
+
     public Integer getIgnoreBlacklist() {
         return ignoreBlacklist;
     }
 
-    
     public void setIgnoreBlacklist(Integer ignoreBlacklist) {
         this.ignoreBlacklist = ignoreBlacklist;
+    }
+
+    public Integer getIgnoreForbiddenWords() {
+        return ignoreForbiddenWords;
+    }
+
+    public void setIgnoreForbiddenWords(Integer ignoreForbiddenWords) {
+        this.ignoreForbiddenWords = ignoreForbiddenWords;
     }
 
 }

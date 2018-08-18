@@ -120,6 +120,7 @@
                                             <#else>
                                                 <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'0');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
                                             </#if>
+                                            <a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="kill(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;断连接</a>
                                             &nbsp;
                                             <a class="btn btn-info btn-xs" href="javascript:void(0);" onclick="testPassage(${pl.id});"><i class="fa fa-bug"></i>&nbsp;测试通道 </a>
                                         </td>
@@ -213,6 +214,26 @@
                         });
                     },error:function(data){
                         Boss.alert(msg+"通道失败！");
+                    }
+                });
+            });
+        }
+        
+        function kill(id){
+            Boss.confirm('确定要断开该通道连接吗？',function(){
+                $.ajax({
+                    url:'${BASE_PATH}/sms/passage/kill',
+                    type:'post',
+                    dataType:'json',
+                    data:{id:id},
+                    success:function(data){
+                        Boss.alertToCallback(data.message,function(){
+                            if(data.result){
+                                location.reload();
+                            }
+                        });
+                    },error:function(data){
+                        Boss.alert("断开通道连接失败！");
                     }
                 });
             });

@@ -131,6 +131,19 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-xs-2 control-label">敏感词放行</label>
+                                <div class="col-xs-4">
+                                	 <label class="form-radio form-icon">
+                                	 	<input type="radio" class="fwords" name="fwords" value="0" checked /><span class="label label-danger">自动拦截，不放行</span>
+                                	 </label>
+                                	 &nbsp;&nbsp;
+                                	 <label class="form-radio form-icon">
+                                	 	<input type="radio" class="fwords" name="fwords" value="1" /><span class="label label-success">不拦截，自动放行</span>
+                                	 </label>
+                                	 <input type="hidden" id="ignoreForbiddenWords" name="messageTemplate.ignoreForbiddenWords" value="0" />
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <div class="col-xs-9 col-xs-offset-3">
                                     <button type="button" onclick="formSubmit();" class="btn btn-primary btn-sm"
                                             name="buttonSubmit">提交
@@ -170,6 +183,10 @@
         
         $('.blacklist').click(function () {
             $('#ignoreBlacklist').val($(this).val());
+        });
+        
+        $('.fwords').click(function () {
+            $('#ignoreForbiddenWords').val($(this).val());
         });
     });
 

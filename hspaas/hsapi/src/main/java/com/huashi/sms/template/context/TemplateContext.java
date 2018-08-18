@@ -127,4 +127,34 @@ public class TemplateContext {
             return value;
         }
     }
+    
+    /**
+     * 
+      * TODO 忽略敏感词拦截设置
+      * 
+      * @author zhengying
+      * @version V1.0   
+      * @date 2018年8月18日 下午5:29:44
+     */
+    public enum IgnoreForbiddenWords {
+        /**
+         * 拦截黑名单
+         */
+        NO(0), 
+        
+        /**
+         * 放行黑名单
+         */
+        YES(1);
+
+        private int value;
+
+        private IgnoreForbiddenWords(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
 }

@@ -13,6 +13,7 @@
     <script src="${BASE_PATH}/resources/js/bootstrap/pace.min.js"></script>
     <script src="${BASE_PATH}/resources/js/My97DatePicker/WdatePicker.js"></script>
     <script src="${BASE_PATH}/resources/js/common.js"></script>
+    <#include "/WEB-INF/views/common/select_search.ftl">
 </head>
 
 <body>
@@ -48,14 +49,14 @@
                                 <div class="col-md-3">
                                     <div class="input-group">
                                         <span class="input-group-addon">所属用户</span>
-                                        <input type="text" class="form-control" id="username" name="username"
-                                               value="${username!''}" readonly style="background: #fff"
-                                               placeholder="选择用户">
-                                        <input type="hidden" name="userId" id="userId" value="${userId!-1}"/>
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-info" type="button"
-                                                    onclick="openUserList();">选择</button>
-                                        </span>
+                                        <select class="form-control selectpicker show-tick" id="userId" name="userId" data-live-search="true">
+				                        	<option value="-1">--选择用户--</option>
+				                        	<#if userList??>
+					    					<#list userList as p>
+					    						<option value="${p.id!''}" <#if userId?? && userId == p.id>selected</#if>>${p.name!''}</option>
+					    					</#list>
+								    		</#if>
+				                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -273,9 +274,7 @@
                                        class="btn btn-info btn-xs">子任务</a>
                                      
                                     <#if pl.submitType != 1 && pl.submitType != 2>
-		                                <#if pl.isTemplateError()>
-	                                        <a href="${BASE_PATH }/sms/message_template/create?sid=${pl.sid}" class="btn btn-primary btn-xs">模板报备</a>
-	                                    </#if>
+                                    	<a href="${BASE_PATH }/sms/message_template/create?sid=${pl.sid}" class="btn btn-primary btn-xs"><#if pl.isTemplateError()>模板报备<#else>模板叠加</#if></a>
 	                                    <#if pl.isWordError()>
 	                                    	<#if pl.messageTemplateId?? && pl.messageTemplateId gt 0>
 			                                    <a  href="${BASE_PATH }/sms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}"
@@ -428,7 +427,14 @@
                     </div>
                     <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
                          id="myModelBody">
-                        <select class="form-control" id="switchPassageId">
+                        <select class="form-control selectpicker show-tick" id="switchPassageId" data-live-search="true">
+                        	<#if passageList??>
+		    					<#list passageList?sort_by("name") as p>
+		    						<#if p.status?? && p.status == 0>
+		    						<option value="${p.id!''}">${p.name!''}</option>
+		    						</#if>
+		    					</#list>
+				    		</#if>
                         </select>
                     </div>
                     <div class="modal-footer">
@@ -439,27 +445,6 @@
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
         </div>
-
-
-        <div class="modal fade" id="userModal">
-            <div class="modal-dialog" style="width:850px">
-                <div class="modal-content" style="width:850px">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">选择用户</h4>
-                    </div>
-                    <div class="modal-body" id="userModelBody">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-success" onclick="clearUser();">清空</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
-
     </div>
     <script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
     <script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
@@ -618,20 +603,6 @@
             Boss.alert('请选择需要处理的任务！');
             return;
         }
-        $.ajax({
-            url:'${BASE_PATH}/sms/passage/passage_json',
-            dataType:'json',
-            type:'post',
-            success:function (data) {
-                var html = '';
-                for(var i = 0;i<data.length;i++){
-                    html += '<option value="'+data[i].id+'">'+data[i].name+'</option>';
-                }
-                $('#switchPassageId').html(html);
-            },error:function(data){
-                Boss.alert('获取通道json数据失败！');
-            }
-        });
         $('#passageModal').modal('show');
     }
     
@@ -845,34 +816,6 @@
                 Boss.alert('批放失败!');
             }
         });
-    }
-
-    function openUserList() {
-        var userId = $('#userId').val();
-        $.ajax({
-            url: '${BASE_PATH}/base/customer/commonUserList',
-            dataType: 'html',
-            type: 'POST',
-            data: {userId: userId},
-            success: function (data) {
-                $('#userModelBody').html(data);
-                $('#userModal').modal('show');
-            }, error: function (data) {
-                Boss.alert('请求用户列表异常！');
-            }
-        });
-    }
-
-    function selectUser(userId, fullName, mobile) {
-        $('#userId').val(userId);
-        $('#username').val(fullName);
-        $('#userModal').modal('hide');
-    }
-
-    function clearUser() {
-        $('#userId').val("");
-        $('#username').val("");
-        $('#userModal').modal('hide');
     }
 
     function userJumpPage(p){

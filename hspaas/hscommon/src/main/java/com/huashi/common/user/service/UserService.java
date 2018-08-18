@@ -61,8 +61,6 @@ public class UserService implements IUserService {
     @Autowired
     private UserProfileMapper        profileMapper;
     @Autowired
-    private IUserDeveloperService    developerService;
-    @Autowired
     private IUserDeveloperService    userDeveloperService;
     @Reference
     private ISmsMtPushService        smsMtPushService;
@@ -283,9 +281,15 @@ public class UserService implements IUserService {
             if (result > 0) {
                 result = userProfileMapper.updateUserProfileState(userId, status);
             }
-
+            
             // 刷新REDIS
             if (result > 0) {
+                // 如果更新账号基础信息成功，则更新开发者账号信息
+                boolean isOk = userDeveloperService.updateStatus(userId, Integer.parseInt(status));
+                if(!isOk) {
+                    throw new RuntimeException("Developer update status failed");
+                }
+                
                 saveUserModel(userMapper.selectMappingByUserId(userId));
             }
 
@@ -308,7 +312,7 @@ public class UserService implements IUserService {
                 user.setSecretPassword(AESUtil.encrypt(user.getPassword(), user.getSalt()));
             }
             userMapper.updateUserInfo(user);
-            developerService.update(developer);
+            userDeveloperService.update(developer);
 
             // 更新REDIS
             saveUserModel(userMapper.selectMappingByUserId(user.getId()));

@@ -164,7 +164,7 @@ public class SmsMoMessageService implements ISmsMoMessageService {
     public int doFinishReceive(List<SmsMoMessageReceive> list) {
         int count = 0;
         try {
-
+            logger.warn("-------------上行数据为：{}", JSON.toJSONString(list));
             for (SmsMoMessageReceive receive : list) {
 
                 // // 31省测试上行自动触发下行功能（测试后上线去掉此逻辑） add by 20170709

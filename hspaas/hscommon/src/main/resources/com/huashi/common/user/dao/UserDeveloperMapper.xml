@@ -141,11 +141,17 @@
 		where id = #{id,jdbcType=INTEGER}
 	</update>
 
-	<select id="selectByUserId" resultMap="BaseResultMap"
+	<select id="selectAvaiableByUserId" resultMap="BaseResultMap"
 		parameterType="java.lang.Integer">
 		select id, user_id, app_key, app_secret, status,
 		create_time from hspaas_user_developer where user_id = #{userId} and
 		status = 0
+	</select>
+
+	<select id="selectByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select id, user_id, app_key, app_secret, status,
+		create_time from hspaas_user_developer where user_id = #{userId}
 	</select>
 
 	<select id="selectByAppkey" resultMap="BaseResultMap"
@@ -154,7 +160,8 @@
 		u.status, d.create_time, d.update_time
 		from hspaas_user_developer d
 		join hspaas_user u on d.user_id = u.id
-		where app_key = #{appkey} and u.status = 0
+		where app_key = #{appkey} and
+		u.status = 0
 	</select>
 
 	<select id="selectByAppkeyAndSecret" resultMap="BaseResultMap">
@@ -163,9 +170,21 @@
 		from hspaas_user_developer where app_key = #{appkey} and app_secret =
 		#{appsecret}
 	</select>
-	
+
 	<select id="selectAll" resultMap="BaseResultMap">
-		select <include refid="Base_Column_List" /> from hspaas_user_developer 
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_developer
 	</select>
-	
+
+	<update id="updateDeveloperStatus">
+		update
+		hspaas_user_developer
+		set status =
+		#{status,jdbcType=INTEGER},
+		update_time = now()
+		where user_id =
+		#{userId,jdbcType=INTEGER}
+	</update>
+
 </mapper>

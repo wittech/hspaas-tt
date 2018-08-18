@@ -123,9 +123,20 @@
 			                                	 <label class="form-radio form-icon">
 			                                	 	<input type="radio" class="blacklist" name="blacklist" value="1" <#if messageTemplate.ignoreBlacklist == 1>checked</#if> /><span class="label label-success">不拦截，自动放行</span>
 			                                	 </label>
-			                                	 
-			                                	 
 			                                	 <input type="hidden" id="ignoreBlacklist" name="messageTemplate.ignoreBlacklist" value="${messageTemplate.ignoreBlacklist!'0'}" />
+			                                </div>
+			                            </div>
+			                            <div class="form-group">
+			                                <label class="col-xs-2 control-label">敏感词放行</label>
+			                                <div class="col-xs-4">
+			                                	 <label class="form-radio form-icon">
+			                                	 	<input type="radio" class="fwords" name="fwords" value="0" <#if messageTemplate.ignoreForbiddenWords == 0>checked</#if> /><span class="label label-danger">自动拦截，不放行</span>
+			                                	 </label>
+			                                	 &nbsp;&nbsp;
+			                                	 <label class="form-radio form-icon">
+			                                	 	<input type="radio" class="fwords" name="fwords" value="1" <#if messageTemplate.ignoreForbiddenWords == 1>checked</#if> /><span class="label label-success">不拦截，自动放行</span>
+			                                	 </label>
+			                                	 <input type="hidden" id="ignoreForbiddenWords" name="messageTemplate.ignoreForbiddenWords" value="${messageTemplate.ignoreForbiddenWords!'0'}" />
 			                                </div>
 			                            </div>
 	                                    <div class="form-group">
@@ -153,6 +164,10 @@
 			
 			$('.blacklist').click(function () {
 	            $('#ignoreBlacklist').val($(this).val());
+	        });
+	        
+	        $('.fwords').click(function () {
+	            $('#ignoreForbiddenWords').val($(this).val());
 	        });
 		});
 		

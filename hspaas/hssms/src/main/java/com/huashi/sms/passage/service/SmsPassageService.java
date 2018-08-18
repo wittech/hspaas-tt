@@ -316,13 +316,6 @@ public class SmsPassageService implements ISmsPassageService {
 	@Transactional
 	public boolean disabledOrActive(int passageId, int status){
 		try {
-			// 是否需要出发通道代理逻辑(目前主要针对CMPP,SGIP,SGMP等直连协议)
-			if(smsProxyManageService.isProxyAvaiable(passageId)) {
-				if(!smsProxyManageService.stopProxy(passageId)) {
-                    return false;
-                }
-			}
-			
 			SmsPassage passage = new SmsPassage();
 			passage.setId(passageId);
 			passage.setStatus(status);
@@ -631,4 +624,28 @@ public class SmsPassageService implements ISmsPassageService {
 		 
 		return ProtocolType.isBelongtoDirect(parameter.getProtocol());
 	}
+
+    @Override
+    public boolean kill(int id) {
+        try {
+            // 是否需要出发通道代理逻辑(目前主要针对CMPP,SGIP,SGMP等直连协议)
+            if(smsProxyManageService.isProxyAvaiable(id)) {
+                if(!smsProxyManageService.stopProxy(id)) {
+                    logger.error("通道 ["+id+"] 断开连接失败");
+                    return false;
+                }
+            } else {
+                logger.info("通道 ["+id+"] 连接不存在，忽略断开连接操作");
+                return true;
+            }
+            
+            logger.info("通道 ["+id+"] 断开连接成功");
+            return true;
+            
+        }catch (Exception e){
+            logger.error("通道 ["+id+"] 断开连接操作失败", e);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
+        }
+    }
 }

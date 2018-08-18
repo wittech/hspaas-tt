@@ -392,7 +392,13 @@
 		<if test="templateId != null and templateId > 0">
 			and p.message_template_id = #{templateId}
 		</if>
-		order by p.create_time desc limit #{start},#{end}
+		<if test="searchType == 0">
+			order by p.create_time asc
+		</if>
+		<if test="searchType == 1">
+			order by p.create_time desc
+		</if>
+		limit #{start},#{end}
 	</select>
 
 	<select id="findCount" resultType="java.lang.Integer">

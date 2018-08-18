@@ -108,9 +108,9 @@
                                 <thead>
                                     <tr>
                                     	<th width="5%">编号</th>
+                                        <th width="10%">公司名称</th>
                                         <th width="10%">姓名</th>
                                         <th width="6%">手机号</th>
-                                        <th width="10%">公司名称</th>
                                         <th width="5%">身份证号</th>
                                         <th width="4%">状态</th>
                                         <th width="10%">开户时间</th>
@@ -122,9 +122,9 @@
                                 		<#list page.list as pl>
 		                                    <tr>
 		                                        <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
-		                                        <td>${(pl.fullName)!''}<#if pl.label?? && pl.label != ''><span class="label label-danger">禁止操作</span></#if></td>
+		                                        <td>${(pl.company)!''}<#if pl.label?? && pl.label != ''><span class="label label-danger">禁止操作</span></#if></td>
+		                                        <td>${(pl.fullName)!''}</td>
 		                                        <td>${(pl.mobile)!''}</td>
-		                                        <td>${(pl.company)!''}</td>
 		                                        <td>${(pl.cardNo)!''}</td>
 		                                        <td>
 		                                        	<#if pl.state?? && pl.state == '0'>

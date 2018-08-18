@@ -17,7 +17,7 @@ public interface IUserDeveloperService {
 
 	/**
 	 * 
-	 * TODO 根据用户ID获取用户接口信息
+	 * TODO 根据用户ID获取有效的用户接口信息（状态为启用）
 	 * 
 	 * @param userId
 	 * @return
@@ -84,4 +84,14 @@ public interface IUserDeveloperService {
 	 * @return
 	 */
 	boolean reloadToRedis();
+	
+	/**
+	 * 
+	   * TODO 更新开发者账号状态信息
+	   * 
+	   * @param userId
+	   * @param status
+	   * @return
+	 */
+	boolean updateStatus(int userId, int status);
 }

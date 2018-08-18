@@ -88,6 +88,14 @@ public interface ISmsPassageService {
 	 * @return
 	 */
 	boolean disabledOrActive(int id, int flag);
+	
+	/**
+	 * 
+	   * TODO 通道断开连接（针对直连，HTTP等其他协议直接忽略）
+	   * @param id
+	   * @return
+	 */
+	boolean kill(int id);
 
 	/**
 	 * 

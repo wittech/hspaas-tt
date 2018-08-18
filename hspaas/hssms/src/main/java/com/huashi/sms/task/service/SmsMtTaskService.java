@@ -113,6 +113,11 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     @Resource
     private StringRedisTemplate        stringRedisTemplate;
 
+    /**
+     * 防止同时审批产生脏数据
+     */
+    private static final Lock          lock   = new ReentrantLock();
+
     // @Value("${zk.connect}")
     // private String zkConnectUrl;
     //
@@ -270,7 +275,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
 
         int effect = taskMapper.insertSelective(task);
         if (effect > 0) {
-            if(CollectionUtils.isNotEmpty(task.getPackets())) {
+            if (CollectionUtils.isNotEmpty(task.getPackets())) {
                 taskPacketsMapper.batchInsert(task.getPackets());
             }
         }
@@ -1008,8 +1013,6 @@ public class SmsMtTaskService implements ISmsMtTaskService {
         // edit by 20180416 介于当前分布式zookeeper 经常超时，待查，而分布式还未上暂时切换为JVM的可重入锁
         // Lock lock = new ZookeeperLock(zkConnectUrl, zkSessionTimeout, zkConnectTimeout, zkLockNode,
         // CURRENT_BUSINESS_LOCK_NODE);
-
-        Lock lock = new ReentrantLock();
         // 分布式锁开启
         lock.lock();
         try {

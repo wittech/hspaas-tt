@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.huashi.common.user.service.IUserService;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.ResponseMessage;
@@ -51,6 +52,8 @@ public class SmsRecordController extends BaseController {
 	private ISmsPassageService iSmsPassageService;
 	@Inject.BY_NAME
 	private ISmsTemplateService iSmsTemplateService;
+	@Inject.BY_NAME
+	private IUserService iUserService;
 
 	private static final Integer UNWDER_WAY = 0;
 	private static final Integer COMPLETED = 1;
@@ -67,6 +70,9 @@ public class SmsRecordController extends BaseController {
 		
 		setAttr("page", iSmsMtTaskService.findPage(condition));
 		setAttrs(condition);
+		
+		setAttr("passageList", iSmsPassageService.findAll());
+        setAttr("userList", iUserService.findAll());
 	}
 
 	/**
@@ -78,7 +84,7 @@ public class SmsRecordController extends BaseController {
 		
 		setAttr("page", iSmsMtTaskService.findPage(condition));
 		setAttrs(condition);
-		
+        setAttr("userList", iUserService.findAll());
 	}
 
 	/**
@@ -177,7 +183,6 @@ public class SmsRecordController extends BaseController {
 		paramMap.put("sid", getParaToLong("sid"));
 		paramMap.put("mobile", getPara("mobile"));
 		paramMap.put("content", getPara("content"));
-		paramMap.put("username", getPara("username"));
 		paramMap.put("userId", getParaToInt("userId", -1));
 		
 		String startDate = getPara("startDate");

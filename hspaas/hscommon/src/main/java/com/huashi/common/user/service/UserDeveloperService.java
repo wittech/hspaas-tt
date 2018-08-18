@@ -36,7 +36,7 @@ public class UserDeveloperService implements IUserDeveloperService {
 
     @Override
     public UserDeveloper getByUserId(int userId) {
-        return userDeveloperMapper.selectByUserId(userId);
+        return userDeveloperMapper.selectAvaiableByUserId(userId);
     }
 
     @Override
@@ -167,6 +167,21 @@ public class UserDeveloperService implements IUserDeveloperService {
         }
 
         return result > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateStatus(int userId, int status) {
+        int result = userDeveloperMapper.updateDeveloperStatus(userId, status);
+        if(result > 0) {
+            UserDeveloper developer = userDeveloperMapper.selectByUserId(userId);
+            developer.setStatus(status);
+            pushToRedis(developer);
+            
+            return true;
+        }
+        
+        return false;
     }
 
 }

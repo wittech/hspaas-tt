@@ -2,6 +2,7 @@
     <div class="col-lg-4">
         <select class="form-control sourcePassage" style="height: 200px;" multiple="multiple">
             <#list passageList as pl>
+            	<#if pl.status?? && pl.status == 0>
                 <option value="${pl.id}">
                     ${pl.name}
                     <#if pl.type == 1>
@@ -11,6 +12,7 @@
                         &nbsp;[全]
                     </#if>
                 </option>
+                </#if>
             </#list>
         </select>
     </div>

@@ -212,6 +212,18 @@ public class PassageController extends BaseController {
 			 renderResultJson(false);
 		}
     }
+    
+    /**
+     * 
+       * TODO 断开通道连接
+     */
+    public void kill() {
+        try {
+            renderResultJson(iSmsPassageService.kill(getParaToInt("id")));
+        } catch (Exception e) {
+             renderResultJson(false);
+        }
+    }
 
     public void userList() {
         String fullName = getPara("fullName");
@@ -250,6 +262,7 @@ public class PassageController extends BaseController {
             map.put("id", passage.getId());
             map.put("name", passage.getName());
             map.put("cmcp", passage.getCmcp());
+            map.put("status", passage.getStatus());
             jsonList.add(map);
         }
         renderJson(jsonList);
