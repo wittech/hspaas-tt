@@ -19,7 +19,7 @@ public class PaginationVo<T> implements Serializable {
     /**
      * 默认第一页
      */
-    private static final int  DEFAULT_START_PAGE_NO   = 1;
+    public static final int  DEFAULT_START_PAGE_NO   = 1;
 
     /**
      * 默认显示20条记录
