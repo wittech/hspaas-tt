@@ -83,8 +83,12 @@ public class SmsTemplateService implements ISmsTemplateService {
         if (totalRecord == 0) {
             return null;
         }
-
-        params.put("startPage", PaginationVo.getStartPage(pageNo == null ? PaginationVo.DEFAULT_START_PAGE_NO : pageNo));
+        
+        if(pageNo == null) {
+            pageNo = PaginationVo.DEFAULT_START_PAGE_NO;
+        }
+        
+        params.put("startPage", PaginationVo.getStartPage(pageNo));
         params.put("pageRecord", pageSize == null ? PaginationVo.DEFAULT_RECORD_PER_PAGE : pageSize);
 
         List<MessageTemplate> list = messageTemplateMapper.findPageListByUserId(params);

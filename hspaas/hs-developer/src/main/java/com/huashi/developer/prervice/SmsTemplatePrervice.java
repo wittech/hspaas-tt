@@ -458,7 +458,10 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             jsonObject.put("modeSign", template.getRegexValue());
              
             // 签名位置 0:尾部1:头部
-            Integer location = Integer.parseInt(template.getMobile());
+            Integer location = 1;
+            if(StringUtils.isNotEmpty(template.getMobile())) {
+                location = Integer.parseInt(template.getMobile());
+            }
             String context  = template.getContent();
             jsonObject.put("location", location);
             if(location == 0) {
