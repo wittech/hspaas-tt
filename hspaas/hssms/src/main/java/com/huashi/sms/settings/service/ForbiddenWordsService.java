@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.huashi.common.settings.context.SettingsContext;
 import com.huashi.common.settings.context.SettingsContext.SystemConfigType;
 import com.huashi.common.settings.context.SettingsContext.WordsLibrary;
@@ -25,7 +26,6 @@ import com.huashi.common.settings.domain.SystemConfig;
 import com.huashi.common.settings.service.ISystemConfigService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
-import com.huashi.sms.settings.constant.SmsSettingsContext.ForbiddenWordsSwitch;
 import com.huashi.sms.settings.dao.ForbiddenWordsMapper;
 import com.huashi.sms.settings.domain.ForbiddenWords;
 import com.huashi.sms.settings.filter.SensitiveWordFilter;
@@ -33,294 +33,298 @@ import com.huashi.sms.settings.filter.SensitiveWordFilter;
 @Service
 public class ForbiddenWordsService implements IForbiddenWordsService {
 
-	@Autowired
-	private ForbiddenWordsMapper forbiddenWordsMapper;
-	@Resource
-	private StringRedisTemplate stringRedisTemplate;
-	@Reference
-	private ISystemConfigService systemConfigService;
+    @Autowired
+    private ForbiddenWordsMapper forbiddenWordsMapper;
+    @Resource
+    private StringRedisTemplate  stringRedisTemplate;
+    @Reference
+    private ISystemConfigService systemConfigService;
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger         logger              = LoggerFactory.getLogger(getClass());
 
-	@Override
-	public boolean isContainsForbiddenWords(String content) {
-		if (StringUtils.isEmpty(content)) {
+    @Override
+    public boolean isContainsForbiddenWords(String content) {
+        if (StringUtils.isEmpty(content)) {
             return false;
         }
 
-		try {
-			return SensitiveWordFilter.isContains(content);
-		} catch (Exception e) {
-			logger.error("解析是否包含敏感词失败", e);
-			return false;
-		}
-
-	}
-
-	@Override
-	public boolean isContainsForbiddenWords(String content,
-			Set<String> safeWords) {
-		Set<String> words = filterForbiddenWords(content);
-		if (CollectionUtils.isEmpty(words)) {
+        try {
+            return SensitiveWordFilter.isContains(content);
+        } catch (Exception e) {
+            logger.error("解析是否包含敏感词失败", e);
             return false;
         }
 
-		if (CollectionUtils.isEmpty(safeWords)) {
+    }
+
+    @Override
+    public boolean isContainsForbiddenWords(String content, Set<String> safeWords) {
+        Set<String> words = filterForbiddenWords(content);
+        if (CollectionUtils.isEmpty(words)) {
+            return false;
+        }
+
+        if (CollectionUtils.isEmpty(safeWords)) {
             return true;
         }
 
-		// 如果报备的敏感词包含本次检索出来的敏感词，则认为本次无敏感词
-		return !safeWords.containsAll(words);
-	}
+        // 如果报备的敏感词包含本次检索出来的敏感词，则认为本次无敏感词
+        return !safeWords.containsAll(words);
+    }
 
-	@Override
+    @Override
 	public Set<String> filterForbiddenWords(String content) {
 		if (StringUtils.isEmpty(content)) {
             return null;
         }
 
-		// 【全棉时代天猫旗舰店】520亲子节，卫生巾化妆棉爆款直降50%OFF！￥品质棉，新生爱￥（复制整段再打开手机淘宝抢先看）退订回N
 		// 过滤内容敏感词
 		Set<String> sensitiveWords = SensitiveWordFilter.doFilter(content);
-
-		return CollectionUtils.isEmpty(sensitiveWords) ? null : sensitiveWords;
-
-	}
-
-	@Override
-	public Set<String> filterForbiddenWords(String content,
-			Set<String> safeWords) {
-		Set<String> set = filterForbiddenWords(content);
-		if (CollectionUtils.isEmpty(set)) {
-			return null;
+		
+		// 过滤通配敏感词
+		Set<String> wildcardsWords = SensitiveWordFilter.pickupWildcardsWords(content);
+		if(CollectionUtils.isEmpty(sensitiveWords)) {
+		    if(CollectionUtils.isEmpty(wildcardsWords)) {
+		        return null;
+		    }
+		    
+		    return wildcardsWords;
+		} else {
+		    if(CollectionUtils.isEmpty(wildcardsWords)) {
+	            return sensitiveWords;
+	        }
+	        
+	        sensitiveWords.addAll(wildcardsWords);
+	        return sensitiveWords;
 		}
-
-		set.removeAll(safeWords);
-
-		return set;
 	}
 
-	@Override
-	public List<String> findForbiddenWordsLibrary() {
-		try {
-			Set<String> set = stringRedisTemplate.opsForSet().members(
-					SmsRedisConstant.RED_FORBIDDEN_WORDS);
+    @Override
+    public Set<String> filterForbiddenWords(String content, Set<String> safeWords) {
+        Set<String> set = filterForbiddenWords(content);
+        if (CollectionUtils.isEmpty(set)) {
+            return null;
+        }
 
-			if (CollectionUtils.isNotEmpty(set)) {
+        set.removeAll(safeWords);
+
+        return set;
+    }
+
+    @Override
+    public List<String> findForbiddenWordsLibrary() {
+        try {
+            Set<String> set = stringRedisTemplate.opsForSet().members(SmsRedisConstant.RED_FORBIDDEN_WORDS);
+
+            if (CollectionUtils.isNotEmpty(set)) {
                 return new ArrayList<>(set);
             }
 
-		} catch (Exception e) {
-			logger.warn("Redis敏感词加载失败.", e);
-		}
-
-		List<String> list = forbiddenWordsMapper.selectAllWords();
-		try {
-			stringRedisTemplate.opsForSet().add(
-					SmsRedisConstant.RED_FORBIDDEN_WORDS,
-					list.toArray(new String[] {}));
-		} catch (Exception e) {
-			logger.warn("Redis敏感词同步失败.", e);
-		}
-
-		return list;
-	}
-
-	@Override
-	public boolean saveForbiddenWords(ForbiddenWords word) {
-		if(word == null || StringUtils.isBlank(word.getWord()) 
-				|| StringUtils.isBlank(word.getLabel())) {
-            return false;
+        } catch (Exception e) {
+            logger.warn("Redis敏感词加载失败.", e);
         }
-		
-		try {
-			stringRedisTemplate.opsForSet().add(
-					SmsRedisConstant.RED_FORBIDDEN_WORDS, word.getWord());
-		} catch (Exception e) {
-			logger.warn("Redis敏感词同步失败.", e);
-		}
 
-		// 暂时均默认为1级
-		word.setLevel(1);
-		word.setCreateTime(new Date());
-		int result = forbiddenWordsMapper.insertSelective(word);
-		if (result <= 0) {
+        List<String> list = forbiddenWordsMapper.selectAllWords();
+        try {
+            stringRedisTemplate.opsForSet().add(SmsRedisConstant.RED_FORBIDDEN_WORDS, list.toArray(new String[] {}));
+        } catch (Exception e) {
+            logger.warn("Redis敏感词同步失败.", e);
+        }
+
+        return list;
+    }
+
+    @Override
+    public boolean saveForbiddenWords(ForbiddenWords word) {
+        if (word == null || StringUtils.isBlank(word.getWord()) || StringUtils.isBlank(word.getLabel())) {
             return false;
         }
 
-		return freshForbiddenWords();
-	}
+        try {
+            stringRedisTemplate.opsForSet().add(SmsRedisConstant.RED_FORBIDDEN_WORDS, word.getWord());
+        } catch (Exception e) {
+            logger.warn("Redis敏感词同步失败.", e);
+        }
 
-	/**
-	 * 
-	 * TODO 刷新内部缓存库（敏感词目前加载在JVM本地内存，全局MAP中）
-	 * 
-	 * @return
-	 */
-	private boolean freshForbiddenWords() {
-		try {
-			// 初始化WORDS
-			SensitiveWordFilter.setSensitiveWord(new ArrayList<>(findForbiddenWordsLibrary()));
-			return true;
-		} catch (Exception e) {
-			logger.warn("REDIS刷新敏感词数据失败", e);
-			return false;
-		}
+        // 暂时均默认为1级
+        word.setLevel(1);
+        word.setCreateTime(new Date());
+        int result = forbiddenWordsMapper.insertSelective(word);
+        if (result <= 0) {
+            return false;
+        }
+        
+        try {
+            // 是否为通配敏感词
+            if(SensitiveWordFilter.isWildcardsWords(word.getWord())) {
+                SensitiveWordFilter.addWildcarsWords(word.getWord());
+            } else {
+                // 重新初始化明确敏感词词库(JVM)
+                SensitiveWordFilter.setSensitiveWord(new ArrayList<>(findForbiddenWordsLibrary()));
+            }
+            return true;
+        } catch (Exception e) {
+            logger.error("保存敏感词["+JSON.toJSONString(word)+"]失败", e);
+            return false;
+        }
+    }
 
-	}
+    /**
+     * TODO 刷新内部缓存库（敏感词目前加载在JVM本地内存，全局MAP中）
+     * 
+     * @return
+     */
+    @Override
+    public boolean freshLocalForbiddenWords(boolean isWildcardsWords, boolean isSaveMode) {
+        try {
+            // 重新初始化明确敏感词词库(JVM)
+            SensitiveWordFilter.setSensitiveWord(new ArrayList<>(findForbiddenWordsLibrary()));
+            return true;
+        } catch (Exception e) {
+            logger.warn("REDIS刷新敏感词数据失败", e);
+            return false;
+        }
 
-	@Override
-	public boolean reloadRedisForbiddenWords() {
-		List<String> words = forbiddenWordsMapper.selectAllWords();
-		if (CollectionUtils.isEmpty(words)) {
-			logger.info("数据库未检索到敏感词，放弃填充REDIS");
-			return true;
-		}
-		try {
-			// 初始化WORDS
-			SensitiveWordFilter.setSensitiveWord(words);
+    }
 
-			stringRedisTemplate.delete(SmsRedisConstant.RED_FORBIDDEN_WORDS);
-			stringRedisTemplate.opsForSet().add(
-					SmsRedisConstant.RED_FORBIDDEN_WORDS,
-					words.toArray(new String[] {}));
-			return true;
-		} catch (Exception e) {
-			logger.warn("REDIS重载敏感词数据失败", e);
-			return false;
-		}
+    @Override
+    public boolean reloadRedisForbiddenWords() {
+        List<String> words = forbiddenWordsMapper.selectAllWords();
+        if (CollectionUtils.isEmpty(words)) {
+            logger.info("数据库未检索到敏感词，放弃填充REDIS");
+            return true;
+        }
+        try {
+            // 加载精确敏感词库
+            SensitiveWordFilter.setSensitiveWord(words);
+            
+            // 加载通配敏感词库
+            SensitiveWordFilter.loadWildcarsWords(words);
 
-	}
+            stringRedisTemplate.delete(SmsRedisConstant.RED_FORBIDDEN_WORDS);
+            stringRedisTemplate.opsForSet().add(SmsRedisConstant.RED_FORBIDDEN_WORDS, words.toArray(new String[] {}));
+            return true;
+        } catch (Exception e) {
+            logger.warn("REDIS重载敏感词数据失败", e);
+            return false;
+        }
 
-	@Override
-	public BossPaginationVo<ForbiddenWords> findPage(int pageNum, String keyword) {
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("keyword", keyword);
-		BossPaginationVo<ForbiddenWords> page = new BossPaginationVo<ForbiddenWords>();
-		page.setCurrentPage(pageNum);
-		int total = forbiddenWordsMapper.findCount(paramMap);
-		if (total <= 0) {
-			return page;
-		}
-		page.setTotalCount(total);
-		paramMap.put("start", page.getStartPosition());
-		paramMap.put("end", page.getPageSize());
-		List<ForbiddenWords> dataList = forbiddenWordsMapper.findList(paramMap);
-		page.getList().addAll(dataList);
-		return page;
-	}
+    }
 
-	@Override
-	public boolean deleteWord(int id) {
-		try {
-			ForbiddenWords words = forbiddenWordsMapper.selectByPrimaryKey(id);
-			stringRedisTemplate.opsForSet().remove(
-					SmsRedisConstant.RED_FORBIDDEN_WORDS, words.getWord());
+    @Override
+    public BossPaginationVo<ForbiddenWords> findPage(int pageNum, String keyword) {
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("keyword", keyword);
+        BossPaginationVo<ForbiddenWords> page = new BossPaginationVo<ForbiddenWords>();
+        page.setCurrentPage(pageNum);
+        int total = forbiddenWordsMapper.findCount(paramMap);
+        if (total <= 0) {
+            return page;
+        }
+        page.setTotalCount(total);
+        paramMap.put("start", page.getStartPosition());
+        paramMap.put("end", page.getPageSize());
+        List<ForbiddenWords> dataList = forbiddenWordsMapper.findList(paramMap);
+        page.getList().addAll(dataList);
+        return page;
+    }
 
-			freshForbiddenWords();
+    @Override
+    public boolean deleteWord(int id) {
+        try {
+            ForbiddenWords words = forbiddenWordsMapper.selectByPrimaryKey(id);
+            stringRedisTemplate.opsForSet().remove(SmsRedisConstant.RED_FORBIDDEN_WORDS, words.getWord());
 
-		} catch (Exception e) {
-			logger.warn("Redis 删除敏感词信息失败, id : {}", id, e);
-			return false;
-		}
-		return forbiddenWordsMapper.deleteByPrimaryKey(id) > 0;
-	}
-
-	@Override
-	public boolean isForbiddenWordsAllowPassed() {
-		try {
-			String forbiddenWordsSwitch = stringRedisTemplate.opsForValue()
-					.get(SmsRedisConstant.RED_FORBIDDEN_WORDS_SWITCH);
-			if (StringUtils.isEmpty(forbiddenWordsSwitch)) {
-                return false;
+            // 是否为通配敏感词
+            if(SensitiveWordFilter.isWildcardsWords(words.getWord())) {
+                SensitiveWordFilter.removeWildcarsWords(words.getWord());
+            } else {
+                // 重新初始化明确敏感词词库(JVM)
+                SensitiveWordFilter.setSensitiveWord(new ArrayList<>(findForbiddenWordsLibrary()));
             }
 
-			return ForbiddenWordsSwitch.isOpen(forbiddenWordsSwitch);
+        } catch (Exception e) {
+            logger.warn("Redis 删除敏感词信息失败, id : {}", id, e);
+            return false;
+        }
+        return forbiddenWordsMapper.deleteByPrimaryKey(id) > 0;
+    }
 
-		} catch (Exception e) {
-			logger.warn("Redis敏感词开关查询失败，将采用默认开启..", e);
-			return false;
-		}
-
-	}
-
-	@Override
-	public String[] findWordsLabelLibrary() {
-		SystemConfig systemConfig = systemConfigService.findByTypeAndKey(
-				SystemConfigType.WORDS_LIBRARY.name(),
-				WordsLibrary.FORBIDDEN_LABEL.name());
-		if (systemConfig == null
-				|| StringUtils.isEmpty(systemConfig.getAttrValue())) {
-			logger.warn("敏感词标签库未配置，请及时配置");
-			return null;
-		}
-
-		return systemConfig.getAttrValue().split(
-				SettingsContext.MULTI_VALUE_SEPERATOR);
-	}
-
-	@Override
-	public List<ForbiddenWords> getLabelByWords(String words) {
-		if (StringUtils.isEmpty(words)) {
+    @Override
+    public String[] findWordsLabelLibrary() {
+        SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.WORDS_LIBRARY.name(),
+                                                                         WordsLibrary.FORBIDDEN_LABEL.name());
+        if (systemConfig == null || StringUtils.isEmpty(systemConfig.getAttrValue())) {
+            logger.warn("敏感词标签库未配置，请及时配置");
             return null;
         }
 
-		String[] wordsArray = words.split(",");
-		ForbiddenWords forbiddenWords = null;
+        return systemConfig.getAttrValue().split(SettingsContext.MULTI_VALUE_SEPERATOR);
+    }
 
-		List<ForbiddenWords> list = new ArrayList<>();
-		if (wordsArray.length == 1) {
-			// 如果只有一个词汇，并且为空则直接返回空
-			if (StringUtils.isBlank(wordsArray[0])) {
-                return null;
-            }
-
-			forbiddenWords = forbiddenWordsMapper.selectByWord(wordsArray[0]);
-			if (forbiddenWords == null) {
-                return null;
-            }
-
-			list.add(forbiddenWords);
-			return list;
-		}
-
-		List<ForbiddenWords> wordLib = forbiddenWordsMapper.selectByMultiWord(wordsArray);
-		if(CollectionUtils.isEmpty(wordLib)) {
+    @Override
+    public List<ForbiddenWords> getLabelByWords(String words) {
+        if (StringUtils.isEmpty(words)) {
             return null;
         }
-		
-		Map<String, ForbiddenWords> map = new HashMap<>();
-		// 如果存在多个标签，需要判断是否是同一个，如果为同一个标签则只返回一个即可
-		for(ForbiddenWords word : wordLib) {
-			if(!map.containsKey(word.getLabel())) {
-				map.put(word.getLabel(), word);
-				continue;
-			}
-			
-			ForbiddenWords originWord = map.get(word.getLabel());
-			originWord.setWord(originWord.getWord() + "," + word.getWord());
-			
-			map.put(word.getLabel(), originWord);
-		}
-		
-		for(String label : map.keySet()) {
-			list.add(map.get(label));
-		}
-		
-		return list;
-	}
 
-	@Override
-	public ForbiddenWords get(int id) {
-		return forbiddenWordsMapper.selectByPrimaryKey(id);
-	}
+        String[] wordsArray = words.split(",");
+        ForbiddenWords forbiddenWords = null;
 
-	@Override
-	public boolean update(ForbiddenWords words) {
-		// 暂时均默认为1级
-		words.setLevel(1);
-		words.setLabel(words.getLabel());
-		
-		return forbiddenWordsMapper.updateByPrimaryKeySelective(words) > 0;
-	}
+        List<ForbiddenWords> list = new ArrayList<>();
+        if (wordsArray.length == 1) {
+            // 如果只有一个词汇，并且为空则直接返回空
+            if (StringUtils.isBlank(wordsArray[0])) {
+                return null;
+            }
+
+            forbiddenWords = forbiddenWordsMapper.selectByWord(wordsArray[0]);
+            if (forbiddenWords == null) {
+                return null;
+            }
+
+            list.add(forbiddenWords);
+            return list;
+        }
+
+        List<ForbiddenWords> wordLib = forbiddenWordsMapper.selectByMultiWord(wordsArray);
+        if (CollectionUtils.isEmpty(wordLib)) {
+            return null;
+        }
+
+        Map<String, ForbiddenWords> map = new HashMap<>();
+        // 如果存在多个标签，需要判断是否是同一个，如果为同一个标签则只返回一个即可
+        for (ForbiddenWords word : wordLib) {
+            if (!map.containsKey(word.getLabel())) {
+                map.put(word.getLabel(), word);
+                continue;
+            }
+
+            ForbiddenWords originWord = map.get(word.getLabel());
+            originWord.setWord(originWord.getWord() + "," + word.getWord());
+
+            map.put(word.getLabel(), originWord);
+        }
+
+        for (String label : map.keySet()) {
+            list.add(map.get(label));
+        }
+
+        return list;
+    }
+
+    @Override
+    public ForbiddenWords get(int id) {
+        return forbiddenWordsMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public boolean update(ForbiddenWords words) {
+        // 暂时均默认为1级
+        words.setLevel(1);
+        words.setLabel(words.getLabel());
+
+        return forbiddenWordsMapper.updateByPrimaryKeySelective(words) > 0;
+    }
+    
 }

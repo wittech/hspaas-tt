@@ -150,7 +150,7 @@
                         <table id="demo-dt-basic" class="table table-striped table-bordered" cellspacing="0"
                                width="100%">
                             <thead>
-                            <tr>
+                            <tr onclick="selectAllRow();">
                                 <th><input type="checkbox" id="selectAll"></th>
                                 <th>SID</th>
                                 <#--<th>客户名</th>-->
@@ -307,12 +307,21 @@
                                 	<input type="hidden" id="${pl.sid}_content" value="${pl.finalContent!''}" />
                                 	<#if pl.forbiddenWordLabels??>
                                 	<#list pl.forbiddenWordLabels as forbiddenWordLabel>
-                                		<span class="label label-warning" data-toggle="popwordover" title="${forbiddenWordLabel.label!''}标签敏感词" data-content="${forbiddenWordLabel.word!''}">${forbiddenWordLabel.label!''}</span>&nbsp;
+                                		<span class="label <#if forbiddenWordLabel.word?index_of(".*") == -1>label-warning<#else>label-danger</#if>" style="float:left;margin-right:3px;" data-toggle="popwordover" title="${forbiddenWordLabel.label!''}标签敏感词" data-content="${forbiddenWordLabel.word!''}">${forbiddenWordLabel.label!''}</span>&nbsp;
                                 	</#list>
 	                                	<span style="word-break:break-all;">
 	                                	<#assign content="${pl.finalContent!''}">
 	                                	<#list pl.forbiddenWords?split(",") as word>
-	                                		<#assign content= content?replace(word, "<span style='color:red'>${(word)!}</span>")>
+	                                		<#if word?? && word?contains(".*")>
+	                                			<#list word?split(".*") as wildcardWord>
+	                                				<#if wildcardWord?? && wildcardWord != "">
+	                                					<#assign content= content?replace(wildcardWord, "<span style='color:#FF0000;border-bottom:1px solid #FF0000;'>${(wildcardWord)!}</span>")>
+	                                				</#if>
+	                                			</#list>
+	                                		<#else>
+	                                			<#assign content= content?replace(word, "<span style='color:#E9967A'>${(word)!}</span>")>
+	                                		</#if>
+	                                		
 	                                    </#list>
 	                                    ${content!''}
 	                                    </span>
@@ -322,7 +331,7 @@
 	                                    </span>
                                 	</#if>
                                     
-                                    <span style="color:red">
+                                    <span style="color:#808080">
                                     [字数：${pl.finalContent?length}]
                                     </span>
                                 </td>
@@ -463,7 +472,7 @@
                 $('input[name=checkItem]').prop('checked',false);
             }
         });
-
+        
         $('a[data-toggle=popover]').mouseover(function () {
             var $this = $(this);
             if($this.attr('data-content') != ''){
@@ -489,6 +498,16 @@
         });
         
     });
+    
+    function selectAllRow() {
+    	if($("#selectAll").prop('checked')){
+        	$("#selectAll").prop('checked', false);
+            $('input[name=checkItem]').prop('checked',false);
+        }else{
+        	$("#selectAll").prop('checked', true);
+            $('input[name=checkItem]').prop('checked',true);
+        }
+    }
 
     function getSelectIds(){
         var selects = $('input[name=checkItem]:checked');

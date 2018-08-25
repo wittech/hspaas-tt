@@ -20,11 +20,6 @@ public class SmsRedisConstant {
     public static final String RED_FORBIDDEN_WORDS = "red_forbidden_words";
 
     /**
-     * 短信敏感词开关
-     */
-    public static final String RED_FORBIDDEN_WORDS_SWITCH = "red_forbidden_words_switch";
-
-    /**
      * 手机号码黑名单数据
      */
     public static final String RED_MOBILE_BLACKLIST = "red_mobile_blacklist";

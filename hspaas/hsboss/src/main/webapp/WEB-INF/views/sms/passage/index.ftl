@@ -122,7 +122,7 @@
                                             </#if>
                                             <a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="kill(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;断连接</a>
                                             &nbsp;
-                                            <a class="btn btn-info btn-xs" href="javascript:void(0);" onclick="testPassage(${pl.id});"><i class="fa fa-bug"></i>&nbsp;测试通道 </a>
+                                            <a class="btn btn-info btn-xs" href="javascript:void(0);" onclick="testPassage(${pl.id}, '${pl.name}');"><i class="fa fa-bug"></i>&nbsp;测试通道 </a>
                                         </td>
                                     </tr>
                                     </#list>
@@ -145,7 +145,7 @@
                         <div class="modal-header">
                             <button type="button" class="close" onclick="closeModal();"><span
                                     aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title">测试通道</h4>
+                            <h4 class="modal-title" id="test_passage_title">测试通道</h4>
                         </div>
                         <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
                              id="myModelBody">
@@ -164,6 +164,7 @@
 
 		</div>
 		<script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
+        <script src="${BASE_PATH}/resources/js/jquery.cookie.js"></script>
         <script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
 		<script src="${BASE_PATH}/resources/js/bootstrap/bootstrap.min.js"></script>
 		<script src="${BASE_PATH}/resources/js/bootstrap/scripts.js"></script>
@@ -245,9 +246,15 @@
 
         var testPassageId = -1;
 
-        function testPassage(id){
+        function testPassage(id, name){
             testPassageId = id;
             
+            var cookieTestMobile = $.cookie('hspaas_test_mobiles');
+            if(cookieTestMobile != null && cookieTestMobile != "") {
+            	$('#testMobile').val(cookieTestMobile);
+            }
+            
+            $("#test_passage_title").html("测试["+name+"]通道");
             var code = Math.floor(Math.random() * 1000000);
             $('#testContent').val("【华时科技】您的验证码为"+code+"，请尽快完成后续操作。");
             $('#testPassageModal').modal('show');
@@ -289,6 +296,7 @@
                             $('#testMobile').val('');
                             $('#testContent').val('');
                             closeModal();
+                            $.cookie('hspaas_test_mobiles', realMobiles, { expires: 1 });
                         }
                     });
                 },error:function(data){

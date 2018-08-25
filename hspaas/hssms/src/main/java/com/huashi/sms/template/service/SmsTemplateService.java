@@ -332,8 +332,8 @@ public class SmsTemplateService implements ISmsTemplateService {
             throw new RuntimeException("模板内容不能为空");
         }
 
-        if (forbiddenWordsService.isContainsForbiddenWords(template.getContent())) {
-            Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
+        Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
+        if (CollectionUtils.isNotEmpty(words)) {
             throw new RuntimeException(String.format("模板内容包含敏感词：%s", words));
         }
         template.setCreateTime(new Date());
@@ -353,8 +353,8 @@ public class SmsTemplateService implements ISmsTemplateService {
     @Override
     @Transactional
     public boolean saveToBatchContent(MessageTemplate template, String[] contents) {
-        if (forbiddenWordsService.isContainsForbiddenWords(template.getContent())) {
-            Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
+        Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
+        if (CollectionUtils.isNotEmpty(words)) {
             throw new RuntimeException(String.format("模板内容包含敏感词：%s", words));
         }
 

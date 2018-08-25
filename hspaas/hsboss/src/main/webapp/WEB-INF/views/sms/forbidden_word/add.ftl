@@ -47,6 +47,7 @@
                                 <div class="col-xs-5">
                                 	<input type="text" class="form-control validate[required,maxSize[32]]"
                                            name="forbiddenWords.word" id="word" placeholder="输入敏感词">
+                                    <a href="javascript:void(0);" onclick="insertCode();" class="btn btn-success btn-sm">通配敏感词符号(.*)</a>
                                 </div>
                             </div>
                             
@@ -123,6 +124,37 @@
             }
         });
     }
+    
+    (function ($) {
+        $.fn.extend({
+            insertAtCaret: function (myValue) {
+                var $t = $(this)[0];
+                if (document.selection) {
+                    this.focus();
+                    sel = document.selection.createRange();
+                    sel.text = myValue;
+                    this.focus();
+                } else
+                    if ($t.selectionStart || $t.selectionStart == '0') {
+                        var startPos = $t.selectionStart;
+                        var endPos = $t.selectionEnd;
+                        var scrollTop = $t.scrollTop;
+                        $t.value = $t.value.substring(0, startPos) + myValue + $t.value.substring(endPos, $t.value.length);
+                        this.focus();
+                        $t.selectionStart = startPos + myValue.length;
+                        $t.selectionEnd = startPos + myValue.length;
+                        $t.scrollTop = scrollTop;
+                    } else {
+                        this.value += myValue;
+                        this.focus();
+                    }
+            }
+        })
+    })(jQuery);
+    
+    function insertCode(){
+    	$("#word").insertAtCaret(".*");
+    };
 
 </script>
 </html>

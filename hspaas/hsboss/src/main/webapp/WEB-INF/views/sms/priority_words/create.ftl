@@ -78,7 +78,7 @@
 							<div class="form-group">
                                 <label class="col-xs-3 control-label">词库内容</label>
                                 <div class="col-xs-5">
-                                    <input type="text" class="form-control validate[required,maxSize[100]]" name="smsPriorityWords.content" id="mobile" placeholder="请输入词库内容"/>
+                                    <input type="text" class="form-control validate[required,maxSize[100]]" name="smsPriorityWords.content" id="content" placeholder="请输入词库内容"/>
                                 </div>
                             </div>
 
