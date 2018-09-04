@@ -33,9 +33,8 @@ import com.jfinal.ext.route.ControllerBind;
  * 短信记录查询 Author youngmeng Created 2016-10-12 20:02
  */
 @ControllerBind(controllerKey = "/sms/record")
-@ViewMenu(code = { MenuCode.MENU_CODE_2002001, MenuCode.MENU_CODE_2002002, MenuCode.MENU_CODE_2002003,
-		MenuCode.MENU_CODE_2002004, MenuCode.MENU_CODE_2002005, MenuCode.MENU_CODE_2002006,
-		MenuCode.MENU_CODE_2002007 })
+@ViewMenu(code = { MenuCode.MENU_CODE_2001001, MenuCode.MENU_CODE_2001002, MenuCode.MENU_CODE_2001003,
+		MenuCode.MENU_CODE_2001004, MenuCode.MENU_CODE_2001005, MenuCode.MENU_CODE_2001006})
 public class SmsRecordController extends BaseController {
 
 	@Inject.BY_NAME
@@ -65,6 +64,7 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 进行中的短信任务
 	 */
+	@ViewMenu(code = MenuCode.MENU_CODE_2001001)
 	public void under_way_list() {
 		Map<String, Object> condition = appendTaskQueryParams(UNWDER_WAY);
 		
@@ -78,7 +78,7 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 已完成的短信任务
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_2002007)
+	@ViewMenu(code = MenuCode.MENU_CODE_2001003)
 	public void completed_list() {
 		Map<String, Object> condition = appendTaskQueryParams(COMPLETED);
 		
@@ -90,7 +90,7 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 子任务查询
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_2002006)
+	@ViewMenu(code = MenuCode.MENU_CODE_2001001)
 	public void child_task() {
 		List<SmsMtTaskPackets> taskList = iSmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
 		setAttr("taskList", taskList);
@@ -99,7 +99,7 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 子任务查询
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_2002007)
+	@ViewMenu(code = MenuCode.MENU_CODE_2001003)
 	public void complate_child_task() {
 		List<SmsMtTaskPackets> taskList = iSmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
 		setAttr("taskList", taskList);
@@ -204,6 +204,7 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 调用失败记录
 	 */
+	@ViewMenu(code = MenuCode.MENU_CODE_2001005)
 	public void invoke_fail_list() {
 		String keyword = getPara("keyword");
 		BossPaginationVo<SmsApiFailedRecord> page = iSmsApiFaildRecordService.findPage(getPN(), keyword);
@@ -214,6 +215,7 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 处理失败记录
 	 */
+	@ViewMenu(code = MenuCode.MENU_CODE_2001006)
 	public void disponse_fail_list() {
 		String keyword = getPara("keyword");
 		Long sid = getParaToLong("sid");
@@ -225,6 +227,7 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 短信发送记录(短信下行记录查询 submit)
 	 */
+	@ViewMenu(code = MenuCode.MENU_CODE_2001002)
 	public void send_record_list() {
 		Map<String, Object> condition = appendQueryParams();
 

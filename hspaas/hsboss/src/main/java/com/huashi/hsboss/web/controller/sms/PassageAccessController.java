@@ -22,7 +22,7 @@ import com.jfinal.ext.route.ControllerBind;
  *
  */
 @ControllerBind(controllerKey = "/sms/passage_access")
-@ViewMenu(code= MenuCode.MENU_CODE_2001004)
+@ViewMenu(code= MenuCode.MENU_CODE_2003004)
 public class PassageAccessController extends BaseController {
 	@BY_NAME
 	private ISmsPassageAccessService iSmsPassageAccessService;

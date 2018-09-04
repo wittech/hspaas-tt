@@ -19,7 +19,7 @@ import java.util.Map;
  * @author ym
  * @created_at 2016年6月28日下午4:24:09
  */
-@ViewMenu(code=MenuCode.MENU_CODE_1004)
+@ViewMenu(code=MenuCode.MENU_CODE_7001)
 @ControllerBind(controllerKey="/base/invoice")
 public class InvoiceController extends BaseController {
 

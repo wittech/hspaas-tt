@@ -24,7 +24,7 @@ import com.jfinal.ext.route.ControllerBind;
  *
  */
 @ControllerBind(controllerKey = "/sms/passage_control")
-@ViewMenu(code= MenuCode.MENU_CODE_2001003)
+@ViewMenu(code= MenuCode.MENU_CODE_2003005)
 public class PassageControlController extends BaseController {
 	@BY_NAME
 	private ISmsPassageControlService iSmsPassageControlService;

@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by youngmeng on 2016/10/20.
  */
-@ViewMenu(code= MenuCode.MENU_CODE_1001003)
+@ViewMenu(code= MenuCode.MENU_CODE_1001002)
 @ControllerBind(controllerKey = "/base/system_config")
 public class SystemConfigController extends BaseController {
 

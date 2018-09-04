@@ -20,7 +20,7 @@ import com.jfinal.ext.route.ControllerBind;
   * @date 2017年8月19日 下午11:45:14
  */
 @ControllerBind(controllerKey = "/report/sms")
-@ViewMenu(code = { MenuCode.MENU_CODE_9001001, MenuCode.MENU_CODE_9001002, MenuCode.MENU_CODE_9001003, MenuCode.MENU_CODE_9001004})
+@ViewMenu(code = { MenuCode.MENU_CODE_5001001, MenuCode.MENU_CODE_5001002, MenuCode.MENU_CODE_5001003, MenuCode.MENU_CODE_5001004})
 public class SmsReportController extends BaseController {
 
 	@Inject.BY_NAME
@@ -32,7 +32,7 @@ public class SmsReportController extends BaseController {
 	 * 
 	   * TODO 用户通道统计
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_9001001)
+	@ViewMenu(code = MenuCode.MENU_CODE_5001001)
 	public void user_passage_send_report() {
 		String startDate = getPara("startDate");
 		if(StringUtils.isEmpty(startDate))
@@ -52,7 +52,7 @@ public class SmsReportController extends BaseController {
 	 * 
 	   * TODO 用户统计数据
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_9001002)
+	@ViewMenu(code = MenuCode.MENU_CODE_5001002)
 	public void user_send_report() {
 		String startDate = getPara("startDate");
 		if(StringUtils.isEmpty(startDate))
@@ -72,7 +72,7 @@ public class SmsReportController extends BaseController {
 	 * 
 	   * TODO 通道统计数据
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_9001003)
+	@ViewMenu(code = MenuCode.MENU_CODE_5001003)
 	public void passage_send_report() {
 		String startDate = getPara("startDate");
 		if(StringUtils.isEmpty(startDate))
@@ -92,7 +92,7 @@ public class SmsReportController extends BaseController {
 	 * 
 	   * TODO 通道统计数据
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_9001004)
+	@ViewMenu(code = MenuCode.MENU_CODE_5001004)
 	public void province_send_report() {
 		String startDate = getPara("startDate");
 		if(StringUtils.isEmpty(startDate))
@@ -112,7 +112,7 @@ public class SmsReportController extends BaseController {
 	 * 
 	   * TODO 获取昨日全国运营商发送数据
 	 */
-	@ViewMenu(code = MenuCode.MENU_CODE_9001005)
+	@ViewMenu(code = MenuCode.MENU_CODE_5001004)
 	public void province_cmcp_report() {
 		renderResultJson(iSmsSubmitHourReportService.getCmcpSubmitReport(DateUtil.getDayGoXday(-1), 
 				DateUtil.getDayGoXday(-1)));

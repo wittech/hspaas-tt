@@ -21,7 +21,7 @@ import com.jfinal.ext.route.ControllerBind;
   * @version V1.0   
   * @date 2017年9月2日 下午5:28:27
  */
-@ViewMenu(code = MenuCode.MENU_CODE_2001005)
+@ViewMenu(code = MenuCode.MENU_CODE_2003006)
 @ControllerBind(controllerKey = "/sms/passage_message_template")
 public class PassageMessageTemplateController extends BaseController {
 

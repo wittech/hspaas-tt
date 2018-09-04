@@ -193,8 +193,9 @@ public class OperSqlGen {
 	
 	public static void main(String[] args) throws Exception {
 		OperSqlGen gen = new OperSqlGen();
-		String operFile = "C:\\Users\\youngmeng\\IdeaProjects\\hspaas\\hsboss\\src\\main\\resources\\oper\\oper_list.xml";
+		String operFile = "E:\\华时\\workspace\\hspaas\\hspaas\\hsboss\\src\\main\\resources\\oper\\oper_list_20180904.xml";
 		gen.genSql(operFile,"hsboss");
 //		System.out.println(gen.genMenuConstant(operFile));
+//		System.out.println(gen.genConstant(operFile));
 	}
 }

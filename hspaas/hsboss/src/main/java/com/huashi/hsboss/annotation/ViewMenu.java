@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface ViewMenu {
 
-	public abstract String[] code() default {};
+	String[] code() default {};
 	
-	public abstract String[] name() default {};
+	String[] name() default {};
 }

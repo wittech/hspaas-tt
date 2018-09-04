@@ -36,7 +36,7 @@ import java.util.*;
  * @created_at 2016年8月25日下午4:17:02
  */
 @ControllerBind(controllerKey="/sms/passage_group")
-@ViewMenu(code= MenuCode.MENU_CODE_2001002)
+@ViewMenu(code= MenuCode.MENU_CODE_2003002)
 public class PassageGroupController extends BaseController {
 
 	

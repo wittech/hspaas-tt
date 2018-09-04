@@ -2,19 +2,16 @@ package com.huashi.hsboss.constant;
 
 public class MenuCode {
 
-
     /**基础信息*/
     public static final String MENU_CODE_1000 = "1000";
     /**客户信息*/
     public static final String MENU_CODE_1001 = "1001";
     /**客户基础信息*/
     public static final String MENU_CODE_1001001 = "1001001";
-    /**通道模板管理*/
-    public static final String MENU_CODE_1001002 = "1001002";
+    /**余额*/
+    public static final String MENU_CODE_1001001003 = "1001001003";
     /**参数配置管理*/
-    public static final String MENU_CODE_1001003 = "1001003";
-    /**用户账户余额管理*/
-    public static final String MENU_CODE_1001004 = "1001004";
+    public static final String MENU_CODE_1001002 = "1001002";
     /**公告管理*/
     public static final String MENU_CODE_1002 = "1002";
     /**公告管理*/
@@ -27,42 +24,40 @@ public class MenuCode {
     public static final String MENU_CODE_1003001 = "1003001";
     /**套餐购买充值记录*/
     public static final String MENU_CODE_1003002 = "1003002";
-    /**套餐购买充值记录*/
+    /**产品管理*/
     public static final String MENU_CODE_1003003 = "1003003";
-    /**发票管理*/
-    public static final String MENU_CODE_1004 = "1004";
-    /**短信管理*/
+    /**短信*/
     public static final String MENU_CODE_2000 = "2000";
-    /**通道管理*/
-    public static final String MENU_CODE_2001 = "2001";
-    /**通道管理*/
-    public static final String MENU_CODE_2001001 = "2001001";
-    /**通道组管理*/
-    public static final String MENU_CODE_2001002 = "2001002";
-    /**用户运行中通道管理*/
-    public static final String MENU_CODE_2001003 = "2001003";
-    /**通道轮训控制管理*/
-    public static final String MENU_CODE_2001004 = "2001004";
-    /**通道短信模板管理*/
-    public static final String MENU_CODE_2001005 = "2001005";
     /**短信记录查询*/
-    public static final String MENU_CODE_2002 = "2002";
-    /**短信调用失败记录*/
-    public static final String MENU_CODE_2002001 = "2002001";
-    /**短信处理失败记录*/
-    public static final String MENU_CODE_2002002 = "2002002";
+    public static final String MENU_CODE_2001 = "2001";
+    /**待处理短信任务*/
+    public static final String MENU_CODE_2001001 = "2001001";
     /**短信发送记录*/
-    public static final String MENU_CODE_2002003 = "2002003";
-    /**短信人工处理记录*/
-    public static final String MENU_CODE_2002004 = "2002004";
+    public static final String MENU_CODE_2001002 = "2001002";
+    /**已完成短信任务*/
+    public static final String MENU_CODE_2001003 = "2001003";
     /**短信上行接收记录*/
-    public static final String MENU_CODE_2002005 = "2002005";
-    /**待处理短信任务记录*/
-    public static final String MENU_CODE_2002006 = "2002006";
-    /**已完成短信任务记录*/
-    public static final String MENU_CODE_2002007 = "2002007";
+    public static final String MENU_CODE_2001004 = "2001004";
+    /**短信调用失败记录*/
+    public static final String MENU_CODE_2001005 = "2001005";
+    /**短信处理失败记录*/
+    public static final String MENU_CODE_2001006 = "2001006";
     /**模板管理*/
+    public static final String MENU_CODE_2002 = "2002";
+    /**通道管理*/
     public static final String MENU_CODE_2003 = "2003";
+    /**通道管理*/
+    public static final String MENU_CODE_2003001 = "2003001";
+    /**通道组管理*/
+    public static final String MENU_CODE_2003002 = "2003002";
+    /**通道模板管理*/
+    public static final String MENU_CODE_2003003 = "2003003";
+    /**用户运行中通道管理*/
+    public static final String MENU_CODE_2003004 = "2003004";
+    /**通道轮训控制管理*/
+    public static final String MENU_CODE_2003005 = "2003005";
+    /**通道短信模板管理*/
+    public static final String MENU_CODE_2003006 = "2003006";
     /**黑白名单管理*/
     public static final String MENU_CODE_2004 = "2004";
     /**黑名单管理*/
@@ -71,13 +66,12 @@ public class MenuCode {
     public static final String MENU_CODE_2004002 = "2004002";
     /**敏感词管理*/
     public static final String MENU_CODE_2004003 = "2004003";
-    /**ip白名单管理*/
+    /**服务器IP白名单*/
     public static final String MENU_CODE_2004004 = "2004004";
-    /**优先级词库管理*/
+    /**优先级词库*/
     public static final String MENU_CODE_2004005 = "2004005";
-    /**签名扩展号码管理*/
+    /**签名扩展管理*/
     public static final String MENU_CODE_2005 = "2005";
-    
     /**流量管理*/
     public static final String MENU_CODE_3000 = "3000";
     /**接入商管理*/
@@ -114,16 +108,18 @@ public class MenuCode {
     public static final String MENU_CODE_4003002 = "4003002";
     /**流量包管理*/
     public static final String MENU_CODE_4004 = "4004";
-    /**报表统计*/
+    /**报表*/
     public static final String MENU_CODE_5000 = "5000";
     /**短信统计*/
     public static final String MENU_CODE_5001 = "5001";
-    /**通道汇总*/
+    /**客户通道发送统计*/
     public static final String MENU_CODE_5001001 = "5001001";
-    /**帐号汇总*/
+    /**客户发送统计*/
     public static final String MENU_CODE_5001002 = "5001002";
-    /**提供商结算账单*/
+    /**通道发送统计*/
     public static final String MENU_CODE_5001003 = "5001003";
+    /**通道发送统计*/
+    public static final String MENU_CODE_5001004 = "5001004";
     /**流量消费统计*/
     public static final String MENU_CODE_5002 = "5002";
     /**客户消费统计*/
@@ -134,7 +130,7 @@ public class MenuCode {
     public static final String MENU_CODE_5002003 = "5002003";
     /**套餐统计*/
     public static final String MENU_CODE_5003 = "5003";
-    /**系统管理*/
+    /**系统*/
     public static final String MENU_CODE_6000 = "6000";
     /**用户管理*/
     public static final String MENU_CODE_6001 = "6001";
@@ -142,26 +138,27 @@ public class MenuCode {
     public static final String MENU_CODE_6002 = "6002";
     /**日志管理*/
     public static final String MENU_CODE_6003 = "6003";
-    
+    /**密码管理*/
+    public static final String MENU_CODE_6004 = "6004";
+    /**财务*/
+    public static final String MENU_CODE_7000 = "7000";
+    /**发票管理*/
+    public static final String MENU_CODE_7001 = "7001";
+    /**用户账户余额管理*/
+    public static final String MENU_CODE_7002 = "7002";
     /**监控中心*/
     public static final String MENU_CODE_8000 = "8000";
+    /**通道监控中心*/
+    public static final String MENU_CODE_8001 = "8001";
     /**通道自取报告*/
     public static final String MENU_CODE_8001001 = "8001001";
-
-    /**短信通道监控*/
+    /**通道状态监控*/
+    public static final String MENU_CODE_8001002 = "8001002";
+    /**通道告警查询*/
+    public static final String MENU_CODE_8002 = "8002";
+    /**回执率失标查询*/
+    public static final String MENU_CODE_8002001 = "8002001";
+    /**短信通道监控设置*/
     public static final String MENU_CODE_8003 = "8003";
-    
-    /**统计报告*/
-    public static final String MENU_CODE_9000 = "9000";
-    /**短信客户通道统计*/
-    public static final String MENU_CODE_9001001 = "9001001";
-    /**短信客户发送统计*/
-    public static final String MENU_CODE_9001002 = "9001002";
-    /**短信通道发送统计*/
-    public static final String MENU_CODE_9001003 = "9001003";
-    /**短信省份发送统计*/
-    public static final String MENU_CODE_9001004 = "9001004";
-    /**短信省份运营商发送统计*/
-    public static final String MENU_CODE_9001005 = "9001005";
 
 }

@@ -7,4 +7,9 @@ package com.huashi.hsboss.constant;
  */
 public class EnumConstant {
 
+
+    public enum ViewType {
+        HTML,JSON
+    }
+
 }

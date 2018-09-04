@@ -22,7 +22,7 @@ import com.jfinal.ext.route.ControllerBind;
  */
 
 @ControllerBind(controllerKey = "/base/user_balance")
-@ViewMenu(code = MenuCode.MENU_CODE_1001004)
+@ViewMenu(code = MenuCode.MENU_CODE_7002)
 public class UserBalanceController extends BaseController {
 
 	@Inject.BY_NAME

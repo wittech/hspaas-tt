@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class BaseService {
 	
-	protected int pageSize = 1;
+	protected int pageSize = 20;
 
 	protected Map<String, Object> resultMap(boolean result,String message,Object obj){
 		Map<String, Object> map = new HashMap<String,Object>();
