@@ -54,11 +54,15 @@ public class AuthInterceptor implements Interceptor {
                         inv.invoke();
                     } else {
                         ActionMode actionMode = method.getAnnotation(ActionMode.class);
-                        if(actionMode != null && actionMode.type().equals(EnumConstant.ActionType.JSON)) {
-                            BaseController baseController = (BaseController) inv.getController();
-                            baseController.renderResultJson(false,"权限不足...");
-                        } else {
+                        if(actionMode == null) {
                             inv.getController().redirect("/account/no_auth");
+                        } else {
+                            if(actionMode.type().equals(EnumConstant.ActionType.JSON)) {
+                                BaseController baseController = (BaseController) inv.getController();
+                                baseController.renderResultJson(false,"权限不足...");
+                            }
+                            inv.getController().redirect("/account/no_auth?mode="+actionMode.type().name());
+
                         }
 
                     }

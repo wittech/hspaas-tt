@@ -9,7 +9,7 @@ public class EnumConstant {
 
 
     public enum ActionType {
-        HTML,JSON
+        HTML,JSON,AJAX_HTML
     }
 
 }

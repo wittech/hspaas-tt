@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.constant.EnumConstant;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
@@ -104,7 +106,7 @@ public class AccountController extends BaseController {
 	}
 
 	public void no_auth() {
-
+		setAttr("mode",getPara("mode", EnumConstant.ActionType.HTML.name()));
 	}
 	
 	public void exit(){
