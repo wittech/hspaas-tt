@@ -27,7 +27,7 @@ public class BaseController extends Controller {
 		return getUserSession().getLoginName();
 	}
 
-	protected void renderResultJson(boolean result, String message) {
+	public void renderResultJson(boolean result, String message) {
 		renderResultJson(result, message, "");
 	}
 	

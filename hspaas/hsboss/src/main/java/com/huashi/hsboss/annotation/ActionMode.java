@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ViewType {
+public @interface ActionMode {
 
-    EnumConstant.ViewType type() default EnumConstant.ViewType.HTML;
+    EnumConstant.ActionType type() default EnumConstant.ActionType.HTML;
 }

@@ -4,12 +4,23 @@ import com.huashi.hsboss.dto.UserMenu;
 import com.huashi.hsboss.dto.ZTreeNodeDto;
 import com.huashi.hsboss.model.boss.BossMenu;
 import com.huashi.hsboss.model.boss.BossOper;
+import com.huashi.hsboss.model.boss.BossUser;
 import com.huashi.hsboss.service.common.BaseService;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.jfinal.plugin.activerecord.Db.find;
 
 @Service
 public class BossMenuService extends BaseService {
@@ -102,6 +113,80 @@ public class BossMenuService extends BaseService {
             menuList.add(userMenu);
         }
         return menuList;
+    }
+
+
+    public List<UserMenu> getUserMenuById(int userId) {
+
+        String menuSql = "select * from hsboss_menu order by id,menu_position asc";
+        List<BossMenu> menuList = BossMenu.DAO.find(menuSql);
+        LinkedHashMap<String,UserMenu> menuMap = new LinkedHashMap<String, UserMenu>();
+        for(BossMenu menu : menuList) {
+            UserMenu userMenu = new UserMenu();
+            userMenu.setId(menu.getInt("id"));
+            userMenu.setMenuName(menu.getStr("menu_name"));
+            userMenu.setMenuUrl(menu.getStr("menu_url"));
+            userMenu.setMenuCode(menu.getStr("menu_code"));
+            userMenu.setParentId(menu.getInt("parent_id"));
+            menuMap.put("menu_" + menu.getInt("id"), userMenu);
+        }
+
+        String sql = "select * from hsboss_menu h where h.id in (" +
+                "select distinct menu_id from hsboss_oper o,hsboss_role_oper_ref r,hsboss_user_role_ref u where o.id = r.oper_id and " +
+                "r.role_id = u.role_id and u.user_id = ?)";
+        LinkedHashMap<String,UserMenu> userMenuMap = new LinkedHashMap<String, UserMenu>();
+        List<BossMenu> operMenuList = BossMenu.DAO.find(sql,userId);
+        for(BossMenu menu : operMenuList) {
+            userMenuMap.putAll(recursionUserMenu(menuMap,menu.getInt("parent_id")));
+            String key = "menu_"+menu.getInt("id");
+            userMenuMap.put(key, menuMap.get(key));
+        }
+
+        List<UserMenu> realList = new LinkedList<UserMenu>();
+        Collection<UserMenu> valueList = userMenuMap.values();
+        for(UserMenu menu : valueList) {
+            if(menu.getParentId() <= 0) {
+                menu.getChildList().addAll(groupMenuTree(userMenuMap,menu.getId()));
+                realList.add(menu);
+            }
+        }
+
+        return realList;
+    }
+
+    public Set<String> getOperCodeByUserId(int userId){
+        Set<String> opers = new HashSet<String>();
+        String sql = "select distinct o.oper_code from hsboss_oper o,hsboss_role_oper_ref r,hsboss_user_role_ref u where o.id = r.oper_id and " +
+                "r.role_id = u.role_id and u.user_id = ?";
+        List<Record> list = Db.find(sql,userId);
+        for(Record record : list) {
+            opers.add(record.getStr("oper_code"));
+        }
+        return opers;
+
+    }
+
+    public List<UserMenu> groupMenuTree(LinkedHashMap<String,UserMenu> menuMap,int parentId){
+        List<UserMenu> menuList = new LinkedList<UserMenu>();
+        Collection<UserMenu> collection = menuMap.values();
+        for(UserMenu menu : collection) {
+            if(menu.getParentId() == parentId) {
+                menu.getChildList().addAll(groupMenuTree(menuMap,menu.getId()));
+                menuList.add(menu);
+            }
+        }
+        return menuList;
+    }
+
+    public LinkedHashMap<String,UserMenu> recursionUserMenu(LinkedHashMap<String,UserMenu> menuMap,int menuParentId){
+        LinkedHashMap<String,UserMenu> newMap = new LinkedHashMap<String,UserMenu>();
+        String key = "menu_"+menuParentId;
+        UserMenu userMenu = menuMap.get(key);
+        newMap.put(key,userMenu);
+        if(userMenu.getParentId() > 0) {
+            newMap.putAll(recursionUserMenu(menuMap,userMenu.getParentId()));
+        }
+        return newMap;
     }
 
     public List<BossOper> getOperByMenu(int menuId) {

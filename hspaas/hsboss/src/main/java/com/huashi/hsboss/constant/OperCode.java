@@ -10,6 +10,8 @@ import java.util.Map;
  */
 public class OperCode {
 
+    /*通用权限*/
+    public static final String OPER_CODE_COMMON = "0000000000";
     /**所有关联*/
     public Map<String, String[]> OPER_CODE_MAP = new HashMap<String, String[]>();
     /**客户基础信息_新增客户*/
@@ -216,12 +218,14 @@ public class OperCode {
     public static final String OPER_CODE_6001002 = "6001002";
     /**用户管理_删除*/
     public static final String OPER_CODE_6001003 = "6001003";
-    /**角色管理_新增用户*/
+    /**角色管理_新增角色*/
     public static final String OPER_CODE_6002001 = "6002001";
     /**角色管理_编辑*/
     public static final String OPER_CODE_6002002 = "6002002";
     /**角色管理_删除*/
     public static final String OPER_CODE_6002003 = "6002003";
+    /**角色管理_设置权限*/
+    public static final String OPER_CODE_6002004 = "6002004";
     /**日志管理_日志管理操作*/
     public static final String OPER_CODE_6003001 = "6003001";
     /**密码管理_密码管理操作*/

@@ -257,9 +257,10 @@
             <node name="删除" code="6001003" ref="6001"/>
         </node>
         <node name="角色管理" code="6002" ref="6000" url="/boss/role">
-            <node name="新增用户" code="6002001" ref="6002"/>
+            <node name="新增角色" code="6002001" ref="6002"/>
             <node name="编辑" code="6002002" ref="6002"/>
             <node name="删除" code="6002003" ref="6002"/>
+            <node name="设置权限" code="6002004" ref="6002"/>
         </node>
         <node name="日志管理" code="6003" ref="6000" url="/boss/log">
             <node name="日志管理操作" code="6003001" ref="6003"/>

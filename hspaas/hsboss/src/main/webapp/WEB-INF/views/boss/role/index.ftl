@@ -39,11 +39,13 @@
 					<div id="page-content">
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
-                                <button class="btn btn-success" onclick="location.href='${BASE_PATH}/boss/role/add'">新增角色</button>
-                            </div>
+							<#if macro.doOper("6002001")>
+								<div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
+									<button class="btn btn-success" onclick="location.href='${BASE_PATH}/boss/role/add'">新增角色</button>
+								</div>
+							</#if>
                             <h3 class="panel-title">
-                            <span>角色列表</span>
+                            <span>角色列表${macro.test()}</span>
                             </h3>
                            
                         </div>
@@ -59,7 +61,9 @@
 						 			</tr>
                                 </thead>
                                 <tbody>
-                                
+									<#assign deleteCheck = macro.doOper("6002003") />
+									<#assign editCheck = macro.doOper("6002002") />
+									<#assign authCheck = macro.doOper("6002004") />
                                 	<#list page.list as pl>
 									<tr>
 										<td>${(page.pageNumber - 1) * page.pageSize + (pl_index+1)}</td>	
@@ -67,9 +71,15 @@
 										<td>${pl.created_at?string('yyyy-MM-dd HH:mm:ss')}</td>	
 										<td>${pl.created}</td>	
 										<td>
-                                            <a class="btn btn-success btn-xs" href="javascript:void(0);" onclick="setAuth(${pl.id});"><i class="fa fa-gear"></i>&nbsp;设置权限 </a>
-											<a class="btn btn-primary btn-xs" href="${BASE_PATH}/boss/role/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
-											<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+											<#if authCheck>
+                                            	<a class="btn btn-success btn-xs" href="javascript:void(0);" onclick="setAuth(${pl.id});"><i class="fa fa-gear"></i>&nbsp;设置权限 </a>
+											</#if>
+											<#if editCheck>
+                                                <a class="btn btn-primary btn-xs" href="${BASE_PATH}/boss/role/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+											</#if>
+											<#if deleteCheck>
+												<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+											</#if>
 										</td>
 									</tr>
 									</#list>
@@ -228,6 +238,7 @@
 				data:{id:id},
 				success:function(data){
                     $.fn.zTree.init($("#authTree"), setting, data);
+                    zTree = $.fn.zTree.getZTreeObj("authTree");
                     setCheck();
                     $("#py").bind("change", setCheck);
                     $("#sy").bind("change", setCheck);

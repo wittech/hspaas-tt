@@ -2,9 +2,12 @@ package com.huashi.hsboss.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import com.jfinal.render.FreeMarkerRender;
+import freemarker.template.Configuration;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
 import com.huashi.hsboss.config.handler.ViewConstantHandler;
@@ -40,13 +43,12 @@ public class SystemConfig extends JFinalConfig {
 	@Override
 	public void configConstant(Constants constants) {
 		constants.setViewType(ViewType.FREE_MARKER);
-//		constants.setFreemarkerViewExtension(".ftl");
-		
 		constants.setFreeMarkerViewExtension(".ftl");
         constants.setError404View("/resources/html/404.html");
 		constants.setError500View("/resources/html/500.html");
-
 		constants.setBaseViewPath(BASE_VIEW_PATH);
+		Configuration configuration = FreeMarkerRender.getConfiguration();
+		configuration.addAutoImport("macro","/WEB-INF/views/common/macro.ftl");
 		constants.setDevMode(true);
 	}
 

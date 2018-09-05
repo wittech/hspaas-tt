@@ -26,3 +26,12 @@
 	</#if>${(report)!}
 	</#compress>
 </#macro>
+
+<#function test>
+	<#assign str = "abcd" />
+	<#return str />
+</#function>
+
+<#function doOper code>
+    <#return session.doOper("${code}") />
+</#function>

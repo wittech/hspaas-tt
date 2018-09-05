@@ -55,7 +55,7 @@ public class AccountController extends BaseController {
 		
 		String md5pwd = DigestUtils.md5Hex(password);
 		if(!md5pwd.toUpperCase().equals(bossUser.getStr("password").toUpperCase())){
-			renderResultJson(false, "登录密码不正确！","password");
+			renderResultJson(false, "用户名或密码不正确！","password");
 			return;
 		}
 		
@@ -72,7 +72,16 @@ public class AccountController extends BaseController {
 		userSession.setLastLoginTime(bossUser.getDate("last_login_time"));
 		userSession.setLoginIp(IpUtils.getClientIp(getRequest()));
 		userSession.setLoginTime(new Date());
-		List<UserMenu> menuList = bossMenuService.getAllMenu();
+		Integer superFlag = bossUser.getInt("super_flag");
+		userSession.setSuperAdmin((superFlag != null && superFlag == 1));
+		List<UserMenu> menuList = null;
+		if(userSession.isSuperAdmin()) {
+			menuList = bossMenuService.getAllMenu();
+		} else {
+			menuList = bossMenuService.getUserMenuById(userSession.getUserId());
+			userSession.getOperSet().addAll(bossMenuService.getOperCodeByUserId(userSession.getUserId()));
+		}
+
 		userSession.getMenuList().addAll(menuList);
 		getSession().setAttribute(SystemConstant.USER_SESSION, userSession);
 		
@@ -92,6 +101,10 @@ public class AccountController extends BaseController {
 	
 	public void back(){
 		
+	}
+
+	public void no_auth() {
+
 	}
 	
 	public void exit(){

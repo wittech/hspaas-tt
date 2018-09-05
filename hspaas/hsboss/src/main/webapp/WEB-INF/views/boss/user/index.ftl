@@ -56,9 +56,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
-                                <button class="btn btn-success" onclick="location.href='${BASE_PATH}/boss/user/add'">新增用户</button>
-                            </div>
+							<#if macro.doOper("6001001")>
+								<div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
+									<button class="btn btn-success" onclick="location.href='${BASE_PATH}/boss/user/add'">新增用户</button>
+								</div>
+							</#if>
                             <h3 class="panel-title">
                             <span>用户列表</span>
                             </h3>
@@ -78,7 +80,9 @@
 						 			</tr>
                                 </thead>
                                 <tbody>
-                                
+
+								<#assign deleteCheck = macro.doOper("6001003") />
+								<#assign editCheck = macro.doOper("6001002") />
                                 	<#list page.list as pl>
 									<tr>
 										<td>${(page.pageNumber - 1) * page.pageSize + (pl_index+1)}</td>	
@@ -89,17 +93,20 @@
 										<td>${(pl.created)!''}</td>	
 										<td>
 											<#if pl.super_flag == 0>
-												<a class="btn btn-primary btn-xs" href="${BASE_PATH}/boss/user/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
-												<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
-												
-												<#if pl.disabled_flag == 0>
-													<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},${pl.disabled_flag});"><i class="fa fa-lock"></i>&nbsp;
-														禁用
-													</a>
-												<#else>
-													<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},${pl.disabled_flag});"><i class="fa fa-unlock-alt"></i>&nbsp;
-														启用
-													</a>
+												<#if editCheck>
+													<a class="btn btn-primary btn-xs" href="${BASE_PATH}/boss/user/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+													<#if pl.disabled_flag == 0>
+														<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},${pl.disabled_flag});"><i class="fa fa-lock"></i>&nbsp;
+															禁用
+														</a>
+													<#else>
+														<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},${pl.disabled_flag});"><i class="fa fa-unlock-alt"></i>&nbsp;
+															启用
+														</a>
+													</#if>
+												</#if>
+												<#if deleteCheck>
+													<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
 												</#if>
 											</#if>
 										</td>
