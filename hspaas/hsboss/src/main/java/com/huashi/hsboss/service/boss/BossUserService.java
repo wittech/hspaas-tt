@@ -133,7 +133,7 @@ public class BossUserService extends BaseService {
 			if(bossUser ==null){
 				return resultFail("用户不存在！");
 			}
-			if(bossUser.get("password").equals(DigestUtils.md5Hex(originalPassword).toUpperCase())){
+			if(bossUser.getStr("password").toUpperCase().equals(DigestUtils.md5Hex(originalPassword).toUpperCase())){
 				bossUser.set("password", DigestUtils.md5Hex(newPassword).toUpperCase());
 				bossUser.update();
 				return resultSuccess("密码修改成功！");
