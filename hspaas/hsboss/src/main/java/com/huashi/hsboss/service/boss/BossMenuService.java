@@ -1,26 +1,22 @@
 package com.huashi.hsboss.service.boss;
 
-import com.huashi.hsboss.dto.UserMenu;
-import com.huashi.hsboss.dto.ZTreeNodeDto;
-import com.huashi.hsboss.model.boss.BossMenu;
-import com.huashi.hsboss.model.boss.BossOper;
-import com.huashi.hsboss.model.boss.BossUser;
-import com.huashi.hsboss.service.common.BaseService;
-import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Record;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import static com.jfinal.plugin.activerecord.Db.find;
+import org.springframework.stereotype.Service;
+
+import com.huashi.hsboss.dto.UserMenu;
+import com.huashi.hsboss.dto.ZTreeNodeDto;
+import com.huashi.hsboss.model.boss.BossMenu;
+import com.huashi.hsboss.model.boss.BossOper;
+import com.huashi.hsboss.service.common.BaseService;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
 
 @Service
 public class BossMenuService extends BaseService {

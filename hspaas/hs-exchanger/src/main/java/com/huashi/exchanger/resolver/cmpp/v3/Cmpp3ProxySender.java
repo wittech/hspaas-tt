@@ -213,7 +213,6 @@ public class Cmpp3ProxySender extends AbstractSmProxySender{
     public List<ProviderSendResponse> send(SmsPassageParameter parameter, String extNumber, String mobile,
                                            String content) {
         try {
-
             TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
             if (MapUtils.isEmpty(tparameter)) {
                 throw new RuntimeException("CMPP 参数信息为空");
@@ -239,13 +238,13 @@ public class Cmpp3ProxySender extends AbstractSmProxySender{
                                                                                srcTerminalId, mobile, content, "",
                                                                                cmppManageProxy,
                                                                                parameter.getFeeByWords());
-
-            logger.info("CMPP3 通道ID ["+parameter.getPassageId()+"]，提交耗时：" + (System.currentTimeMillis() - startTime) + "ms");
             if (submitRepMsg == null) {
                 logger.error("CMPP3SubmitRepMessage 网关提交信息为空");
                 smsProxyManageService.plusSendErrorTimes(parameter.getPassageId());
                 return null;
             }
+            
+            logger.info("CMPP3 通道ID ["+parameter.getPassageId()+"]，提交耗时：" + (System.currentTimeMillis() - startTime) + "ms，回执内容：{}", submitRepMsg.toString());
 
             List<ProviderSendResponse> list = new ArrayList<>();
             ProviderSendResponse response = new ProviderSendResponse();
@@ -266,7 +265,8 @@ public class Cmpp3ProxySender extends AbstractSmProxySender{
                 response.setStatusCode(submitRepMsg.getResult() + "");
                 response.setSid(getMsgId(submitRepMsg.getMsgId()));
                 response.setSuccess(false);
-                response.setRemark(submitRepMsg.getSequenceId() + "");
+                response.setRemark(String.format("{result:%d, sequenceId:%d, commandId:%d}", submitRepMsg.getResult(),
+                                                 submitRepMsg.getSequenceId(), submitRepMsg.getCommandId()));
 
                 list.add(response);
             }

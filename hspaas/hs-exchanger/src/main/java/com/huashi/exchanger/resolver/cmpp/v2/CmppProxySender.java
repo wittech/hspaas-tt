@@ -265,7 +265,8 @@ public class CmppProxySender extends AbstractSmProxySender {
                 response.setStatusCode(submitRepMsg.getResult() + "");
                 response.setSid(getMsgId(submitRepMsg.getMsgId()));
                 response.setSuccess(false);
-                response.setRemark(submitRepMsg.getSequenceId() + "");
+                response.setRemark(String.format("{result:%d, sequenceId:%d, commandId:%d}", submitRepMsg.getResult(),
+                                                 submitRepMsg.getSequenceId(), submitRepMsg.getCommandId()));
 
                 list.add(response);
             }

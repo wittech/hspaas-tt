@@ -187,7 +187,8 @@ public class SmgpProxySender extends AbstractSmProxySender {
                 response.setStatusCode(submitRepMsg.getStatus() + "");
                 response.setSid(submitRepMsg.bytesToHexString(submitRepMsg.getMsgId()));
                 response.setSuccess(false);
-                response.setRemark(submitRepMsg.getSequenceId() + "");
+                response.setRemark(String.format("{status:%d, sequenceId:%d}", submitRepMsg.getStatus(),
+                                                 submitRepMsg.getSequenceId()));
 
                 list.add(response);
             }

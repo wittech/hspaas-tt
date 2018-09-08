@@ -1,9 +1,7 @@
 package com.huashi.hsboss.web.controller.boss;
 
-import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSONObject;
 import com.huashi.hsboss.annotation.ActionMode;
 import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
@@ -11,7 +9,6 @@ import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
 import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.constant.OperCode;
-import com.huashi.hsboss.dto.ZTreeNodeDto;
 import com.huashi.hsboss.model.boss.BossRole;
 import com.huashi.hsboss.service.boss.BossMenuService;
 import com.huashi.hsboss.service.boss.BossRoleService;

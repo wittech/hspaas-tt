@@ -30,6 +30,7 @@ import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.service.IUserSmsConfigService;
+import com.huashi.constants.OpenApiCode;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
@@ -120,14 +121,12 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
             // 获取通道信息
             SmsPassage smsPassage = smsPassageService.findById(packets.getFinalPassageId());
 
-            
-
             // 重新调整扩展号码
             extNumber = resizeExtNumber(extNumber, smsPassage);
 
             // 根据网关分包数要求对手机号码进行拆分，分批提交
             List<String> groupMobiles = regroupMobileByPacketsSize(packets.getMobile(), smsPassage);
-
+            
             // add by zhengying 20179610 加入签名自动前置后置等逻辑
             packets.setContent(changeMessageContentBySignMode(packets.getContent(), packets.getPassageSignMode()));
 
@@ -142,11 +141,12 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
                                                                                                           groupMobile,
                                                                                       packets.getContent(),
                                                                                       packets.getSingleFee(), extNumber);
+                
                 // ProviderSendResponse response = list.iterator().next();
                 List<SmsMtMessageSubmit> list = makeSubmitReport(packets, groupMobile, responses, extNumber, pushConfig);
                 if (CollectionUtils.isEmpty(list)) {
-                    logger.error("解析上家回执数据逻辑数据为空");
-                    return;
+                    logger.error("解析上家回执数据逻辑数据为空，伪造包逻辑处理");
+                    continue;
                 }
 
                 persistSubmitMessage(list);
@@ -468,6 +468,11 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
             }
 
             submit.setStatus(response.isSuccess() ? MessageSubmitStatus.SUCCESS.getCode() : MessageSubmitStatus.FAILED.getCode());
+            // 如果通道发送失败，则设置伪造包状态码S0013 add by 20180908
+            if(!response.isSuccess()) {
+                submit.setPushErrorCode(OpenApiCode.SmsPushCode.SMS_PASSAGE_AUTH_NOT_MATCHED.getCode());
+            }
+            
             submit.setRemark(response.getRemark());
             submit.setMsgId(StringUtils.isNotEmpty(response.getSid()) ? response.getSid() : sid + "");
             

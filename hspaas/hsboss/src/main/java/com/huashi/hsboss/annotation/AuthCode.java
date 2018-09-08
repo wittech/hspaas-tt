@@ -1,7 +1,5 @@
 package com.huashi.hsboss.annotation;
 
-import com.huashi.hsboss.constant.EnumConstant;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

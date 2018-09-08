@@ -214,6 +214,7 @@ public class OpenApiCode {
 			SMS_SAME_MOBILE_NUM_BEYOND_LIMIT_IN_ONE_DAY("BEYOND_TIMES", "同一个手机号码一天内超限"), 
 			SMS_MOBILE_BLACKLIST("BLACK", "短信黑名单"), 
 			SMS_TASK_REJECT("REJECT", "驳回任务"),
+			SMS_PASSAGE_AUTH_NOT_MATCHED("S0013", "通道鉴权失败"),
 			SMS_SUBMIT_PASSAGE_FAILED("S0099", "提交通道失败");
 
 		private String code;

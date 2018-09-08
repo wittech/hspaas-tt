@@ -71,7 +71,19 @@ public class AuthInterceptor implements Interceptor {
         }
     }
 
+    /**
+     * 
+       * TODO 判断是否有操作权限
+       * 
+       * @param method
+       * @param session
+       * @return
+     */
     private boolean checkOper(Method method, UserSession session) {
+        if(session != null && session.isSuperAdmin()) {
+            return true;
+        }
+        
         AuthCode authCode = method.getAnnotation(AuthCode.class);
         if (authCode == null) {
             return false;

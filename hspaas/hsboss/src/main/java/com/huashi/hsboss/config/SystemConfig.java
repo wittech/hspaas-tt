@@ -2,12 +2,9 @@ package com.huashi.hsboss.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import com.jfinal.render.FreeMarkerRender;
-import freemarker.template.Configuration;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
 import com.huashi.hsboss.config.handler.ViewConstantHandler;
@@ -29,7 +26,10 @@ import com.jfinal.ext.handler.UrlSkipHandler;
 import com.jfinal.ext.plugin.tablebind.AutoTableBindPlugin;
 import com.jfinal.ext.route.AutoBindRoutes;
 import com.jfinal.plugin.activerecord.dialect.MysqlDialect;
+import com.jfinal.render.FreeMarkerRender;
 import com.jfinal.render.ViewType;
+
+import freemarker.template.Configuration;
 
 /**
  * Jfinal系统配置
