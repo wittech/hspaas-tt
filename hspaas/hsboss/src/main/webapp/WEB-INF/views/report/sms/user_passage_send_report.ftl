@@ -13,6 +13,7 @@
     <script src="${BASE_PATH}/resources/js/bootstrap/pace.min.js"></script>
     <script src="${BASE_PATH}/resources/js/My97DatePicker/WdatePicker.js"></script>
     <script src="${BASE_PATH}/resources/js/common.js"></script>
+    <#include "/WEB-INF/views/common/select_search.ftl">
 </head>
 
 <body>
@@ -41,14 +42,14 @@
                                 <div class="col-md-3">
                                     <div class="input-group">
                                         <span class="input-group-addon">所属用户</span>
-                                        <input type="text" class="form-control" id="username" name="username"
-                                               value="${username!''}" readonly style="background: #fff"
-                                               placeholder="选择用户">
-                                        <input type="hidden" name="userId" id="userId" value="${(userId)!}"/>
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-info" type="button"
-                                                    onclick="openUserList();">选择</button>
-                                        </span>
+                                       	<select class="form-control selectpicker show-tick" id="userId" name="userId" data-live-search="true">
+				                        	<option value="">--选择用户--</option>
+				                        	<#if userList??>
+					    					<#list userList as p>
+					    						<option value="${p.id!''}" <#if userId?? && userId==p.id>selected</#if>>${p.name!''}</option>
+					    					</#list>
+								    		</#if>
+						                </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -150,26 +151,6 @@
             </div>
         <#include "/WEB-INF/views/main/left.ftl">
         </div>
-
-        <div class="modal fade" id="userModal">
-            <div class="modal-dialog" style="width:850px">
-                <div class="modal-content" style="width:850px">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">选择用户</h4>
-                    </div>
-                    <div class="modal-body" id="userModelBody">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-success" onclick="clearUser();">清空</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
-
     </div>
     <script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
     <script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>

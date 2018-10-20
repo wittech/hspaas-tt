@@ -13,6 +13,7 @@
 		<link href="${BASE_PATH}/resources/css/bootstrap/pace.min.css" rel="stylesheet">
 		<script src="${BASE_PATH}/resources/js/bootstrap/pace.min.js"></script>
         <script src="${BASE_PATH}/resources/js/common.js"></script>
+        <#include "/WEB-INF/views/common/select_search.ftl">
     </head>
 
 	<body>
@@ -43,16 +44,16 @@
 								    		</div>
 								    	</div>
 								    	<div class="col-md-4">
-		                                    <div class="input-group">
+								    		<div class="input-group">
 		                                        <span class="input-group-addon">所属用户</span>
-		                                        <input type="text" class="form-control" id="username" name="username"
-		                                               value="${username!''}" readonly style="background: #fff"
-		                                               placeholder="选择用户">
-		                                        <input type="hidden" name="userId" id="userId" value="${userId!''}"/>
-		                                        <span class="input-group-btn">
-		                                            <button class="btn btn-info" type="button"
-		                                                    onclick="openUserList();">选择</button>
-		                                        </span>
+		                                        <select class="form-control selectpicker show-tick" id="userId" name="userId" data-live-search="true">
+						                        	<option value="-1">--选择用户--</option>
+						                        	<#if userList??>
+							    					<#list userList as p>
+							    						<option value="${p.userId!''}"  <#if userId?? && userId==p.userId>selected</#if>>${p.name!''}</option>
+							    					</#list>
+										    		</#if>
+						                        </select>
 		                                    </div>
 		                                </div>
 								    	<div class="col-md-3">
@@ -142,26 +143,6 @@
 				</div>
 				<#include "/WEB-INF/views/main/left.ftl">
 			</div>
-			
-			<div class="modal fade" id="userModal">
-	            <div class="modal-dialog" style="width:850px">
-	                <div class="modal-content" style="width:850px">
-	                    <div class="modal-header">
-	                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-	                                aria-hidden="true">&times;</span></button>
-	                        <h4 class="modal-title">选择用户</h4>
-	                    </div>
-	                    <div class="modal-body" id="userModelBody">
-	
-	                    </div>
-	                    <div class="modal-footer">
-	                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-	                        <button type="button" class="btn btn-success" onclick="clearUser();">清空</button>
-	                    </div>
-	                </div><!-- /.modal-content -->
-	            </div><!-- /.modal-dialog -->
-	        </div><!-- /.modal -->
-
 		</div>
 		<script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
 				<script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
@@ -198,44 +179,6 @@
                 });
 			});
 		}
-		
-		function openUserList() {
-	        var userId = $('#userId').val();
-	        $.ajax({
-	            url: '${BASE_PATH}/base/customer/commonUserList',
-	            dataType: 'html',
-	            type: 'POST',
-	            data: {userId: userId},
-	            success: function (data) {
-	                $('#userModelBody').html(data);
-	                $('#userModal').modal('show');
-	            }, error: function (data) {
-	                Boss.alert('请求用户列表异常！');
-	            }
-	        });
-	    }
-	    
-	    function selectUser(userId, fullName, mobile) {
-	        $('#userId').val(userId);
-	        $('#username').val(fullName);
-	        $('#userModal').modal('hide');
-	    }
-	    
-	    function userJumpPage(p){
-	        $('#userpn').val(p);
-	        var userId = $('#userId').val();
-	        $.ajax({
-	            url:'${BASE_PATH}/base/customer/commonUserList?userId='+userId,
-	            dataType:'html',
-	            data:$('#userform').serialize(),
-	            type:'POST',
-	            success:function(data){
-	                $('#userModelBody').html(data);
-	            },error:function(data){
-	                Boss.alert('请求用户列表异常！');
-	            }
-	        });
-	    }
 		
 		function loadingRedis(){
             Boss.confirm("确定要重载redis模板吗？",function(){

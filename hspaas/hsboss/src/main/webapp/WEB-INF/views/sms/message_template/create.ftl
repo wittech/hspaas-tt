@@ -13,6 +13,7 @@
     <link href="${BASE_PATH}/resources/css/bootstrap/pace.min.css" rel="stylesheet">
     <script src="${BASE_PATH}/resources/js/bootstrap/pace.min.js"></script>
     <script src="${BASE_PATH}/resources/js/common.js"></script>
+    <#include "/WEB-INF/views/common/select_search.ftl">
 </head>
 
 <body>
@@ -43,7 +44,7 @@
                             <div class="form-group">
                                 <label class="col-xs-2 control-label">开户用户</label>
                                 <div class="col-xs-4">
-                                    <select id="userId" name="messageTemplate.userId" class="form-control">
+                                    <select id="userId" name="messageTemplate.userId" class="form-control selectpicker show-tick" data-live-search="true">
                                     <#if userList??>
                                         <#list userList as u>
                                             <option value="${u.userId!''}" <#if userId?? && u.userId==userId>selected<#elseif task?? && task.userId?? && u.userId==task.userId>selected</#if>>${u.name!''}-${u.username!''}</option>

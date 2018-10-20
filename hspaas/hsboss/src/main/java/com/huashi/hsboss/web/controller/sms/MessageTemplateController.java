@@ -52,10 +52,11 @@ public class MessageTemplateController extends BaseController {
 		if(StringUtils.isNotEmpty(status)){
 			setAttr("status",Integer.parseInt(status));
 		}
-		setAttr("userId", userId);
 		setAttr("username", getPara("username"));
 		setAttr("page", page);
+		setAttr("userId", getParaToInt("userId", -1));
 		setAttr("approveStatus", ApproveStatus.values());
+		setAttr("userList", iUserService.findUserModels());
 	}
 
 	public void add() {
