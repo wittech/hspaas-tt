@@ -11,15 +11,15 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.huashi.exchanger.service.ISmsProxyManageService;
+import com.huashi.exchanger.service.SmsProxyManageService;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
 
 /**
+ * TODO 直连抽象类
  * 
-  * TODO 直连抽象类
-  * 
-  * @author zhengying
-  * @version V1.0   
-  * @date 2018年8月5日 上午12:21:38
+ * @author zhengying
+ * @version V1.0
+ * @date 2018年8月5日 上午12:21:38
  */
 public abstract class AbstractSmProxySender {
 
@@ -51,7 +51,7 @@ public abstract class AbstractSmProxySender {
 
         synchronized (passageLockMonitor.get(parameter.getPassageId())) {
             if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-                return smsProxyManageService.getManageProxy(parameter.getPassageId());
+                return SmsProxyManageService.getManageProxy(parameter.getPassageId());
             }
 
             boolean isOk = smsProxyManageService.startProxy(parameter);
@@ -62,7 +62,7 @@ public abstract class AbstractSmProxySender {
             // 重新初始化后将错误计数器归零
             smsProxyManageService.clearSendErrorTimes(parameter.getPassageId());
 
-            return smsProxyManageService.getManageProxy(parameter.getPassageId());
+            return SmsProxyManageService.GLOBAL_PROXIES.get(parameter.getPassageId());
         }
     }
 

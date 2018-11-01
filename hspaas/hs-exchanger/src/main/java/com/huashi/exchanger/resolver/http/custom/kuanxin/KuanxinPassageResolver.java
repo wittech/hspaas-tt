@@ -56,7 +56,7 @@ public class KuanxinPassageResolver extends AbstractPassageResolver{
 			return sendResponse(result, parameter.getSuccessCode());
 		} catch (Exception e) {
 			logger.error("宽信发送解析失败", e);
-			throw new RuntimeException("解析失败");
+			throw new RuntimeException(e);
 		}
 	}
 	

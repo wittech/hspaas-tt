@@ -86,8 +86,8 @@
 		<mail.version>1.4.7</mail.version>
 		<dubbo.version>2.6.1</dubbo.version>
 		<kryo.version>4.0.1</kryo.version>
-        <kryo.serializers.version>0.42</kryo.serializers.version>
-        <fst.version>2.48-jdk-6</fst.version>
+		<kryo.serializers.version>0.42</kryo.serializers.version>
+		<fst.version>2.48-jdk-6</fst.version>
 		<quartz.version>2.2.3</quartz.version>
 		<poi.version>3.14</poi.version>
 		<jedis.version>2.9.0</jedis.version>
@@ -104,6 +104,7 @@
 		<spring-data-commons.verison>1.13.8.RELEASE</spring-data-commons.verison>
 		<springfox-swagger.version>2.6.1</springfox-swagger.version>
 		<guava.version>21.0</guava.version>
+		<google.version>3.2.1</google.version>
 	</properties>
 
 	<dependencyManagement>
@@ -460,20 +461,20 @@
 			</dependency>
 
 			<dependency>
-                <groupId>com.esotericsoftware</groupId>
-                <artifactId>kryo</artifactId>
-                <version>${kryo.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.javakaffee</groupId>
-                <artifactId>kryo-serializers</artifactId>
-                <version>${kryo.serializers.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.ruedigermoeller</groupId>
-                <artifactId>fst</artifactId>
-                <version>${fst.version}</version>
-            </dependency>
+				<groupId>com.esotericsoftware</groupId>
+				<artifactId>kryo</artifactId>
+				<version>${kryo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.javakaffee</groupId>
+				<artifactId>kryo-serializers</artifactId>
+				<version>${kryo.serializers.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.ruedigermoeller</groupId>
+				<artifactId>fst</artifactId>
+				<version>${fst.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>com.caucho</groupId>
@@ -658,6 +659,18 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>${guava.version}</version>
+			</dependency>
+
+			<!-- google 二维码 zxing -->
+			<dependency>
+				<groupId>com.google.zxing</groupId>
+				<artifactId>core</artifactId>
+				<version>${google.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.zxing</groupId>
+				<artifactId>javase</artifactId>
+				<version>${google.version}</version>
 			</dependency>
 
 		</dependencies>

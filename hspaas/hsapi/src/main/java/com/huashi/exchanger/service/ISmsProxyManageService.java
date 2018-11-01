@@ -29,14 +29,6 @@ public interface ISmsProxyManageService {
     boolean stopProxy(Integer passageId);
 
     /**
-     * TODO 获取直连协议对象
-     * 
-     * @param passageId
-     * @return
-     */
-    Object getManageProxy(Integer passageId);
-
-    /**
      * TODO 累加发送错误次数
      * 
      * @param passageId

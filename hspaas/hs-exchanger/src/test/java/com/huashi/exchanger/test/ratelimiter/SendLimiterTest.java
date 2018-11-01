@@ -47,7 +47,7 @@ public class SendLimiterTest {
 		
 		
 		// 目前HTTP用途并不是很大（因为取决于HTTP自身的瓶颈）
-		List<String[]> packets = SmsProviderService.doLimitSpeedInSecond(mobiles, amount, packetsSize);
+		List<String[]> packets = SmsProviderService.recombineMobilesByLimitSpeedInSecond(mobiles, amount, packetsSize);
 		for(String[] str : packets) {
 			System.out.println("0:"+ str[0] + "mobiles:" + str[1]);
 		}

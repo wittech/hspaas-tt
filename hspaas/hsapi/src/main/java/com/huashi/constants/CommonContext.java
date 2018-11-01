@@ -29,11 +29,13 @@ public class CommonContext {
          */
         UNRECOGNIZED(0, "无法识别", null),
 
-        CHINA_MOBILE(1, "移动", "^((134|135|136|137|138|139|150|151|152|157|158|159|182|183|184|187|188|178|147|198)[0-9]{8}|1705[0-9]{7})$"),
+        CHINA_MOBILE(1, "移动",
+                     "^((134|135|136|137|138|139|150|151|152|157|158|159|182|183|184|187|188|178|147|198)[0-9]{8}|1705[0-9]{7})$"),
 
         CHINA_TELECOM(2, "电信", "^((133|149|153|180|181|189||173|177|199)[0-9]{8}|(1700|1701)[0-9]{7})$"),
 
-        CHINA_UNICOM(3, "联通", "^((130|131|132|155|156|185|186|175|176|145|166)[0-9]{8}|(1704|1707|1708|1709|1718|1719)[0-9]{7})$"),
+        CHINA_UNICOM(3, "联通",
+                     "^((130|131|132|155|156|185|186|175|176|145|166)[0-9]{8}|(1704|1707|1708|1709|1718|1719)[0-9]{7})$"),
 
         GLOBAL(4, "全网", "^(13[0-9]|15[012356789]|166|17[05678]|18[0-9]|14[579]|19[89])[0-9]{8}$");
 
@@ -43,7 +45,7 @@ public class CommonContext {
             this.localRegex = localRegex;
         }
 
-        private int code;
+        private int    code;
         private String title;
         private String localRegex;
 
@@ -94,7 +96,8 @@ public class CommonContext {
          * @return
          */
         public static boolean isAvaiableMobile(String mobileNumber) {
-            return StringUtils.isNotBlank(mobileNumber) && PatternUtil.isRight(CMCP.GLOBAL.getLocalRegex(), mobileNumber);
+            return StringUtils.isNotBlank(mobileNumber)
+                   && PatternUtil.isRight(CMCP.GLOBAL.getLocalRegex(), mobileNumber);
         }
 
     }
@@ -115,14 +118,14 @@ public class CommonContext {
         /**
          * 未定义
          */
-        UNDEFINED(0, "未定义"), 
-        
+        UNDEFINED(0, "未定义"),
+
         /**
          * SEND_MESSAGE_SERVICE同 SHORT_MESSAGE_SERVICE (SMS)
          */
         SEND_MESSAGE_SERVICE(1, "短信服务"), FLUX_SERVICE(2, "流量服务"), VOICE_SERVICE(3, "语音服务");
 
-        private int code;
+        private int    code;
         private String name;
 
         PlatformType(int code, String name) {
@@ -176,9 +179,10 @@ public class CommonContext {
         /**
          * 短信状态报告
          */
-        SMS_STATUS(1, "短信状态报告"), SMS_MO(2, "短信上行报告"), FLUX_CHARGE_RESULT(3, "流量充值结果"), VOICE_SEND_STATUS(4, "语音验证码发送报告");
+        SMS_STATUS(1, "短信状态报告"), SMS_MO(2, "短信上行报告"), FLUX_CHARGE_RESULT(3, "流量充值结果"),
+        VOICE_SEND_STATUS(4, "语音验证码发送报告");
 
-        private int code;
+        private int    code;
         private String name;
 
         CallbackUrlType(int code, String name) {
@@ -228,7 +232,7 @@ public class CommonContext {
 
         PASSAGE_BALANCE_GET(6, "通道余额查询");
 
-        private int code;
+        private int    code;
         private String name;
 
         PassageCallType(int code, String name) {
@@ -272,7 +276,7 @@ public class CommonContext {
 
         BOSS(3, "运营支撑系统");
 
-        private int code;
+        private int    code;
         private String name;
 
         AppType(int code, String name) {
@@ -303,16 +307,13 @@ public class CommonContext {
     /**
      * TODO 通道调用协议
      * <p>
-     * 1、与CMPP/SGIP协议的差异
-     * 1）协议定义比CMPP和SGIP严谨和规范，虽然CMPP和SGIP都是从SMPP派生出来的。
-     * 2）CMPP和SGIP中有大量的关于计费的定义，SMPP没有考虑这部分内容。这完全反映了通过短信实现的移动增值业务模式在国内的成熟和流行。
-     * 3）SMPP的网络承载层可以是TCP/IP和X.25。
+     * 1、与CMPP/SGIP协议的差异 1）协议定义比CMPP和SGIP严谨和规范，虽然CMPP和SGIP都是从SMPP派生出来的。
+     * 2）CMPP和SGIP中有大量的关于计费的定义，SMPP没有考虑这部分内容。这完全反映了通过短信实现的移动增值业务模式在国内的成熟和流行。 3）SMPP的网络承载层可以是TCP/IP和X.25。
      * 2、SMPP协议解决的是移动网络之外的短消息实体与短消息中心的交互问题。即允许移动网络之外的短消息实体（External Short Message Entities,ESMEs）连接短消息中心（SMSC）来提交和接受短消息。
-     * 3、SMPP协议定义的是1）ESME和SMSC之间交互的一组操作和2）ESMS与SMSC交互操作中的数据格式。
-     * 4、任何SMPP操作都包含请求PDU（Request Protocol Data Unit）和与之对应的回应PDU（Response Protocol Data Unit）。
-     * 5、SMPP把ESMEs分类为Transmitter/Receiver/Transceiver三种交互方式，分别对应仅提交短消息/仅接收短消息/提交和接收短消息三种形态。
-     * 6、SMPP会话有5种状态：OPEN / BOUND_TX / BOUND_RX / BOUND_TRX / CLOSED
-     * 7、SMPP定义的PDUs包括：
+     * 3、SMPP协议定义的是1）ESME和SMSC之间交互的一组操作和2）ESMS与SMSC交互操作中的数据格式。 4、任何SMPP操作都包含请求PDU（Request Protocol Data
+     * Unit）和与之对应的回应PDU（Response Protocol Data Unit）。
+     * 5、SMPP把ESMEs分类为Transmitter/Receiver/Transceiver三种交互方式，分别对应仅提交短消息/仅接收短消息/提交和接收短消息三种形态。 6、SMPP会话有5种状态：OPEN /
+     * BOUND_TX / BOUND_RX / BOUND_TRX / CLOSED 7、SMPP定义的PDUs包括：
      *
      * @author zhengying
      * @version V1.0
@@ -333,7 +334,8 @@ public class CommonContext {
         // SMGW 与其它网元设备（除SMC 外）进行短消息传输的接口协议 （Short Message Gateway Protocol）
         SMGP,
 
-        // 中国网通CNGP协议2.0版 ，本标准描述了PHS短消息网关（SMGW）和服务提供商（SP）之间、短消息网关（SMGW）和短消息网关（SMGW）之间的通信协议（China Netcom Short Message Gateway Protocol）
+        // 中国网通CNGP协议2.0版 ，本标准描述了PHS短消息网关（SMGW）和服务提供商（SP）之间、短消息网关（SMGW）和短消息网关（SMGW）之间的通信协议（China Netcom Short Message
+        // Gateway Protocol）
         CNGP,
 
         // SMPP（short message peer to peer）协议是一个开放的消息转换协议
@@ -360,12 +362,11 @@ public class CommonContext {
          */
         public static boolean isBelongtoDirect(String protocol) {
             if (StringUtils.isEmpty(protocol)) {
-                {
-                    return false;
-                }
+                return false;
             }
 
-            return !protocol.equalsIgnoreCase(ProtocolType.HTTP.name()) && !protocol.equalsIgnoreCase(ProtocolType.WEBSERVICE.name());
+            return !protocol.equalsIgnoreCase(ProtocolType.HTTP.name())
+                   && !protocol.equalsIgnoreCase(ProtocolType.WEBSERVICE.name());
         }
     }
 
