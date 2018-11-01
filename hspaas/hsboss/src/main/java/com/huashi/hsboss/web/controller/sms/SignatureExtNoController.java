@@ -36,6 +36,7 @@ public class SignatureExtNoController extends BaseController {
 		
 		setAttr("page", page);
 		setAttrs(condition);
+		setAttr("userList", iUserService.findAll());
 	}
 	
 	/**
@@ -45,7 +46,7 @@ public class SignatureExtNoController extends BaseController {
 	 */
 	private Map<String, Object> appendQueryParams() {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("userId", getPara("userId"));
+		paramMap.put("userId", getParaToInt("userId", -1));
 		paramMap.put("currentPage", getPN());
 		paramMap.put("signature", getPara("signature"));
 		paramMap.put("username", getPara("username"));

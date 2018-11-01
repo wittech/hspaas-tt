@@ -2,9 +2,11 @@ package com.huashi.hsboss.web.controller.report;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.huashi.common.user.service.IUserService;
 import com.huashi.common.util.DateUtil;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject;
+import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.sms.passage.service.ISmsPassageService;
@@ -27,6 +29,8 @@ public class SmsReportController extends BaseController {
 	private ISmsSubmitHourReportService iSmsSubmitHourReportService;
 	@Inject.BY_NAME
 	private ISmsPassageService iSmsPassageService;
+	@BY_NAME
+	private IUserService iUserService;
 
 	/**
 	 * 
@@ -44,7 +48,7 @@ public class SmsReportController extends BaseController {
 		setAttr("endDate", endDate);
 		setAttr("username", getPara("username"));
 		setAttr("userId", getParaToInt("userId", null));
-		
+		setAttr("userList", iUserService.findAll());
 		setAttr("container", iSmsSubmitHourReportService.findUserPassageSubmitReport(getParaToInt("userId", null), startDate, endDate));
 	}
 	
@@ -64,7 +68,7 @@ public class SmsReportController extends BaseController {
 		setAttr("endDate", endDate);
 		setAttr("username", getPara("username"));
 		setAttr("userId", getParaToInt("userId", null));
-		
+		setAttr("userList", iUserService.findAll());
 		setAttr("container", iSmsSubmitHourReportService.findUserSubmitReport(getParaToInt("userId", null), startDate, endDate));
 	}
 	

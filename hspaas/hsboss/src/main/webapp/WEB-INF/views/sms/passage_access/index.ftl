@@ -13,6 +13,7 @@
 		<link href="${BASE_PATH}/resources/css/bootstrap/pace.min.css" rel="stylesheet">
 		<script src="${BASE_PATH}/resources/js/bootstrap/pace.min.js"></script>
         <script src="${BASE_PATH}/resources/js/common.js"></script>
+        <#include "/WEB-INF/views/common/select_search.ftl">
     </head>
 
 	<body>
@@ -41,7 +42,7 @@
 								    	<div class="col-md-4">
 								    		<div class="input-group">
 								    			<span class="input-group-addon">通道名称</span>
-								    			<select id="keyword" name="keyword" class="form-control">
+								    			<select id="keyword" name="keyword" class="form-control selectpicker show-tick" data-live-search="true">
 								    				<option value="">全部</option>
 								    				<#if passageList??>
 								    					<#list passageList as p>
@@ -56,7 +57,7 @@
 								    	<div class="col-md-4">
 								    		<div class="input-group">
 								    			<span class="input-group-addon">用户名称</span>
-								    			<select id="userId" name="userId" class="form-control">
+								    			<select id="userId" name="userId" class="form-control selectpicker show-tick" data-live-search="true">
 								    				<option value="">全部</option> 
 								    				<#if userList??>
 										    			<#list userList as u>

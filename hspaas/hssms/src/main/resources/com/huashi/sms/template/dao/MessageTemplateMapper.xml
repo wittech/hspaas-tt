@@ -337,7 +337,7 @@
 		<if test="status != null and status != ''">
 			and status = #{status}
 		</if>
-		<if test="userId != null and userId != ''">
+		<if test="userId != null and userId != '' and userId >-1">
 			and user_id = #{userId}
 		</if>
 		order by id desc limit #{start},#{end}
