@@ -45,7 +45,7 @@
 								</div>
 							</#if>
                             <h3 class="panel-title">
-                            <span>角色列表${macro.test()}</span>
+                            <span>角色列表</span>
                             </h3>
                            
                         </div>

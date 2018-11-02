@@ -33,14 +33,22 @@
 	        </div>
 	    </div>
 	    <div id="page-content">
-		<div style="padding:5px 20px 0">
-		    <div class="row" style="margin-top:10px">
+		<div class="panel">
+			<div class="panel-heading">
+                        <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
+                        </div>
+                        <h3 class="panel-title">
+                            <span>冲扣值日志</span>
+                        </h3>
+
+                    </div>
+		    <div class="panel-body">
 		    	<form id="myform">
 					<input type="hidden" name="pn" id="pn" value="1" />
 					<input type="hidden" name="userId" id="userId" value="${(userId)!''}" />
 					<input type="hidden" name="platformType" id="platformType" value="${(platformType)!''}" />
 			    </form>
-		        <table class="table table-striped table-bordered" cellspacing="0" width="100%">
+		        <table id="demo-dt-basic" class="table table-striped table-bordered" cellspacing="0" width="100%">
 		            <thead>
 		            <tr>
 		                <th>编号</th>

@@ -166,7 +166,6 @@
 		                }
 		            },error:function(data){
 		            	console.log(data);
-		                Boss.alert('请求数据异常');
 		            }
 		        });
 	        

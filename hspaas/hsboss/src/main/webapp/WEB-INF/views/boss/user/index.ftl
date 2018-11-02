@@ -72,6 +72,7 @@
                                    <tr>
 										<th>#</th>
 										<th>登录名</th>
+										<th>动态口令</th>
 										<th>真实姓名</th>
 										<th>手机号</th>
 										<th>创建时间</th>
@@ -87,6 +88,12 @@
 									<tr>
 										<td>${(page.pageNumber - 1) * page.pageSize + (pl_index+1)}</td>	
 										<td>${pl.login_name}</td>	
+										<td>
+										<#if pl.mfaQrcode??>
+											<a href="javascript:void(0);" data-placement="bottom" data-html="true" class="btn btn-info btn-xs" data-toggle="popover" title="绑定MFA二维码"
+		                                       data-content="<img src='data:image/png;base64,${(pl.mfaQrcode)!}' width='98px' height='98px'>">MFA二维码</a>
+										</#if>
+										</td>
 										<td>${(pl.real_name)!'--'}</td>	
 										<td>${(pl.mobile)!'--'}</td>	
 										<td>${pl.created_at?string('yyyy-MM-dd HH:mm:ss')}</td>	
@@ -108,6 +115,7 @@
 												<#if deleteCheck>
 													<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
 												</#if>
+												<a class="btn btn-success btn-xs" href="javascript:void(0);" onclick="updateMfa(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;MFA重置 </a>
 											</#if>
 										</td>
 									</tr>
@@ -130,6 +138,22 @@
 	<script src="${BASE_PATH}/resources/js/bootstrap/bootstrap.min.js"></script>
 	<script src="${BASE_PATH}/resources/js/bootstrap/scripts.js"></script>
 	<script type="text/javascript">
+	
+		$(function(){
+
+	        $('a[data-toggle=popover]').mouseover(function () {
+	            var $this = $(this);
+	            if($this.attr('data-content') != ''){
+	                $this.popover('show');
+	            }
+	        });
+	
+	        $('a[data-toggle=popover]').mouseout(function () {
+	            var $this = $(this);
+	            $this.popover('hide')
+	        });
+	        
+	    });
 	
 		function jumpPage(pn){
 			$('#pn').val(pn);
@@ -181,6 +205,26 @@
 
 					},error:function(data){
                         Boss.alert('禁用用户请求失败！');
+					}
+				})
+			});
+		}
+		
+		function updateMfa(id){
+            Boss.confirm('确定重置MFA动态口令吗？',function(){
+				$.ajax({
+					url:'${BASE_PATH}/boss/user/updateMfa',
+					data:{id:id},
+					dataType:'json',
+					type:'post',
+					success:function(data){
+                        Boss.alertToCallback(data.message,function(){
+                            if(data.result){
+                                location.reload();
+                            }
+						});
+					},error:function(data){
+                        Boss.alert('重置MFA请求失败！');
 					}
 				})
 			});

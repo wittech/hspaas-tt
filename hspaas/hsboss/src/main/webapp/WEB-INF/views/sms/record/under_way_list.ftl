@@ -464,15 +464,6 @@
 
     $(function(){
 
-        $('#selectAll').change(function(){
-            var $this = $(this);
-            if($this.prop('checked')){
-                $('input[name=checkItem]').prop('checked',true);
-            }else{
-                $('input[name=checkItem]').prop('checked',false);
-            }
-        });
-        
         $('a[data-toggle=popover]').mouseover(function () {
             var $this = $(this);
             if($this.attr('data-content') != ''){

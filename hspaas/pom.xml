@@ -105,6 +105,7 @@
 		<springfox-swagger.version>2.6.1</springfox-swagger.version>
 		<guava.version>21.0</guava.version>
 		<google.version>3.2.1</google.version>
+		<elastic-job.version>2.1.5</elastic-job.version>
 	</properties>
 
 	<dependencyManagement>
@@ -671,6 +672,18 @@
 				<groupId>com.google.zxing</groupId>
 				<artifactId>javase</artifactId>
 				<version>${google.version}</version>
+			</dependency>
+
+			<!-- elastic-job 分布式任务 -->
+			<dependency>
+				<groupId>com.dangdang</groupId>
+				<artifactId>elastic-job-lite-core</artifactId>
+				<version>${elastic-job.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.dangdang</groupId>
+				<artifactId>elastic-job-lite-spring</artifactId>
+				<version>${elastic-job.version}</version>
 			</dependency>
 
 		</dependencies>

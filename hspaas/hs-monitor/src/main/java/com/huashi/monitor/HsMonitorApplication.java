@@ -15,21 +15,20 @@ import com.huashi.common.util.LogUtils;
 @EnableScheduling
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsMonitorApplication {
-	
-	@Bean
-	public CountDownLatch closeLatch() {
-		return new CountDownLatch(1);
-	}
 
-	public static void main(String args[]) throws InterruptedException {
+    @Bean
+    public CountDownLatch closeLatch() {
+        return new CountDownLatch(1);
+    }
 
-		ApplicationContext ctx = new SpringApplicationBuilder()
-				.sources(HsMonitorApplication.class).web(false).run(args);
+    public static void main(String args[]) throws InterruptedException {
 
-		LogUtils.info("华时监管中心服务项目启动!");
+        ApplicationContext ctx = new SpringApplicationBuilder().sources(HsMonitorApplication.class).web(false).run(args);
 
-		CountDownLatch closeLatch = ctx.getBean(CountDownLatch.class);
-		closeLatch.await();
-		
-	}
+        LogUtils.info("华时任务监管中心启动完成!");
+
+        CountDownLatch closeLatch = ctx.getBean(CountDownLatch.class);
+        closeLatch.await();
+
+    }
 }
