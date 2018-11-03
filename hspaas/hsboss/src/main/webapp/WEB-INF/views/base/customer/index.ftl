@@ -95,9 +95,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/base/customer/add">新增客户</a>
-                            </div>
+                        	<#if macro.doOper("1001001001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/base/customer/add">新增客户</a>
+	                            </div>
+                            </#if>
                             <h3 class="panel-title">
                             <span>客户信息列表</span>
                             </h3>
@@ -118,6 +120,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign balanceCheck = macro.doOper("1001001003001") />
+									<#assign editCheck = macro.doOper("1001001002") />
+									<#assign templateCheck = macro.doOper("1001001004") />
+									<#assign disabledCheck = macro.doOper("1001001005") />
                                 	<#if page?? && page.list?size gt 0>
                                 		<#list page.list as pl>
 		                                    <tr>
@@ -136,16 +142,24 @@
 												</td>
 												<td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
 		                                        <td>
-		                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/customer/edit?id=${pl.userId}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+		                                        	<#if editCheck>
+		                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/customer/edit?id=${pl.userId}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+		                                        	</#if>
 		                                        	<#--
-													<a class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+														<a class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除 </a>
 		                                        	-->
-		                                        	<a class="btn btn-success btn-xs" href="${BASE_PATH}/base/user_balance?userId=${pl.userId}"><i class="fa fa-edit"></i>&nbsp;余额 </a>
-		                                        	<a class="btn btn-info btn-xs" href="${BASE_PATH}/sms/message_template/create?userId=${pl.userId}"><i class="fa fa-edit"></i>&nbsp;模板 </a>
-		                                        	<#if pl.state == '0'>
-		                                        		<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.userId},'1');"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
-		                                        	<#else>
-		                                        		<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.userId},'0');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+		                                        	<#if balanceCheck>
+		                                        		<a class="btn btn-success btn-xs" href="${BASE_PATH}/base/user_balance?userId=${pl.userId}"><i class="fa fa-edit"></i>&nbsp;余额 </a>
+		                                        	</#if>
+		                                        	<#if templateCheck>
+		                                        		<a class="btn btn-info btn-xs" href="${BASE_PATH}/sms/message_template/create?userId=${pl.userId}"><i class="fa fa-edit"></i>&nbsp;模板 </a>
+		                                        	</#if>
+		                                        	<#if disabledCheck>
+			                                        	<#if pl.state == '0'>
+			                                        		<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.userId},'1');"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
+			                                        	<#else>
+			                                        		<a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.userId},'0');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+			                                        	</#if>
 		                                        	</#if>
 		                                        </td>
 		                                    </tr>

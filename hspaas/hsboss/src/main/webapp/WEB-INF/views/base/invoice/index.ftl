@@ -60,9 +60,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a href="${BASE_PATH}/base/invoice/add" class="btn btn-success">新增发票</a>
-                            </div>
+                        	<#if macro.doOper("7001001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a href="${BASE_PATH}/base/invoice/add" class="btn btn-success">新增发票</a>
+	                            </div>
+                            </#if>
                             <h3 class="panel-title">
                             <span>发票列表</span>
                             </h3>
@@ -83,6 +85,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+									<#assign editCheck = macro.doOper("7001002") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -115,15 +118,19 @@
                                         <td>${pl.money!0}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-										<#if pl.status?? && (pl.status == 0 || pl.status == 3)>
-                                        	<a class="btn btn-danger btn-xs" href="${BASE_PATH}/base/invoice/edit?id=${pl.id}">
-												<i class="fa fa-edit"></i>&nbsp;处理
-											</a>
-										<#else>
-                                            <a class="btn btn-info btn-xs" href="${BASE_PATH}/base/invoice/edit?id=${pl.id}">
-                                                <i class="fa fa-eye"></i>&nbsp;查看
-                                            </a>
-										</#if>
+											<#if pl.status?? && (pl.status == 0 || pl.status == 3)>
+	                                        	<#if editCheck>
+		                                        	<a class="btn btn-danger btn-xs" href="${BASE_PATH}/base/invoice/edit?id=${pl.id}">
+														<i class="fa fa-edit"></i>&nbsp;处理
+													</a>
+												</#if>
+											<#else>
+												<#if editCheck>
+		                                            <a class="btn btn-info btn-xs" href="${BASE_PATH}/base/invoice/edit?id=${pl.id}">
+		                                                <i class="fa fa-eye"></i>&nbsp;查看
+		                                            </a>
+		                                         </#if>  
+											</#if>
                                         </td>
                                     </tr>
                                     </#list>

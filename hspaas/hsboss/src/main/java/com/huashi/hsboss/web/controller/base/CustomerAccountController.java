@@ -14,7 +14,6 @@ import com.jfinal.ext.route.ControllerBind;
 @ControllerBind(controllerKey="/base/customer_account")
 public class CustomerAccountController extends BaseController {
 
-	
 	public void index(){
 		
 	}

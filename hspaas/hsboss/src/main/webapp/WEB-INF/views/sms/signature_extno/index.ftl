@@ -68,8 +68,12 @@
 						<div class="panel">
                         <div class="panel-heading">
                             <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
-                                <a class="btn btn-success" href="${BASE_PATH}/sms/signature_extno/create">添加签名</a>
+                            	<#if macro.doOper("2005001")>
+                                	<button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
+                                </#if>
+                                <#if macro.doOper("2005002")>
+                                	<a class="btn btn-success" href="${BASE_PATH}/sms/signature_extno/create">添加签名</a>
+                            	</#if>
                             </div>
                             <h3 class="panel-title">
                             <span>模板列表</span>
@@ -89,6 +93,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign editCheck = macro.doOper("2005003") />
+									<#assign deleteCheck = macro.doOper("2005004") />
                                 	<#if page?? && page.list??>
                                 	<#list page.list as pl>
                                     <tr>
@@ -98,8 +104,12 @@
                                         <td>${(pl.extNumber)!}</td>
                                         <td>${(pl.remark)!}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/signature_extno/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
-                                        	<a href="javascript:remove(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除&nbsp;&nbsp; </a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/signature_extno/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
+                                        	</#if>
+                                        	<#if deleteCheck>
+                                        		<a href="javascript:remove(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除&nbsp;&nbsp; </a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     </#list>

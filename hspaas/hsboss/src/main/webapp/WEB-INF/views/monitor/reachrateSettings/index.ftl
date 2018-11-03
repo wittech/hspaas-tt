@@ -54,9 +54,11 @@
 
                 <div class="panel">
                     <div class="panel-heading">
-                        <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                            <a class="btn btn-success" href="${BASE_PATH}/monitor/reachrateSettings/add">添加通道监控设置</a>
-                        </div>
+                    	<#if macro.doOper("8003001")>
+	                        <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                            <a class="btn btn-success" href="${BASE_PATH}/monitor/reachrateSettings/add">添加通道监控设置</a>
+	                        </div>
+                        </#if>
                         <h3 class="panel-title">
                             <span>通道监控设置列表</span>
                         </h3>
@@ -79,6 +81,8 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign editCheck = macro.doOper("8003002") />
+							<#assign disabledCheck = macro.doOper("8003003") />
                             <#list page.list as pl>
                             <tr>
                                 <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -95,14 +99,18 @@
                                 <td>${pl.mobile!''}</td>
                                 <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                 <td>
-                                    <a class="btn btn-primary btn-xs" href="${BASE_PATH}/monitor/reachrateSettings/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                	<#if editCheck>
+                                    	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/monitor/reachrateSettings/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                    </#if>
                                     &nbsp;
                                     <#--<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除</a>-->
                                     <#--&nbsp;-->
-                                    <#if pl.status == 1>
-                                        <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'2');"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
-                                    <#else>
-                                        <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'1');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+                                    <#if disabledCheck>
+	                                    <#if pl.status == 1>
+	                                        <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'2');"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
+	                                    <#else>
+	                                        <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'1');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+	                                    </#if>
                                     </#if>
                                 </td>
                             </tr>

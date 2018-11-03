@@ -83,8 +83,12 @@
 						<div class="panel">
                         <div class="panel-heading">
                             <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
-                                <a class="btn btn-success" href="${BASE_PATH}/sms/message_template/create">添加模板</a>
+                            	<#if macro.doOper("2002001")>
+                                	<button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
+                                </#if>
+                                <#if macro.doOper("2002002")>
+                                	<a class="btn btn-success" href="${BASE_PATH}/sms/message_template/create">添加模板</a>
+                            	</#if>
                             </div>
                             <h3 class="panel-title">
                             <span>模板列表</span>
@@ -107,6 +111,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign auditCheck = macro.doOper("2002006") />
+									<#assign editCheck = macro.doOper("2002003") />
+									<#assign deleteCheck = macro.doOper("2002004") />
+									<#assign matchingCheck = macro.doOper("2002005") />
                                 	<#if page?? && page.list??>
                                 	<#list page.list as pl>
                                     <tr>
@@ -121,11 +129,19 @@
                                         <td>
                                         	<#if pl.status==1>
                                         	<#else>
-	                                        	<a class="btn btn-default btn-xs" href="${BASE_PATH}/sms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批 </a>
+                                        		<#if auditCheck>
+	                                        		<a class="btn btn-default btn-xs" href="${BASE_PATH}/sms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批 </a>
+                                        		</#if>
                                         	</#if>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
-                                        	<a href="javascript:remove(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除</a>
-                                        	<a href="${BASE_PATH}/sms/message_template/matching?id=${pl.id}" class="btn btn-success btn-xs"><i class="fa fa-tags"></i>&nbsp;测试</a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
+                                        	</#if>
+                                        	<#if deleteCheck>
+                                        		<a href="javascript:remove(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除</a>
+                                        	</#if>
+                                        	<#if matchingCheck>
+                                        		<a href="${BASE_PATH}/sms/message_template/matching?id=${pl.id}" class="btn btn-success btn-xs"><i class="fa fa-tags"></i>&nbsp;测试</a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     <tr>

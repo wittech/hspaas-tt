@@ -13,9 +13,13 @@ import com.huashi.common.user.service.IUserService;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.ResponseMessage;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.sms.passage.service.ISmsPassageService;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
@@ -65,6 +69,10 @@ public class SmsRecordController extends BaseController {
 	 * 进行中的短信任务
 	 */
 	@ViewMenu(code = MenuCode.MENU_CODE_2001001)
+	@AuthCode(code= {OperCode.OPER_CODE_2001001001, OperCode.OPER_CODE_2001001002,OperCode.OPER_CODE_2001001003
+			,OperCode.OPER_CODE_2001001004,OperCode.OPER_CODE_2001001005,OperCode.OPER_CODE_2001001006,OperCode.OPER_CODE_2001001007
+			,OperCode.OPER_CODE_2001001008,OperCode.OPER_CODE_2001001009,OperCode.OPER_CODE_2001001010})
+	@ActionMode
 	public void under_way_list() {
 		Map<String, Object> condition = appendTaskQueryParams(UNWDER_WAY);
 		
@@ -79,6 +87,8 @@ public class SmsRecordController extends BaseController {
 	 * 已完成的短信任务
 	 */
 	@ViewMenu(code = MenuCode.MENU_CODE_2001003)
+	@AuthCode(code= {OperCode.OPER_CODE_2001003001, OperCode.OPER_CODE_2001003002,OperCode.OPER_CODE_2001003003})
+	@ActionMode
 	public void completed_list() {
 		Map<String, Object> condition = appendTaskQueryParams(COMPLETED);
 		
@@ -91,6 +101,8 @@ public class SmsRecordController extends BaseController {
 	 * 子任务查询
 	 */
 	@ViewMenu(code = MenuCode.MENU_CODE_2001001)
+	@AuthCode(code= OperCode.OPER_CODE_2001001008)
+	@ActionMode
 	public void child_task() {
 		List<SmsMtTaskPackets> taskList = iSmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
 		setAttr("taskList", taskList);
@@ -100,6 +112,8 @@ public class SmsRecordController extends BaseController {
 	 * 子任务查询
 	 */
 	@ViewMenu(code = MenuCode.MENU_CODE_2001003)
+	@AuthCode(code= OperCode.OPER_CODE_2001003001)
+	@ActionMode
 	public void complate_child_task() {
 		List<SmsMtTaskPackets> taskList = iSmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
 		setAttr("taskList", taskList);
@@ -205,6 +219,8 @@ public class SmsRecordController extends BaseController {
 	 * 调用失败记录
 	 */
 	@ViewMenu(code = MenuCode.MENU_CODE_2001005)
+	@AuthCode(code= OperCode.OPER_CODE_2001005001)
+	@ActionMode
 	public void invoke_fail_list() {
 		String keyword = getPara("keyword");
 		BossPaginationVo<SmsApiFailedRecord> page = iSmsApiFaildRecordService.findPage(getPN(), keyword);
@@ -216,6 +232,8 @@ public class SmsRecordController extends BaseController {
 	 * 处理失败记录
 	 */
 	@ViewMenu(code = MenuCode.MENU_CODE_2001006)
+	@AuthCode(code= OperCode.OPER_CODE_2001006001)
+	@ActionMode
 	public void disponse_fail_list() {
 		String keyword = getPara("keyword");
 		Long sid = getParaToLong("sid");
@@ -228,6 +246,8 @@ public class SmsRecordController extends BaseController {
 	 * 短信发送记录(短信下行记录查询 submit)
 	 */
 	@ViewMenu(code = MenuCode.MENU_CODE_2001002)
+	@AuthCode(code= {OperCode.OPER_CODE_2001003002,OperCode.OPER_CODE_2001002001})
+	@ActionMode
 	public void send_record_list() {
 		Map<String, Object> condition = appendQueryParams();
 
@@ -278,6 +298,8 @@ public class SmsRecordController extends BaseController {
 	/**
 	 * 上行接收记录
 	 */
+	@AuthCode(code= OperCode.OPER_CODE_2001004001)
+	@ActionMode
 	public void up_revice_list() {
 		setAttr("page", iSmsMoMessageService.findPage(getPN(), getPara("keyword")));
 		setAttr("keyword", getPara("keyword"));
@@ -287,6 +309,8 @@ public class SmsRecordController extends BaseController {
 	 * 
 	 * TODO 子任务驳回
 	 */
+	@AuthCode(code= {OperCode.OPER_CODE_2001001003})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void refuse_task() {
 		renderResultJson(iSmsMtTaskService.doRejectInTaskPackets(getParaToLong("childId")));
 	}
@@ -295,6 +319,8 @@ public class SmsRecordController extends BaseController {
 	 * 
 	 * TODO 批量切换通道
 	 */
+	@AuthCode(code= {OperCode.OPER_CODE_2001001005})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void batchSwitchPassage() {
 		try {
 			renderResultJson(iSmsMtTaskService.changeTaskPacketsPassage(getPara("ids"), getParaToInt("switchPassageId")));
@@ -319,6 +345,8 @@ public class SmsRecordController extends BaseController {
 	 * 
 	 * TODO 批量驳回任务
 	 */
+	@AuthCode(code= {OperCode.OPER_CODE_2001001003})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void batchRefuse() {
 		try {
 			renderResultJson(iSmsMtTaskService.doRejectInTask(getPara("ids")));
@@ -343,6 +371,8 @@ public class SmsRecordController extends BaseController {
 	 * 
 	 * TODO 批量审批通过
 	 */
+	@AuthCode(code= {OperCode.OPER_CODE_2001001001})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void batchPass() {
 		try {
 			renderJson(iSmsMtTaskService.doTaskApproved(getPara("ids")));
@@ -363,6 +393,8 @@ public class SmsRecordController extends BaseController {
 	 * 
 	 * TODO 批量重新分包
 	 */
+	@AuthCode(code= {OperCode.OPER_CODE_2001001006})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void batchRepeatTask() {
 		renderResultJson(iSmsMtTaskService.batchDoRePackets(getPara("ids")));
 	}

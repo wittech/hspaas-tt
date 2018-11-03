@@ -56,9 +56,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/base/product/add">添加产品</a>
-                            </div>
+                        	<#if macro.doOper("1003003002")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/base/product/add">添加产品</a>
+	                            </div>
+	                        </#if>
                             <h3 class="panel-title">
                             <span>产品列表</span>
                             </h3>
@@ -78,6 +80,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                <#assign deleteCheck = macro.doOper("1003003004") />
+								<#assign editCheck = macro.doOper("1003003003") />
+								<#assign disabledCheck = macro.doOper("1003003005") />
                                 <#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -97,12 +102,18 @@
                                         <td>${pl.amount}&nbsp;${pl.unit!''}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/product/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
-                                        	<a class="btn btn-danger btn-xs" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
-                                        	<#if pl.status == 0>
-                                        		<a class="btn btn-default btn-xs" onclick="disabled(${pl.id},1);"><i class="fa fa-lock"></i>&nbsp;下线 </a>
-                                        	<#else>
-												<a class="btn btn-default btn-xs" onclick="disabled(${pl.id},0);"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/product/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	</#if>
+                                        	<#if deleteCheck>
+                                        		<a class="btn btn-danger btn-xs" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                        	</#if>
+                                        	<#if disabledCheck>
+	                                        	<#if pl.status == 0>
+	                                        		<a class="btn btn-default btn-xs" onclick="disabled(${pl.id},1);"><i class="fa fa-lock"></i>&nbsp;下线 </a>
+	                                        	<#else>
+													<a class="btn btn-default btn-xs" onclick="disabled(${pl.id},0);"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+	                                        	</#if>
                                         	</#if>
                                         </td>
                                     </tr>

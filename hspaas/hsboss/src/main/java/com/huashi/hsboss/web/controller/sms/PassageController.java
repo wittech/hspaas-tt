@@ -18,9 +18,13 @@ import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext;
 import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
 import com.huashi.sms.passage.domain.SmsPassage;
@@ -62,6 +66,9 @@ public class PassageController extends BaseController {
      * 
        * TODO 列表页面
      */
+    @AuthCode(code= {OperCode.OPER_CODE_2003001001, OperCode.OPER_CODE_2003001002,OperCode.OPER_CODE_2003001003
+			,OperCode.OPER_CODE_2003001004,OperCode.OPER_CODE_2003001005,OperCode.OPER_CODE_2003001006})
+	@ActionMode
     public void index() {
         String keyword = getPara("keyword");
         BossPaginationVo<SmsPassage> page = iSmsPassageService.findPage(getPN(), keyword);
@@ -73,6 +80,8 @@ public class PassageController extends BaseController {
      * 
        * TODO 跳转添加页面
      */
+    @AuthCode(code= OperCode.OPER_CODE_2003001001)
+	@ActionMode
     public void add() {
         setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.SMS.getValue()));
         setAttr("cmcp", CommonContext.CMCP.values());
@@ -84,6 +93,8 @@ public class PassageController extends BaseController {
      * 
        * TODO 添加
      */
+    @AuthCode(code= OperCode.OPER_CODE_2003001001)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void create() {
         SmsPassage passage = getModel(SmsPassage.class, "passage");
         String templateDetails = getPara("templateDetails");
@@ -132,6 +143,8 @@ public class PassageController extends BaseController {
      * 
        * TODO 跳转修改页面
      */
+    @AuthCode(code= OperCode.OPER_CODE_2003001002)
+	@ActionMode
     public void edit() {
         SmsPassage passage = iSmsPassageService.findById(getParaToInt("id"));
         UserProfile user = iUserService.getProfileByUserId(passage.getExclusiveUserId());
@@ -162,6 +175,8 @@ public class PassageController extends BaseController {
 
     }
 
+    @AuthCode(code= OperCode.OPER_CODE_2003001002)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void update() {
         SmsPassage passage = getModel(SmsPassage.class, "passage");
         String templateDetails = getPara("templateDetails");
@@ -197,6 +212,8 @@ public class PassageController extends BaseController {
         renderJson(iSmsPassageService.update(passage, getPara("provinceCodes")));
     }
 
+    @AuthCode(code= OperCode.OPER_CODE_2003001003)
+   	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void delete() {
         renderResultJson(iSmsPassageService.deleteById(getParaToInt("id")));
     }
@@ -205,6 +222,8 @@ public class PassageController extends BaseController {
      * 
        * TODO 禁用激活
      */
+    @AuthCode(code= OperCode.OPER_CODE_2003001004)
+   	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void disabled() {
         try {
         	renderResultJson(iSmsPassageService.disabledOrActive(getParaToInt("id"), getParaToInt("flag")));
@@ -217,6 +236,8 @@ public class PassageController extends BaseController {
      * 
        * TODO 断开通道连接
      */
+    @AuthCode(code= OperCode.OPER_CODE_2003001005)
+   	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void kill() {
         try {
             renderResultJson(iSmsPassageService.kill(getParaToInt("id")));
@@ -246,6 +267,8 @@ public class PassageController extends BaseController {
     /**
      * 通道测试
      */
+    @AuthCode(code= OperCode.OPER_CODE_2003001006)
+   	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void test() {
         Integer passageId = getParaToInt("passageId");
         String mobile = getPara("mobile");

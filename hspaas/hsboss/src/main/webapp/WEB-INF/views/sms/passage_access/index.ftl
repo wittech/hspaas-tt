@@ -78,9 +78,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
-                            </div>
+                        	<#if macro.doOper("2003004001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
+	                            </div>
+	                        </#if>
                             <h3 class="panel-title">
                             <span>用户运行中通道列表</span>
                             </h3>
@@ -104,6 +106,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign editCheck = macro.doOper("2003004002") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -132,7 +135,9 @@
 										<td>${pl.passageCode!''}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage_access/edit?id=${pl.id}&groupId=${pl.groupId}&cmcp=${pl.cmcp}&routeType=${pl.routeType}"><i class="fa fa-edit"></i>&nbsp编辑</a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage_access/edit?id=${pl.id}&groupId=${pl.groupId}&cmcp=${pl.cmcp}&routeType=${pl.routeType}"><i class="fa fa-edit"></i>&nbsp编辑</a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     </#list>

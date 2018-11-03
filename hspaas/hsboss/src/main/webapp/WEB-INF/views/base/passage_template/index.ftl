@@ -56,9 +56,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/base/passage_template/add">添加通道模板</a>
-                            </div>
+                        	<#if macro.doOper("2003003001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/base/passage_template/add">添加通道模板</a>
+	                            </div>
+                            </#if>
                             <h3 class="panel-title">
                             <span>通道模板列表</span>
                             </h3>
@@ -77,6 +79,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign deleteCheck = macro.doOper("2003003003") />
+									<#assign editCheck = macro.doOper("2003003002") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -95,9 +99,15 @@
 										</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/passage_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/passage_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	</#if>
+                                        	<#if editCheck && deleteCheck>
                                         	|
-                                        	<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除</a>
+                                        	</#if>
+                                        	<#if deleteCheck>
+                                        		<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除</a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     </#list>

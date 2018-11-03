@@ -128,19 +128,33 @@
                 <div class="panel">
                     <div class="panel-heading">
                         <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                            <a href="javascript:void(0);" class="btn btn-success" onclick="batchPass();">审核通过</a>
-                            &nbsp;
-                            <a href="javascript:void(0);" class="btn btn-mint" onclick="batchPassWithSameContent();">同内容批放</a>
-                            &nbsp;
-                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuse();">驳回</a>
-                            &nbsp;
-                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuseWithSameContent();">同内容驳回</a>
-                            &nbsp;
-                            <a href="javascript:void(0);" class="btn btn-warning" onclick="openSwitchPassage();">切换通道</a>
-                            &nbsp;
-                            <a href="javascript:void(0);" class="btn btn-info" onclick="batchRepeatTask();">重新分包</a>
-                            &nbsp;
-                            <a href="javascript:void(0);" class="btn btn-default" onclick="batchEditContent();">修改内容</a>
+                        	<#if macro.doOper("2001001001")>
+                            	<a href="javascript:void(0);" class="btn btn-success" onclick="batchPass();">审核通过</a>
+                            </#if>
+                            <#if macro.doOper("2001001002")>
+	                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-mint" onclick="batchPassWithSameContent();">同内容批放</a>
+                            </#if>
+                            <#if macro.doOper("2001001003")>
+	                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuse();">驳回</a>
+                            </#if>
+                            <#if macro.doOper("2001001004")>
+	                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuseWithSameContent();">同内容驳回</a>
+                            </#if>
+                            <#if macro.doOper("2001001005")>
+	                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-warning" onclick="openSwitchPassage();">切换通道</a>
+                            </#if>
+                            <#if macro.doOper("2001001006")>
+	                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-info" onclick="batchRepeatTask();">重新分包</a>
+                            </#if>
+                            <#if macro.doOper("2001001007")>
+	                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-default" onclick="batchEditContent();">修改内容</a>
+                        	</#if>
                         </div>
                         <h3 class="panel-title">
                             <span>待处理短信任务</span>
@@ -169,6 +183,9 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign childTaskCheck = macro.doOper("2001001008") />
+							<#assign isTemplateErrorCheck = macro.doOper("2001001009") />
+							<#assign sensitiveWordsCheck = macro.doOper("2001001010") />
                             <#list page.list as pl>
                             <tr onclick="choose(this);">
                                 <td rowspan="2"
@@ -270,18 +287,24 @@
                                     </#if>
                                 </td>
                                 <td>
-                                    <a href="${BASE_PATH}/sms/record/child_task?sid=${pl.sid}"
-                                       class="btn btn-info btn-xs">子任务</a>
+                                	<#if childTaskCheck>
+	                                    <a href="${BASE_PATH}/sms/record/child_task?sid=${pl.sid}"
+	                                       class="btn btn-info btn-xs">子任务</a>
+                                    </#if>
                                      
                                     <#if pl.submitType != 1 && pl.submitType != 2>
-                                    	<a href="${BASE_PATH }/sms/message_template/create?sid=${pl.sid}" class="btn btn-primary btn-xs"><#if pl.isTemplateError()>模板报备<#else>模板叠加</#if></a>
-	                                    <#if pl.isWordError()>
-	                                    	<#if pl.messageTemplateId?? && pl.messageTemplateId gt 0>
-			                                    <a  href="${BASE_PATH }/sms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}"
-			                                       class="btn btn-default btn-xs">敏感词导白</a>
-			                                <#else>
-			                                	<a href="${BASE_PATH }/sms/message_template/create?sid=${pl.sid}" class="btn btn-default btn-xs">敏感词导白</a>
-			                                </#if>
+                                    	<#if isTemplateErrorCheck>
+                                    		<a href="${BASE_PATH }/sms/message_template/create?sid=${pl.sid}" class="btn btn-primary btn-xs"><#if pl.isTemplateError()>模板报备<#else>模板叠加</#if></a>
+	                                    </#if>
+	                                    <#if sensitiveWordsCheck>
+		                                    <#if pl.isWordError()>
+		                                    	<#if pl.messageTemplateId?? && pl.messageTemplateId gt 0>
+				                                    <a  href="${BASE_PATH }/sms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}"
+				                                       class="btn btn-default btn-xs">敏感词导白</a>
+				                                <#else>
+				                                	<a href="${BASE_PATH }/sms/message_template/create?sid=${pl.sid}" class="btn btn-default btn-xs">敏感词导白</a>
+				                                </#if>
+		                                    </#if>
 	                                    </#if>
                                     </#if>
                                    <#--

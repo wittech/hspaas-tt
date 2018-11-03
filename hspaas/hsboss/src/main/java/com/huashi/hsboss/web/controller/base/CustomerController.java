@@ -44,9 +44,13 @@ import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.fs.passage.domain.FluxPassageGroup;
 import com.huashi.fs.passage.service.IFsPassageGroupService;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.sms.passage.domain.SmsPassageGroup;
 import com.huashi.sms.passage.service.ISmsPassageGroupService;
@@ -85,6 +89,9 @@ public class CustomerController extends BaseController {
     @BY_NAME
     private IUserDeveloperService    iUserDeveloperService;
 
+    @AuthCode(code= {OperCode.OPER_CODE_1001001001, OperCode.OPER_CODE_1001001002,OperCode.OPER_CODE_1001001003001,
+			OperCode.OPER_CODE_1001001004,OperCode.OPER_CODE_1001001005})
+	@ActionMode
     public void index() {
         String fullName = getPara("fullName");
         String mobile = getPara("mobile");
@@ -105,6 +112,8 @@ public class CustomerController extends BaseController {
 
     }
 
+    @AuthCode(code= {OperCode.OPER_CODE_1001001001})
+    @ActionMode
     public void add() {
         List<SystemConfig> balanceConfigList = iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_BALANCE.name());
         Map<String, Object> balanceConfigMap = new HashMap<String, Object>();
@@ -130,6 +139,8 @@ public class CustomerController extends BaseController {
         // setAttr("fxPassageGroupList", fxPassageGroupList);
     }
 
+    @AuthCode(code= {OperCode.OPER_CODE_1001001001})
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void create() {
         User user = getModel(User.class, "user");
         boolean checkMobile = iUserService.isUserExistsByMobile(user.getMobile());
@@ -248,6 +259,8 @@ public class CustomerController extends BaseController {
         renderResultJson(result);
     }
 
+    @AuthCode(code= {OperCode.OPER_CODE_1001001002})
+   	@ActionMode
     public void edit() throws Exception {
         int userId = getParaToInt("id");
         UserProfile profile = iUserService.getProfileByUserId(userId);
@@ -311,6 +324,8 @@ public class CustomerController extends BaseController {
     }
 
     // 更新帐号信息
+   	@AuthCode(code= {OperCode.OPER_CODE_1001001002})
+   	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void updateUser() {
         User user = getModel(User.class, "user");
 
@@ -418,6 +433,8 @@ public class CustomerController extends BaseController {
     /**
      * TODO 禁用/启用
      */
+    @AuthCode(code= {OperCode.OPER_CODE_1001001005})
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void disabled() {
         renderResultJson(iUserService.changeStatus(getParaToInt("id"), getPara("flag")));
     }

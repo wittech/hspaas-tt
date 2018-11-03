@@ -56,8 +56,12 @@
                 <div class="panel">
                     <div class="panel-heading">
                         <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                            <button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
-                            <a class="btn btn-success" href="${BASE_PATH}/sms/host_white/create">新增白名单</a>
+                        	<#if macro.doOper("2004004001")>
+                            	<button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
+                            </#if>
+                            <#if macro.doOper("2004004002")>
+                            	<a class="btn btn-success" href="${BASE_PATH}/sms/host_white/create">新增白名单</a>
+                            </#if>
                         </div>
                         <h3 class="panel-title">
                             <span>ip白名单列表</span>
@@ -76,6 +80,7 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign deleteCheck = macro.doOper("2004004003") />
                             <#list page.list as pl>
                             <tr>
                                 <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -85,7 +90,9 @@
                                 </td>
                                 <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                 <td>
-                                    <a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                	<#if deleteCheck>
+                                    	<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                	</#if>
                                 </td>
                             </tr>
                             </#list>

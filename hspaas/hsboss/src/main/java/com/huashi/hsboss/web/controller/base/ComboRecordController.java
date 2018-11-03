@@ -4,9 +4,12 @@ import com.huashi.bill.order.constant.TradeOrderContext;
 import com.huashi.bill.order.domain.TradeOrder;
 import com.huashi.bill.order.service.ITradeOrderService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.jfinal.ext.route.ControllerBind;
 
@@ -22,6 +25,8 @@ public class ComboRecordController extends BaseController {
 	@Inject.BY_NAME
 	private ITradeOrderService iTradeOrderService;
 
+	@AuthCode(code= {OperCode.OPER_CODE_1003002001})
+	@ActionMode
 	public void index(){
 		String keyword = getPara("keyword");
 		String start = getPara("start");

@@ -69,9 +69,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/base/combo/add">添加套餐</a>
-                            </div>
+                        	<#if macro.doOper("1003001002")>
+	                            <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/base/combo/add">添加套餐</a>
+	                            </div>
+                            </#if>
                             <h3 class="panel-title">
                             <span>套餐列表</span>
                             </h3>
@@ -90,6 +92,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+									<#assign editCheck = macro.doOper("1003001003") />
+									<#assign disabledCheck = macro.doOper("1003001005") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${pl.name}</td>
@@ -104,16 +108,20 @@
                                         </td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<#if pl.status == 1>
-                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/combo/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	<#if editCheck>
+	                                        	<#if pl.status == 1>
+	                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/combo/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+	                                        	</#if>
                                         	</#if>
                                         	<#--
-                                        	<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                        		<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
                                         	-->
-                                        	<#if pl.status == 0>
-                                        		<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},1)"><i class="fa fa-lock"></i>&nbsp;下线 </a>
-                                        	<#else>
-                                        		<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},0)"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+                                        	<#if disabledCheck>
+	                                        	<#if pl.status == 0>
+	                                        		<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},1)"><i class="fa fa-lock"></i>&nbsp;下线 </a>
+	                                        	<#else>
+	                                        		<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},0)"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+	                                        	</#if>
                                         	</#if>
                                         </td>
                                     </tr>

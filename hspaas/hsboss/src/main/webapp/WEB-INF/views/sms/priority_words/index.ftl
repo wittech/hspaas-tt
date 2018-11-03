@@ -67,9 +67,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                        	 <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
-                                <button class="btn btn-success" onclick="location.href='${BASE_PATH}/sms/priority_words/create'">新增优先级词库</button>
-                            </div>
+                        	<#if macro.doOper("2004005001")>
+	                        	 <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
+	                                <button class="btn btn-success" onclick="location.href='${BASE_PATH}/sms/priority_words/create'">新增优先级词库</button>
+	                            </div>
+	                        </#if>
                             <h3 class="panel-title">
                             	<span>优先级词库列表</span>
                             </h3>
@@ -88,6 +90,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                               		<#assign editCheck = macro.doOper("2004005002") />
+									<#assign disabledCheck = macro.doOper("2004005003") />
+									<#assign deleteCheck = macro.doOper("2004005004") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -97,13 +102,19 @@
 										<td>${pl.priority!''}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/priority_words/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
-                                        	<#if pl.status==0>
-                                        		<a class="btn btn-default btn-xs" href="javascript:enableAndisable(${pl.id},1)"><i class="fa fa-edit"></i>&nbsp关闭</a>
-                                        	<#else>
-                                        		<a class="btn btn-default btn-xs" href="javascript:enableAndisable(${pl.id},0)"><i class="fa fa-edit"></i>&nbsp开启</a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/priority_words/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
                                         	</#if>
-                                        	<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                        	<#if disabledCheck>
+	                                        	<#if pl.status==0>
+	                                        		<a class="btn btn-default btn-xs" href="javascript:enableAndisable(${pl.id},1)"><i class="fa fa-edit"></i>&nbsp关闭</a>
+	                                        	<#else>
+	                                        		<a class="btn btn-default btn-xs" href="javascript:enableAndisable(${pl.id},0)"><i class="fa fa-edit"></i>&nbsp开启</a>
+	                                        	</#if>
+	                                        </#if>
+	                                        <#if deleteCheck>
+                                        		<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                       		</#if>
                                         </td>
                                     </tr>
                                     </#list>

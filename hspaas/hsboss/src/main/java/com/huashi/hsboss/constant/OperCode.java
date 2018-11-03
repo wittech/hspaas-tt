@@ -38,16 +38,36 @@ public class OperCode {
     public static final String OPER_CODE_1002001002 = "1002001002";
     /**公告管理_禁用*/
     public static final String OPER_CODE_1002001003 = "1002001003";
+    /**公告管理_删除*/
+    public static final String OPER_CODE_1002001004 = "1002001004";
     /**站内消息_发送站内消息*/
     public static final String OPER_CODE_1002002001 = "1002002001";
     /**站内消息_编辑*/
     public static final String OPER_CODE_1002002002 = "1002002002";
+    /**站内消息_删除*/
+    public static final String OPER_CODE_1002002003 = "1002002003";
     /**套餐管理_套餐管理操作*/
     public static final String OPER_CODE_1003001001 = "1003001001";
+    /**套餐管理_添加套餐*/
+    public static final String OPER_CODE_1003001002 = "1003001002";
+    /**套餐管理_编辑套餐*/
+    public static final String OPER_CODE_1003001003 = "1003001003";
+    /**套餐管理_删除 套餐*/
+    public static final String OPER_CODE_1003001004 = "1003001004";
+    /**套餐管理_下线/启用套餐*/
+    public static final String OPER_CODE_1003001005 = "1003001005";
     /**套餐购买充值记录_套餐购买充值记录操作*/
     public static final String OPER_CODE_1003002001 = "1003002001";
     /**产品管理_产品管理*/
     public static final String OPER_CODE_1003003001 = "1003003001";
+    /**产品管理_添加产品管理*/
+    public static final String OPER_CODE_1003003002 = "1003003002";
+    /**产品管理_编辑产品管理*/
+    public static final String OPER_CODE_1003003003 = "1003003003";
+    /**产品管理_删除产品管理*/
+    public static final String OPER_CODE_1003003004 = "1003003004";
+    /**产品管理_禁用产品管理*/
+    public static final String OPER_CODE_1003003005 = "1003003005";
     /**待处理短信任务_审核通过*/
     public static final String OPER_CODE_2001001001 = "2001001001";
     /**待处理短信任务_同内容批放*/
@@ -66,6 +86,8 @@ public class OperCode {
     public static final String OPER_CODE_2001001008 = "2001001008";
     /**待处理短信任务_模板报备*/
     public static final String OPER_CODE_2001001009 = "2001001009";
+    /**待处理短信任务_敏感词导白*/
+    public static final String OPER_CODE_2001001010 = "2001001010";
     /**短信发送记录_短信发送记录*/
     public static final String OPER_CODE_2001002001 = "2001002001";
     /**已完成短信任务_子任务*/
@@ -90,6 +112,8 @@ public class OperCode {
     public static final String OPER_CODE_2002004 = "2002004";
     /**模板管理_测试*/
     public static final String OPER_CODE_2002005 = "2002005";
+    /**模板管理_审批*/
+    public static final String OPER_CODE_2002006 = "2002006";
     /**通道管理_添加模板*/
     public static final String OPER_CODE_2003001001 = "2003001001";
     /**通道管理_编辑*/
@@ -108,9 +132,9 @@ public class OperCode {
     public static final String OPER_CODE_2003002002 = "2003002002";
     /**通道模板管理_添加通道模板*/
     public static final String OPER_CODE_2003003001 = "2003003001";
-    /**通道模板管理_添加通道模板*/
+    /**通道模板管理_编辑通道模板*/
     public static final String OPER_CODE_2003003002 = "2003003002";
-    /**通道模板管理_添加通道模板*/
+    /**通道模板管理_删除通道模板*/
     public static final String OPER_CODE_2003003003 = "2003003003";
     /**用户运行中通道管理_重载redis*/
     public static final String OPER_CODE_2003004001 = "2003004001";
@@ -202,7 +226,7 @@ public class OperCode {
     public static final String OPER_CODE_5001002001 = "5001002001";
     /**通道发送统计_图表*/
     public static final String OPER_CODE_5001003001 = "5001003001";
-    /**通道发送统计_图表*/
+    /**通道发送统计_省份图表*/
     public static final String OPER_CODE_5001004001 = "5001004001";
     /**客户消费统计_客户消费统计操作*/
     public static final String OPER_CODE_5002001001 = "5002001001";

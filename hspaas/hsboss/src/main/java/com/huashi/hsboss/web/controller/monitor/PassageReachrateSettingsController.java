@@ -1,9 +1,13 @@
 package com.huashi.hsboss.web.controller.monitor;
 
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.monitor.passage.service.IPassageMonitorService;
 import com.huashi.sms.passage.domain.SmsPassage;
@@ -31,6 +35,8 @@ public class PassageReachrateSettingsController extends BaseController {
     @Inject.BY_NAME
     private IPassageMonitorService iPassageMonitorService;
 
+    @AuthCode(code= {OperCode.OPER_CODE_8003001, OperCode.OPER_CODE_8003002,OperCode.OPER_CODE_8003003})
+	@ActionMode
     public void index(){
         String keyword = getPara("keyword");
         BossPaginationVo<SmsPassageReachrateSettings> page = iSmsPassageReachrateSettingsService.findPage(getPN(),keyword);
@@ -38,11 +44,15 @@ public class PassageReachrateSettingsController extends BaseController {
         setAttr("keyword", keyword);
     }
 
+    @AuthCode(code= OperCode.OPER_CODE_8003001)
+	@ActionMode
     public void add(){
         List<SmsPassage> passageList = iSmsPassageReachrateSettingsService.getPassageByUseable();
         setAttr("passageList", passageList);
     }
 
+    @AuthCode(code= OperCode.OPER_CODE_8003001)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void create(){
         SmsPassageReachrateSettings data = getModel(SmsPassageReachrateSettings.class,"model");
         data.setStartTime(data.getStartTime() * 60);
@@ -58,6 +68,8 @@ public class PassageReachrateSettingsController extends BaseController {
         renderResultJson(id > -1);
     }
 
+    @AuthCode(code= OperCode.OPER_CODE_8003002)
+  	@ActionMode
     public void edit(){
         SmsPassageReachrateSettings source = iSmsPassageReachrateSettingsService.findById(getParaToLong("id"));
         SmsPassage passage = iSmsPassageService.findById(source.getPassageId().intValue());
@@ -67,6 +79,8 @@ public class PassageReachrateSettingsController extends BaseController {
         setAttr("passageList", passageList);
     }
 
+    @AuthCode(code= OperCode.OPER_CODE_8003002)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void update(){
         SmsPassageReachrateSettings data = getModel(SmsPassageReachrateSettings.class,"model");
         data.setStartTime(data.getStartTime() * 60);
@@ -76,7 +90,8 @@ public class PassageReachrateSettingsController extends BaseController {
         renderResultJson(result);
     }
 
-
+    @AuthCode(code= OperCode.OPER_CODE_8003003)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void disabled(){
         Long id = getParaToLong("id");
         int flag = getParaToInt("flag");    //1-启用 2-禁用

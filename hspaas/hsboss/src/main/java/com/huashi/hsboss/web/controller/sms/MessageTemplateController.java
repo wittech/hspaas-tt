@@ -15,9 +15,13 @@ import org.apache.commons.lang.StringUtils;
 
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.task.domain.SmsMtTask;
@@ -43,6 +47,9 @@ public class MessageTemplateController extends BaseController {
 	@BY_NAME
 	private ISmsMtTaskService iSmsMtTaskService;
 
+	@AuthCode(code= {OperCode.OPER_CODE_2002001, OperCode.OPER_CODE_2002002,OperCode.OPER_CODE_2002003
+			,OperCode.OPER_CODE_2002004,OperCode.OPER_CODE_2002005,OperCode.OPER_CODE_2002006})
+	@ActionMode
 	public void index() {
 		String userId = getPara("userId");
 		String keyword = getPara("keyword");
@@ -59,6 +66,8 @@ public class MessageTemplateController extends BaseController {
 		setAttr("userList", iUserService.findUserModels());
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2002002)
+	@ActionMode
 	public void add() {
 		MessageTemplate messageTemplate = getModel(MessageTemplate.class);
 		messageTemplate.setApproveUser(getLoginName());
@@ -69,6 +78,8 @@ public class MessageTemplateController extends BaseController {
 		renderResultJson(result);
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2002002)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void create() {
 		long sid = getParaToLong("sid",-1L);
 		
@@ -94,6 +105,8 @@ public class MessageTemplateController extends BaseController {
 	 * 
 	   * TODO 编辑（跳转到修改页面）
 	 */
+	@AuthCode(code= OperCode.OPER_CODE_2002003)
+	@ActionMode
 	public void edit() {
         long id = getParaToLong("id");
         long sid = getParaToLong("sid",-1L);
@@ -122,6 +135,8 @@ public class MessageTemplateController extends BaseController {
 		setAttr("userList", iUserService.findUserModels());
 	}
 	
+	@AuthCode(code= OperCode.OPER_CODE_2002003)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void update() {
 		MessageTemplate template = getModel(MessageTemplate.class, "messageTemplate");
 		template.setApproveUser(getLoginName());
@@ -131,18 +146,24 @@ public class MessageTemplateController extends BaseController {
 		renderResultJson(result);
 	}
 	
+	@AuthCode(code= OperCode.OPER_CODE_2002005)
+	@ActionMode
 	public void matching(){
 		long id = getParaToLong("id");
 		MessageTemplate template = iSmsTemplateService.get(id);
 		setAttr("messageTemplate", template);
 	}
 	
+	@AuthCode(code= OperCode.OPER_CODE_2002005)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void matchingSubmit(){
 		long id = getParaToLong("id");
 		String content = getPara("content");
 		renderResultJson(iSmsTemplateService.isContentMatched(id,content));
 	}
 	
+	@AuthCode(code= OperCode.OPER_CODE_2002006)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void audit(){
 		setAttr("templateStatus", ApproveStatus.values());
 		long id = getParaToLong("id");
@@ -150,12 +171,16 @@ public class MessageTemplateController extends BaseController {
 		setAttr("messageTemplate", template);
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2002004)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void delete() {
 		long id = getParaToLong("id");
 		boolean result = iSmsTemplateService.deleteById(id);
 		renderResultJson(result);
 	}
 	
+	@AuthCode(code= OperCode.OPER_CODE_2002001)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void loadingRedis(){
 	    renderResultJson(iSmsTemplateService.reloadToRedis());
 	}

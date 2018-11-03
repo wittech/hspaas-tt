@@ -79,9 +79,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/sms/passage_control/create">添加轮训控制</a>
-                            </div>
+                        	<#if macro.doOper("2003005001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/sms/passage_control/create">添加轮训控制</a>
+	                            </div>
+                            </#if>
                             <h3 class="panel-title">
                             <span>通道轮训控制列表</span>
                             </h3>
@@ -100,6 +102,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign editCheck = macro.doOper("2003005002") />
+									<#assign disabledCheck = macro.doOper("2003005003") />
+									<#assign deleteCheck = macro.doOper("2003005004") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -110,13 +115,19 @@
                                         <td>${pl.cron!''}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage_control/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
-                                        	<#if pl.status==0>
-                                        		<a class="btn btn-default btn-xs" href="javascript:updateStatus(${pl.id},1);"><i class="fa fa-lock"></i>&nbsp;停用 </a>
-                                        	<#else>
-	                                        	<a class="btn btn-default btn-xs" href="javascript:updateStatus(${pl.id},0);"><i class="fa fa-lock"></i>&nbsp;启用</a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage_control/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
                                         	</#if>
-                                        	<a href="javascript:remove(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                        	<#if disabledCheck>
+	                                        	<#if pl.status==0>
+	                                        		<a class="btn btn-default btn-xs" href="javascript:updateStatus(${pl.id},1);"><i class="fa fa-lock"></i>&nbsp;停用 </a>
+	                                        	<#else>
+		                                        	<a class="btn btn-default btn-xs" href="javascript:updateStatus(${pl.id},0);"><i class="fa fa-lock"></i>&nbsp;启用</a>
+	                                        	</#if>
+                                        	</#if>
+                                        	<#if deleteCheck>
+                                        		<a href="javascript:remove(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     </#list>

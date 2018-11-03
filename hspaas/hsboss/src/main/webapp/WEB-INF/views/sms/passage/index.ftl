@@ -54,9 +54,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/sms/passage/add">添加通道</a>
-                            </div>
+                        	<#if macro.doOper("2003001001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/sms/passage/add">添加通道</a>
+	                            </div>
+	                        </#if>
                             <h3 class="panel-title">
                             <span>通道列表</span>
                             </h3>
@@ -77,6 +79,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign editCheck = macro.doOper("2003001002") />
+                                	<#assign deleteCheck = macro.doOper("2003001003") />
+									<#assign disabledCheck = macro.doOper("2003001004") />
+									<#assign killCheck = macro.doOper("2003001005") />
+									<#assign testPassageCheck = macro.doOper("2003001006") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -111,18 +118,28 @@
 										<td>${pl.priority!'--'}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	</#if>
                                         	&nbsp;
-                                        	<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除</a>
-                                            &nbsp;
-                                            <#if pl.status == 0>
-                                                <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'1');"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
-                                            <#else>
-                                                <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'0');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+                                        	<#if deleteCheck>
+                                        		<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除</a>
                                             </#if>
-                                            <a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="kill(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;断连接</a>
                                             &nbsp;
-                                            <a class="btn btn-info btn-xs" href="javascript:void(0);" onclick="testPassage(${pl.id}, '${pl.name}');"><i class="fa fa-bug"></i>&nbsp;测试通道 </a>
+                                            <#if disabledCheck>
+	                                            <#if pl.status == 0>
+	                                                <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'1');"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
+	                                            <#else>
+	                                                <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'0');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+	                                            </#if>
+                                            </#if>
+                                            <#if killCheck>
+                                            	<a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="kill(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;断连接</a>
+                                            </#if>
+                                            &nbsp;
+                                            <#if testPassageCheck>
+                                            	<a class="btn btn-info btn-xs" href="javascript:void(0);" onclick="testPassage(${pl.id}, '${pl.name}');"><i class="fa fa-bug"></i>&nbsp;测试通道 </a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     </#list>

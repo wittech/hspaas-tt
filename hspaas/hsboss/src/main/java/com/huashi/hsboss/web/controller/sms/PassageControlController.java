@@ -3,8 +3,13 @@
  */
 package com.huashi.hsboss.web.controller.sms;
 
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.huashi.common.vo.BossPaginationVo;
@@ -33,6 +38,9 @@ public class PassageControlController extends BaseController {
 	@BY_NAME
 	private ISmsPassageParameterService iSmsPassageParameterService;
 
+	@AuthCode(code= {OperCode.OPER_CODE_2003005001, OperCode.OPER_CODE_2003005002,OperCode.OPER_CODE_2003005003
+			,OperCode.OPER_CODE_2003005004})
+	@ActionMode
 	public void index() {
 		String keyword = getPara("keyword");
 		String status = getPara("status");
@@ -48,16 +56,22 @@ public class PassageControlController extends BaseController {
 		setAttr("passageList", iSmsPassageService.findAll());
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2003005001)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void add() {
 		SmsPassageControl control = getModel(SmsPassageControl.class);
 		renderJson(iSmsPassageControlService.save(control));
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2003005001)
+	@ActionMode
 	public void create() {
 		setAttr("passageStatus", PassageStatus.values());
 		setAttr("passageList", iSmsPassageService.findAll());
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2003005002)
+	@ActionMode
 	public void edit() {
 		setAttr("passageStatus", PassageStatus.values());
 		setAttr("passageList", iSmsPassageService.findAll());
@@ -66,6 +80,8 @@ public class PassageControlController extends BaseController {
 		setAttr("smsPassageControl", control);
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2003005002)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void update() {
 		SmsPassageControl control = getModel(SmsPassageControl.class, "smsPassageControl");
 		renderJson(iSmsPassageControlService.update(control));
@@ -74,6 +90,8 @@ public class PassageControlController extends BaseController {
 	/**
 	 * 更新状态 启用/停用
 	 */
+	@AuthCode(code= OperCode.OPER_CODE_2003005003)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void updateStatus() {
 		SmsPassageControl control = getModel(SmsPassageControl.class, "smsPassageControl");
 		renderJson(iSmsPassageControlService.updateStatus(control));
@@ -87,6 +105,8 @@ public class PassageControlController extends BaseController {
 		renderJson(iSmsPassageParameterService.findByPassageId(Integer.parseInt(passageId)));
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_2003005004)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void delete() {
 		long id = getParaToLong("id");
 		renderResultJson(iSmsPassageControlService.deleteById((int) id));

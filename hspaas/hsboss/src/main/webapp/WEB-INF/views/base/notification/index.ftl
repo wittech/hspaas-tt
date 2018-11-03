@@ -59,9 +59,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/base/notification/add">发布公告</a>
-                            </div>
+                        	<#if macro.doOper("1002001001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/base/notification/add">发布公告</a>
+	                            </div>
+	                        </#if>    
                             <h3 class="panel-title">
                             <span>公告列表</span>
                             </h3>
@@ -81,6 +83,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign deleteCheck = macro.doOper("1002001004") />
+									<#assign editCheck = macro.doOper("1002001002") />
+									<#assign disabledCheck = macro.doOper("1002001003") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -104,12 +109,20 @@
                                         <td>${pl.hits!0}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/notification/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/notification/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	</#if>
                                         	<#if pl.status == 1>
-                                        		<a class="btn btn-danger btn-xs" href="javascript:deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
-                                        		<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},0);"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+                                        		<#if deleteCheck>
+                                        			<a class="btn btn-danger btn-xs" href="javascript:deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                        		</#if>
+                                        		<#if disabledCheck>
+                                        			<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},0);"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
+                                        		</#if>
                                         	<#else>
-                                        		<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},1);"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
+                                        		<#if disabledCheck>
+                                        			<a class="btn btn-default btn-xs" href="javascript:disabled(${pl.id},1);"><i class="fa fa-lock"></i>&nbsp;禁用 </a>
+                                        		</#if>
                                         	</#if>
                                         </td>
                                     </tr>

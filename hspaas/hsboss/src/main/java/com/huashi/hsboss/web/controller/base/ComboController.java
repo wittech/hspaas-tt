@@ -7,9 +7,13 @@ import com.huashi.bill.product.domain.Product;
 import com.huashi.bill.product.service.IComboService;
 import com.huashi.bill.product.service.IProductService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.jfinal.ext.route.ControllerBind;
 
@@ -28,6 +32,9 @@ public class ComboController extends BaseController {
 	@BY_NAME
 	private IProductService iProductService;
 
+	@AuthCode(code= {OperCode.OPER_CODE_1003001001,OperCode.OPER_CODE_1003001002, OperCode.OPER_CODE_1003001003,OperCode.OPER_CODE_1003001004
+			,OperCode.OPER_CODE_1003001005})
+	@ActionMode
 	public void index() {
 		String name = getPara("name");
 		String start = getPara("start");
@@ -39,6 +46,8 @@ public class ComboController extends BaseController {
 		setAttr("end", end);
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_1003001002)
+	@ActionMode
 	public void add() {
 
 	}
@@ -52,6 +61,8 @@ public class ComboController extends BaseController {
 		setAttr("productList", productList);
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_1003001002)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void create() {
 		Combo combo = getModel(Combo.class);
 		String originalMoney = getPara("originalMoney");
@@ -64,6 +75,8 @@ public class ComboController extends BaseController {
 		renderResultJson(result);
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_1003001003)
+	@ActionMode
 	public void edit() {
 		int id = getParaToInt("id");
 		Combo combo = iComboService.findById(id);
@@ -72,6 +85,8 @@ public class ComboController extends BaseController {
 		setAttr("combo", combo);
 	}
 
+	@AuthCode(code= OperCode.OPER_CODE_1003001003)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void update() {
 		Combo combo = getModel(Combo.class);
 		String originalMoney = getPara("originalMoney");
@@ -84,6 +99,8 @@ public class ComboController extends BaseController {
 		renderResultJson(result);
 	}
 
+	@AuthCode(code= {OperCode.OPER_CODE_1003001005})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void disabled() {
 		int id = getParaToInt("id");
 		int flag = getParaToInt("flag");
@@ -91,6 +108,8 @@ public class ComboController extends BaseController {
 		renderResultJson(result);
 	}
 
+	@AuthCode(code= {OperCode.OPER_CODE_1003001004})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void delete() {
 		int id = getParaToInt("id");
 		boolean result = iComboService.delete(id);

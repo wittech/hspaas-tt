@@ -14,9 +14,13 @@ import java.util.Map;
 import com.huashi.bill.product.domain.Product;
 import com.huashi.bill.product.service.IProductService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.jfinal.ext.route.ControllerBind;
 
@@ -31,7 +35,9 @@ public class ProductController extends BaseController {
 	@BY_NAME
 	private IProductService iProductService;
 	
-	
+	@AuthCode(code= {OperCode.OPER_CODE_1003003001, OperCode.OPER_CODE_1003003002,OperCode.OPER_CODE_1003003003,
+			OperCode.OPER_CODE_1003003004,OperCode.OPER_CODE_1003003005})
+	@ActionMode
 	public void index(){
 		String name = getPara("name");
 		BossPaginationVo<Product> page = iProductService.findPage(getPN(), name);
@@ -39,11 +45,14 @@ public class ProductController extends BaseController {
 		setAttr("page", page);
 	}
 	
-	
+	@AuthCode(code= {OperCode.OPER_CODE_1003003002})
+	@ActionMode
 	public void add(){
 		
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1003003002})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void create(){
 		Product product = getModel(Product.class);
 		product.setOperationId(getUserId());
@@ -53,12 +62,16 @@ public class ProductController extends BaseController {
 		renderResultJson(result);
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1003003003})
+	@ActionMode
 	public void edit(){
 		int id = getParaToInt("id");
 		Product product = iProductService.findById(id);
 		setAttr("product", product);
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1003003003})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void update(){
 		Product product = getModel(Product.class);
 		product.setModifyOperationId(getUserId());
@@ -68,12 +81,16 @@ public class ProductController extends BaseController {
 		renderResultJson(result);
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1003003004})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void delete(){
 		int id = getParaToInt("id");
 		Map<String, Object> map = iProductService.delete(id);
 		renderJson(map);
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1003003005})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void disabled(){
 		int id = getParaToInt("id");
 		int flag = getParaToInt("flag");

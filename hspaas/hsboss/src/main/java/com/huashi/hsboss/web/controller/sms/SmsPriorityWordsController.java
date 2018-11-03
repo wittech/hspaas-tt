@@ -7,9 +7,13 @@ import org.apache.commons.lang.StringUtils;
 
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.huashi.sms.settings.constant.SmsSettingsContext.ForbiddenWordsSwitch;
 import com.huashi.sms.settings.domain.SmsPriorityWords;
@@ -33,6 +37,9 @@ public class SmsPriorityWordsController extends BaseController {
 	/**
 	 * 查询列表页面
 	 */
+	@AuthCode(code= {OperCode.OPER_CODE_2004005001, OperCode.OPER_CODE_2004005002,OperCode.OPER_CODE_2004005003
+			,OperCode.OPER_CODE_2004005004})
+	@ActionMode
 	public void index() {
 		String content = getPara("content");
 		String userId = getPara("userId");
@@ -50,6 +57,8 @@ public class SmsPriorityWordsController extends BaseController {
 	/**
 	 * 添加页面
 	 */
+	@AuthCode(code= OperCode.OPER_CODE_2004005001)
+	@ActionMode
 	public void create() {
 		setAttr("forbiddenWordsSwitch", ForbiddenWordsSwitch.values());
 		setAttr("userList", iUserService.findAll());
@@ -58,6 +67,8 @@ public class SmsPriorityWordsController extends BaseController {
 	/**
 	 * 保存
 	 */
+	@AuthCode(code= OperCode.OPER_CODE_2004005001)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void save() {
 		SmsPriorityWords words = getModel(SmsPriorityWords.class, "smsPriorityWords");
 		renderResultJson(iSmsPriorityWordsService.save(words));
@@ -66,6 +77,8 @@ public class SmsPriorityWordsController extends BaseController {
 	/**
 	 * 编辑页面
 	 */
+	@AuthCode(code= OperCode.OPER_CODE_2004005002)
+	@ActionMode
 	public void edit() {
 		long id = getParaToLong("id");
 		SmsPriorityWords words = iSmsPriorityWordsService.get((int) id);
@@ -77,6 +90,8 @@ public class SmsPriorityWordsController extends BaseController {
 	/**
 	 * 启用/禁用/修改
 	 */
+	@AuthCode(code= {OperCode.OPER_CODE_2004005002,OperCode.OPER_CODE_2004005003})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void enableAndisable() {
 		SmsPriorityWords words = getModel(SmsPriorityWords.class, "smsPriorityWords");
 		renderResultJson(iSmsPriorityWordsService.enableAndisable(words));
@@ -85,6 +100,8 @@ public class SmsPriorityWordsController extends BaseController {
 	/**
 	 * 删除
 	 */
+	@AuthCode(code= OperCode.OPER_CODE_2004005004)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void delete(){
         renderResultJson(iSmsPriorityWordsService.delete(getParaToInt("id")));
     }

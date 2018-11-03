@@ -146,6 +146,9 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign complateChildTaskCheck = macro.doOper("2001003001") />
+							<#assign sendRecordListCheck = macro.doOper("2001003002") />
+							<#assign tempCheck = macro.doOper("2001003003") />
                             <#list page.list as pl>
                             <tr>
                                <td rowspan="2" style="background: #fff;text-align: center;">${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -224,13 +227,19 @@
                                     </#if>
                                 </td>
                                 <td>
-                                    <a href="${BASE_PATH}/sms/record/complate_child_task?sid=${pl.sid}" class="btn btn-info btn-xs">子任务</a>
-                                    |
-                                    <a href="${BASE_PATH}/sms/record/send_record_list?sid=${pl.sid}" class="btn btn-success btn-xs">发送记录</a>
+                                	<#if complateChildTaskCheck>
+                                    	<a href="${BASE_PATH}/sms/record/complate_child_task?sid=${pl.sid}" class="btn btn-info btn-xs">子任务</a>
+                                    </#if>
+                                    <#if sendRecordListCheck>
+                                    	|
+                                    	<a href="${BASE_PATH}/sms/record/send_record_list?sid=${pl.sid}" class="btn btn-success btn-xs">发送记录</a>
+                                    </#if>
                                     |
                                    <#if pl.messageTemplateId?? && pl.messageTemplateId gt 0>
-                                    <a href="${BASE_PATH}/sms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}"
+                                   	<#if tempCheck>
+                                    	<a href="${BASE_PATH}/sms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}"
 			                                       class="btn btn-default btn-xs">模板</a>
+			                        </#if>
 			                        <#else>
 			                        <a href="javascript:void(0);" class="btn btn-default btn-xs">无</a>
                                     </#if>

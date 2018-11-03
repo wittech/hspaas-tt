@@ -13,9 +13,13 @@ import com.huashi.common.settings.domain.Province;
 import com.huashi.common.settings.service.IProvinceService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.dto.PassageCmcpDto;
 import com.huashi.hsboss.dto.PassageGroupProvinceDto;
 import com.huashi.hsboss.web.controller.common.BaseController;
@@ -49,7 +53,8 @@ public class PassageGroupController extends BaseController {
     @BY_NAME
     private IProvinceService iProvinceService;
 
-	
+    @AuthCode(code= {OperCode.OPER_CODE_2003002001, OperCode.OPER_CODE_2003002002})
+	@ActionMode
 	public void index(){
 		String keyword = getPara("keyword");
 		BossPaginationVo<SmsPassageGroup> page = iSmsPassageGroupService.findPage(getPN(), keyword);
@@ -57,6 +62,8 @@ public class PassageGroupController extends BaseController {
 		setAttr("keyword", keyword);
 	}
 	
+    @AuthCode(code= OperCode.OPER_CODE_2003002001)
+	@ActionMode
 	public void add(){
         List<Province> provinceList = iProvinceService.findAvaiable();
         CommonContext.CMCP[] cmcps = CommonContext.CMCP.values();
@@ -89,6 +96,8 @@ public class PassageGroupController extends BaseController {
         setAttr("passageList", passageList);
     }
 
+    @AuthCode(code= OperCode.OPER_CODE_2003002001)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
     public void create(){
         SmsPassageGroup group = getModel(SmsPassageGroup.class, "group");
         //passageId + split_tag + passageName + split_tag + provinceCode + split_tag + cmcp + split_tag + routeType;
@@ -148,6 +157,8 @@ public class PassageGroupController extends BaseController {
         setAttr("group", group);
     }
 
+	@AuthCode(code= OperCode.OPER_CODE_2003002002)
+	@ActionMode
     public void edit(){
         SmsPassageGroup group = iSmsPassageGroupService.findById(getParaToInt("id"));
         List<Province> provinceList = new LinkedList<Province>();
@@ -207,6 +218,8 @@ public class PassageGroupController extends BaseController {
      * 
        * TODO 修改通道组
      */
+	@AuthCode(code= OperCode.OPER_CODE_2003002002)
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void update(){
 		SmsPassageGroup group = getModel(SmsPassageGroup.class, "group");
         for(RouteType rt : RouteType.values()){

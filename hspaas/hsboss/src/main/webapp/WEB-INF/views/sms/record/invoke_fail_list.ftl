@@ -76,6 +76,7 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign openFailReasonCheck = macro.doOper("2001005001") />
                             <#list page.list as pl>
                             <tr>
                                 <td rowspan="2" style="background: #fff;text-align: center;">${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -112,8 +113,10 @@
                                 </td>
                                 <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                 <td>
-                                    <#if pl.respCode?? && pl.respCode != ''>
-                                        <a href="javascript:void(0);" onclick="openFailReason('${pl.respCode?html}')" class="btn btn-info btn-xs">失败原因</a>
+                                	<#if openFailReasonCheck>
+	                                    <#if pl.respCode?? && pl.respCode != ''>
+	                                        <a href="javascript:void(0);" onclick="openFailReason('${pl.respCode?html}')" class="btn btn-info btn-xs">失败原因</a>
+	                                    </#if>
                                     </#if>
                                 </td>
                             </tr>

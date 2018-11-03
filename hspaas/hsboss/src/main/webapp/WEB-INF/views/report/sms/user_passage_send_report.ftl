@@ -78,9 +78,11 @@
 
                 <div class="panel">
                     <div class="panel-heading">
-                        <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                            <a href="javascript:void(0);" class="btn btn-success" onclick="#">图表</a>
-                        </div>
+                    	<#if macro.doOper("5001001001")>
+	                        <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                            <a href="javascript:void(0);" class="btn btn-success" onclick="#">图表</a>
+	                        </div>
+                        </#if>
                         <h3 class="panel-title">
                             <span>用户通道短信统计</span>
                         </h3>

@@ -55,8 +55,12 @@
                 <div class="panel">
                     <div class="panel-heading">
                         <div class="pull-right"  style="margin-top: 10px;margin-right: 20px;">
-                            <button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
-                            <a class="btn btn-success" href="${BASE_PATH}/sms/forbidden_word/add">新增敏感词</a>
+                        	<#if macro.doOper("2004003001")>
+                            	<button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
+                            </#if>
+                            <#if macro.doOper("2004003002")>
+                            	<a class="btn btn-success" href="${BASE_PATH}/sms/forbidden_word/add">新增敏感词</a>
+                            </#if>
                         </div>
                         <h3 class="panel-title">
                             <span>敏感词列表</span>
@@ -74,6 +78,8 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign editCheck = macro.doOper("2004003003") />
+							<#assign deleteCheck = macro.doOper("2004003004") />
                             <#list page.list as pl>
                             <tr>
                                 <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -85,8 +91,12 @@
                                 </td>
                                 <td>${(pl.createTime?string('yyyy-MM-dd HH:mm:ss'))!'--'}</td>
                                 <td>
-                                	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/forbidden_word/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
-                                    <a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                	<#if editCheck>
+                                		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/forbidden_word/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                    </#if>
+                                    <#if deleteCheck>
+                                    	<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                	</#if>
                                 </td>
                             </tr>
                             </#list>

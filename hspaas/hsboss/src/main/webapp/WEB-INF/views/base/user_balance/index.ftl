@@ -69,6 +69,10 @@
                             </tr>
                             </thead>
                             <tbody>
+                          	<#assign editCheck = macro.doOper("7002001") />
+							<#assign warningCheck = macro.doOper("7002002") />
+							<#assign updateStatusCheck = macro.doOper("7002003") />
+							<#assign logCheck = macro.doOper("7002004") />
                             <#list page.list as pl>
                             <tr>
                                 <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -114,15 +118,23 @@
                                 </#if>
                                 </td>
                                 <td>
-                                	<a class="btn btn-success btn-xs" href="${BASE_PATH}/base/user_balance/edit?id=${pl.id}">冲扣值 </a>&nbsp;
-                                	<a class="btn btn-danger  btn-xs" href="${BASE_PATH}/base/user_balance/warning?id=${pl.id}">告警设置 </a>&nbsp;
-                                    <#if pl.status == 0>
-                                        <a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="updateStatus(${pl.id},'1');">禁止告警</a>&nbsp;
-                                    <#else>
-                                        <a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="updateStatus(${pl.id},'0');">恢复监管 </a>&nbsp;
+                                	<#if editCheck>
+                                		<a class="btn btn-success btn-xs" href="${BASE_PATH}/base/user_balance/edit?id=${pl.id}">冲扣值 </a>&nbsp;
+                                	</#if>
+                                	<#if warningCheck>
+                                		<a class="btn btn-danger  btn-xs" href="${BASE_PATH}/base/user_balance/warning?id=${pl.id}">告警设置 </a>&nbsp;
+                                    </#if>
+                                    <#if updateStatusCheck>
+	                                    <#if pl.status == 0>
+	                                        <a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="updateStatus(${pl.id},'1');">禁止告警</a>&nbsp;
+	                                    <#else>
+	                                        <a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="updateStatus(${pl.id},'0');">恢复监管 </a>&nbsp;
+	                                    </#if>
                                     </#if>
                                     &nbsp;
-                                    <a class="btn btn-default btn-xs" href="${BASE_PATH}/base/user_balance/log?userId=${pl.userId}&platformType=${(pl.type)!''}">冲扣值日志</a>
+                                    <#if logCheck>
+                                    	<a class="btn btn-default btn-xs" href="${BASE_PATH}/base/user_balance/log?userId=${pl.userId}&platformType=${(pl.type)!''}">冲扣值日志</a>
+                                 	</#if>
                                 </td>
                             </tr>
                             </#list>

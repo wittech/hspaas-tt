@@ -7,9 +7,13 @@ import com.huashi.common.notice.service.INotificationMessageService;
 import com.huashi.common.user.domain.UserProfile;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.hsboss.annotation.ActionMode;
+import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
 import com.huashi.hsboss.config.plugin.spring.Inject.BY_NAME;
+import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
+import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.jfinal.ext.route.ControllerBind;
 
@@ -28,17 +32,22 @@ public class NotificationMessageController extends BaseController{
 	@BY_NAME
 	private IUserService iUserService;
 	
-	
+	@AuthCode(code= {OperCode.OPER_CODE_1002002001, OperCode.OPER_CODE_1002002002,OperCode.OPER_CODE_1002002003})
+	@ActionMode
 	public void index(){
 		BossPaginationVo<NotificationMessage> page = iNotificationMessageService.findPage(getPN(), getPara("keyword"));
 		setAttr("page", page);
 		setAttr("keyword", getPara("keyword"));
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1002002001})
+	@ActionMode
 	public void add(){
 		
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1002002001})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void create(){
 		NotificationMessage message = getModel(NotificationMessage.class);
 		message.setStatus(0);
@@ -48,11 +57,15 @@ public class NotificationMessageController extends BaseController{
 		renderResultJson(result);
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1002002002})
+	@ActionMode
 	public void edit(){
 		NotificationMessage message = iNotificationMessageService.findById(getParaToInt("id"));
 		setAttr("notificationMessage", message);
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1002002002})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void update(){
 		NotificationMessage message = getModel(NotificationMessage.class);
 		message.setType(getParaToInt("notificationType",3));
@@ -60,6 +73,8 @@ public class NotificationMessageController extends BaseController{
 		renderResultJson(result);
 	}
 	
+	@AuthCode(code= {OperCode.OPER_CODE_1002002003})
+	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void delete(){
 		boolean result = iNotificationMessageService.delete(getParaToInt("id"));
 		renderResultJson(result);

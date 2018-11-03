@@ -55,9 +55,11 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                                <a class="btn btn-success" href="${BASE_PATH}/sms/passage_group/add">添加通道组</a>
-                            </div>
+                        	<#if macro.doOper("2003002001")>
+	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                                <a class="btn btn-success" href="${BASE_PATH}/sms/passage_group/add">添加通道组</a>
+	                            </div>
+	                        </#if>
                             <h3 class="panel-title">
                             <span>通道组列表</span>
                             </h3>
@@ -74,13 +76,16 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                	<#assign editCheck = macro.doOper("2003002002") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
                                         <td>${(pl.passageGroupName)!''}</td>
                                         <td>${pl.comments!''}</td>
                                         <td>
-                                        	<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage_group/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	<#if editCheck>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage_group/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     </#list>

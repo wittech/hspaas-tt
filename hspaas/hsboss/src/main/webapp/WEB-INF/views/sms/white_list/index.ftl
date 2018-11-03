@@ -59,9 +59,11 @@
 
                 <div class="panel">
                     <div class="panel-heading">
-                        <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                            <a class="btn btn-success" href="${BASE_PATH}/sms/white_list/add">新增白名单</a>
-                        </div>
+                    	<#if macro.doOper("2004002001")>
+	                        <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+	                            <a class="btn btn-success" href="${BASE_PATH}/sms/white_list/add">新增白名单</a>
+	                        </div>
+                        </#if>
                         <h3 class="panel-title">
                             <span>白名单列表</span>
                         </h3>
@@ -80,6 +82,7 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign deleteCheck = macro.doOper("2004002002") />
                             <#list page.list as pl>
                             <tr>
                                 <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
@@ -100,7 +103,9 @@
                                 <#--</td>-->
                                 <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                 <td>
-                                    <a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                	<#if deleteCheck>
+                                    	<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
+                                	</#if>
                                 </td>
                             </tr>
                             </#list>

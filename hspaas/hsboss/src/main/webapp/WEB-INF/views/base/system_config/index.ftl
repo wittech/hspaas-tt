@@ -79,6 +79,7 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <#assign editCheck = macro.doOper("1001002001") />
                             <#list configList as pl>
                             <tr>
                                 <td>${(pl_index+1)}</td>
@@ -92,9 +93,11 @@
                                     <#assign showTime = pl.modifyTime>
                                 </#if>
                                 ${showTime?string('yyyy-MM-dd HH:mm:ss')}</td>
-                                <td>
-                                    <a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/system_config/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
-                                </td>
+	                            <td>
+	                                 <#if editCheck>
+	                                    <a class="btn btn-primary btn-xs" href="${BASE_PATH}/base/system_config/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+	                                </#if>
+	                            </td>
                             </tr>
                             </#list>
                             </tbody>
