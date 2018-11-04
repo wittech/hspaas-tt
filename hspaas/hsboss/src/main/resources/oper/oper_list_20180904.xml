@@ -118,8 +118,8 @@
 
             <node name="通道模板管理" code="2003003" ref="2003" url="/sms/passage_template">
                 <node name="添加通道模板" code="2003003001" ref="2003003"/>
-                <node name="添加通道模板" code="2003003002" ref="2003003"/>
-                <node name="添加通道模板" code="2003003003" ref="2003003"/>
+                <node name="编辑通道模板" code="2003003002" ref="2003003"/>
+                <node name="删除通道模板" code="2003003003" ref="2003003"/>
             </node>
 
             <node name="用户运行中通道管理" code="2003004" ref="2003" url="/sms/passage_access">
