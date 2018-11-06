@@ -51,7 +51,7 @@ public abstract class AbstractSmProxySender {
 
         synchronized (passageLockMonitor.get(parameter.getPassageId())) {
             if (smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-                return SmsProxyManageService.getManageProxy(parameter.getPassageId());
+                return SmsProxyManageService.getProxyManager(parameter.getPassageId());
             }
 
             boolean isOk = smsProxyManageService.startProxy(parameter);

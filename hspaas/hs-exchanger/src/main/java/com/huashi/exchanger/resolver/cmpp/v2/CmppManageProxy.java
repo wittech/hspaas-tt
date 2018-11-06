@@ -1,12 +1,12 @@
 package com.huashi.exchanger.resolver.cmpp.v2;
 
-import com.huashi.exchanger.resolver.GatewayManageProxy;
+import com.huashi.exchanger.resolver.ProxyStateManager;
 import com.huawei.insa2.comm.cmpp.message.CMPPDeliverMessage;
 import com.huawei.insa2.comm.cmpp.message.CMPPMessage;
 import com.huawei.insa2.util.Args;
 import com.huawei.smproxy.SMProxy;
 
-public class CmppManageProxy extends SMProxy implements GatewayManageProxy {
+public class CmppManageProxy extends SMProxy implements ProxyStateManager {
 
     // 通道ID
     private Integer         passageId;

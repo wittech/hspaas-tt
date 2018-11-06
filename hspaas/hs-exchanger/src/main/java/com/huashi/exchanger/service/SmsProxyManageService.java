@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.util.concurrent.RateLimiter;
 import com.huashi.constants.CommonContext.ProtocolType;
 import com.huashi.exchanger.exception.DataEmptyException;
-import com.huashi.exchanger.resolver.GatewayManageProxy;
+import com.huashi.exchanger.resolver.ProxyStateManager;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppManageProxy;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppProxySender;
 import com.huashi.exchanger.resolver.cmpp.v3.Cmpp3ManageProxy;
@@ -50,7 +50,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
     /**
      * CMPP/SGIP/SMGP通道代理发送实例
      */
-    public static volatile Map<Integer, GatewayManageProxy> GLOBAL_PROXIES               = new ConcurrentHashMap<>();
+    public static volatile Map<Integer, ProxyStateManager> GLOBAL_PROXIES               = new ConcurrentHashMap<>();
 
     /**
      * 通道PROXY 发送错误次数计数器 add by 20170903
@@ -155,7 +155,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
      * @return
      */
     private void closeInvalidProxyIfAlive(Integer passageId) {
-        GatewayManageProxy manageProxy = getManageProxy(passageId);
+        ProxyStateManager manageProxy = getProxyManager(passageId);
         if (manageProxy != null) {
             try {
                 manageProxy.close();
@@ -178,7 +178,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
         closeInvalidProxyIfAlive(passageId);
 
-        GatewayManageProxy gatewayManageProxy = null;
+        ProxyStateManager gatewayManageProxy = null;
 
         try {
             switch (protocolType) {
@@ -269,7 +269,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
     @Override
     public boolean isProxyAvaiable(Integer passageId) {
-        GatewayManageProxy passage = getManageProxy(passageId);
+        ProxyStateManager passage = getProxyManager(passageId);
         if (passage == null) {
             return false;
         }
@@ -310,7 +310,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
      * @param passageId
      * @return
      */
-    public static GatewayManageProxy getManageProxy(Integer passageId) {
+    public static ProxyStateManager getProxyManager(Integer passageId) {
         return GLOBAL_PROXIES.get(passageId);
     }
 
@@ -323,7 +323,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
         }
 
         try {
-            GatewayManageProxy prxoy = GLOBAL_PROXIES.get(passageId);
+            ProxyStateManager prxoy = GLOBAL_PROXIES.get(passageId);
             if (prxoy instanceof SgipManageProxy) {
                 SgipManageProxy sgipManageProxy = (SgipManageProxy) prxoy;
                 sgipManageProxy.stopService();
