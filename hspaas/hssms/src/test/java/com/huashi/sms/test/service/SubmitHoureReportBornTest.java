@@ -13,7 +13,7 @@ public class SubmitHoureReportBornTest extends BaseTest{
 	
 	@Test
 	public void testQ() {
-		int result = smsSubmitHourReportService.doStatLastestSubmitReport();
+		int result = smsSubmitHourReportService.beBornSubmitHourReport(72);
 		
 		logger.info("处理结果：{}", result);
 	}
