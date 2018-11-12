@@ -1,5 +1,6 @@
 package com.huashi.exchanger.service;
 
+import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +17,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.util.concurrent.RateLimiter;
 import com.huashi.constants.CommonContext.ProtocolType;
 import com.huashi.exchanger.exception.DataEmptyException;
-import com.huashi.exchanger.resolver.ProxyStateManager;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppManageProxy;
 import com.huashi.exchanger.resolver.cmpp.v2.CmppProxySender;
 import com.huashi.exchanger.resolver.cmpp.v3.Cmpp3ManageProxy;
@@ -34,43 +34,43 @@ import com.huawei.insa2.util.Args;
 @Service
 public class SmsProxyManageService implements ISmsProxyManageService {
 
-    private final Logger                                    logger                       = LoggerFactory.getLogger(getClass());
+    private final Logger                          logger                       = LoggerFactory.getLogger(getClass());
     // private final Object lock = new Object();
 
     @Autowired
-    private CmppProxySender                                 cmppProxySender;
+    private CmppProxySender                       cmppProxySender;
     @Autowired
-    private Cmpp3ProxySender                                cmpp3ProxySender;
+    private Cmpp3ProxySender                      cmpp3ProxySender;
 
     @Autowired
-    private SgipProxySender                                 sgipProxySender;
+    private SgipProxySender                       sgipProxySender;
     @Autowired
-    private SmgpProxySender                                 smgpProxySender;
+    private SmgpProxySender                       smgpProxySender;
 
     /**
      * CMPP/SGIP/SMGP通道代理发送实例
      */
-    public static volatile Map<Integer, ProxyStateManager> GLOBAL_PROXIES               = new ConcurrentHashMap<>();
+    public static volatile Map<Integer, Object>   GLOBAL_PROXIES               = new ConcurrentHashMap<>();
 
     /**
      * 通道PROXY 发送错误次数计数器 add by 20170903
      */
-    private static final Map<Integer, Integer>              GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
+    private static final Map<Integer, Integer>    GLOBAL_PROXIES_ERROR_COUNTER = new HashMap<>();
 
     /**
      * 通道对应的限流器容器
      */
-    public static final Map<Integer, RateLimiter>           GLOBAL_GATEWAY_RATE_LIMITERS = new HashMap<>();
+    public static final Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS = new HashMap<>();
 
     /**
      * 默认限流速度
      */
-    public static final int                                 DEFAULT_LIMIT_SPEED          = 500;
+    public static final int                       DEFAULT_LIMIT_SPEED          = 500;
 
     /**
      * 联通重连超时时间
      */
-    private static final int                                SGIP_RECONNECT_TIMEOUT       = 60 * 1000;
+    private static final int                      SGIP_RECONNECT_TIMEOUT       = 60 * 1000;
 
     @Override
     public boolean startProxy(SmsPassageParameter parameter) {
@@ -145,7 +145,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
      */
     private void bindPassageRateLimiter(Integer passageId, Integer speed) {
         RateLimiter limiter = RateLimiter.create((speed == null || speed == 0) ? DEFAULT_LIMIT_SPEED : speed);
-        GLOBAL_GATEWAY_RATE_LIMITERS.put(passageId, limiter);
+        GLOBAL_RATE_LIMITERS.put(passageId, limiter);
     }
 
     /**
@@ -154,11 +154,13 @@ public class SmsProxyManageService implements ISmsProxyManageService {
      * @param passageId
      * @return
      */
-    private void closeInvalidProxyIfAlive(Integer passageId) {
-        ProxyStateManager manageProxy = getProxyManager(passageId);
+    private void closeProxyIfAlive(Integer passageId) {
+        Object manageProxy = getManageProxy(passageId);
         if (manageProxy != null) {
             try {
-                manageProxy.close();
+                // 通过JAVA 反射调用关闭方法，同manageProxy.close();
+                Method method = manageProxy.getClass().getMethod("close");
+                method.invoke(manageProxy);
                 GLOBAL_PROXIES.remove(passageId);
             } catch (Exception e) {
                 logger.error("Closing manageProxy[" + manageProxy + "] failed", e);
@@ -176,29 +178,27 @@ public class SmsProxyManageService implements ISmsProxyManageService {
      */
     private boolean loadManageProxy(Integer passageId, TParameter tparameter, ProtocolType protocolType) {
 
-        closeInvalidProxyIfAlive(passageId);
+        closeProxyIfAlive(passageId);
 
-        ProxyStateManager gatewayManageProxy = null;
+        Object proxy = null;
 
         try {
             switch (protocolType) {
                 case CMPP2: {
-                    gatewayManageProxy = new CmppManageProxy(cmppProxySender, passageId,
-                                                             new Args(tparameter.getCmppConnectAttrs()));
+                    proxy = new CmppManageProxy(cmppProxySender, passageId, new Args(tparameter.getCmppConnectAttrs()));
                     break;
                 }
                 case CMPP3: {
-                    gatewayManageProxy = new Cmpp3ManageProxy(cmpp3ProxySender, passageId,
-                                                              new Args(tparameter.getCmppConnectAttrs()));
+                    proxy = new Cmpp3ManageProxy(cmpp3ProxySender, passageId,
+                                                 new Args(tparameter.getCmppConnectAttrs()));
                     break;
                 }
                 case SMGP: {
-                    gatewayManageProxy = new SmgpManageProxy(smgpProxySender, passageId,
-                                                             new Args(tparameter.getSmgpConnectAttrs()));
+                    proxy = new SmgpManageProxy(smgpProxySender, passageId, new Args(tparameter.getSmgpConnectAttrs()));
                     break;
                 }
                 case SGIP: {
-                    gatewayManageProxy = loadSgipManageProxy(passageId, tparameter.getSgipConnectAttrs());
+                    proxy = loadSgipManageProxy(passageId, tparameter.getSgipConnectAttrs());
                     break;
                 }
                 default: {
@@ -206,15 +206,16 @@ public class SmsProxyManageService implements ISmsProxyManageService {
                 }
             }
 
-            if (gatewayManageProxy == null) {
+            if (proxy == null) {
+                logger.error("Loading direct proxy failed, proxy is null");
                 return false;
             }
 
             // 加载通道代理类信息
-            GLOBAL_PROXIES.put(passageId, gatewayManageProxy);
+            GLOBAL_PROXIES.put(passageId, proxy);
 
-            logger.info("Cmpp passage[" + passageId + "] protocol[" + protocolType.name()
-                        + "]  setup succeed with args [" + JSON.toJSONString(tparameter) + "]");
+            logger.info("Passage[" + passageId + "] protocol[" + protocolType.name() + "]  setup succeed with args ["
+                        + JSON.toJSONString(tparameter) + "]");
 
             return true;
         } catch (Exception e) {
@@ -269,27 +270,29 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
     @Override
     public boolean isProxyAvaiable(Integer passageId) {
-        ProxyStateManager passage = getProxyManager(passageId);
+        Object passage = getManageProxy(passageId);
         if (passage == null) {
             return false;
         }
 
-//        if (passage.getConn() == null) {
-//            return false;
-//        }
+        // if (passage.getConn() == null) {
+        // return false;
+        // }
 
         if (passage instanceof SgipManageProxy) {
+            SgipManageProxy passageProxy = (SgipManageProxy) passage;
+
             // 上次发送时间，如果上次发送时间和当前时间差值在55秒内，则认为连接有效
             Long lastSendTime = SgipConstant.SGIP_RECONNECT_TIMEMILLS.get(passageId);
 
-            logger.info("SGIP 状态：{}, 上次时间：{}， 时间差：{} ms", passage.getConnState(), lastSendTime,
+            logger.info("SGIP 状态：{}, 上次时间：{}， 时间差：{} ms", passageProxy.getConnState(), lastSendTime,
                         lastSendTime == null ? null : System.currentTimeMillis() - lastSendTime);
             if (lastSendTime != null && (System.currentTimeMillis() - lastSendTime > SGIP_RECONNECT_TIMEOUT)) {
                 return false;
             }
 
-            if (StringUtils.isNotEmpty(passage.getConnState())) {
-                logger.error("SGIP连接错误，错误信息：{} ", passage.getConnState());
+            if (StringUtils.isNotEmpty(passageProxy.getConnState())) {
+                logger.error("SGIP连接错误，错误信息：{} ", passageProxy.getConnState());
                 return false;
             }
 
@@ -310,7 +313,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
      * @param passageId
      * @return
      */
-    public static ProxyStateManager getProxyManager(Integer passageId) {
+    public static Object getManageProxy(Integer passageId) {
         return GLOBAL_PROXIES.get(passageId);
     }
 
@@ -323,15 +326,13 @@ public class SmsProxyManageService implements ISmsProxyManageService {
         }
 
         try {
-            ProxyStateManager prxoy = GLOBAL_PROXIES.get(passageId);
+            Object prxoy = GLOBAL_PROXIES.get(passageId);
             if (prxoy instanceof SgipManageProxy) {
                 SgipManageProxy sgipManageProxy = (SgipManageProxy) prxoy;
                 sgipManageProxy.stopService();
             }
 
-            prxoy.close();
-            GLOBAL_PROXIES.remove(passageId);
-
+            closeProxyIfAlive(passageId);
             logger.info("Passage[" + passageId + "] shutdown finished");
             return true;
         } catch (Exception e) {

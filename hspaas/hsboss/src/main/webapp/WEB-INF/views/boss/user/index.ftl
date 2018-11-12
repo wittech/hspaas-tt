@@ -115,8 +115,8 @@
 												<#if deleteCheck>
 													<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="deleteById(${pl.id});"><i class="fa fa-trash"></i>&nbsp;删除 </a>
 												</#if>
-												<a class="btn btn-success btn-xs" href="javascript:void(0);" onclick="updateMfa(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;MFA重置 </a>
 											</#if>
+											<a class="btn btn-success btn-xs" href="javascript:void(0);" onclick="updateMfa(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;MFA重置 </a>
 										</td>
 									</tr>
 									</#list>

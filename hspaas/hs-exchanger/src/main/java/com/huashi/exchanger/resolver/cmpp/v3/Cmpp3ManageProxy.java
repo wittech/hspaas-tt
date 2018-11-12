@@ -1,12 +1,11 @@
 package com.huashi.exchanger.resolver.cmpp.v3;
 
-import com.huashi.exchanger.resolver.ProxyStateManager;
 import com.huawei.insa2.comm.cmpp.message.CMPPMessage;
 import com.huawei.insa2.comm.cmpp30.message.CMPP30DeliverMessage;
 import com.huawei.insa2.util.Args;
 import com.huawei.smproxy.SMProxy30;
 
-public class Cmpp3ManageProxy extends SMProxy30 implements ProxyStateManager {
+public class Cmpp3ManageProxy extends SMProxy30 {
 
     // 通道ID
     private Integer          passageId;

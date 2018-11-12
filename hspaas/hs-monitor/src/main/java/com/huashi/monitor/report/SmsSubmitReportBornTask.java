@@ -29,9 +29,9 @@ public class SmsSubmitReportBornTask {
     private static final int            SMS_SUBMIT_REPORT_HOURS = 72;
 
     /**
-     * TODO 预计达到每小时第5分钟执行一次
+     * TODO 预计达到每小时第20分钟执行一次
      */
-    @Scheduled(cron = "0 5 * * * ?")
+    @Scheduled(cron = "0 20 * * * ?")
     public void execute() {
         try {
             long startTime = System.currentTimeMillis();

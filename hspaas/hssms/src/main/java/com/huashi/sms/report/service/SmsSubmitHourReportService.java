@@ -1,6 +1,7 @@
 package com.huashi.sms.report.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,9 +52,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
     @Override
     public int beBornSubmitHourReport() {
         // 截止时间为前一个小时0分0秒
-        Long endTime = DateUtil.getXHourWithMzSzMillis(-1);
+        Long endTime = DateUtil.getAfterXHourWithMzSzMillis(-1);
         // 开始时间为前2个小时0分0秒
-        Long startTime = DateUtil.getXHourWithMzSzMillis(-2);
+        Long startTime = DateUtil.getXHourWithMzSzMillis(-1);
 
         List<Map<String, Object>> list = smsMtSubmitService.getSubmitStatReport(startTime, endTime);
         if (CollectionUtils.isEmpty(list)) {
@@ -92,7 +93,9 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int beBornSubmitHourReport(int hour) {
-        Long endTime = DateUtil.getXHourWithMzSzMillis(-hour);
+        // 当前时间减1，通过人为方式错开时间点，如5点执行4点前的数据
+        Long endTime = DateUtil.getAfterXHourWithMzSzMillis(-1);
+        // 当前时间在减去指定小时的时间数（如72小时）在减去1，保证落地数据
         Long startTime = DateUtil.getXHourWithMzSzMillis(-hour - 1);
 
         List<Map<String, Object>> list = smsMtSubmitService.getSubmitStatReport(startTime, endTime);
@@ -122,17 +125,18 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
             return 0;
         }
 
-        int result = smsSubmitHourReportMapper.deleteBtHourTime(startTime, endTime);
-        if (result == 0) {
-            logger.error("Deleting smsHourReport failed in [" + startTime + " - " + endTime + "]");
-            throw new RuntimeException("Delete failed");
-        }
+        try {
+            smsSubmitHourReportMapper.deleteBtHourTime(startTime, endTime);
+            if (smsSubmitHourReportMapper.batchInsert(batchList) > 0) {
+                logger.info("开始时间：{} 截止时间：{} 数据：{} 生成成功", startTime, endTime, batchList.size());
+                return batchList.size();
+            }
 
-        if (smsSubmitHourReportMapper.batchInsert(batchList) > 0) {
-            return batchList.size();
+            throw new RuntimeException("Batch insert failed");
+        } catch (Exception e) {
+            logger.error("Invoked method[beBornSubmitHourReport] failed by args [" + hour + "]", e);
+            throw new RuntimeException(e);
         }
-
-        throw new RuntimeException("BatchInsert failed");
     }
 
     /**
@@ -463,8 +467,10 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
     }
 
     public static void main(String[] args) {
-        System.out.println(parseDateStr2StartLongTime("2017-09-02"));
-        System.out.println(parseDateStr2EndLongTime("2017-09-02"));
+        // System.out.println(parseDateStr2StartLongTime("2017-09-02"));
+        // System.out.println(parseDateStr2EndLongTime("2017-09-02"));
+
+        System.out.println(new Date(1541836800000L));
     }
 
     @Override

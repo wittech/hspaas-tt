@@ -69,6 +69,20 @@ public class DateUtil {
 		
 		return cal.getTime().getTime();
 	}
+	
+	/**
+     * 
+       * TODO 获取X时分59秒59分 毫秒时间
+       * @param xhour
+       * @return
+     */
+    public static long getAfterXHourWithMzSzMillis(int xhour) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(getSecondDate(getFormat("yyyy-MM-dd HH:59:59").format(new Date())));
+        cal.add(Calendar.HOUR, xhour);
+        
+        return cal.getTime().getTime();
+    }
 
 	public static String getSecondOnlyStr(Date date) {
 		synchronized (SECOND_ONLY) {

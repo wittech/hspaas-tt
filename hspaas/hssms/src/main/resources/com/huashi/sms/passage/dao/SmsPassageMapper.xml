@@ -304,6 +304,7 @@
 	</select>
 
 	<select id="selectAvaiableCodes" resultType="java.lang.String">
-		select distinct(code) from sms_passage passage where status = 0
+		select distinct(code) from sms_passage passage 
+		<!-- where status = 0 -->
 	</select>
 </mapper>

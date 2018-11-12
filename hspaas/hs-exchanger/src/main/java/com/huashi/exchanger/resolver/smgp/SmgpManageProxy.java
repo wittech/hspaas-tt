@@ -1,12 +1,11 @@
 package com.huashi.exchanger.resolver.smgp;
 
-import com.huashi.exchanger.resolver.ProxyStateManager;
 import com.huawei.insa2.comm.smgp.message.SMGPDeliverMessage;
 import com.huawei.insa2.comm.smgp.message.SMGPMessage;
 import com.huawei.insa2.util.Args;
 import com.huawei.smproxy.SMGPSMProxy;
 
-public class SmgpManageProxy extends SMGPSMProxy implements ProxyStateManager {
+public class SmgpManageProxy extends SMGPSMProxy {
 
     private Integer         passageId;
     private SmgpProxySender smgpProxySender;

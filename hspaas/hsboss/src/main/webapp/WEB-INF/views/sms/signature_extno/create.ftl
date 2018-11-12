@@ -13,6 +13,7 @@
     <link href="${BASE_PATH}/resources/css/bootstrap/pace.min.css" rel="stylesheet">
     <script src="${BASE_PATH}/resources/js/bootstrap/pace.min.js"></script>
     <script src="${BASE_PATH}/resources/js/common.js"></script>
+    <#include "/WEB-INF/views/common/select_search.ftl">
 </head>
 
 <body>
@@ -43,7 +44,7 @@
                             <div class="form-group">
                                 <label class="col-xs-2 control-label">开户用户</label>
                                 <div class="col-xs-4">
-                                    <select id="userId" name="signatureExtNo.userId" class="form-control">
+                                    <select id="userId" name="signatureExtNo.userId" class="form-control selectpicker show-tick" data-live-search="true">
                                     <#if userList??>
                                         <#list userList as u>
                                             <option value="${u.userId!''}">${u.name!''}-${u.username!''}</option>
@@ -91,7 +92,9 @@
 </div>
 </body>
 <script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
-<script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
+<script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> 
+<script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> 
+<script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
 <#include "/WEB-INF/views/common/form_validation.ftl">
 <script src="${BASE_PATH}/resources/js/bootstrap/bootstrap.min.js"></script>
 <script src="${BASE_PATH}/resources/js/bootstrap/scripts.js"></script>

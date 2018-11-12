@@ -1,33 +1,26 @@
 package com.huashi.monitor.test;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import com.alibaba.dubbo.config.spring.ReferenceBean;
-import com.huashi.sms.record.service.ISmsMtDeliverService;
+import com.huashi.monitor.report.SmsSubmitReportBornTask;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class SubmitReportBornTest {
-	
-	//用于将bean关系注入到当前的context中  
-    @Autowired
-    private ApplicationContext applicationContext; 
 
-	
-	public void test() {
-		String url = "dubbo://106.14.37.153:20881/com.huashi.sms.record.service.ISmsMtDeliverService?anyhost=true&application=hssms-provider&default.retries=0&default.timeout=100000&dubbo=2.8.4&generic=false&interface=com.huashi.sms.record.service.ISmsMtDeliverService&logger=slf4j&methods=doFinishDeliver,batchInsert,doDeliverToException,saveDeliverLog,findByMobileAndMsgid&pid=28352&serialization=kryo&side=provider×tamp=1494991242127";
-		  
-        ReferenceBean<ISmsMtDeliverService> referenceBean = new ReferenceBean<ISmsMtDeliverService>();  
-        referenceBean.setApplicationContext(applicationContext);  
-        referenceBean.setInterface(ISmsMtDeliverService.class);  
-        referenceBean.setUrl(url);  
-  
+    @Autowired
+    private SmsSubmitReportBornTask smsSubmitReportBornTask;
+
+    @Test
+    public void test() {
         try {
-            referenceBean.afterPropertiesSet();  
-//            smsMtDeliverService = referenceBean.get();
-           
-        } catch (Exception e) {  
-            e.printStackTrace();  
-        }  
-		
-	}
+            smsSubmitReportBornTask.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

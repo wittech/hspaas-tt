@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
-import com.huashi.exchanger.resolver.ProxyStateManager;
 import com.huashi.exchanger.resolver.sgip.constant.SgipConstant;
 import com.huawei.insa2.comm.sgip.message.SGIPDeliverMessage;
 import com.huawei.insa2.comm.sgip.message.SGIPMessage;
@@ -12,7 +11,7 @@ import com.huawei.insa2.comm.sgip.message.SGIPReportMessage;
 import com.huawei.insa2.util.Args;
 import com.huawei.smproxy.SGIPSMProxy;
 
-public class SgipManageProxy extends SGIPSMProxy implements ProxyStateManager {
+public class SgipManageProxy extends SGIPSMProxy {
 
     private Integer         passageId;
     private SgipProxySender sgipProxySender;

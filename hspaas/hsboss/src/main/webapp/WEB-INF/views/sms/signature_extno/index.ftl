@@ -127,7 +127,9 @@
 			
 		</div>
 		<script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
-				<script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
+		<script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> 
+		<script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> 
+		<script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
 		<script src="${BASE_PATH}/resources/js/bootstrap/bootstrap.min.js"></script>
 		<script src="${BASE_PATH}/resources/js/bootstrap/scripts.js"></script>
 	</body>
