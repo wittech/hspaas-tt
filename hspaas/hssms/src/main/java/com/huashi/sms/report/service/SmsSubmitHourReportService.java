@@ -57,17 +57,41 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int beBornSubmitHourReport(int hour) {
-        // 当前时间减1，通过人为方式错开时间点，如5点执行4点前的数据
-        Long endTime = DateUtil.getAfterXHourWithMzSzMillis(-1);
-        // 当前时间在减去指定小时的时间数（如72小时）在减去1，保证落地数据
-        Long startTime = DateUtil.getXHourWithMzSzMillis(-hour - 1);
-        
+        int count = 0;
+        logger.info("For finishing it will be execute " + hour + " times ");
+        long startTimeCounter = System.currentTimeMillis();
+        for (int i = 0; i <= hour; i++) {
+            // 当前时间在减去指定小时的时间数（如72小时）在减去1，保证落地数据00:00
+            Long startTime = DateUtil.getXHourWithMzSzMillis(-hour - 1 + i);
+            // 当前时间减1，通过人为方式错开时间点，如5点执行4点前的数据59:59
+            Long endTime = DateUtil.getAfterXHourWithMzSzMillis(-hour - 1 + i);
+
+            int currentCount = beBornSubmitHourReportByHourTimeRange(startTime, endTime);
+            logger.info("No." + i + "'s result is " + currentCount + " between " + startTime + " and " + endTime);
+            count += currentCount;
+        }
+
+        logger.info("Summarize is " + count + "in " + hour + " hours, it cost "
+                    + (System.currentTimeMillis() - startTimeCounter) + " ms");
+
+        return count;
+    }
+
+    /**
+     * TODO 按照时间范围执行小时报表生成
+     * 
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    private int beBornSubmitHourReportByHourTimeRange(long startTime, long endTime) {
         List<Map<String, Object>> list = smsMtSubmitService.getSubmitStatReport(startTime, endTime);
         if (CollectionUtils.isEmpty(list)) {
+            logger.warn("Ignore by querying data empty between " + startTime + " and " + endTime);
             return 0;
         }
 
-        List<SmsSubmitHourReport> batchList = new ArrayList<SmsSubmitHourReport>();
+        List<SmsSubmitHourReport> batchList = new ArrayList<>();
         SmsSubmitHourReport report = null;
         for (Map<String, Object> map : list) {
             if (MapUtils.isEmpty(map)) {
@@ -86,19 +110,20 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
         }
 
         if (CollectionUtils.isEmpty(batchList)) {
+            logger.warn("Ignore by querying data empty between " + startTime + " and " + endTime);
             return 0;
         }
 
         try {
             smsSubmitHourReportMapper.deleteBtHourTime(startTime, endTime);
             if (smsSubmitHourReportMapper.batchInsert(batchList) > 0) {
-                logger.info("开始时间：{} 截止时间：{} 数据：{} 生成成功", startTime, endTime, batchList.size());
                 return batchList.size();
             }
 
             throw new RuntimeException("Batch insert failed");
         } catch (Exception e) {
-            logger.error("Invoked method[beBornSubmitHourReport] failed by args [" + hour + "]", e);
+            logger.error("Invoked method[beBornSubmitHourReport] failed by args [" + startTime + " - " + endTime + "]",
+                         e);
             throw new RuntimeException(e);
         }
     }
@@ -434,8 +459,18 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
         // System.out.println(parseDateStr2StartLongTime("2017-09-02"));
         // System.out.println(parseDateStr2EndLongTime("2017-09-02"));
 
-//        System.out.println(new Date(1541836800000L));
+        // System.out.println(new Date(1541836800000L));
         System.out.println(System.currentTimeMillis());
+        int hour = 72;
+
+        for (int i = 0; i <= hour; i++) {
+            // 当前时间在减去指定小时的时间数（如72小时）在减去1，保证落地数据
+            Long startTime = DateUtil.getXHourWithMzSzMillis(-hour - 1 + i);
+            // 当前时间减1，通过人为方式错开时间点，如5点执行4点前的数据
+            Long endTime = DateUtil.getAfterXHourWithMzSzMillis(-hour - 1 + i);
+            System.out.println("start:" + (-hour - 1 + i) + "-" + new Date(startTime) + "            end:"
+                               + (-hour - 1 + i + 1) + "-" + new Date(endTime));
+        }
     }
 
     @Override
