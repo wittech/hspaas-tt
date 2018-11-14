@@ -30,7 +30,8 @@ layui.use(['element', 'tree', 'table', 'form', 'laydate'], function() {
     var currpage = 1;
 
     var loadTableData = function() {
-    	var loading = layer.msg("数据加载中...");
+//    	var loading = layer.msg("数据加载中...");
+    	var index = layer.load(1); //添加laoding,0-2两种方式
     	
     	searchObj.currentPage = currpage;
     	searchObj.sid = $.trim($("#sid").val());
@@ -56,6 +57,7 @@ layui.use(['element', 'tree', 'table', 'form', 'laydate'], function() {
 	              , {field: 'content', title: '短信内容'}
 	          ]]
             ,url: server_domain + "/sms/send/page"
+            ,loading: true
             ,where: searchObj
             ,method: 'GET'
             ,page: {
@@ -67,7 +69,7 @@ layui.use(['element', 'tree', 'table', 'form', 'laydate'], function() {
             ,even: true
             ,done: function(res, curr, count){
                 currpage = curr;
-                layer.close(loading);
+                layer.close(index);
             }
         });
     };

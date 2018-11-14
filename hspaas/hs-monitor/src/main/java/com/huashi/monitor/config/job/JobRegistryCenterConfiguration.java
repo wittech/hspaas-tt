@@ -9,12 +9,12 @@ import com.dangdang.ddframe.job.reg.zookeeper.ZookeeperConfiguration;
 import com.dangdang.ddframe.job.reg.zookeeper.ZookeeperRegistryCenter;
 
 @Configuration
-@ConditionalOnExpression("'${regCenter.serverList}'.length() > 0")
+@ConditionalOnExpression("'${elasticJob.regCenter.servers}'.length() > 0")
 public class JobRegistryCenterConfiguration {
 
     @Bean(initMethod = "init")
-    public ZookeeperRegistryCenter regCenter(@Value("${regCenter.serverList}")
-    final String serverList, @Value("${regCenter.namespace}")
+    public ZookeeperRegistryCenter regCenter(@Value("${elasticJob.regCenter.servers}")
+    final String serverList, @Value("${elasticJob.regCenter.namespace}")
     final String namespace) {
         return new ZookeeperRegistryCenter(new ZookeeperConfiguration(serverList, namespace));
     }

@@ -51,43 +51,7 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
 
     @Override
     public int beBornSubmitHourReport() {
-        // 截止时间为前一个小时0分0秒
-        Long endTime = DateUtil.getAfterXHourWithMzSzMillis(-1);
-        // 开始时间为前2个小时0分0秒
-        Long startTime = DateUtil.getXHourWithMzSzMillis(-1);
-
-        List<Map<String, Object>> list = smsMtSubmitService.getSubmitStatReport(startTime, endTime);
-        if (CollectionUtils.isEmpty(list)) {
-            return 0;
-        }
-
-        List<SmsSubmitHourReport> batchList = new ArrayList<>();
-        SmsSubmitHourReport report = null;
-        for (Map<String, Object> map : list) {
-            if (MapUtils.isEmpty(map)) {
-                logger.error("开始时间：{} 截止时间：{}， 报表离线统计包含数据为空，整体失败，[严重,需补修]", startTime, endTime);
-                break;
-            }
-
-            try {
-                report = new SmsSubmitHourReport();
-                copyProperties(map, report, startTime);
-                batchList.add(report);
-            } catch (Exception e) {
-                logger.error("开始时间：{} 截止时间：{}， 报表离线统计失败，整体失败，[严重,需补修]", startTime, endTime, e);
-                break;
-            }
-        }
-
-        if (CollectionUtils.isEmpty(batchList)) {
-            return 0;
-        }
-
-        if (smsSubmitHourReportMapper.batchInsert(batchList) > 0) {
-            return batchList.size();
-        }
-
-        return 0;
+        return beBornSubmitHourReport(0);
     }
 
     @Override
@@ -97,7 +61,7 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
         Long endTime = DateUtil.getAfterXHourWithMzSzMillis(-1);
         // 当前时间在减去指定小时的时间数（如72小时）在减去1，保证落地数据
         Long startTime = DateUtil.getXHourWithMzSzMillis(-hour - 1);
-
+        
         List<Map<String, Object>> list = smsMtSubmitService.getSubmitStatReport(startTime, endTime);
         if (CollectionUtils.isEmpty(list)) {
             return 0;
@@ -470,7 +434,8 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
         // System.out.println(parseDateStr2StartLongTime("2017-09-02"));
         // System.out.println(parseDateStr2EndLongTime("2017-09-02"));
 
-        System.out.println(new Date(1541836800000L));
+//        System.out.println(new Date(1541836800000L));
+        System.out.println(System.currentTimeMillis());
     }
 
     @Override
