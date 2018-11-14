@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.fastjson.JSON;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.huashi.common.user.context.UserContext.BalanceStatus;
 import com.huashi.common.user.domain.UserBalance;
@@ -49,7 +48,7 @@ public class UserBalanceCheckJob extends AbtractJob {
             return;
         }
 
-        logger.info("Users " + JSON.toJSONString(list) + " balance checking");
+//        logger.info("Users " + JSON.toJSONString(list,new SimplePropertyPreFilter("userId,balance")) + " balance checking");
 
         for (UserBalance ub : list) {
             if (!isNeedAndReachWarning(ub)) {
