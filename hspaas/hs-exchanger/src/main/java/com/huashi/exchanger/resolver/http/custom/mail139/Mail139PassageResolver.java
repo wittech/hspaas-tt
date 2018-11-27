@@ -382,7 +382,7 @@ public class Mail139PassageResolver extends AbstractPassageResolver {
             throw new RuntimeException("Mt report from mail.139 failed[" + e.getMessage() + "]");
         }
     }
-
+    
     @Override
     public List<SmsMoMessageReceive> moReceive(String report, Integer passageId) {
         try {
@@ -396,16 +396,20 @@ public class Mail139PassageResolver extends AbstractPassageResolver {
             SAXBuilder sb = new SAXBuilder();
             Document doc = sb.build(source);
             Element root = doc.getRootElement();
-
-            SmsMoMessageReceive response = new SmsMoMessageReceive();
-            response.setPassageId(passageId);
-            response.setMobile(root.getChildText("UserNumber"));
-            response.setContent(root.getChildText("MoMsg"));
-            response.setDestnationNo(root.getChildText("SpNumber"));
-            response.setReceiveTime(root.getChildText("MoTime"));
-            response.setCreateTime(new Date());
-            response.setCreateUnixtime(response.getCreateTime().getTime());
-            list.add(response);
+            
+            List<Element> responseData = root.getChildren("responseData");
+            SmsMoMessageReceive response;
+            for (Element rd : responseData) {
+                response = new SmsMoMessageReceive();
+                response.setPassageId(passageId);
+                response.setMobile(rd.getChildText("UserNumber"));
+                response.setContent(rd.getChildText("MoMsg"));
+                response.setDestnationNo(rd.getChildText("SpNumber"));
+                response.setReceiveTime(rd.getChildText("MoTime"));
+                response.setCreateTime(new Date());
+                response.setCreateUnixtime(response.getCreateTime().getTime());
+                list.add(response);
+            }
 
             return list;
         } catch (Exception e) {
