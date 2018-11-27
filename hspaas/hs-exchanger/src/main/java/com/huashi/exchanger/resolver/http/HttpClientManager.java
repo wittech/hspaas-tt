@@ -661,8 +661,8 @@ public class HttpClientManager {
      * @param content
      * @return
      */
-    public static String postReport(String url, String content) {
-        return postReport(url, content, ENCODING_UTF_8, null);
+    public static String postBody(String url, String content) {
+        return postBody(url, content, ENCODING_UTF_8, null);
     }
 
     /**
@@ -673,8 +673,8 @@ public class HttpClientManager {
      * @param headers
      * @return
      */
-    public static String postReport(String url, String content, Map<String, Object> headers) {
-        return postReport(url, content, ENCODING_UTF_8, headers);
+    public static String postBody(String url, String content, Map<String, Object> headers) {
+        return postBody(url, content, ENCODING_UTF_8, headers);
     }
 
     /**
@@ -685,7 +685,7 @@ public class HttpClientManager {
      * @param headers
      * @return
      */
-    public static String postReport(String url, String content, String encoding, Map<String, Object> headers) {
+    public static String postBody(String url, String content, String encoding, Map<String, Object> headers) {
         if (StringUtils.isEmpty(content)) {
             throw new DataEmptyException("用户参数为空");
         }

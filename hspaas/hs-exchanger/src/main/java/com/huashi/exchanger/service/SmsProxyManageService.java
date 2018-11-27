@@ -1,6 +1,5 @@
 package com.huashi.exchanger.service;
 
-import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class SmsProxyManageService implements ISmsProxyManageService {
     /**
      * 通道对应的限流器容器
      */
-    public static final Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS = new HashMap<>();
+    public static final Map<Integer, RateLimiter> GLOBAL_RATE_LIMITERS         = new HashMap<>();
 
     /**
      * 默认限流速度
@@ -156,16 +155,64 @@ public class SmsProxyManageService implements ISmsProxyManageService {
      */
     private void closeProxyIfAlive(Integer passageId) {
         Object manageProxy = getManageProxy(passageId);
-        if (manageProxy != null) {
-            try {
-                // 通过JAVA 反射调用关闭方法，同manageProxy.close();
-                Method method = manageProxy.getClass().getMethod("close");
-                method.invoke(manageProxy);
-                GLOBAL_PROXIES.remove(passageId);
-            } catch (Exception e) {
-                logger.error("Closing manageProxy[" + manageProxy + "] failed", e);
+        if (manageProxy == null) {
+            // ignored if proxy is null
+            return;
+        }
+
+        try {
+            // close if alive
+            if (manageProxy instanceof CmppManageProxy) {
+                ((CmppManageProxy) manageProxy).close();
+            } else if (manageProxy instanceof Cmpp3ManageProxy) {
+                ((Cmpp3ManageProxy) manageProxy).close();
+            } else if (manageProxy instanceof SmgpManageProxy) {
+                ((SmgpManageProxy) manageProxy).close();
+            } else if (manageProxy instanceof SgipManageProxy) {
+                ((SgipManageProxy) manageProxy).close();
+            } else {
+                logger.error("Closing manageProxy[" + manageProxy + "] failed cause by unkown instance");
+            }
+
+        } catch (Exception e) {
+            logger.warn("Close proxy failed cause by msssage[" + e.getMessage() + "]");
+        }
+    }
+
+    /**
+     * TODO 生成新代理实例
+     * 
+     * @param passageId
+     * @param tparameter
+     * @param protocolType
+     * @return
+     */
+    private Object newProxy(Integer passageId, TParameter tparameter, ProtocolType protocolType) {
+        Object proxy = null;
+        switch (protocolType) {
+            case CMPP2: {
+                proxy = new CmppManageProxy(cmppProxySender, passageId, new Args(tparameter.getCmppConnectAttrs()));
+                break;
+            }
+            case CMPP3: {
+                proxy = new Cmpp3ManageProxy(cmpp3ProxySender, passageId, new Args(tparameter.getCmppConnectAttrs()));
+                break;
+            }
+            case SMGP: {
+                proxy = new SmgpManageProxy(smgpProxySender, passageId, new Args(tparameter.getSmgpConnectAttrs()));
+                break;
+            }
+            case SGIP: {
+                proxy = loadSgipManageProxy(passageId, tparameter.getSgipConnectAttrs());
+                break;
+            }
+            default: {
+                throw new RuntimeException("ProtocolType[" + protocolType.name()
+                                           + "] not belong to gateway direct protocol.");
             }
         }
+
+        return proxy;
     }
 
     /**
@@ -180,31 +227,10 @@ public class SmsProxyManageService implements ISmsProxyManageService {
 
         closeProxyIfAlive(passageId);
 
-        Object proxy = null;
-
         try {
-            switch (protocolType) {
-                case CMPP2: {
-                    proxy = new CmppManageProxy(cmppProxySender, passageId, new Args(tparameter.getCmppConnectAttrs()));
-                    break;
-                }
-                case CMPP3: {
-                    proxy = new Cmpp3ManageProxy(cmpp3ProxySender, passageId,
-                                                 new Args(tparameter.getCmppConnectAttrs()));
-                    break;
-                }
-                case SMGP: {
-                    proxy = new SmgpManageProxy(smgpProxySender, passageId, new Args(tparameter.getSmgpConnectAttrs()));
-                    break;
-                }
-                case SGIP: {
-                    proxy = loadSgipManageProxy(passageId, tparameter.getSgipConnectAttrs());
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
+            
+            // 获取代理实例
+            Object proxy = newProxy(passageId, tparameter, protocolType);
 
             if (proxy == null) {
                 logger.error("Loading direct proxy failed, proxy is null");

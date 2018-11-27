@@ -24,17 +24,17 @@ import com.huashi.sms.passage.domain.SmsPassageParameter;
 public abstract class AbstractSmProxySender {
 
     @Autowired
-    protected ISmsProxyManageService            smsProxyManageService;
+    protected ISmsProxyManageService   smsProxyManageService;
 
     @Resource
-    protected RabbitTemplate                    rabbitTemplate;
+    protected RabbitTemplate           rabbitTemplate;
 
-    protected final Logger                      logger             = LoggerFactory.getLogger(getClass());
+    protected final Logger             logger             = LoggerFactory.getLogger(getClass());
 
     /**
      * 通道ID锁
      */
-    protected static final Map<Integer, Object> passageLockMonitor = new ConcurrentHashMap<>();
+    private final Map<Integer, Object> passageLockMonitor = new ConcurrentHashMap<>();
 
     private void addPassageLockMonitor(Integer passageId) {
         passageLockMonitor.putIfAbsent(passageId, new Object());

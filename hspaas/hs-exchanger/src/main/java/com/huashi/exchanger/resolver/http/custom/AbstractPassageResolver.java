@@ -49,6 +49,16 @@ public abstract class AbstractPassageResolver implements HttpPassageResolver {
     public static final String                      COMMON_MT_STATUS_SUCCESS_CODE   = "DELIVRD";
 
     /**
+     * 多个手机号码分隔符
+     */
+    protected static final String                   MULTI_MOBILES_SEPERATOR         = ",";
+
+    /**
+     * 默认中文编码
+     */
+    protected static final String                   DEFAULT_ENCODING                = "UTF-8";
+
+    /**
      * TODO 初始化通道简码对应的实体映射
      */
     @PostConstruct
