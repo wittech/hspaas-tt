@@ -149,7 +149,7 @@
                             </#if>
                             <#if macro.doOper("2001001006")>
 	                            &nbsp;
-	                            <a href="javascript:void(0);" class="btn btn-info" onclick="batchRepeatTask();">重新分包</a>
+	                            <a href="javascript:void(0);" class="btn btn-info" onclick="repeatTask();">重新分包</a>
                             </#if>
                             <#if macro.doOper("2001001007")>
 	                            &nbsp;
@@ -308,15 +308,6 @@
 	                                    </#if>
                                     </#if>
                                    <#--
-                                    &nbsp;
-                                    <a href="javascript:void(0);" onclick="repeatTask(${pl.id});"
-                                       class="btn btn-info btn-xs">重新分包</a>
-                                    &nbsp;
-                                    <a href="javascript:void(0);" onclick="mainTaskForcePass('${pl.sid}');"
-                                       class="btn btn-danger btn-xs">强制通过</a>
-                                    &nbsp;
-                                    <a href="javascript:void(0);" onclick="mainTaskForcePass('${pl.sid}');"
-                                       class="btn btn-danger btn-xs">驳回</a>
                                     &nbsp;
                                     <a href="javascript:void(0);" onclick="editContent(${pl.sid},this);"
                                        class="btn btn-warning btn-xs">修改内容</a>
@@ -692,26 +683,6 @@
         });
     }
 
-    function repeatTask(id){
-        Boss.confirm('确定要重新分包吗？',function(){
-            $.ajax({
-                url:'${BASE_PATH}/sms/record/repeatTask',
-                data:{id:id},
-                dataType:'json',
-                type:'post',
-                success:function(data){
-                    Boss.alertToCallback(data.message,function(){
-                        if(data.result){
-                            location.reload();
-                        }
-                    });
-                },error:function(data){
-                    Boss.alert('重新分包失败！');
-                }
-            });
-        });
-    }
-
     function jumpPage(p) {
         $('#pn').val(p);
         $('#myform').attr('action', '${BASE_PATH}/sms/record/under_way_list');
@@ -735,27 +706,6 @@
     function editContent(sid) {
         $('#edit_content').val($("#"+sid+"_content").val());
         $('#contentModal').modal('show');
-    }
-
-    function mainTaskForcePass(sid){
-        Boss.confirm('强制通过会将该任务下的所有子任务全部执行，确定要执行该操作吗？',function(){
-            $.ajax({
-                url:'${BASE_PATH}/sms/record/main_task_force_pass',
-                data:{'sid':sid},
-                type:'post',
-                dataType:'json',
-                success:function(data){
-                    Boss.alertToCallback(data.message,function(){
-                        if(data.result){
-                            location.reload();
-                        }
-                    });
-
-                },error:function(data){
-                    Boss.alert('主任务强制通过失败！');
-                }
-            })
-        });
     }
 
     function saveContent() {
@@ -880,18 +830,16 @@
         editContent(sid);
     }
 
-    function batchRepeatTask(){
+    function repeatTask(){
         var ids = getSelectIds();
         if(ids == ''){
             Boss.alert('请选择主任务！');
             return;
         }
-//        var idArray = ids.split(',');
-//        var realId = idArray[0];
-//        repeatTask(realId);
+        
         Boss.confirm('确定要重新分包吗？',function(){
             $.ajax({
-                url:'${BASE_PATH}/sms/record/batchRepeatTask',
+                url:'${BASE_PATH}/sms/record/repeatTask',
                 data:{ids:ids},
                 dataType:'json',
                 type:'post',

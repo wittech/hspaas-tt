@@ -191,7 +191,7 @@
     function refuseTask(childId){
         Boss.confirm('确定要驳回吗？',function(){
             $.ajax({
-                url:'${BASE_PATH}/sms/record/refuseTask',
+                url:'${BASE_PATH}/sms/record/refuse_task',
                 data:{childId:childId},
                 dataType:'json',
                 success:function(data){

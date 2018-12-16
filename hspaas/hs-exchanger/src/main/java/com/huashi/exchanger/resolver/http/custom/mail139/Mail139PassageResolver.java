@@ -74,6 +74,11 @@ public class Mail139PassageResolver extends AbstractPassageResolver {
      */
     private static final String API_SYSTEM_SUCCESS_CODE = "000";
 
+    /**
+     * 短信后缀编码
+     */
+    private static final String AUTH_CODE_SUFFIX        = "002";
+
     @Override
     public List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content,
                                            String extNumber) {
@@ -268,6 +273,7 @@ public class Mail139PassageResolver extends AbstractPassageResolver {
         signature.append("sendsmspriority" + sendsmspriority);
         signature.append("serviceType" + serviceType);
         signature.append("spnumber" + spnumber);
+        signature.append("suffix" + AUTH_CODE_SUFFIX);
         signature.append("templateId" + templateId);
         signature.append("timestamp" + timestamp);
         signature.append("title" + title);
@@ -321,6 +327,7 @@ public class Mail139PassageResolver extends AbstractPassageResolver {
         xml.append("<serviceType>" + serviceType + "</serviceType>");
         xml.append("<templateId>" + templateId + "</templateId>");
         xml.append("<spnumber>" + spnumber + "</spnumber>");
+        xml.append("<suffix>" + AUTH_CODE_SUFFIX + "</suffix>");
         xml.append("</sendmail>");
 
         return xml.toString();
@@ -382,7 +389,7 @@ public class Mail139PassageResolver extends AbstractPassageResolver {
             throw new RuntimeException("Mt report from mail.139 failed[" + e.getMessage() + "]");
         }
     }
-    
+
     @Override
     public List<SmsMoMessageReceive> moReceive(String report, Integer passageId) {
         try {
@@ -396,7 +403,7 @@ public class Mail139PassageResolver extends AbstractPassageResolver {
             SAXBuilder sb = new SAXBuilder();
             Document doc = sb.build(source);
             Element root = doc.getRootElement();
-            
+
             List<Element> responseData = root.getChildren("responseData");
             SmsMoMessageReceive response;
             for (Element rd : responseData) {

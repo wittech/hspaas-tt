@@ -37,14 +37,14 @@ import net.sf.json.JSONArray;
  * @created_at 2016年8月25日下午4:13:37
  */
 @ControllerBind(controllerKey="/base/passage_template")
-@ViewMenu(code=MenuCode.MENU_CODE_1001002)
+@ViewMenu(code=MenuCode.MENU_CODE_1004001)
 public class PassageTemplateController extends BaseController{
 
 	
 	@BY_NAME
 	private IPassageTemplateService iPassageTemplateService;
 	
-	@AuthCode(code= {OperCode.OPER_CODE_2003003001, OperCode.OPER_CODE_2003003002,OperCode.OPER_CODE_2003003003})
+	@AuthCode(code= {OperCode.OPER_CODE_1004001001, OperCode.OPER_CODE_1004001002,OperCode.OPER_CODE_1004001003})
 	@ActionMode
 	public void index(){
 		String keyword = getPara("keyword");
@@ -55,13 +55,13 @@ public class PassageTemplateController extends BaseController{
 		setAttr("type", type);
 	}
 	
-	@AuthCode(code= {OperCode.OPER_CODE_2003003001})
+	@AuthCode(code= {OperCode.OPER_CODE_1004001001})
 	@ActionMode
 	public void add(){
 		setAttr("protocolTypes", CommonContext.ProtocolType.values());
 	}
 	
-	@AuthCode(code= {OperCode.OPER_CODE_2003003001})
+	@AuthCode(code= {OperCode.OPER_CODE_1004001001})
 	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void create(){
 		PassageTemplate template = getModel(PassageTemplate.class, "template");
@@ -93,7 +93,7 @@ public class PassageTemplateController extends BaseController{
 		renderResultJson(result);
 	}
 	
-	@AuthCode(code= {OperCode.OPER_CODE_2003003002})
+	@AuthCode(code= {OperCode.OPER_CODE_1004001002})
 	@ActionMode
 	public void edit(){
 		PassageTemplate template = iPassageTemplateService.findById(getParaToInt("id"));
@@ -101,7 +101,7 @@ public class PassageTemplateController extends BaseController{
 		setAttr("protocolTypes", CommonContext.ProtocolType.values());
 	}
 	
-	@AuthCode(code= {OperCode.OPER_CODE_2003003002})
+	@AuthCode(code= {OperCode.OPER_CODE_1004001002})
 	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void update(){
 		PassageTemplate template = getModel(PassageTemplate.class, "template");
@@ -143,7 +143,7 @@ public class PassageTemplateController extends BaseController{
 		setAttr("ruleType", getParaToInt("ruleType"));
 	}
 	
-	@AuthCode(code= {OperCode.OPER_CODE_2003003003})
+	@AuthCode(code= {OperCode.OPER_CODE_1004001003})
 	@ActionMode(type = EnumConstant.ActionType.JSON)
 	public void delete(){
 		boolean result = iPassageTemplateService.deleteById(getParaToInt("id"));

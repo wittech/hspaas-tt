@@ -56,7 +56,7 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                        	<#if macro.doOper("2003003001")>
+                        	<#if macro.doOper("1004001001")>
 	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
 	                                <a class="btn btn-success" href="${BASE_PATH}/base/passage_template/add">添加通道模板</a>
 	                            </div>
@@ -79,8 +79,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                	<#assign deleteCheck = macro.doOper("2003003003") />
-									<#assign editCheck = macro.doOper("2003003002") />
+                                	<#assign deleteCheck = macro.doOper("1004001003") />
+									<#assign editCheck = macro.doOper("1004001002") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
