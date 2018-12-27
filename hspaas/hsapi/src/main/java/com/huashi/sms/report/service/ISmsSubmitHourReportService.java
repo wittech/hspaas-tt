@@ -53,6 +53,16 @@ public interface ISmsSubmitHourReportService {
     List<SmsSubmitHourReport> findUserSubmitReport(Integer userId, String startDate, String endDate);
 
     /**
+     * TODO 查询用户短信提交统计报告（按照每天分组查询）
+     * 
+     * @param userId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<SmsSubmitHourReport> findUserSubmitReportInDailyFilter(Integer userId, String startDate, String endDate);
+
+    /**
      * TODO 获取通道提交统计数据
      * 
      * @param passageId 通道 ID

@@ -513,4 +513,41 @@ public class SmsSubmitHourReportService implements ISmsSubmitHourReportService {
         }
     }
 
+    @Override
+    public List<SmsSubmitHourReport> findUserSubmitReportInDailyFilter(Integer userId, String startDate, String endDate) {
+        try {
+            List<SmsSubmitHourReport> list = smsSubmitHourReportMapper.selectUserSubmitReportGroupByDaily(userId,
+                                                                                              parseDateStr2StartLongTime(startDate),
+                                                                                              parseDateStr2EndLongTime(endDate));
+
+//            if (CollectionUtils.isEmpty(list)) {
+//                return null;
+//            }
+//
+//            Map<Integer, UserModel> userModelMap = new HashMap<Integer, UserModel>();
+//
+//            UserModel userModel = null;
+//            for (SmsSubmitHourReport report : list) {
+//                if (report == null || report.getUserId() == null) {
+//                    logger.error("用户提交报表数据包含异常数据, {}", JSON.toJSONString(report));
+//                    return null;
+//                }
+//
+//                userModel = getUserModel(userModelMap, report.getUserId());
+//                if (userModel == null) {
+//                    logger.error("用户提交报表数据包含用户数据为空, {}", JSON.toJSONString(report));
+//                    return null;
+//                }
+//
+//                report.setUserModel(userModel);
+//            }
+
+            return list;
+
+        } catch (Exception e) {
+            logger.error("获取用户短信提交报表失败", e);
+            return null;
+        }
+    }
+
 }

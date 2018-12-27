@@ -21,14 +21,25 @@
     <form class="layui-form" action="">
         <input type="hidden" id="empId" name="empId">
         <div class="layui-tab layui-tab-card layui-tab-width">
-            <div class="layui-tab-content" style="min-height: 230px;">
+            <div class="layui-tab-content" style="min-height: 350px;">
                 <!--- 基本信息 --->
                 <div class="layui-tab-item layui-show">
-                    <div class="layui-div-left">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">手机号码</label>
+                            <label class="layui-form-label">手机号码<br/>
+                            <span id="count" class="layui-badge">0</span>
+                            </label>
+                            
                             <div class="layui-input-block">
-                                <input type="text" id="mobile" name="mobile" lay-verify="multiMobiles" autocomplete="off" placeholder="多个手机号码间以英文 ,号分隔开" class="layui-input">
+                                <textarea id="mobile" name="mobile" placeholder="多个手机号码间以英文 ,号分隔开" lay-verify="multiMobiles" class="layui-textarea"></textarea>
+                            </div>
+                            
+                            <div class="layui-input-block">
+	                            <button type="button" class="layui-btn" id="txt_file">
+								    <i class="layui-icon">&#xe67c;</i>TXT文件
+								</button>
+								 <button type="button" class="layui-btn layui-btn-danger" id="excel_file">
+								    <i class="layui-icon">&#xe67c;</i>EXCEL文件
+								</button>
                             </div>
                         </div>
                         <div>
@@ -37,7 +48,6 @@
                                 <textarea id="content" name="content" placeholder="请输入短信内容，建议发送已报备模板内容" lay-verify="required" class="layui-textarea"></textarea>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -49,9 +59,9 @@
         </div>
     </form>
 </div>
-<script type="text/javascript" src="/static/js/custom_defines.js"></script>
-<script type="text/javascript" src="/static/plugins/layui2/layui.js"></script>
-<script type="text/javascript" src="/static/js/sms/send_sms.js?v=20171204"></script>
+<script type="text/javascript" src="${rc.contextPath}/static/js/custom_defines.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/static/plugins/layui2/layui.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/static/js/sms/send_sms.js?v=2018122015002"></script>
 </body>
 
 </html>

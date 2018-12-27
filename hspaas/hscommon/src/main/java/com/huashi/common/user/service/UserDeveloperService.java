@@ -36,7 +36,7 @@ public class UserDeveloperService implements IUserDeveloperService {
 
     @Override
     public UserDeveloper getByUserId(int userId) {
-        return userDeveloperMapper.selectAvaiableByUserId(userId);
+        return userDeveloperMapper.selectByUserId(userId);
     }
 
     @Override

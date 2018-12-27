@@ -24,9 +24,9 @@
 				<dl class="fl">	
 					<dt>关于华时</dt>
 					<dd>
-						<a href="">关于我们</a>
-						<a href="">加入我们</a>
-						<a href="">联系我们</a>
+						<a href="${rc.contextPath}/api/about">关于我们</a>
+						<a href="${rc.contextPath}/api/job">加入我们</a>
+						<a href="${rc.contextPath}/api/contact">联系我们</a>
 					</dd>
 				</dl>
 				<div class="btn_box fl">
@@ -39,13 +39,11 @@
 	<div class="footer_inner_b ">
 		<div class="inner clearfix">
 			<p>
-				<a href="">站点地图</a>
+				<a href="${rc.contextPath}/api/about">关于我们</a>
 				|
-				<a href="">联系我们</a>
+				<a href="${rc.contextPath}/api/contact">联系我们</a>
 				|
-				<a href="">法律说明</a>
-				|
-				<span>© 2003-2015 hspaas.com 京ICP备15044067号</span>
+				<span>© 2015-2018 hspaas.cn 浙ICP备16008761号-1</span>
 			</p>
 		</div>
 	</div>

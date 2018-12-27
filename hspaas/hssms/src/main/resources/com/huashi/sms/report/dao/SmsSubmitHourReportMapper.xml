@@ -20,6 +20,7 @@
 		<result column="status" property="status" jdbcType="TINYINT" />
 		<result column="born_hours" property="bornHours" jdbcType="INTEGER" />
 		<result column="hour_time" property="hourTime" jdbcType="BIGINT" />
+		<result column="stat_date" property="statDate" jdbcType="VARCHAR" />
 	</resultMap>
 	<sql id="Base_Column_List">
 		id, user_id, passage_id, province_code, submit_count,
@@ -282,6 +283,25 @@
 			and user_id = #{userId}
 		</if>
 		group by user_id
+	</select>
+
+
+	<select id="selectUserSubmitReportGroupByDaily" resultMap="BaseResultMap">
+		select DATE(FROM_UNIXTIME(hour_time/1000)) as stat_date,
+		SUM(submit_count) AS submit_count, SUM(bill_count) AS
+		bill_count,
+		SUM(unknown_count) AS
+		unknown_count,
+		SUM(success_count) AS
+		success_count, SUM(submit_failed_count) AS submit_failed_count,
+		SUM(other_count) AS other_count
+		from sms_submit_hour_report
+		where
+		user_id = #{userId} and
+		hour_time &gt;= #{startTime} and
+		hour_time &lt;=
+		#{endTime}
+		group by DATE(FROM_UNIXTIME(hour_time/1000))
 	</select>
 
 	<select id="selectPassageSubmitReport" resultMap="BaseResultMap">

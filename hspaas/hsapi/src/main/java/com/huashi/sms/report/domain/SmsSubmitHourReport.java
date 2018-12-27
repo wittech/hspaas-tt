@@ -4,42 +4,44 @@ import java.io.Serializable;
 
 import com.huashi.common.user.model.UserModel;
 
-public class SmsSubmitHourReport implements Serializable{
-    
-	private static final long serialVersionUID = -4052169158389147731L;
+public class SmsSubmitHourReport implements Serializable {
 
-	private Long id;
+    private static final long serialVersionUID = -4052169158389147731L;
 
-    private Integer userId;
-    
+    private Long              id;
+
+    private Integer           userId;
+
     // 用户相关信息
-    private UserModel userModel;
+    private UserModel         userModel;
 
-    private Integer passageId;
+    private Integer           passageId;
     // 通道名称
-    private String passageName;
+    private String            passageName;
 
-    private Integer provinceCode;
+    private Integer           provinceCode;
     // 省份名称
-    private String pronvinceName;
+    private String            pronvinceName;
 
-    private Integer submitCount;
+    private Integer           submitCount;
 
-    private Integer billCount;
+    private Integer           billCount;
 
-    private Integer unknownCount;
+    private Integer           unknownCount;
 
-    private Integer successCount;
+    private Integer           successCount;
 
-    private Integer submitFailedCount;
+    private Integer           submitFailedCount;
 
-    private Integer otherCount;
+    private Integer           otherCount;
 
-    private Integer status;
+    private Integer           status;
 
-    private Integer bornHours;
+    private Integer           bornHours;
 
-    private Long hourTime;
+    private Long              hourTime;
+
+    private String            statDate;
 
     public Long getId() {
         return id;
@@ -145,29 +147,36 @@ public class SmsSubmitHourReport implements Serializable{
         this.hourTime = hourTime;
     }
 
-	public UserModel getUserModel() {
-		return userModel;
-	}
+    public UserModel getUserModel() {
+        return userModel;
+    }
 
-	public void setUserModel(UserModel userModel) {
-		this.userModel = userModel;
-	}
+    public void setUserModel(UserModel userModel) {
+        this.userModel = userModel;
+    }
 
-	public String getPassageName() {
-		return passageName;
-	}
+    public String getPassageName() {
+        return passageName;
+    }
 
-	public void setPassageName(String passageName) {
-		this.passageName = passageName;
-	}
+    public void setPassageName(String passageName) {
+        this.passageName = passageName;
+    }
 
-	public String getPronvinceName() {
-		return pronvinceName;
-	}
+    public String getPronvinceName() {
+        return pronvinceName;
+    }
 
-	public void setPronvinceName(String pronvinceName) {
-		this.pronvinceName = pronvinceName;
-	}
-    
-    
+    public void setPronvinceName(String pronvinceName) {
+        this.pronvinceName = pronvinceName;
+    }
+
+    public String getStatDate() {
+        return statDate;
+    }
+
+    public void setStatDate(String statDate) {
+        this.statDate = statDate;
+    }
+
 }

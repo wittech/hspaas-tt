@@ -32,7 +32,12 @@ public class BaseController {
     public static final String    DEFAULT_CAPTCHA_MD5_CODE_KEY = "_HUASHI_MD5_CODE_";                // 图形验证码
     public static final String    DEFAULT_CAPTCHA_SMS_CODE_KEY = "_HUASHI_SMS_CODE_";                // 短信验证码
 
-    protected Logger              logger                       = LoggerFactory.getLogger(getClass());
+    protected final Logger        logger                       = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 控制台前置
+     */
+    private static final String   ROUTE_CONSOLE                = "/console";
 
     @Resource
     protected HttpServletRequest  request;
@@ -164,6 +169,10 @@ public class BaseController {
         return true;
     }
 
+    protected String moduleInConsole(String module) {
+        return ROUTE_CONSOLE + module;
+    }
+
     /**
      * TODO 转换layui分页类
      * 
@@ -183,14 +192,15 @@ public class BaseController {
      * @return
      */
     protected <T> LayuiPage parseLayuiPage(PaginationVo<T> webPage, String msg, String code) {
-        if (webPage == null || CollectionUtils.isEmpty(webPage.getList())) {
-            return null;
-        }
-
         LayuiPage layuiPage = new LayuiPage();
-
         layuiPage.setCode(code);
         layuiPage.setMsg(msg);
+        
+        if (webPage == null || CollectionUtils.isEmpty(webPage.getList())) {
+            layuiPage.setCount(0);
+            return layuiPage;
+        }
+
         layuiPage.setCount(webPage.getTotalRecord());
         layuiPage.put(LayuiPage.DATA_NAME, webPage.getList());
 

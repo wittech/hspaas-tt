@@ -7,13 +7,6 @@ layui.use(['form', 'element', 'laydate', 'upload'], function(){
         ,upload = layui.upload
         ,laydate = layui.laydate;
 
-    //页面皮肤
-    var skin = getUrlParam('skin');
-    if(!skin){
-        skin = layui.data('kit_skin').skin;
-    }
-    setSkin($, skin);
-
     //自定义验证规则
     form.verify({
     	multiMobiles: function(value){
@@ -37,6 +30,9 @@ layui.use(['form', 'element', 'laydate', 'upload'], function(){
         $.ajax({
             url: server_domain + "/sms/send/submit",
             data: data.field,
+            beforeSend : function() {
+            	
+            },
             type: "POST",
             success: function (result) {
             	if(result.code == "0") {
@@ -51,4 +47,61 @@ layui.use(['form', 'element', 'laydate', 'upload'], function(){
         });
         return false;
     });
+    
+    var showMobileCount = function() {
+    	var val = $("#mobile").val();
+    	if($.trim(val) == "") {
+    		$("#count").html("0");
+    	} else {
+    		$("#count").html(val.split(",").length);
+    	}
+    };
+    
+    $("#mobile").bind({"input propertychange" : function(){
+    	showMobileCount();
+	},"blur" : function(){
+		showMobileCount();
+	}});
+    
+    
+    //执行TXT上传实例
+	upload.render({
+		elem : '#txt_file',
+		url : server_domain + "/sms/send/read_file/txt",
+		accept : 'file',
+		exts: 'txt|csv',
+		multiple : false,
+		before: function(){
+			layer.load(0);
+	    },
+		done : function(res) {
+			$("#mobile").val(res.mobiles);
+			showMobileCount();
+			layer.closeAll('loading');
+		},
+		error : function() {
+			// 请求异常回调
+			layer.closeAll('loading');
+		}
+	});
+    
+    //执行TXT上传实例
+	upload.render({
+		elem : '#excel_file',
+		url : server_domain + "/sms/send/read_file/excel",
+		accept : 'file',
+		exts: 'xls|xlsx',
+		before: function(){
+			layer.load(0);
+	    },
+		done : function(res) {
+			$("#mobile").val(res.mobiles);
+			showMobileCount();
+			layer.closeAll('loading');
+		},
+		error : function() {
+			layer.closeAll('loading');
+		}
+	});
+    
 });

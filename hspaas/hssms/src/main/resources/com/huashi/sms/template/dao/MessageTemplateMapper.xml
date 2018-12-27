@@ -60,21 +60,25 @@
 		regex_value, submit_interval,
 		limit_times, white_word, route_type,
 		priority, ext_number, ignore_blacklist, ignore_forbidden_words)
-		values (#{userId,jdbcType=INTEGER},
+		values
+		(#{userId,jdbcType=INTEGER},
 		#{content,jdbcType=VARCHAR},
 		#{status,jdbcType=INTEGER},
-		#{appType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+		#{appType,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},
 		#{approveTime,jdbcType=TIMESTAMP},
 		#{approveUser,jdbcType=VARCHAR},
 		#{remark,jdbcType=VARCHAR},
 		#{noticeMode,jdbcType=INTEGER},
-		#{mobile,jdbcType=VARCHAR}, #{regexValue,jdbcType=VARCHAR},
+		#{mobile,jdbcType=VARCHAR},
+		#{regexValue,jdbcType=VARCHAR},
 		#{submitInterval,jdbcType=INTEGER},
 		#{limitTimes,jdbcType=INTEGER},
 		#{whiteWord,jdbcType=VARCHAR},
 		#{routeType,jdbcType=INTEGER},
-		#{priority,jdbcType=INTEGER}, #{extNumber,jdbcType=VARCHAR},
-		#{ignoreBlacklist,jdbcType=INTEGER}, 
+		#{priority,jdbcType=INTEGER},
+		#{extNumber,jdbcType=VARCHAR},
+		#{ignoreBlacklist,jdbcType=INTEGER},
 		#{ignoreForbiddenWords,jdbcType=INTEGER})
 	</insert>
 	<insert id="insertSelective" parameterType="com.huashi.sms.template.domain.MessageTemplate">
@@ -260,7 +264,8 @@
 				ignore_blacklist = #{ignoreBlacklist,jdbcType=INTEGER},
 			</if>
 			<if test="ignoreForbiddenWords != null">
-				ignore_forbidden_words = #{ignoreForbiddenWords,jdbcType=INTEGER},
+				ignore_forbidden_words =
+				#{ignoreForbiddenWords,jdbcType=INTEGER},
 			</if>
 		</set>
 		where id = #{id,jdbcType=BIGINT}
@@ -295,8 +300,10 @@
 		#{routeType,jdbcType=INTEGER},
 		priority = #{priority,jdbcType=INTEGER},
 		ext_number = #{extNumber,jdbcType=VARCHAR},
-		ignore_blacklist = #{ignoreBlacklist,jdbcType=INTEGER},
-		ignore_forbidden_words = #{ignoreForbiddenWords,jdbcType=INTEGER}
+		ignore_blacklist =
+		#{ignoreBlacklist,jdbcType=INTEGER},
+		ignore_forbidden_words =
+		#{ignoreForbiddenWords,jdbcType=INTEGER}
 		where id =
 		#{id,jdbcType=BIGINT}
 	</update>
@@ -310,6 +317,9 @@
 		<if test="content != null">
 			and content like CONCAT('%',#{content},'%')
 		</if>
+		<if test="appType != null">
+			and app_type = #{appType}
+		</if>
 	</select>
 
 	<select id="findPageListByUserId" resultMap="BaseResultMap"
@@ -322,6 +332,9 @@
 		</if>
 		<if test="content != null">
 			and content like CONCAT(#{content},'%')
+		</if>
+		<if test="appType != null">
+			and app_type = #{appType}
 		</if>
 		order by create_time desc
 		limit #{pageRecord} offset #{startPage}

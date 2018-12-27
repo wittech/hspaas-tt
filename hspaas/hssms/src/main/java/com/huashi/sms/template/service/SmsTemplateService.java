@@ -75,6 +75,10 @@ public class SmsTemplateService implements ISmsTemplateService {
         if (StringUtils.isNotEmpty(content)) {
             params.put("content", content);
         }
+
+        // WEB只能看到自己提交的数据
+        params.put("appType", AppType.WEB.getCode());
+
         int totalRecord = messageTemplateMapper.getCountByUserId(params);
         if (totalRecord == 0) {
             return null;
@@ -169,19 +173,43 @@ public class SmsTemplateService implements ISmsTemplateService {
 
     @Override
     public boolean update(MessageTemplate template) {
-        MessageTemplate td = get(template.getId());
-        if (td == null) {
-            logger.error("短信模板信息为空, id:{}", template.getId());
+        MessageTemplate originTemplate = null;
+        try {
+            originTemplate = isAllowAccess(template.getUserId(), template.getId());
+        } catch (IllegalArgumentException e) {
+            logger.error("模板数据鉴权失败 : {}", e.getMessage());
             return false;
         }
 
         template.setRegexValue(parseContent2Regex(template.getContent()));
-        template.setCreateTime(td.getCreateTime());
+        template.setCreateTime(originTemplate.getCreateTime());
         int result = messageTemplateMapper.updateByPrimaryKey(template);
         if (result > 0) {
             reloadUserTemplate(template.getUserId());
         }
         return result > 0;
+    }
+
+    /**
+     * TODO 是否允许被访问（针对用户ID进行鉴权,防止恶意使用userID来篡改其他userId数据）
+     * 
+     * @param userId
+     * @param templateId
+     * @return
+     */
+    private MessageTemplate isAllowAccess(int userId, long templateId) {
+        MessageTemplate template = get(templateId);
+        if (template == null) {
+            throw new IllegalArgumentException("模板 [" + templateId + "]信息为空");
+        }
+
+        // 仅针对WEB用户自己添加的模板进行过滤
+        if (AppType.WEB.getCode() == template.getAppType() && template.getUserId() != userId) {
+            throw new IllegalArgumentException("用户模板[" + templateId + "]数据不匹配，原模板用户ID:[" + template.getUserId()
+                                               + "] , 本次用户ID:[" + userId + "]");
+        }
+
+        return template;
     }
 
     @Override
@@ -463,6 +491,25 @@ public class SmsTemplateService implements ISmsTemplateService {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean delete(long id, int userId) {
+        MessageTemplate originTemplate = null;
+        try {
+            originTemplate = isAllowAccess(userId, id);
+        } catch (IllegalArgumentException e) {
+            logger.error("模板数据鉴权失败 : {}", e.getMessage());
+            return false;
+        }
+
+        try {
+            removeRedis(originTemplate);
+        } catch (Exception e) {
+            logger.error("移除REDIS用户模板失败， ID：{}", id, e);
+        }
+
+        return messageTemplateMapper.deleteByPrimaryKey(id) > 0;
     }
 
 }

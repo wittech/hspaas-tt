@@ -24,7 +24,7 @@
 						<p style="white-space:normal;">
 							杭州华时科技有限公司是一群激情四射、怀揣梦想的团队，有通信界的技术大牛、也有互联网界的技术小哥、有笑容甜美的客服小妹、也有闯荡通信业多年的商务大叔……我们专心只为实现一个梦想------为每个客户插上通信的翅膀，在“互联网+”的风口里，飞的更高，变的更强！
 						</p>
-						<img src="${rc.contextPath}/assets/images/partner/212302383163.jpg" style="white-space:normal;">
+						<img src="${rc.contextPath}/static/images/partner/212302383163.jpg" style="white-space:normal;">
 						<span style="white-space:normal;"></span><br style="white-space:normal;">					
 					</div>
 				</div>

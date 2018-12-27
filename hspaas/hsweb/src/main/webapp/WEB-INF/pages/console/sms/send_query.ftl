@@ -19,9 +19,13 @@
         <div class="admin-main">
             <form class="layui-form" action="">
             <blockquote class="layui-elem-quote">
+            	
                 <a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-sm" id="export">
+                <#--
                     <i class="fa fa-file-excel-o fa-pr5" aria-hidden="true"></i>
+                     -->
                 </a>
+                
                 <div style="float:right;">
                     <div class="layui-form-search" style="margin:0;">
                     	<label class="layui-search-label">检索条件</label>
@@ -67,36 +71,39 @@
             </form>
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">
-                    <!-- data list box -->
                     <table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
-                    <!-- data list toolbar -->
-                    <script type="text/html" id="toolbar">
-                        <a href="javascript:;" lay-event="view" class="layui-btn layui-btn-normal layui-btn-xs">预览</a>
-                        <a href="javascript:;" lay-event="edit" class="layui-btn layui-btn-xs">修改</a>
-                        <a href="javascript:;" lay-event="del" class="layui-btn layui-btn-danger layui-btn-xs">注销</a>
-                    </script>
                 </div>
             </fieldset>
         </div>
     </div>
 
-<script type="text/javascript" src="/static/js/date_format.js"></script>
-
-<script type="text/html" id="send_status">
-	{{ getFormatDateByLong(d.createTime, "yyyy-MM-dd hh:mm:ss") }}
-</script>
-
-<script type="text/html" id="deliver_status">
-	{{ getFormatDateByLong(d.createTime, "yyyy-MM-dd hh:mm:ss") }}
-</script>
+<script type="text/javascript" src="${rc.contextPath}/static/js/date_format.js"></script>
 
 <script type="text/html" id="date_format">
 	{{ getFormatDateByLong(d.createTime, "yyyy-MM-dd hh:mm:ss") }}
 </script>
 
-<script type="text/javascript" src="/static/js/custom_defines.js"></script>
-<script type="text/javascript" src="/static/plugins/layui2/layui.js"></script>
-<script type="text/javascript" src="/static/js/sms/send_query.js?v=201806030212"></script>
+<script type="text/html" id="send_status_des">
+	{{#  if(d.status === 0){ }}
+	    <span class="background-color: #5FB878;">{{ "发送成功" }}</span>
+	  {{#  } else { }}
+	    <span style="background-color: #FF5722; color: #fff;">{{ "发送失败" }}</span>
+	  {{#  } }}
+</script>
+
+<script type="text/html" id="deliver_status_des">
+	 {{# if(d.messageDeliver == undefined){ }}
+	    {{ "待回执" }}
+	  {{# } else if(d.messageDeliver.status == 0){ }}
+	    <span class="background-color: #5FB878;">{{ "回执成功" }}</span>
+	  {{# } else { }}
+	    <span style="background-color: #FF5722; color: #fff;">{{ "回执失败" }}</span>
+	  {{# } }}
+</script>
+
+<script type="text/javascript" src="${rc.contextPath}/static/js/custom_defines.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/static/plugins/layui2/layui.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/static/js/sms/send_query.js?v=201812201656"></script>
 </body>
 
 </html>

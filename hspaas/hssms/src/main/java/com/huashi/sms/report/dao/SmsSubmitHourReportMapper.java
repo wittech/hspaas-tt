@@ -52,6 +52,18 @@ public interface SmsSubmitHourReportMapper {
                                                      @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
     /**
+     * TODO 查询用户短信提交统计报告(Group by)
+     * 
+     * @param userId 用户ID(为空则查询全部))
+     * @param startDate 开始时间（毫秒值）
+     * @param endDate 截止时间（毫秒值）
+     * @return
+     */
+    List<SmsSubmitHourReport> selectUserSubmitReportGroupByDaily(@Param("userId") Integer userId,
+                                                                 @Param("startTime") Long startTime,
+                                                                 @Param("endTime") Long endTime);
+
+    /**
      * TODO 获取通道提交统计数据
      * 
      * @param passageId 通道 ID

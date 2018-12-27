@@ -93,7 +93,7 @@
                                                         <label class="col-xs-1 control-label">App Key</label>
                                                         <div class="col-xs-4">
                                                             <input type="text" class="form-control" id="developerAppkey" value="${(developer.appKey)!''}" name="developer.appKey">
-                                                            <input type="hidden" name="developer.id" value="${developer.id!0}">
+                                                            <input type="hidden" name="developer.id" value="${(developer.id)!'0'}">
                                                         </div>
                                                         <label class="col-xs-1 control-label">Secret</label>
                                                         <div class="col-xs-4">
