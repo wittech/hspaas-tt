@@ -25,13 +25,13 @@
                         <div class="layui-inline">
                             <label class="layui-search-label">开始日期</label>
                             <div class="layui-input-inline">
-                                <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" value="${(startDate)!}">
+                                <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" lay-verify="required" value="${(startDate)!}">
                             </div>
                         </div>
                         <div class="layui-inline">
                             <label class="layui-search-label">截止日期</label>
                             <div class="layui-input-inline">
-                                <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" value="${(endDate)!}">
+                                <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" lay-verify="required" value="${(endDate)!}">
                             </div>
                         </div>
                         <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
@@ -42,6 +42,7 @@
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">
                     <table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
+                    <script type="text/html" id="table-daily-toolbar"></script>
                 </div>
             </fieldset>
         </div>
@@ -49,7 +50,80 @@
 
 <script type="text/javascript" src="${rc.contextPath}/static/js/custom_defines.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/static/plugins/layui2/layui.js"></script>
-<script type="text/javascript" src="${rc.contextPath}/static/js/sms/sms_daily.js?v=201812225556"></script>
+<script type="text/javascript">
+layui.use(['element', 'tree', 'table', 'form', 'laydate'], function() {
+    var table = layui.table
+        ,layerTips = parent.layer === undefined ? layui.layer : parent.layer
+        ,layer = layui.layer
+        ,form = layui.form
+        ,element = layui.element
+        ,laydate = layui.laydate
+        ,$ = layui.$;
+    
+
+    //日期
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate'
+    });
+    
+    //预定义参数
+    var searchObj = new Object();
+    var currpage = 1;
+
+    var loadTableData = function() {
+    	searchObj.currentPage = currpage;
+    	searchObj.startDate = $.trim($("#startDate").val());
+    	searchObj.endDate = $.trim($("#endDate").val());
+    	
+        table.render({
+            id:'dataTable'
+            ,elem: '#dataTable'
+            ,cellMinWidth: 50
+            ,totalRow: true
+            ,loading: true
+            ,toolbar: '#table-daily-toolbar'
+            ,cols: [[
+                  {type:'numbers'}
+                  , {field: 'statDate', title: '日期',  sort: true, totalRowText: '总计'}
+	              , {field: 'submitCount', title: '提交数量',  sort: true, totalRow: true}
+	              , {field: 'billCount', title: '计费数',  sort: true, totalRow: true}
+	              , {field: 'successCount', title: '成功数量',  sort: true, totalRow: true}
+	          ]]
+            ,url: server_domain + "/report/sms_daily_query"
+            ,where: searchObj
+            ,method: 'GET'
+            ,page: false
+            ,even: true
+            ,done: function(res, curr, count){
+                currpage = curr;
+            }
+        });
+    };
+    
+    loadTableData();
+
+    var reloadList = function() {
+    	searchObj.currentPage = currpage;
+    	
+        table.reload('dataTable', {
+            where: searchObj
+            ,page: false
+        });
+    };
+
+    form.on('submit(search)', function(data) {
+        searchObj = data.field;
+        currpage = 1;
+        reloadList();
+        return false;
+    });
+
+});
+
+</script>
 </body>
 
 </html>

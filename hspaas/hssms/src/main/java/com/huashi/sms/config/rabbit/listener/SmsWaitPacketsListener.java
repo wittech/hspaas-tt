@@ -867,7 +867,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         submit.setProvinceCode(Province.PROVINCE_CODE_ALLOVER_COUNTRY);
 
         // add by zhengying 2017-03-28 针对用户WEB平台发送的数据，则不进行推送，直接在平台看推送记录
-        if (task.getAppType() != null && AppType.DEVELOPER.getCode() == AppType.WEB.getCode()) {
+        if (task.getAppType() != null && AppType.DEVELOPER.getCode() != task.getAppType()) {
             submit.setNeedPush(false);
 
         } else {

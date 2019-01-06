@@ -23,6 +23,22 @@ public interface SmsMtMessageSubmitMapper {
     List<SmsMtMessageSubmit> findList(Map<String,Object> params);
 
     int findCount(Map<String,Object> params);
+    
+    /**
+     * 
+       * TODO 针对指定用户查询列表数据（一般指WEB分页查询）
+       * @param params
+       * @return
+     */
+    List<SmsMtMessageSubmit> findListByUser(Map<String,Object> params);
+
+    /**
+     * 
+       * TODO 针对指定用户查询总量数据（一般指WEB统计查询）
+       * @param params
+       * @return
+     */
+    int findCountByUser(Map<String,Object> params);
 
     /**
      * 

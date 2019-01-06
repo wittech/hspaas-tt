@@ -48,20 +48,160 @@
                                 <textarea id="content" name="content" placeholder="请输入短信内容，建议发送已报备模板内容" lay-verify="required" class="layui-textarea"></textarea>
                             </div>
                         </div>
+                        <div>
+	                        <label class="layui-form-label"></label>
+							<div class="layui-input-block">
+								短信内容已输入<span id="words" class="layui-badge">0</span>字
+							</div>
+						</div>
                 </div>
             </div>
         </div>
         <div class="layui-form-button">
             <div class="layui-input-block">
-                <button class="layui-btn" lay-submit="" lay-filter="sendSms">发送</button>
-                <button type="reset" id="resetForm" class="layui-btn layui-btn-primary">重置</button>
+                <button class="layui-btn" lay-submit="" lay-filter="sendSms">发送短信</button>
+                <button id="resetForm" class="layui-btn layui-btn-primary">重置</button>
             </div>
         </div>
     </form>
 </div>
 <script type="text/javascript" src="${rc.contextPath}/static/js/custom_defines.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/static/plugins/layui2/layui.js"></script>
-<script type="text/javascript" src="${rc.contextPath}/static/js/sms/send_sms.js?v=2018122015002"></script>
+<script type="text/javascript">
+layui.use(['form', 'element', 'laydate', 'upload'], function(){
+    var form = layui.form
+        ,layer = layui.layer
+        ,element = layui.element
+        ,$ = layui.$
+        ,upload = layui.upload
+        ,laydate = layui.laydate;
+
+    //自定义验证规则
+    form.verify({
+    	multiMobiles: function(value){
+        	var mobiles = $.trim(value);
+			if(mobiles==null || mobiles==undefined || mobiles==""){
+				return "请输入手机号码";
+			}
+			
+			var regex = /^(13[0-9]|15[012356789]|166|17[05678]|18[0-9]|14[579]|19[89])[0-9]{8}$/;
+			
+			var ms = mobiles.split(",");
+			for(var i=0; i < ms.length; i++){
+				if(!regex.test(ms[i]))
+					return "手机号码: [" + ms[i] +"] 格式不正确";
+			}
+        }
+    });
+    
+    var l_index;
+
+    //监听提交
+    form.on('submit(sendSms)', function(data) {
+        $.ajax({
+            url: server_domain + "/sms/send/submit",
+            data: data.field,
+            beforeSend : function() {
+            	l_index = layer.load(1);
+            },
+            type: "POST",
+            success: function (result) {
+            	layer.close(l_index);
+            	if(result.code == "0") {
+            		layer.msg('发送成功');
+            	} else {
+            		layer.msg('发送失败:[' + result.msg + "]");
+            	}
+            },
+            error: function (data) {
+            	layer.close(l_index);
+                errorHandle(layer,data);
+            }
+        });
+        return false;
+    });
+    
+    var showMobileCount = function() {
+    	var val = $("#mobile").val();
+    	if($.trim(val) == "") {
+    		$("#count").html("0");
+    	} else {
+    		$("#count").html(val.split(",").length);
+    	}
+    };
+    
+    var showWordsCount = function() {
+    	var val = $("#content").val();
+    	if($.trim(val) == "") {
+    		$("#words").html("0");
+    	} else {
+    		$("#words").html(val.length);
+    	}
+    };
+    
+    $("#mobile").bind({"input propertychange" : function(){
+    	showMobileCount();
+	},"blur" : function(){
+		showMobileCount();
+	}});
+    
+    $("#content").bind({"input propertychange" : function(){
+    	showWordsCount();
+	},"blur" : function(){
+		showWordsCount();
+	}});
+    
+    $("#resetForm").bind({"click" : function(){
+    	$("#mobile").val("");
+    	$("#content").val("");
+    	$("#count").html("0");
+    	$("#words").html("0");
+	}});
+    
+    
+    //执行TXT上传实例
+	upload.render({
+		elem : '#txt_file',
+		url : server_domain + "/sms/send/read_file/txt",
+		accept : 'file',
+		exts: 'txt|csv',
+		multiple : false,
+		before: function(){
+			layer.load(0);
+	    },
+		done : function(res) {
+			$("#mobile").val(res.mobiles);
+			showMobileCount();
+			layer.closeAll('loading');
+		},
+		error : function() {
+			// 请求异常回调
+			layer.closeAll('loading');
+		}
+	});
+    
+    //执行TXT上传实例
+	upload.render({
+		elem : '#excel_file',
+		url : server_domain + "/sms/send/read_file/excel",
+		accept : 'file',
+		exts: 'xls|xlsx',
+		before: function(){
+			layer.load(0);
+	    },
+		done : function(res) {
+			$("#mobile").val(res.mobiles);
+			showMobileCount();
+			layer.closeAll('loading');
+		},
+		error : function() {
+			layer.closeAll('loading');
+		}
+	});
+    
+});
+
+</script>
 </body>
 
 </html>

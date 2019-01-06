@@ -39,13 +39,13 @@
                             </div>
                             <!-- Panel body -->
                                 <form id="myform" class="form-horizontal">
-                                  <input type="hidden" name="messageTemplate.id" value="${messageTemplate.id}">
+                                  <input type="hidden" name="id" value="${messageTemplate.id}">
 				    			  <div class="panel-body">
 				    			  	<div class="form-group">
 				    			  		<label class="col-xs-1 control-label">审核状态</label>
                                         <div class="col-xs-4">
                                         	<div class="input-group">
-										      <select class="form-control" name="messageTemplate.status" id="status">
+										      <select class="form-control" name="status" id="status">
 			                                    <#if templateStatus??>
 									    			<#list templateStatus as a>
 									    				<option value="${a.value!''}">${a.title!''}</option>
@@ -55,10 +55,16 @@
 										    </div>
                                         </div>
                                        </div>
+                                     <div class="form-group">
+                                        <label class="col-xs-1 control-label">模板内容</label>
+                                        <div class="col-xs-5">
+                                             <textarea class="form-control id="content" rows="8">${messageTemplate.content!''}</textarea>
+                                        </div>
+                                    </div>
                                     <div class="form-group">
                                         <label class="col-xs-1 control-label">审核备注</label>
                                         <div class="col-xs-5">
-                                             <textarea class="form-control validate[required,maxSize[1000]]" name="messageTemplate.remark" id="remark" rows="8"></textarea>
+                                             <textarea class="form-control name="remark" id="remark" rows="8"></textarea>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -91,7 +97,7 @@
 				return;
 			}
 			$.ajax({
-	  			url:'${BASE_PATH}/sms/message_template/update',
+	  			url:'${BASE_PATH}/sms/message_template/approve',
 	  			dataType:'json',
 	  			data:$('#myform').serialize(),
 	  			type:'post',

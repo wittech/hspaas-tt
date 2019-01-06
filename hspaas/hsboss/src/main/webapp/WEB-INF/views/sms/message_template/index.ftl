@@ -127,8 +127,7 @@
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td><#if pl.approveTime??>${pl.approveTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
                                         <td>
-                                        	<#if pl.status==1>
-                                        	<#else>
+                                        	<#if pl.status==0>
                                         		<#if auditCheck>
 	                                        		<a class="btn btn-default btn-xs" href="${BASE_PATH}/sms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批 </a>
                                         		</#if>

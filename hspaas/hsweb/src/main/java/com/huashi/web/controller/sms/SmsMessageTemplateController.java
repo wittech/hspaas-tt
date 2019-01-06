@@ -2,6 +2,7 @@ package com.huashi.web.controller.sms;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -35,13 +36,13 @@ public class SmsMessageTemplateController extends BaseController {
 
     @RequestMapping(value = "/page")
     @ResponseBody
-    public LayuiPage page(String page, String status, String mobile, Model model) {
-        return parseLayuiPage(smsMessageTemplateService.findPage(getCurrentUserId(), status, null, page));
+    public LayuiPage page(String page, String status, String content, Model model) {
+        return parseLayuiPage(smsMessageTemplateService.findPage(getCurrentUserId(), status, content, page));
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.GET)
     public String add(Model model) {
-        return moduleInConsole("/sms/template/template_add");
+        return moduleInConsole("/sms/template/template_edit");
     }
 
     /**
@@ -62,7 +63,8 @@ public class SmsMessageTemplateController extends BaseController {
     }
 
     @RequestMapping(value = "/edit", method = RequestMethod.GET)
-    public String edit(Model model) {
+    public String edit(Long id, Model model) {
+        model.addAttribute("template", smsMessageTemplateService.get(id));
         return moduleInConsole("/sms/template/template_edit");
     }
 
@@ -84,14 +86,21 @@ public class SmsMessageTemplateController extends BaseController {
     }
 
     private MessageTemplate toMessageTemplate(String content, Long id) {
-        MessageTemplate messageTemplate = new MessageTemplate();
-        messageTemplate.setContent(content);
-        messageTemplate.setId(id);
-        messageTemplate.setUserId(getCurrentUserId());
-        messageTemplate.setStatus(ApproveStatus.WAITING.getValue());
-        messageTemplate.setAppType(AppType.WEB.getCode());
-        messageTemplate.setCreateTime(new Date());
+        MessageTemplate messageTemplate = null;
+        if(id == null || id == 0L) {
+            messageTemplate = new MessageTemplate();
+            messageTemplate.setContent(content);
+            messageTemplate.setUserId(getCurrentUserId());
+            messageTemplate.setStatus(ApproveStatus.WAITING.getValue());
+            messageTemplate.setAppType(AppType.WEB.getCode());
+            messageTemplate.setCreateTime(new Date());
+        } else {
+            messageTemplate = smsMessageTemplateService.get(id);
+            messageTemplate.setContent(content);
+        }
+        
         return messageTemplate;
+        
     }
 
     /**
@@ -120,7 +129,34 @@ public class SmsMessageTemplateController extends BaseController {
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public @ResponseBody boolean delete(long id) {
-        return smsMessageTemplateService.delete(id, getCurrentUserId());
+    public @ResponseBody HttpResponse delete(String ids) {
+        if(StringUtils.isEmpty(ids)) {
+            return new HttpResponse(false);
+        }
+        
+        return new HttpResponse(batchDelete(ids));
+    }
+    
+    /**
+     * 
+       * TODO 批量删除
+       * @param ids
+       * @return
+     */
+    private boolean batchDelete(String ids) {
+        String[] idArray = ids.split(",");
+        for(String id : idArray) {
+            try {
+                boolean isOk = smsMessageTemplateService.delete(Long.valueOf(id), getCurrentUserId());
+                if(!isOk) {
+                    return false;
+                }
+            } catch (Exception e) {
+                logger.error("删除失败，失败id : {}", id, e);
+                return false;
+            }
+        }
+        
+        return true;
     }
 }

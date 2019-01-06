@@ -208,6 +208,10 @@ public class SmsTemplateService implements ISmsTemplateService {
             throw new IllegalArgumentException("用户模板[" + templateId + "]数据不匹配，原模板用户ID:[" + template.getUserId()
                                                + "] , 本次用户ID:[" + userId + "]");
         }
+        
+        if (AppType.WEB.getCode() == template.getAppType() && template.getStatus() != ApproveStatus.WAITING.getValue()) {
+            throw new IllegalArgumentException("用户模板[" + templateId + "]模板状态为非待审核状态["+template.getStatus()+"]不能修改");
+        }
 
         return template;
     }
@@ -433,13 +437,13 @@ public class SmsTemplateService implements ISmsTemplateService {
     }
 
     @Override
-    public boolean approve(long id, int approveStatus, String operator) {
+    public boolean approve(long id, int status, String remark) {
         MessageTemplate template = get(id);
-        template.setStatus(approveStatus);
-        template.setApproveUser(operator);
+        template.setStatus(status);
+        template.setRemark(remark);
         template.setApproveTime(new Date());
 
-        if (ApproveStatus.SUCCESS.getValue() == approveStatus) {
+        if (ApproveStatus.SUCCESS.getValue() == status) {
             pushToRedis(template.getUserId(), template);
         } else {
             removeRedis(template);

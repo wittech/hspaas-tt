@@ -3,6 +3,9 @@ package com.huashi.hsboss.web.controller.common;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.huashi.hsboss.constant.SystemConstant;
 import com.huashi.hsboss.dto.UserSession;
 import com.jfinal.core.Controller;
@@ -14,6 +17,8 @@ import com.jfinal.core.Controller;
  * @created_at 2016年6月22日下午2:11:36
  */
 public class BaseController extends Controller {
+    
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	protected UserSession getUserSession() {
 		return (UserSession) getSession().getAttribute(SystemConstant.USER_SESSION);

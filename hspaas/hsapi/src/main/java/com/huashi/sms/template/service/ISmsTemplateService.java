@@ -36,11 +36,11 @@ public interface ISmsTemplateService {
      * TODO 模板审核
      * 
      * @param id
-     * @param approveStatus
-     * @param operator
+     * @param status
+     * @param remark
      * @return
      */
-    boolean approve(long id, int approveStatus, String operator);
+    boolean approve(long id, int status, String remark);
 
     /**
      * TODO 更新模板内容

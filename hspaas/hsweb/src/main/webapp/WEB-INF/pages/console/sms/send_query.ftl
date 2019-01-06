@@ -72,6 +72,7 @@
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">
                     <table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
+                    <script type="text/html" id="table-send-query-toolbar"></script>
                 </div>
             </fieldset>
         </div>
@@ -103,7 +104,97 @@
 
 <script type="text/javascript" src="${rc.contextPath}/static/js/custom_defines.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/static/plugins/layui2/layui.js"></script>
-<script type="text/javascript" src="${rc.contextPath}/static/js/sms/send_query.js?v=201812201656"></script>
+<script type="text/javascript">
+	layui.use(['element', 'table', 'form', 'laydate'], function() {
+    var table = layui.table
+        ,layerTips = parent.layer === undefined ? layui.layer : parent.layer
+        ,layer = layui.layer
+        ,form = layui.form
+        ,element = layui.element
+        ,laydate = layui.laydate
+        ,$ = layui.$;
+
+    //日期
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate'
+    });
+    
+    //预定义参数
+    var searchObj = new Object();
+    var currpage = 1;
+
+    var loadTableData = function() {
+    	searchObj.currentPage = currpage;
+    	searchObj.sid = $.trim($("#sid").val());
+    	searchObj.mobile = $.trim($("#mobile").val());
+    	searchObj.startDate = $.trim($("#startDate").val());
+    	searchObj.endDate = $.trim($("#endDate").val());
+    	
+        table.render({
+            id:'dataTable'
+            ,elem: '#dataTable'
+            ,cellMinWidth: 50
+            ,toolbar: '#table-send-query-toolbar'
+            , cols: [[
+                  {type:'numbers'}
+	              , {field: 'sid', title: 'sid'}
+	              , {field: 'mobile', title: '手机号码'}
+	              , {field: 'createTime', title: '发送时间', width:200, templet: '#date_format', sort: true}
+	              , {field: 'status', title: '发送状态', templet: '#send_status_des', sort: true}
+	              , {field: 'receiveStatus', title: '回执状态', sort: true, templet: '#deliver_status_des'}
+	              , {field: 'content', title: '短信内容', width : 400}
+	          ]]
+            ,url: server_domain + "/sms/send/page"
+            ,loading: true
+            ,where: searchObj
+            ,method: 'GET'
+            ,page: {
+	            layout: ['count', 'prev', 'page', 'next', 'skip']
+	            ,groups: 5
+	            ,first: '1'
+	            ,last: '尾页'
+	         }
+	        ,limit:20
+            ,even: true
+            ,done: function(res, curr, count){
+                currpage = curr;
+            }
+        });
+    };
+
+    var reloadList = function() {
+    	searchObj.currentPage = currpage;
+    	
+        if(searchObj.status){
+            searchObj.status = searchObj.status=='0'?"":searchObj.status;
+        }
+        table.reload('dataTable', {
+            where: searchObj
+            ,page: {
+                curr: currpage
+            }
+        });
+    };
+
+
+    loadTableData();
+
+    $('#openSearch').bind('click',function(){
+        $('.layui-advance-search').toggle(300);
+    });
+
+    form.on('submit(search)', function(data) {
+        searchObj = data.field;
+        currpage = 1;
+        reloadList();
+        return false;
+    });
+
+});
+</script>
 </body>
 
 </html>

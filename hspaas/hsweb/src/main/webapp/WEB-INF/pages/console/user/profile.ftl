@@ -87,7 +87,6 @@
 </div>
 <script type="text/javascript" src="/static/js/custom_defines.js"></script>
 <script type="text/javascript" src="/static/plugins/layui2/layui.js"></script>
-<script type="text/javascript" src="/static/js/sms/send_sms.js?v=20171204"></script>
 </body>
 
 </html>

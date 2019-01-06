@@ -344,7 +344,7 @@
 			and sd.status = #{deliverStatus}
 		</if>
 
-		order by s.id desc limit #{start},#{end}
+		order by s.create_unixtime desc limit #{start},#{end}
 	</select>
 
 
@@ -388,6 +388,51 @@
 		</if>
 		
 	</select>
+	
+	
+	<select id="findListByUser" resultMap="BaseResultMap">
+		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp, s.content, s.fee,
+		s.attach, s.passage_id,
+		s.need_push, s.push_url,s.create_time,
+		s.create_unixtime, s.status, s.remark, s.msg_id,s.destnation_no
+		from sms_mt_message_submit s
+		where s.user_id = #{userId} and s.create_unixtime &gt;=#{startDate} and s.create_unixtime &lt;=#{endDate}
+		
+		<if test="sid != null and sid != ''">
+			and s.sid = #{sid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and s.mobile like '${mobile}%'
+		</if>
+		<if test="content != null and content != ''">
+			and s.content like '%${content}%'
+		</if>
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
+			and s.status = #{sendStatus}
+		</if>
+
+		order by s.create_unixtime desc limit #{start},#{end}
+	</select>
+
+
+	<select id="findCountByUser" resultType="java.lang.Integer">
+		select count(0) from sms_mt_message_submit s
+		where user_id = #{userId} and s.create_unixtime &gt;=#{startDate} and s.create_unixtime &lt;=#{endDate}
+		<if test="sid != null and sid != ''">
+			and s.sid = #{sid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and s.mobile like '${mobile}%'
+		</if>
+		<if test="content != null and content != ''">
+			and s.content like '%${content}%'
+		</if>
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
+			and s.status = #{sendStatus}
+		</if>
+		
+	</select>
+	
 
 	<select id="findBySid" resultMap="BaseResultMap">
 		select s.*,p.name passage_name

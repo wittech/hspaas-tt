@@ -182,18 +182,24 @@ layui.define(function(exports){
                         ,submit = layero.find('iframe').contents().find('#'+ submitID);
 
                     //监听提交
+                    
                     iframeWindow.layui.form.on('submit('+ submitID +')', function(data){
                         var field = data.field; //获取提交的字段
                         if(callbackOptions){
                             if(callbackOptions.action){
-                                admin.req({
+                                $.ajax({
                                     url: callbackOptions.action
                                     ,data: field
                                     ,type: callbackOptions.method
-                                    ,done: function(data){
-                                        callbackOptions.callback();
-                                        layer.close(index);//关闭弹层
+                                    ,beforeSend : function() {
+                                    	callbackOptions.beforeSend();
                                     }
+                                    ,success: function(data){
+                                        callbackOptions.callback(data);
+                                        layer.close(index);//关闭弹层
+                                    },error : function() {
+            	                    	modal.msgError("服务请求异常");
+            	                    }
                                 });
                             }else {
                                 callbackOptions.callback();
@@ -316,17 +322,24 @@ layui.define(function(exports){
                         ,submit = layero.find('iframe').contents().find('#'+ submitID);
 
                     //监听提交
+                    
+                    
                     iframeWindow.layui.form.on('submit('+ submitID +')', function(data){
                         var field = data.field; //获取提交的字段
                         if(callbackOptions){
-                            admin.req({
+                            $.ajax({
                                 url: callbackOptions.action
                                 ,data: field
                                 ,type: callbackOptions.method
-                                ,done: function(data){
-                                    callbackOptions.callback();
-                                    layer.close(index);//关闭弹层
+                                ,beforeSend : function() {
+                                	callbackOptions.beforeSend();
                                 }
+                                ,success: function(data){
+                                    callbackOptions.callback(data);
+                                    layer.close(index);//关闭弹层
+                                },error : function() {
+        	                    	modal.msgError("服务请求异常");
+        	                    }
                             });
                         }else{
                             layer.close(index);//关闭弹层
