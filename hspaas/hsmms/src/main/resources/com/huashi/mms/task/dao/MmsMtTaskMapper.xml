@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.mms.task.dao.MmsMtTaskMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.mms.task.domain.MmsMtTask">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="sid" property="sid" jdbcType="BIGINT" />
+		<result column="app_type" property="appType" jdbcType="TINYINT" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
+		<result column="attach" property="attach" jdbcType="VARCHAR" />
+		<result column="callback" property="callback" jdbcType="VARCHAR" />
+		<result column="fee" property="fee" jdbcType="INTEGER" />
+		<result column="return_fee" property="returnFee" jdbcType="INTEGER" />
+		<result column="ip" property="ip" jdbcType="VARCHAR" />
+		<result column="process_status" property="processStatus"
+			jdbcType="INTEGER" />
+		<result column="approve_status" property="approveStatus"
+			jdbcType="INTEGER" />
+		<result column="final_content" property="finalContent"
+			jdbcType="VARCHAR" />
+		<result column="message_template_id" property="messageTemplateId"
+			jdbcType="BIGINT" />
+		<result column="process_time" property="processTime" jdbcType="TIMESTAMP" />
+		<result column="force_actions" property="forceActions"
+			jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="create_unixtime" property="createUnixtime"
+			jdbcType="BIGINT" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="error_mobiles" property="errorMobiles"
+			jdbcType="VARCHAR" />
+		<result column="repeat_mobiles" property="repeatMobiles"
+			jdbcType="VARCHAR" />
+		<result column="black_mobiles" property="blackMobiles"
+			jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, sid, app_type, title, content, ext_number,
+		attach, callback,
+		fee, return_fee,
+		ip, process_status, approve_status,
+		final_content, message_template_id,
+		process_time,
+		force_actions, remark,
+		create_time, create_unixtime, mobile, error_mobiles,
+		repeat_mobiles,
+		black_mobiles
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="ResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		mms_mt_task
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.mms.task.domain.MmsMtTask">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_mt_task (user_id, sid, app_type,
+		title, content,
+		ext_number,
+		attach, callback, fee,
+		return_fee, ip, process_status,
+		approve_status, final_content, message_template_id,
+		process_time,
+		force_actions, remark,
+		create_time, create_unixtime, mobile,
+		error_mobiles, repeat_mobiles, black_mobiles
+		)
+		values
+		(#{userId,jdbcType=INTEGER}, #{sid,jdbcType=BIGINT},
+		#{appType,jdbcType=TINYINT},
+		#{title,jdbcType=VARCHAR},
+		#{content,jdbcType=VARCHAR}, #{extNumber,jdbcType=VARCHAR},
+		#{attach,jdbcType=VARCHAR}, #{callback,jdbcType=VARCHAR},
+		#{fee,jdbcType=INTEGER},
+		#{returnFee,jdbcType=INTEGER},
+		#{ip,jdbcType=VARCHAR}, #{processStatus,jdbcType=INTEGER},
+		#{approveStatus,jdbcType=INTEGER}, #{finalContent,jdbcType=VARCHAR},
+		#{messageTemplateId,jdbcType=BIGINT},
+		#{processTime,jdbcType=TIMESTAMP}, #{forceActions,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{createUnixtime,jdbcType=BIGINT}, #{mobile,jdbcType=LONGVARCHAR},
+		#{errorMobiles,jdbcType=LONGVARCHAR},
+		#{repeatMobiles,jdbcType=LONGVARCHAR},
+		#{blackMobiles,jdbcType=LONGVARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.mms.task.domain.MmsMtTask">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_mt_task
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="sid != null">
+				sid,
+			</if>
+			<if test="appType != null">
+				app_type,
+			</if>
+			<if test="title != null">
+				title,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="attach != null">
+				attach,
+			</if>
+			<if test="callback != null">
+				callback,
+			</if>
+			<if test="fee != null">
+				fee,
+			</if>
+			<if test="returnFee != null">
+				return_fee,
+			</if>
+			<if test="ip != null">
+				ip,
+			</if>
+			<if test="processStatus != null">
+				process_status,
+			</if>
+			<if test="approveStatus != null">
+				approve_status,
+			</if>
+			<if test="finalContent != null">
+				final_content,
+			</if>
+			<if test="messageTemplateId != null">
+				message_template_id,
+			</if>
+			<if test="processTime != null">
+				process_time,
+			</if>
+			<if test="forceActions != null">
+				force_actions,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="createUnixtime != null">
+				create_unixtime,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="errorMobiles != null">
+				error_mobiles,
+			</if>
+			<if test="repeatMobiles != null">
+				repeat_mobiles,
+			</if>
+			<if test="blackMobiles != null">
+				black_mobiles,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=BIGINT},
+			</if>
+			<if test="appType != null">
+				#{appType,jdbcType=TINYINT},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				#{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				#{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="fee != null">
+				#{fee,jdbcType=INTEGER},
+			</if>
+			<if test="returnFee != null">
+				#{returnFee,jdbcType=INTEGER},
+			</if>
+			<if test="ip != null">
+				#{ip,jdbcType=VARCHAR},
+			</if>
+			<if test="processStatus != null">
+				#{processStatus,jdbcType=INTEGER},
+			</if>
+			<if test="approveStatus != null">
+				#{approveStatus,jdbcType=INTEGER},
+			</if>
+			<if test="finalContent != null">
+				#{finalContent,jdbcType=VARCHAR},
+			</if>
+			<if test="messageTemplateId != null">
+				#{messageTemplateId,jdbcType=BIGINT},
+			</if>
+			<if test="processTime != null">
+				#{processTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="forceActions != null">
+				#{forceActions,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createUnixtime != null">
+				#{createUnixtime,jdbcType=BIGINT},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=LONGVARCHAR},
+			</if>
+			<if test="errorMobiles != null">
+				#{errorMobiles,jdbcType=LONGVARCHAR},
+			</if>
+			<if test="repeatMobiles != null">
+				#{repeatMobiles,jdbcType=LONGVARCHAR},
+			</if>
+			<if test="blackMobiles != null">
+				#{blackMobiles,jdbcType=LONGVARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.task.domain.MmsMtTask">
+		update mms_mt_task
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="sid != null">
+				sid = #{sid,jdbcType=BIGINT},
+			</if>
+			<if test="appType != null">
+				app_type = #{appType,jdbcType=TINYINT},
+			</if>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				attach = #{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				callback = #{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="fee != null">
+				fee = #{fee,jdbcType=INTEGER},
+			</if>
+			<if test="returnFee != null">
+				return_fee = #{returnFee,jdbcType=INTEGER},
+			</if>
+			<if test="ip != null">
+				ip = #{ip,jdbcType=VARCHAR},
+			</if>
+			<if test="processStatus != null">
+				process_status = #{processStatus,jdbcType=INTEGER},
+			</if>
+			<if test="approveStatus != null">
+				approve_status = #{approveStatus,jdbcType=INTEGER},
+			</if>
+			<if test="finalContent != null">
+				final_content = #{finalContent,jdbcType=VARCHAR},
+			</if>
+			<if test="messageTemplateId != null">
+				message_template_id =
+				#{messageTemplateId,jdbcType=BIGINT},
+			</if>
+			<if test="processTime != null">
+				process_time = #{processTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="forceActions != null">
+				force_actions = #{forceActions,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createUnixtime != null">
+				create_unixtime = #{createUnixtime,jdbcType=BIGINT},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=LONGVARCHAR},
+			</if>
+			<if test="errorMobiles != null">
+				error_mobiles = #{errorMobiles,jdbcType=LONGVARCHAR},
+			</if>
+			<if test="repeatMobiles != null">
+				repeat_mobiles = #{repeatMobiles,jdbcType=LONGVARCHAR},
+			</if>
+			<if test="blackMobiles != null">
+				black_mobiles = #{blackMobiles,jdbcType=LONGVARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKeyWithBLOBs" parameterType="com.huashi.mms.task.domain.MmsMtTask">
+		update
+		mms_mt_task
+		set user_id = #{userId,jdbcType=INTEGER},
+		sid =
+		#{sid,jdbcType=BIGINT},
+		app_type = #{appType,jdbcType=TINYINT},
+		title =
+		#{title,jdbcType=VARCHAR},
+		content = #{content,jdbcType=VARCHAR},
+		ext_number = #{extNumber,jdbcType=VARCHAR},
+		attach =
+		#{attach,jdbcType=VARCHAR},
+		callback = #{callback,jdbcType=VARCHAR},
+		fee = #{fee,jdbcType=INTEGER},
+		return_fee =
+		#{returnFee,jdbcType=INTEGER},
+		ip = #{ip,jdbcType=VARCHAR},
+		process_status = #{processStatus,jdbcType=INTEGER},
+		approve_status =
+		#{approveStatus,jdbcType=INTEGER},
+		final_content =
+		#{finalContent,jdbcType=VARCHAR},
+		message_template_id =
+		#{messageTemplateId,jdbcType=BIGINT},
+		process_time =
+		#{processTime,jdbcType=TIMESTAMP},
+		force_actions =
+		#{forceActions,jdbcType=VARCHAR},
+		remark = #{remark,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		create_unixtime =
+		#{createUnixtime,jdbcType=BIGINT},
+		mobile =
+		#{mobile,jdbcType=LONGVARCHAR},
+		error_mobiles =
+		#{errorMobiles,jdbcType=LONGVARCHAR},
+		repeat_mobiles =
+		#{repeatMobiles,jdbcType=LONGVARCHAR},
+		black_mobiles =
+		#{blackMobiles,jdbcType=LONGVARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.task.domain.MmsMtTask">
+		update mms_mt_task
+		set user_id = #{userId,jdbcType=INTEGER},
+		sid = #{sid,jdbcType=BIGINT},
+		app_type = #{appType,jdbcType=TINYINT},
+		title =
+		#{title,jdbcType=VARCHAR},
+		content = #{content,jdbcType=VARCHAR},
+		ext_number = #{extNumber,jdbcType=VARCHAR},
+		attach =
+		#{attach,jdbcType=VARCHAR},
+		callback = #{callback,jdbcType=VARCHAR},
+		fee = #{fee,jdbcType=INTEGER},
+		return_fee =
+		#{returnFee,jdbcType=INTEGER},
+		ip = #{ip,jdbcType=VARCHAR},
+		process_status = #{processStatus,jdbcType=INTEGER},
+		approve_status =
+		#{approveStatus,jdbcType=INTEGER},
+		final_content =
+		#{finalContent,jdbcType=VARCHAR},
+		message_template_id =
+		#{messageTemplateId,jdbcType=BIGINT},
+		process_time =
+		#{processTime,jdbcType=TIMESTAMP},
+		force_actions =
+		#{forceActions,jdbcType=VARCHAR},
+		remark = #{remark,jdbcType=VARCHAR},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		create_unixtime =
+		#{createUnixtime,jdbcType=BIGINT}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap">
+
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task p where 1=1
+		<if test="searchType == 0">
+			and p.approve_status = 0
+		</if>
+		<if test="searchType == 1">
+			and p.approve_status != 0
+		</if>
+		<if test="userId != null and userId > -1">
+			and p.user_id = #{userId}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and p.mobile like '${mobile}%'
+		</if>
+		<if test="title != null and title != ''">
+			and p.title like '%${title}%'
+		</if>
+		<if test="processStatus != null and processStatus > -1">
+			and p.process_status = #{processStatus}
+		</if>
+		<if test="approveStatus != null and approveStatus > -1">
+			and p.approve_status = #{approveStatus}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and p.create_unixtime &gt;=#{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and p.create_unixtime &lt;=#{endDate}
+		</if>
+		<if test="sid != null and sid > 0">
+			and p.sid = #{sid}
+		</if>
+		<if test="templateId != null and templateId > 0">
+			and p.message_template_id = #{templateId}
+		</if>
+		<if test="searchType == 0">
+			order by p.create_time asc
+		</if>
+		<if test="searchType == 1">
+			order by p.create_time desc
+		</if>
+		limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from mms_mt_task p where 1 = 1
+		<if test="searchType == 0">
+			and p.approve_status = 0
+		</if>
+		<if test="searchType == 1">
+			and p.approve_status != 0
+		</if>
+		<if test="userId != null and userId > -1">
+			and p.user_id = #{userId}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and p.mobile like '${mobile}%'
+		</if>
+		<if test="title != null and title != ''">
+			and p.title like '%${title}%'
+		</if>
+		<if test="processStatus != null and processStatus > -1">
+			and p.process_status = #{processStatus}
+		</if>
+		<if test="approveStatus != null and approveStatus > -1">
+			and p.approve_status = #{approveStatus}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and p.create_unixtime &gt;=#{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and p.create_unixtime &lt;=#{endDate}
+		</if>
+		<if test="sid != null and sid > 0">
+			and p.sid = #{sid}
+		</if>
+		<if test="templateId != null and templateId > 0">
+			and p.message_template_id = #{templateId}
+		</if>
+
+	</select>
+
+	<update id="updateContent">
+		update mms_mt_task set final_content = #{content}
+		where sid = #{sid}
+	</update>
+
+	<select id="selectBySid" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task
+		where sid = #{sid,jdbcType=BIGINT} limit 1
+	</select>
+
+	<insert id="batchInsert" parameterType="List">
+		insert into mms_mt_task (user_id, sid, app_type,
+		title, content,
+		ext_number,
+		attach, callback, fee,
+		return_fee, ip, process_status,
+		approve_status, final_content, message_template_id,
+		process_time,
+		force_actions, remark,
+		create_time, create_unixtime, mobile,
+		error_mobiles, repeat_mobiles, black_mobiles)
+		values
+
+		<foreach collection="list" item="task" index="index"
+			separator=",">
+			(#{task.userId,jdbcType=INTEGER},
+			#{task.sid,jdbcType=BIGINT},
+			#{task.appType,jdbcType=TINYINT},
+			#{task.title,jdbcType=VARCHAR},
+			#{task.content,jdbcType=VARCHAR},
+			#{task.extNumber,jdbcType=VARCHAR},
+			#{task.attach,jdbcType=VARCHAR},
+			#{task.callback,jdbcType=VARCHAR},
+			#{task.fee,jdbcType=INTEGER},
+			#{task.returnFee,jdbcType=INTEGER},
+			#{task.ip,jdbcType=VARCHAR},
+			#{task.processStatus,jdbcType=INTEGER},
+			#{task.approveStatus,jdbcType=INTEGER},
+			#{task.finalContent,jdbcType=VARCHAR},
+			#{task.messageTemplateId,jdbcType=BIGINT},
+			#{task.processTime,jdbcType=TIMESTAMP},
+			#{task.forceActions,jdbcType=VARCHAR},
+			#{task.remark,jdbcType=VARCHAR},
+			#{task.createTime,jdbcType=TIMESTAMP},
+			#{task.createUnixtime,jdbcType=BIGINT},
+			#{task.mobile,jdbcType=VARCHAR},
+			#{task.errorMobiles,jdbcType=VARCHAR},
+			#{task.repeatMobiles,jdbcType=VARCHAR},
+			#{task.blackMobiles,jdbcType=VARCHAR})
+		</foreach>
+	</insert>
+
+	<update id="updateApproveStatus">
+		update mms_mt_task set approve_status =
+		#{approveStatus} where id = #{id}
+	</update>
+
+	<update id="updateApproveStatusBySid">
+		update mms_mt_task set approve_status =
+		#{approveStatus} where sid = #{sid}
+	</update>
+
+	<select id="selectWaitDealTaskCount" resultType="java.lang.Integer">
+		select count(0)
+		from mms_mt_task p where approve_status = 0
+	</select>
+
+	<select id="selectWaitDealTaskList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task p where approve_status = 0
+	</select>
+
+	<select id="selectTaskByIds" resultMap="BaseResultMap"
+		parameterType="List">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task p where 1 = 1 and id in
+
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="selectEqualTitle" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task where approve_status = 0 and title =
+		#{title}
+	</select>
+
+	<select id="selectLikeTitle" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task where approve_status = 0 and title like
+		'%${title}%'
+	</select>
+</mapper>

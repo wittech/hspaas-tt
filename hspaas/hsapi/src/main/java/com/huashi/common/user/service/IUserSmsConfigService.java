@@ -39,7 +39,7 @@ public interface IUserSmsConfigService {
 	 * @param extNumber
 	 * @return
 	 */
-	UserSmsConfig save(int userId, int words, String extNumber);
+	boolean save(int userId, int words, String extNumber);
 
 	/**
 	 * 修改

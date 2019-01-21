@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.common.user.dao.UserMmsConfigMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.common.user.domain.UserMmsConfig">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="sms_return_rule" property="smsReturnRule"
+			jdbcType="INTEGER" />
+		<result column="sms_timeout" property="smsTimeout" jdbcType="BIGINT" />
+		<result column="message_pass" property="messagePass" jdbcType="BIT" />
+		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
+		<result column="submit_interval" property="submitInterval"
+			jdbcType="INTEGER" />
+		<result column="limit_times" property="limitTimes" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, sms_return_rule, sms_timeout, message_pass,
+		ext_number,
+		submit_interval,
+		limit_times, create_time, update_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_mms_config
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		hspaas_user_mms_config
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.common.user.domain.UserMmsConfig">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_mms_config (user_id, sms_return_rule,
+		sms_timeout,
+		message_pass, ext_number, submit_interval,
+		limit_times,
+		create_time, update_time
+		)
+		values (#{userId,jdbcType=INTEGER},
+		#{smsReturnRule,jdbcType=INTEGER},
+		#{smsTimeout,jdbcType=BIGINT},
+		#{messagePass,jdbcType=BIT}, #{extNumber,jdbcType=VARCHAR},
+		#{submitInterval,jdbcType=INTEGER},
+		#{limitTimes,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.common.user.domain.UserMmsConfig">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into hspaas_user_mms_config
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="smsReturnRule != null">
+				sms_return_rule,
+			</if>
+			<if test="smsTimeout != null">
+				sms_timeout,
+			</if>
+			<if test="messagePass != null">
+				message_pass,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="submitInterval != null">
+				submit_interval,
+			</if>
+			<if test="limitTimes != null">
+				limit_times,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="smsReturnRule != null">
+				#{smsReturnRule,jdbcType=INTEGER},
+			</if>
+			<if test="smsTimeout != null">
+				#{smsTimeout,jdbcType=BIGINT},
+			</if>
+			<if test="messagePass != null">
+				#{messagePass,jdbcType=BIT},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="submitInterval != null">
+				#{submitInterval,jdbcType=INTEGER},
+			</if>
+			<if test="limitTimes != null">
+				#{limitTimes,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.common.user.domain.UserMmsConfig">
+		update hspaas_user_mms_config
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="smsReturnRule != null">
+				sms_return_rule = #{smsReturnRule,jdbcType=INTEGER},
+			</if>
+			<if test="smsTimeout != null">
+				sms_timeout = #{smsTimeout,jdbcType=BIGINT},
+			</if>
+			<if test="messagePass != null">
+				message_pass = #{messagePass,jdbcType=BIT},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="submitInterval != null">
+				submit_interval = #{submitInterval,jdbcType=INTEGER},
+			</if>
+			<if test="limitTimes != null">
+				limit_times = #{limitTimes,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.common.user.domain.UserMmsConfig">
+		update
+		hspaas_user_mms_config
+		set user_id = #{userId,jdbcType=INTEGER},
+		sms_return_rule = #{smsReturnRule,jdbcType=INTEGER},
+		sms_timeout =
+		#{smsTimeout,jdbcType=BIGINT},
+		message_pass =
+		#{messagePass,jdbcType=BIT},
+		ext_number =
+		#{extNumber,jdbcType=VARCHAR},
+		submit_interval =
+		#{submitInterval,jdbcType=INTEGER},
+		limit_times =
+		#{limitTimes,jdbcType=INTEGER},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="selectByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_mms_config
+		where user_id = #{userId,jdbcType=INTEGER}
+		order by id desc limit 1
+	</select>
+
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from hspaas_user_mms_config
+	</select>
+</mapper>

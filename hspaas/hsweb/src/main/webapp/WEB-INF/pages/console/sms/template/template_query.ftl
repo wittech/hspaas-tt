@@ -151,12 +151,16 @@
 	                    },
 	                    callback: function (data) {
 	                    	layer.close(l_index);
+	                    	modal.msgSuccess("保存成功");
+	                    	table.reload(tableId);
+	                    	/**
 	                    	if(data.success == true) {
 	                    		modal.msgSuccess("保存成功");
 	                    		table.reload(tableId);
 	                    	} else {
 	                    		modal.msgError("保存失败");
 	                    	}
+	                    	*/
 	                    }
 	                });
 	                break;
@@ -181,12 +185,16 @@
 	                        ,data: { "ids": ids }
 	                        ,success: function(data){
 	                        	layer.close(l_index);
+	                        	modal.msgSuccess("删除成功");
+		                    	table.reload(tableId);
+		                    	
+		                    	/**
 	                        	if(data.success == true) {
 		                    		modal.msgSuccess("删除成功");
 		                    		table.reload(tableId);
 		                    	} else {
 		                    		modal.msgError("删除失败");
-		                    	}
+		                    	}*/
 	                        },error : function() {
 	                        	layer.close(l_index);
 		                    	modal.msgError("服务请求异常");
@@ -213,12 +221,8 @@
 	                    }
 	                    ,success: function(data){
 	                    	layer.close(l_index);
-	                        if(data.success == true) {
-	                    		modal.msgSuccess("删除成功");
-	                    		table.reload(tableId);
-	                    	} else {
-	                    		modal.msgError("删除失败");
-	                    	}
+	                    	modal.msgSuccess("删除成功");
+	                    	table.reload(tableId);
 	                    },error : function() {
 	                    	layer.close(l_index);
 	                    	modal.msgError("服务请求异常");
@@ -235,12 +239,16 @@
                     },
 	                callback: function (data) {
 	                	layer.close(l_index);
+	                	modal.msgSuccess("修改成功");
+                    	table.reload(tableId);
+                    	
+                    	/**
 	                	if(data.success == true) {
                     		modal.msgSuccess("修改成功");
                     		table.reload(tableId);
                     	} else {
                     		modal.msgError("修改失败");
-                    	}
+                    	}*/
 	                }
 	            });
 	        }

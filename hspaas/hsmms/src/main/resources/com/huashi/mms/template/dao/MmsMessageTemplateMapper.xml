@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.mms.template.dao.MmsMessageTemplateMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.mms.template.domain.MmsMessageTemplate">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="model_id" property="modelId" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="is_running" property="isRunning" jdbcType="TINYINT" />
+		<result column="app_type" property="appType" jdbcType="INTEGER" />
+		<result column="notice_mode" property="noticeMode" jdbcType="INTEGER" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="submit_interval" property="submitInterval"
+			jdbcType="INTEGER" />
+		<result column="limit_times" property="limitTimes" jdbcType="INTEGER" />
+		<result column="route_type" property="routeType" jdbcType="INTEGER" />
+		<result column="priority" property="priority" jdbcType="INTEGER" />
+		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="approve_time" property="approveTime" jdbcType="TIMESTAMP" />
+		<result column="approve_user" property="approveUser" jdbcType="VARCHAR" />
+		<result column="approve_desc" property="approveDesc" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, model_id, user_id, status, is_running, app_type,
+		notice_mode, mobile,
+		submit_interval,
+		limit_times, route_type, priority,
+		ext_number, create_time, update_time,
+		approve_time,
+		approve_user,
+		approve_desc, remark
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		mms_message_template
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.mms.template.domain.MmsMessageTemplate">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_message_template (model_id, user_id, status,
+		is_running, app_type, notice_mode,
+		mobile, submit_interval,
+		limit_times,
+		route_type, priority, ext_number,
+		create_time, update_time,
+		approve_time,
+		approve_user, approve_desc, remark
+		)
+		values
+		(#{modelId,jdbcType=BIGINT}, #{userId,jdbcType=INTEGER},
+		#{status,jdbcType=INTEGER},
+		#{isRunning,jdbcType=TINYINT},
+		#{appType,jdbcType=INTEGER}, #{noticeMode,jdbcType=INTEGER},
+		#{mobile,jdbcType=VARCHAR}, #{submitInterval,jdbcType=INTEGER},
+		#{limitTimes,jdbcType=INTEGER},
+		#{routeType,jdbcType=INTEGER},
+		#{priority,jdbcType=INTEGER}, #{extNumber,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+		#{approveTime,jdbcType=TIMESTAMP},
+		#{approveUser,jdbcType=VARCHAR},
+		#{approveDesc,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.mms.template.domain.MmsMessageTemplate">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_message_template
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="modelId != null">
+				model_id,
+			</if>
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="isRunning != null">
+				is_running,
+			</if>
+			<if test="appType != null">
+				app_type,
+			</if>
+			<if test="noticeMode != null">
+				notice_mode,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="submitInterval != null">
+				submit_interval,
+			</if>
+			<if test="limitTimes != null">
+				limit_times,
+			</if>
+			<if test="routeType != null">
+				route_type,
+			</if>
+			<if test="priority != null">
+				priority,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+			<if test="approveTime != null">
+				approve_time,
+			</if>
+			<if test="approveUser != null">
+				approve_user,
+			</if>
+			<if test="approveDesc != null">
+				approve_desc,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="modelId != null">
+				#{modelId,jdbcType=BIGINT},
+			</if>
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="isRunning != null">
+				#{isRunning,jdbcType=TINYINT},
+			</if>
+			<if test="appType != null">
+				#{appType,jdbcType=INTEGER},
+			</if>
+			<if test="noticeMode != null">
+				#{noticeMode,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="submitInterval != null">
+				#{submitInterval,jdbcType=INTEGER},
+			</if>
+			<if test="limitTimes != null">
+				#{limitTimes,jdbcType=INTEGER},
+			</if>
+			<if test="routeType != null">
+				#{routeType,jdbcType=INTEGER},
+			</if>
+			<if test="priority != null">
+				#{priority,jdbcType=INTEGER},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveTime != null">
+				#{approveTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveUser != null">
+				#{approveUser,jdbcType=VARCHAR},
+			</if>
+			<if test="approveDesc != null">
+				#{approveDesc,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.template.domain.MmsMessageTemplate">
+		update mms_message_template
+		<set>
+			<if test="modelId != null">
+				model_id = #{modelId,jdbcType=BIGINT},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="isRunning != null">
+				is_running = #{isRunning,jdbcType=TINYINT},
+			</if>
+			<if test="appType != null">
+				app_type = #{appType,jdbcType=INTEGER},
+			</if>
+			<if test="noticeMode != null">
+				notice_mode = #{noticeMode,jdbcType=INTEGER},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="submitInterval != null">
+				submit_interval = #{submitInterval,jdbcType=INTEGER},
+			</if>
+			<if test="limitTimes != null">
+				limit_times = #{limitTimes,jdbcType=INTEGER},
+			</if>
+			<if test="routeType != null">
+				route_type = #{routeType,jdbcType=INTEGER},
+			</if>
+			<if test="priority != null">
+				priority = #{priority,jdbcType=INTEGER},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveTime != null">
+				approve_time = #{approveTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="approveUser != null">
+				approve_user = #{approveUser,jdbcType=VARCHAR},
+			</if>
+			<if test="approveDesc != null">
+				approve_desc = #{approveDesc,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.template.domain.MmsMessageTemplate">
+		update
+		mms_message_template
+		set model_id = #{modelId,jdbcType=BIGINT},
+		user_id
+		= #{userId,jdbcType=INTEGER},
+		status = #{status,jdbcType=INTEGER},
+		is_running = #{isRunning,jdbcType=TINYINT},
+		app_type =
+		#{appType,jdbcType=INTEGER},
+		notice_mode =
+		#{noticeMode,jdbcType=INTEGER},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		submit_interval = #{submitInterval,jdbcType=INTEGER},
+		limit_times =
+		#{limitTimes,jdbcType=INTEGER},
+		route_type =
+		#{routeType,jdbcType=INTEGER},
+		priority = #{priority,jdbcType=INTEGER},
+		ext_number = #{extNumber,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP},
+		approve_time =
+		#{approveTime,jdbcType=TIMESTAMP},
+		approve_user =
+		#{approveUser,jdbcType=VARCHAR},
+		approve_desc =
+		#{approveDesc,jdbcType=VARCHAR},
+		remark = #{remark,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="getCountByUserId" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from mms_message_template where user_id = #{userId}
+		<if test="status != null">
+			and status = #{status}
+		</if>
+		<if test="title != null">
+			and content like CONCAT('%',#{title},'%')
+		</if>
+		<if test="appType != null">
+			and app_type = #{appType}
+		</if>
+	</select>
+
+	<select id="findPageListByUserId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template where user_id = #{userId}
+		<if test="status != null">
+			and status = #{status}
+		</if>
+		<if test="title != null">
+			and title like CONCAT(#{title},'%')
+		</if>
+		<if test="appType != null">
+			and app_type = #{appType}
+		</if>
+		order by create_time desc
+		limit #{pageRecord} offset #{startPage}
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template where 1=1
+		<if test="keyword != null and keyword != ''">
+			and title like CONCAT('%', #{keyword},'%')
+		</if>
+		<if test="status != null and status != ''">
+			and status = #{status}
+		</if>
+		<if test="userId != null and userId != '' and userId >-1">
+			and user_id = #{userId}
+		</if>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(id) from mms_message_template where 1=1
+		<if test="keyword != null and keyword != ''">
+			and title like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="status != null and status != ''">
+			and status = #{status}
+		</if>
+		<if test="userId != null and userId != ''">
+			and user_id = #{userId}
+		</if>
+	</select>
+
+	<select id="findAvaiableByUserId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template where user_id = #{userId} and status = 1
+		order by priority
+	</select>
+
+	<select id="findAvaiableByUserIdAndType" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template where user_id = #{userId} and status = 1 and
+		route_type = #{type}
+	</select>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template where status = 1
+	</select>
+
+</mapper>

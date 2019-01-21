@@ -174,8 +174,8 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
             loadToRedis(access);
 
             // 如果通道调用类型为 自取，需要同步到 监管中心
-            if (PassageCallType.STATUS_RECEIPT_WITH_SELF_GET.getCode() == access.getCallType()
-                || PassageCallType.SMS_MO_REPORT_WITH_SELF_GET.getCode() == access.getCallType()) {
+            if (PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET.getCode() == access.getCallType()
+                || PassageCallType.MO_REPORT_WITH_SELF_GET.getCode() == access.getCallType()) {
                 // 修改暂时不同步 监控中心，需要判断通道参数是否发生变动
 
             }
@@ -612,8 +612,8 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     private void monitorThreadNotice(SmsPassageAccess access, Integer status) {
         try {
             // 如果通道调用类型为 自取，需要同步到 监管中心（停止轮训扫描）
-            if (PassageCallType.STATUS_RECEIPT_WITH_SELF_GET.getCode() == access.getCallType()
-                || PassageCallType.SMS_MO_REPORT_WITH_SELF_GET.getCode() == access.getCallType()) {
+            if (PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET.getCode() == access.getCallType()
+                || PassageCallType.MO_REPORT_WITH_SELF_GET.getCode() == access.getCallType()) {
                 if (PassageStatus.ACTIVE.getValue() == status) {
                     passageMonitorService.addPassagePull(access);
                 } else {

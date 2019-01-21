@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.alibaba.fastjson.JSON;
-import com.huashi.exchanger.resolver.http.custom.mail139.Mail139PassageResolver;
+import com.huashi.exchanger.resolver.sms.http.mail139.Mail139PassageResolver;
 
 public class Mail139ReportTest {
 

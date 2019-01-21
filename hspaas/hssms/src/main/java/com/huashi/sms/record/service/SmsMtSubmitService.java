@@ -70,11 +70,6 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     @Autowired
     private ISmsPassageService        smsPassageService;
 
-    // @Autowired
-    // private SqlSessionTemplate sqlSessionTemplate;
-
-    @Autowired
-    private SmsWaitSubmitListener     smsWaitSubmitListener;
     @Autowired
     private ISmsMtPushService         smsMtPushService;
 
@@ -82,9 +77,13 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     private RabbitTemplate            rabbitTemplate;
     @Resource
     private StringRedisTemplate       stringRedisTemplate;
+
+    @Autowired
+    private SmsWaitSubmitListener     smsWaitSubmitListener;
+
     @Autowired
     private RabbitMessageQueueManager rabbitMessageQueueManager;
-    private Logger                    logger = LoggerFactory.getLogger(getClass());
+    private final Logger              logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<SmsMtMessageSubmit> findBySid(long sid) {
@@ -231,9 +230,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
         List<SmsMtMessageSubmit> dataList = smsMtMessageSubmitMapper.findListByUser(paramMap);
         for (SmsMtMessageSubmit record : dataList) {
-//            if (record.getNeedPush()) {
-//                record.setMessagePush(pushMapper.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
-//            }
+            // if (record.getNeedPush()) {
+            // record.setMessagePush(pushMapper.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
+            // }
             if (record.getStatus() == 0) {
                 record.setMessageDeliver(smsMtDeliverService.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
             }
@@ -331,9 +330,9 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
-        
+
         smsMtMessageSubmitMapper.batchInsert(list);
-        
+
         // SqlSession session = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
         // SmsMtMessagesmsMtMessageSubmitMapper smsMtMessageSubmitMapper =
         // session.getMapper(SmsMtMessagesmsMtMessageSubmitMapper.class);
@@ -472,23 +471,21 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
             return true;
         } catch (Exception e) {
             logger.error("声明新队列：{}失败", passageCode);
+            return false;
         }
-        return false;
     }
 
     @Override
     public boolean removeSubmitMessageQueue(String passageCode) {
         String mqName = getSubmitMessageQueueName(passageCode);
-        try {
-            rabbitMessageQueueManager.removeQueue(mqName);
-
+        boolean isSuccess = rabbitMessageQueueManager.removeQueue(mqName);
+        if (isSuccess) {
             logger.info("RabbitMQ移除队列：{} 成功", mqName);
-
-            return true;
-        } catch (Exception e) {
-            logger.error("移除MQ队列：{}失败", passageCode);
+        } else {
+            logger.error("RabbitMQ移除队列：{} 失败", mqName);
         }
-        return false;
+
+        return isSuccess;
     }
 
     @Override
@@ -523,8 +520,10 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
                     continue;
                 }
 
-                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, getSubmitMessageQueueName(passageCode),
-                                              packet, (message) -> {
+                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS,
+                                              getSubmitMessageQueueName(passageCode),
+                                              packet,
+                                              (message) -> {
 
                                                   message.getMessageProperties().setPriority(WordsPriority.getLevel(packet.getContent()));
 
@@ -536,7 +535,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         }
         return true;
     }
-    
+
     /**
      * TODO 根据子任务中的通道获取通道代码信息
      *

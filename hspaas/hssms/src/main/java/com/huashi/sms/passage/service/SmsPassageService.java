@@ -36,7 +36,7 @@ import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.CommonContext.ProtocolType;
 import com.huashi.constants.OpenApiCode;
-import com.huashi.exchanger.service.ISmsProxyManageService;
+import com.huashi.exchanger.service.ISmsProxyManager;
 import com.huashi.monitor.passage.service.IPassageMonitorService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.passage.dao.SmsPassageMapper;
@@ -77,58 +77,173 @@ public class SmsPassageService implements ISmsPassageService {
     @Autowired
     private ISmsMtSubmitService       smsMtSubmitService;
     @Reference
-    private ISmsProxyManageService    smsProxyManageService;
+    private ISmsProxyManager    smsProxyManageService;
     @Reference
     private IPassageMonitorService    passageMonitorService;
 
-    private Logger                    logger = LoggerFactory.getLogger(getClass());
+    private Logger                    logger       = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 非中文表达式
+     */
+    private static final String       LETTER_REGEX = "[0-9A-Za-z_.]*";
+
+    /**
+     * TODO 是否是字符
+     * 
+     * @param code
+     * @return
+     */
+    private static boolean isLetter(String code) {
+        if (StringUtils.isEmpty(code)) {
+            return false;
+        }
+
+        return code.matches(LETTER_REGEX);
+    }
+
+    private void validate(SmsPassage passage) throws Exception {
+        if (StringUtils.isEmpty(passage.getCode())) {
+            throw new IllegalArgumentException("通道代码为空，无法操作");
+        }
+
+        if (!isLetter(passage.getCode().trim())) {
+            throw new IllegalArgumentException("通道代码不合法[字母|数字|下划线]");
+        }
+
+        if (passage.getId() != null) {
+            return;
+        }
+
+        SmsPassage originPassage = smsPassageMapper.getPassageByCode(passage.getCode().trim());
+        if (originPassage != null) {
+            throw new IllegalArgumentException("通道编码 [" + passage.getCode().trim() + "] 已存在，无法添加");
+        }
+    }
+
+    /**
+     * TODO 绑定通道和省份关系记录
+     * 
+     * @param passage
+     * @param provinceCodes
+     * @param isModify 是否为修改模式
+     */
+    private void bindPassageProvince(SmsPassage passage, String provinceCodes, boolean isModify) {
+        if (StringUtils.isEmpty(provinceCodes)) {
+            return;
+        }
+
+        String[] codeArray = provinceCodes.split(",");
+        if (codeArray.length == 0) {
+            return;
+        }
+
+        for (String code : codeArray) {
+            passage.getProvinceList().add(new SmsPassageProvince(passage.getId(), Integer.valueOf(code)));
+        }
+
+        if (CollectionUtils.isNotEmpty(passage.getProvinceList())) {
+            if (isModify) {
+                smsPassageProvinceMapper.deleteByPassageId(passage.getId());
+            }
+
+            smsPassageProvinceMapper.batchInsert(passage.getProvinceList());
+        }
+    }
+
+    /**
+     * TODO 绑定通道参数信息
+     * 
+     * @param passage
+     * @param isModify 是否为修改模式
+     */
+    private boolean bindPassageParameters(SmsPassage passage, boolean isModify) {
+        if (CollectionUtils.isEmpty(passage.getParameterList())) {
+            return false;
+        }
+
+        String passageSendProtocol = null;
+        for (SmsPassageParameter parameter : passage.getParameterList()) {
+            parameter.setPassageId(passage.getId());
+            parameter.setCreateTime(new Date());
+
+            if (passageSendProtocol != null) {
+                continue;
+            }
+
+            if (PassageCallType.DATA_SEND.getCode() == parameter.getCallType()) {
+                passageSendProtocol = parameter.getProtocol();
+
+                // add by zhengying 20170502 针对通道类型为CMPP等协议类型需要创建PROXY
+                startProxyIfMatched(parameter, passage.getPacketsSize());
+            }
+        }
+
+        if (isModify) {
+            parameterMapper.deleteByPassageId(passage.getId());
+        }
+
+        int rows = parameterMapper.batchInsert(passage.getParameterList());
+        if (isModify && rows > 0) {
+            return true;
+        }
+
+        if (rows > 0) {
+            // add by zhengying 20170319 每个通道单独分开 提交队列
+            return smsMtSubmitService.declareNewSubmitMessageQueue(passageSendProtocol, passage.getCode());
+        }
+
+        return false;
+    }
+
+    /**
+     * TODO 释放已经产生的无用资源，如销毁队列和移除REDIS数据
+     * 
+     * @param passage
+     * @param isQueueCreateFinished
+     * @param isRedisPushFinished
+     */
+    private void release(SmsPassage passage, boolean isQueueCreateFinished, boolean isRedisPushFinished) {
+        if (isQueueCreateFinished) {
+            smsMtSubmitService.removeSubmitMessageQueue(passage.getCode().trim());
+        }
+
+        if (isRedisPushFinished) {
+            removeFromRedis(passage.getId());
+        }
+    }
 
     @Override
     @Transactional
     public Map<String, Object> create(SmsPassage passage, String provinceCodes) {
-        if (StringUtils.isEmpty(passage.getCode())) {
-            return response(false, "通道编码为空");
-        }
-
+        boolean isQueueCreateFinished = false;
+        boolean isRedisPushFinished = false;
         try {
-            SmsPassage originPassage = smsPassageMapper.getPassageByCode(passage.getCode().trim());
-            if (originPassage != null) {
-                return response(false, "通道编码已存在");
+            validate(passage);
+
+            int rows = smsPassageMapper.insert(passage);
+            if (rows == 0) {
+                return response(false, "数据操作异常");
             }
 
-            smsPassageMapper.insert(passage);
-            String sendProtocol = null;
-            for (SmsPassageParameter parameter : passage.getParameterList()) {
-                parameter.setPassageId(passage.getId().intValue());
-                parameter.setCreateTime(new Date());
-                parameterMapper.insertSelective(parameter);
+            isQueueCreateFinished = bindPassageParameters(passage, false);
 
-                if (PassageCallType.DATA_SEND.getCode() == parameter.getCallType()) {
-                    sendProtocol = parameter.getProtocol();
-                }
+            bindPassageProvince(passage, provinceCodes, false);
 
-                // add by zhengying 20170502 针对通道类型为CMPP等协议类型需要创建PROXY
-                loadPassageProxy(parameter, passage.getPacketsSize());
-            }
-            String[] codeArrays = provinceCodes.split(",");
-            for (String code : codeArrays) {
-                Integer provinceCode = Integer.valueOf(code);
-                SmsPassageProvince province = new SmsPassageProvince(passage.getId(), provinceCode);
-                smsPassageProvinceMapper.insert(province);
-                passage.getProvinceList().add(province);
-            }
-
-            // add by zhengying 20170319 每个通道单独分开 提交队列
-            smsMtSubmitService.declareNewSubmitMessageQueue(sendProtocol, passage.getCode());
-
-            pushToRedis(passage);
+            isRedisPushFinished = pushToRedis(passage);
 
             return response(true, "添加成功");
 
         } catch (Exception e) {
-            logger.error("添加短信通道失败", e);
+            if (e instanceof IllegalArgumentException) {
+                return response(false, e.getMessage());
+            }
+
+            logger.error("添加短信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return response(false, "添加失败");
+        } finally {
+            release(passage, isQueueCreateFinished, isRedisPushFinished);
         }
     }
 
@@ -139,7 +254,7 @@ public class SmsPassageService implements ISmsPassageService {
      * @param speed
      * @return
      */
-    private boolean loadPassageProxy(SmsPassageParameter parameter, Integer packetsSize) {
+    private boolean startProxyIfMatched(SmsPassageParameter parameter, Integer packetsSize) {
         try {
             if (parameter.getCallType() != PassageCallType.DATA_SEND.getCode()) {
                 return true;
@@ -165,37 +280,43 @@ public class SmsPassageService implements ISmsPassageService {
         }
     }
 
-    @Override
-    @Transactional
-    public Map<String, Object> update(SmsPassage passage, String provinceCode) {
-        if (passage == null) {
-            return response(false, "通道数据异常");
+    /**
+     * TODO 更新通道信息
+     * 
+     * @param passage
+     * @return
+     */
+    private boolean updatePassage(SmsPassage passage) {
+        SmsPassage originPassage = findById(passage.getId());
+        if (originPassage == null) {
+            throw new IllegalArgumentException("通道数据不存在");
         }
 
-        try {
-            // 根据传递的通道代码查询是否存在，如果存在判断是否是本次编辑的通道ID，不是则提示'通道编码已存在'
-            // edit by zhengying 2017-06-27 不允许修改通道代码，通道代码会影响 MQ 名称的声明及销毁
-            // SmsPassage originPassage = smsPassageMapper.getPassageByCode(passage.getCode().trim());
-            // if(originPassage != null && originPassage.getId() != passage.getId())
-            // return response(false, "通道编码已存在");
+        passage.setStatus(originPassage.getStatus());
+        passage.setCreateTime(originPassage.getCreateTime());
+        passage.setModifyTime(new Date());
 
-            SmsPassage originPassage = findById(passage.getId());
-            if (originPassage == null) {
-                return response(false, "数据异常");
+        // 更新通道信息
+        return smsPassageMapper.updateByPrimaryKey(passage) > 0;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> update(SmsPassage passage, String provinceCodes) {
+        try {
+
+            validate(passage);
+
+            boolean isSuccess = updatePassage(passage);
+            if (!isSuccess) {
+                return response(false, "更新通道失败");
             }
 
-            passage.setStatus(originPassage.getStatus());
-            passage.setCreateTime(originPassage.getCreateTime());
-            passage.setModifyTime(new Date());
+            // 绑定通道参数信息
+            bindPassageParameters(passage, true);
 
-            // 更新通道信息
-            smsPassageMapper.updateByPrimaryKey(passage);
-
-            // 刷新通道参数信息
-            refreshPassageParameter(passage);
-
-            // 刷新省份通道关系
-            refreshProvincePassage(passage, provinceCode);
+            // 绑定省份通道关系
+            bindPassageProvince(passage, provinceCodes, false);
 
             // 更新可用通道信息
             smsPassageAccessService.updateByModifyPassage(passage.getId());
@@ -204,72 +325,28 @@ public class SmsPassageService implements ISmsPassageService {
 
             return response(true, "修改成功");
         } catch (Exception e) {
-            logger.error("修改通道失败", e);
+            if (e instanceof IllegalArgumentException) {
+                return response(false, e.getMessage());
+            }
+
+            logger.error("修改短信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return response(true, "修改失败");
+            return response(false, "修改失败");
         }
     }
 
+    /**
+     * TODO 拼接返回值
+     * 
+     * @param result
+     * @param msg
+     * @return
+     */
     private Map<String, Object> response(boolean result, String msg) {
         Map<String, Object> report = new HashMap<String, Object>();
         report.put("result", result);
         report.put("message", msg);
         return report;
-    }
-
-    /**
-     * TODO 刷新通道参数信息
-     * 
-     * @param passage
-     * @return
-     */
-    private void refreshPassageParameter(SmsPassage passage) {
-        // 删除通道参数信息，后面采用重新生成参数信息模式
-        try {
-            parameterMapper.deleteByPassageId(passage.getId());
-            for (SmsPassageParameter parameter : passage.getParameterList()) {
-                parameter.setPassageId(passage.getId().intValue());
-                parameter.setCreateTime(new Date());
-                parameterMapper.insertSelective(parameter);
-
-                // add by zhengying 20170502 针对通道类型为CMPP等协议类型需要创建PROXY
-                loadPassageProxy(parameter, passage.getPacketsSize());
-            }
-
-        } catch (Exception e) {
-            logger.error("刷新通道参数：{} 失败", passage.getId(), e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * TODO 刷新省份通道关系
-     * 
-     * @param passage
-     * @return
-     */
-    private void refreshProvincePassage(SmsPassage passage, String provinceCode) {
-        if (StringUtils.isEmpty(provinceCode)) {
-            return;
-        }
-
-        String[] provinceCodes = provinceCode.split(",");
-        if (provinceCodes.length == 0) {
-            return;
-        }
-
-        try {
-            smsPassageProvinceMapper.deleteByPassageId(passage.getId());
-            for (String code : provinceCodes) {
-                SmsPassageProvince province = new SmsPassageProvince(passage.getId(), Integer.parseInt(code));
-                smsPassageProvinceMapper.insert(province);
-                passage.getProvinceList().add(province);
-            }
-
-        } catch (Exception e) {
-            logger.error("刷新省份通道关系：{} 失败", passage.getId(), e);
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -475,7 +552,17 @@ public class SmsPassageService implements ISmsPassageService {
                                                  JSON.toJSONString(smsPassage));
             return true;
         } catch (Exception e) {
-            logger.warn("REDIS 加载短信通道数据失败", e);
+            logger.warn("REDIS 加载短信通道[" + JSON.toJSONString(smsPassage) + "]数据失败", e);
+            return false;
+        }
+    }
+
+    private boolean removeFromRedis(Integer passageId) {
+        try {
+            stringRedisTemplate.opsForHash().delete(SmsRedisConstant.RED_SMS_PASSAGE, passageId + "");
+            return true;
+        } catch (Exception e) {
+            logger.warn("REDIS 删除短信通道[" + passageId + "]数据失败", e);
             return false;
         }
     }

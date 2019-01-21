@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -87,13 +88,14 @@ public class SmsMtPushService implements ISmsMtPushService {
     }
 
     @Override
+    @PostConstruct
     public boolean doListenerAllUser() {
         Set<Integer> userIds = userService.findAvaiableUserIds();
         if (CollectionUtils.isEmpty(userIds)) {
             logger.error("待推送可用用户数据为空，无法监听");
             return false;
         }
-        
+
         try {
             for (Integer userId : userIds) {
                 addUserMtPushListener(userId);
@@ -331,7 +333,7 @@ public class SmsMtPushService implements ISmsMtPushService {
         // 此处需要查询数据库是否需要有推送设置，无则不推送
         SmsMtMessageSubmit submit = smsMtSubmitService.getByMsgidAndMobile(msgId, mobile);
         if (submit == null) {
-//            logger.warn("msg_id : {}, mobile: {} 未找到短信相关提交数据", msgId, mobile);
+            // logger.warn("msg_id : {}, mobile: {} 未找到短信相关提交数据", msgId, mobile);
             return null;
         }
 
@@ -378,7 +380,8 @@ public class SmsMtPushService implements ISmsMtPushService {
             for (SmsMtMessageSubmit submit : submits) {
                 stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()),
                                                      submit.getMobile(),
-                                                     JSON.toJSONString(submit, new SimplePropertyPreFilter("sid", "userId",
+                                                     JSON.toJSONString(submit,
+                                                                       new SimplePropertyPreFilter("sid", "userId",
                                                                                                    "msgId", "attach",
                                                                                                    "pushUrl",
                                                                                                    "retryTimes")));
@@ -389,19 +392,16 @@ public class SmsMtPushService implements ISmsMtPushService {
             logger.error("设置待推送配置消息: {} 失败", JSON.toJSONString(submits), e);
         }
     }
-    
+
     /**
+     * TODO 推送守候线程名称
      * 
-       * TODO 推送守候线程名称
-       * 
-       * @param userId
-       *        用户ID
-       * @param sequence
-       *        序列号
-       * @return
+     * @param userId 用户ID
+     * @param sequence 序列号
+     * @return
      */
     private static String pushThreadName(Integer userId, Integer sequence) {
-        return String.format("push-daemon-thread-%d-%d", userId, sequence == null ? 1 : sequence ++);
+        return String.format("push-daemon-thread-%d-%d", userId, sequence == null ? 1 : sequence++);
     }
 
     @Override
@@ -410,7 +410,7 @@ public class SmsMtPushService implements ISmsMtPushService {
             for (int i = 0; i < pushThreadPoolSize; i++) {
                 Thread thread = new Thread(new MtReportPushToDeveloperWorker(applicationContext,
                                                                              getUserPushQueueName(userId)),
-                                                                             pushThreadName(userId, i));
+                                           pushThreadName(userId, i));
                 thread.start();
             }
             return true;
@@ -489,7 +489,8 @@ public class SmsMtPushService implements ISmsMtPushService {
     private boolean sendBody(Map<String, List<JSONObject>> urlBodies) {
         try {
             for (Entry<String, List<JSONObject>> urlBody : urlBodies.entrySet()) {
-                doPushPersistence(urlBody.getValue(), HttpClientUtil.postBody(urlBody.getKey(), translateBodies(urlBody.getValue()), 1));
+                doPushPersistence(urlBody.getValue(),
+                                  HttpClientUtil.postBody(urlBody.getKey(), translateBodies(urlBody.getValue()), 1));
             }
 
             return true;

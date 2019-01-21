@@ -13,7 +13,7 @@ public class SmsPassageGroup implements Serializable{
 
     private String comments;
     
-    private List<SmsPassageGroupDetail> detailList = new ArrayList<SmsPassageGroupDetail>();
+    private List<SmsPassageGroupDetail> detailList = new ArrayList<>();
 
     public Integer getId() {
         return id;

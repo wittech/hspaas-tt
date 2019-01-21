@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.mms.task.dao.MmsMtTaskPacketsMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.mms.task.domain.MmsMtTaskPackets">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="sid" property="sid" jdbcType="BIGINT" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="province_code" property="provinceCode"
+			jdbcType="INTEGER" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="mobile_size" property="mobileSize" jdbcType="INTEGER" />
+		<result column="message_template_id" property="messageTemplateId"
+			jdbcType="BIGINT" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="final_passage_id" property="finalPassageId"
+			jdbcType="INTEGER" />
+		<result column="passage_protocol" property="passageProtocol"
+			jdbcType="VARCHAR" />
+		<result column="passage_url" property="passageUrl" jdbcType="VARCHAR" />
+		<result column="passage_parameter" property="passageParameter"
+			jdbcType="VARCHAR" />
+		<result column="result_format" property="resultFormat"
+			jdbcType="VARCHAR" />
+		<result column="success_code" property="successCode" jdbcType="VARCHAR" />
+		<result column="position" property="position" jdbcType="VARCHAR" />
+		<result column="priority" property="priority" jdbcType="INTEGER" />
+		<result column="force_actions" property="forceActions"
+			jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="retry_times" property="retryTimes" jdbcType="INTEGER" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, sid, mobile, province_code, cmcp, title, content,
+		mobile_size,
+		message_template_id, passage_id,
+		final_passage_id,
+		passage_protocol,
+		passage_url, passage_parameter, result_format,
+		success_code, position,
+		priority, force_actions, remark, retry_times,
+		status, create_time,
+		update_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="meterType="
+		java.lang.Long ">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_task_packets
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		mms_mt_task_packets
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.mms.task.domain.MmsMtTaskPackets">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_mt_task_packets (sid, province_code, cmcp,
+		title,
+		content, mobile_size,
+		message_template_id, passage_id,
+		final_passage_id,
+		passage_protocol, passage_url, passage_parameter,
+		result_format, success_code, position,
+		priority, force_actions, remark,
+		retry_times, status, create_time,
+		update_time, mobile)
+		values
+		(#{sid,jdbcType=BIGINT},#{mobile,jdbcType=VARCHAR},
+		#{provinceCode,jdbcType=INTEGER},
+		#{cmcp,jdbcType=INTEGER},
+		#{title,jdbcType=VARCHAR},
+		#{content,jdbcType=VARCHAR},
+		#{mobileSize,jdbcType=INTEGER},
+		#{messageTemplateId,jdbcType=BIGINT},
+		#{passageId,jdbcType=INTEGER},
+		#{finalPassageId,jdbcType=INTEGER},
+		#{passageProtocol,jdbcType=VARCHAR}, #{passageUrl,jdbcType=VARCHAR},
+		#{passageParameter,jdbcType=VARCHAR},
+		#{resultFormat,jdbcType=VARCHAR}, #{successCode,jdbcType=VARCHAR},
+		#{position,jdbcType=VARCHAR},
+		#{priority,jdbcType=INTEGER},
+		#{forceActions,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},
+		#{retryTimes,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP},
+		#{mobile,jdbcType=LONGVARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.mms.task.domain.MmsMtTaskPackets">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_mt_task_packets
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="sid != null">
+				sid,
+			</if>
+			<if test="provinceCode != null">
+				province_code,
+			</if>
+			<if test="cmcp != null">
+				cmcp,
+			</if>
+			<if test="title != null">
+				title,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+			<if test="mobileSize != null">
+				mobile_size,
+			</if>
+			<if test="messageTemplateId != null">
+				message_template_id,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="finalPassageId != null">
+				final_passage_id,
+			</if>
+			<if test="passageProtocol != null">
+				passage_protocol,
+			</if>
+			<if test="passageUrl != null">
+				passage_url,
+			</if>
+			<if test="passageParameter != null">
+				passage_parameter,
+			</if>
+			<if test="resultFormat != null">
+				result_format,
+			</if>
+			<if test="successCode != null">
+				success_code,
+			</if>
+			<if test="position != null">
+				position,
+			</if>
+			<if test="priority != null">
+				priority,
+			</if>
+			<if test="forceActions != null">
+				force_actions,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="retryTimes != null">
+				retry_times,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="sid != null">
+				#{sid,jdbcType=BIGINT},
+			</if>
+			<if test="provinceCode != null">
+				#{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="cmcp != null">
+				#{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="mobileSize != null">
+				#{mobileSize,jdbcType=INTEGER},
+			</if>
+			<if test="messageTemplateId != null">
+				#{messageTemplateId,jdbcType=BIGINT},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="finalPassageId != null">
+				#{finalPassageId,jdbcType=INTEGER},
+			</if>
+			<if test="passageProtocol != null">
+				#{passageProtocol,jdbcType=VARCHAR},
+			</if>
+			<if test="passageUrl != null">
+				#{passageUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="passageParameter != null">
+				#{passageParameter,jdbcType=VARCHAR},
+			</if>
+			<if test="resultFormat != null">
+				#{resultFormat,jdbcType=VARCHAR},
+			</if>
+			<if test="successCode != null">
+				#{successCode,jdbcType=VARCHAR},
+			</if>
+			<if test="position != null">
+				#{position,jdbcType=VARCHAR},
+			</if>
+			<if test="priority != null">
+				#{priority,jdbcType=INTEGER},
+			</if>
+			<if test="forceActions != null">
+				#{forceActions,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="retryTimes != null">
+				#{retryTimes,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=LONGVARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.task.domain.MmsMtTaskPackets">
+		update mms_mt_task_packets
+		<set>
+			<if test="sid != null">
+				sid = #{sid,jdbcType=BIGINT},
+			</if>
+			<if test="provinceCode != null">
+				province_code = #{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="mobileSize != null">
+				mobile_size = #{mobileSize,jdbcType=INTEGER},
+			</if>
+			<if test="messageTemplateId != null">
+				message_template_id =
+				#{messageTemplateId,jdbcType=BIGINT},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="finalPassageId != null">
+				final_passage_id = #{finalPassageId,jdbcType=INTEGER},
+			</if>
+			<if test="passageProtocol != null">
+				passage_protocol = #{passageProtocol,jdbcType=VARCHAR},
+			</if>
+			<if test="passageUrl != null">
+				passage_url = #{passageUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="passageParameter != null">
+				passage_parameter = #{passageParameter,jdbcType=VARCHAR},
+			</if>
+			<if test="resultFormat != null">
+				result_format = #{resultFormat,jdbcType=VARCHAR},
+			</if>
+			<if test="successCode != null">
+				success_code = #{successCode,jdbcType=VARCHAR},
+			</if>
+			<if test="position != null">
+				position = #{position,jdbcType=VARCHAR},
+			</if>
+			<if test="priority != null">
+				priority = #{priority,jdbcType=INTEGER},
+			</if>
+			<if test="forceActions != null">
+				force_actions = #{forceActions,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="retryTimes != null">
+				retry_times = #{retryTimes,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=LONGVARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKeyWithBLOBs" parameterType="com.huashi.mms.task.domain.MmsMtTaskPackets">
+		update
+		mms_mt_task_packets
+		set sid = #{sid,jdbcType=BIGINT},
+		province_code =
+		#{provinceCode,jdbcType=INTEGER},
+		cmcp = #{cmcp,jdbcType=INTEGER},
+		title = #{title,jdbcType=VARCHAR},
+		content =
+		#{content,jdbcType=VARCHAR},
+		mobile_size =
+		#{mobileSize,jdbcType=INTEGER},
+		message_template_id =
+		#{messageTemplateId,jdbcType=BIGINT},
+		passage_id =
+		#{passageId,jdbcType=INTEGER},
+		final_passage_id =
+		#{finalPassageId,jdbcType=INTEGER},
+		passage_protocol =
+		#{passageProtocol,jdbcType=VARCHAR},
+		passage_url =
+		#{passageUrl,jdbcType=VARCHAR},
+		passage_parameter =
+		#{passageParameter,jdbcType=VARCHAR},
+		result_format =
+		#{resultFormat,jdbcType=VARCHAR},
+		success_code =
+		#{successCode,jdbcType=VARCHAR},
+		position =
+		#{position,jdbcType=VARCHAR},
+		priority = #{priority,jdbcType=INTEGER},
+		force_actions = #{forceActions,jdbcType=VARCHAR},
+		remark =
+		#{remark,jdbcType=VARCHAR},
+		retry_times =
+		#{retryTimes,jdbcType=INTEGER},
+		status = #{status,jdbcType=INTEGER},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP},
+		mobile =
+		#{mobile,jdbcType=LONGVARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.task.domain.MmsMtTaskPackets">
+		update
+		mms_mt_task_packets
+		set sid = #{sid,jdbcType=BIGINT},
+		province_code =
+		#{provinceCode,jdbcType=INTEGER},
+		cmcp = #{cmcp,jdbcType=INTEGER},
+		title = #{title,jdbcType=VARCHAR},
+		content =
+		#{content,jdbcType=VARCHAR},
+		mobile_size =
+		#{mobileSize,jdbcType=INTEGER},
+		message_template_id =
+		#{messageTemplateId,jdbcType=BIGINT},
+		passage_id =
+		#{passageId,jdbcType=INTEGER},
+		final_passage_id =
+		#{finalPassageId,jdbcType=INTEGER},
+		passage_protocol =
+		#{passageProtocol,jdbcType=VARCHAR},
+		passage_url =
+		#{passageUrl,jdbcType=VARCHAR},
+		passage_parameter =
+		#{passageParameter,jdbcType=VARCHAR},
+		result_format =
+		#{resultFormat,jdbcType=VARCHAR},
+		success_code =
+		#{successCode,jdbcType=VARCHAR},
+		position =
+		#{position,jdbcType=VARCHAR},
+		priority = #{priority,jdbcType=INTEGER},
+		force_actions = #{forceActions,jdbcType=VARCHAR},
+		remark =
+		#{remark,jdbcType=VARCHAR},
+		retry_times =
+		#{retryTimes,jdbcType=INTEGER},
+		status = #{status,jdbcType=INTEGER},
+		create_time = #{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="selectBySid" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM sms_mt_task_packets WHERE sid = #{sid}
+	</select>
+
+	<update id="updateContent">
+		update sms_mt_task_packets set content = #{content}
+		where sid = #{sid}
+	</update>
+
+	<insert id="batchInsert" parameterType="List">
+		insert into sms_mt_task_packets (sid, mobile, province_code, cmcp,
+		title,
+		content, mobile_size,
+		message_template_id, passage_id,
+		final_passage_id,
+		passage_protocol, passage_url, passage_parameter,
+		result_format, success_code, position,
+		priority, force_actions, remark,
+		retry_times, status, create_time,
+		update_time) values
+
+		<foreach collection="list" item="packets" index="index"
+			separator=",">
+			(#{packets.sid,jdbcType=BIGINT},
+			#{packets.mobile,jdbcType=VARCHAR},
+			#{packets.provinceCode,jdbcType=INTEGER},
+			#{packets.cmcp,jdbcType=INTEGER},
+			#{packets.content,jdbcType=VARCHAR},
+			#{packets.mobileSize,jdbcType=INTEGER},
+			#{packets.messageTemplateId,jdbcType=BIGINT},
+			#{packets.passageId,jdbcType=INTEGER},
+			#{packets.finalPassageId,jdbcType=INTEGER},
+			#{packets.passageProtocol,jdbcType=VARCHAR},
+			#{packets.passageUrl,jdbcType=VARCHAR},
+			#{packets.passageParameter,jdbcType=VARCHAR},
+			#{packets.resultFormat,jdbcType=VARCHAR},
+			#{packets.successCode,jdbcType=VARCHAR},
+			#{packets.position,jdbcType=VARCHAR},
+			#{packets.priority,jdbcType=INTEGER},
+			#{packets.forceActions,jdbcType=VARCHAR},
+			#{packets.remark,jdbcType=VARCHAR},
+			#{packets.retryTimes,jdbcType=INTEGER},
+			#{packets.status,jdbcType=INTEGER},
+			#{packets.createTime,jdbcType=TIMESTAMP},
+			#{packets.updateTime,jdbcType=TIMESTAMP})
+		</foreach>
+	</insert>
+
+	<update id="updateStatusBySid">
+		update sms_mt_task_packets set status = #{status}
+		where sid = #{sid} and status = 0
+	</update>
+
+	<update id="updateStatusById">
+		update sms_mt_task_packets set status = #{status}
+		where id = #{id}
+	</update>
+
+	<update id="updateStatusByMultiIds" parameterType="java.util.List">
+		update sms_mt_task_packets set status = #{status} where 1=1
+		<foreach collection="ids" item="item" open="and id in ("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<delete id="deleteBySid">
+		delete from sms_mt_task_packets where sid = #{sid}
+	</delete>
+
+	<select id="selectPassageErrorCount" resultType="java.lang.Integer">
+		select count(*)
+		from sms_mt_task_packets where sid = #{sid} and final_passage_id is
+		null
+	</select>
+
+	<select id="selectWaitingCount" resultType="java.lang.Integer">
+		select count(*) from
+		sms_mt_task_packets where sid = #{sid} and status = 0
+	</select>
+</mapper>

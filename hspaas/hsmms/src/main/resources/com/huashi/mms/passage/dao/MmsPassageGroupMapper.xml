@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.mms.passage.dao.MmsPassageGroupMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.mms.passage.domain.MmsPassageGroup">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="passage_group_name" property="passageGroupName"
+			jdbcType="VARCHAR" />
+		<result column="comments" property="comments" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, passage_group_name, comments
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage_group
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		mms_passage_group
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.mms.passage.domain.MmsPassageGroup">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage_group (passage_group_name, comments)
+		values
+		(#{passageGroupName,jdbcType=VARCHAR}, #{comments,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.mms.passage.domain.MmsPassageGroup">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage_group
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="passageGroupName != null">
+				passage_group_name,
+			</if>
+			<if test="comments != null">
+				comments,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="passageGroupName != null">
+				#{passageGroupName,jdbcType=VARCHAR},
+			</if>
+			<if test="comments != null">
+				#{comments,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.passage.domain.MmsPassageGroup">
+		update mms_passage_group
+		<set>
+			<if test="passageGroupName != null">
+				passage_group_name =
+				#{passageGroupName,jdbcType=VARCHAR},
+			</if>
+			<if test="comments != null">
+				comments = #{comments,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.passage.domain.MmsPassageGroup">
+		update
+		mms_passage_group
+		set passage_group_name =
+		#{passageGroupName,jdbcType=VARCHAR},
+		comments =
+		#{comments,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select * from mms_passage_group
+		<where>
+			<if test="keyword != null and keyword != ''">
+				passage_group_name like '%${keyword}%'
+			</if>
+		</where>
+		order by id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(id) from mms_passage_group
+		<where>
+			<if test="keyword != null and keyword != ''">
+				passage_group_name like '%${keyword}%'
+			</if>
+		</where>
+	</select>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage_group
+	</select>
+</mapper>

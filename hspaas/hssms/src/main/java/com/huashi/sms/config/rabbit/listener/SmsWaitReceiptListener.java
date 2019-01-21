@@ -39,22 +39,22 @@ import com.rabbitmq.client.Channel;
 public class SmsWaitReceiptListener extends AbstartRabbitListener {
 
     @Autowired
-    private ISmsMtSubmitService smsMtSubmitService;
+    private ISmsMtSubmitService          smsMtSubmitService;
     @Reference
-    private ISmsProviderService smsProviderService;
+    private ISmsProviderService          smsProviderService;
     @Autowired
-    private ISmsMtDeliverService smsMtDeliverService;
+    private ISmsMtDeliverService         smsMtDeliverService;
     @Autowired
     private Jackson2JsonMessageConverter messageConverter;
     @Autowired
-    private ISmsPassageAccessService smsPassageAccessService;
+    private ISmsPassageAccessService     smsPassageAccessService;
 
-	@Override
+    @Override
     @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT)
     public void onMessage(Message message, Channel channel) throws Exception {
-	    
-	    checkIsStartingConsumeMessage();
-	    
+
+        checkIsStartingConsumeMessage();
+
         try {
             Object object = messageConverter.fromMessage(message);
             // 处理待提交队列逻辑
@@ -62,16 +62,17 @@ public class SmsWaitReceiptListener extends AbstartRabbitListener {
                 logger.warn("状态回执报告解析失败：回执数据为空");
                 return;
             }
-            
+
             List<SmsMtMessageDeliver> delivers;
-            if(object instanceof JSONObject) {
-            	delivers = doDeliverMessage((JSONObject)object);
-            } else if(object instanceof List) {
-            	ObjectMapper mapper = new ObjectMapper();
-            	delivers = mapper.convertValue(object, new TypeReference<List<SmsMtMessageDeliver>>(){});
+            if (object instanceof JSONObject) {
+                delivers = doDeliverMessage((JSONObject) object);
+            } else if (object instanceof List) {
+                ObjectMapper mapper = new ObjectMapper();
+                delivers = mapper.convertValue(object, new TypeReference<List<SmsMtMessageDeliver>>() {
+                });
             } else {
-            	logger.error("状态回执数据类型无法匹配");
-            	return;
+                logger.error("状态回执数据类型无法匹配");
+                return;
             }
 
             if (CollectionUtils.isEmpty(delivers)) {
@@ -87,7 +88,7 @@ public class SmsWaitReceiptListener extends AbstartRabbitListener {
             logger.error("MQ消费网关状态回执数据失败： {}", messageConverter.fromMessage(message), e);
             backupIfFailed(message, e.getMessage());
 
-//			channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            // channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
         } finally {
             // 确认消息成功消费
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -97,7 +98,7 @@ public class SmsWaitReceiptListener extends AbstartRabbitListener {
     /**
      * 如果队列消费失败则持久化到异常队列中
      *
-     * @param message  队列消息
+     * @param message 队列消息
      * @param errorDes 错误描述信息
      */
     private void backupIfFailed(Message message, String errorDes) {
@@ -123,7 +124,8 @@ public class SmsWaitReceiptListener extends AbstartRabbitListener {
             return null;
         }
 
-        SmsPassageAccess access = smsPassageAccessService.getByType(PassageCallType.STATUS_RECEIPT_WITH_PUSH, providerCode);
+        SmsPassageAccess access = smsPassageAccessService.getByType(PassageCallType.MT_STATUS_RECEIPT_WITH_PUSH,
+                                                                    providerCode);
         if (access == null) {
             logger.warn("上家推送状态回执报告通道参数无法匹配：{}", jsonObject.toJSONString());
             jsonObject.put("reason", "上家推送状态回执报告通道参数无法匹配");
@@ -132,7 +134,7 @@ public class SmsWaitReceiptListener extends AbstartRabbitListener {
         }
 
         // 回执数据解析后的报文
-        List<SmsMtMessageDeliver> delivers = smsProviderService.doStatusReport(access, jsonObject);
+        List<SmsMtMessageDeliver> delivers = smsProviderService.receiveMtReport(access, jsonObject);
         if (CollectionUtils.isEmpty(delivers)) {
             return null;
         }
@@ -143,8 +145,7 @@ public class SmsWaitReceiptListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 如果报文回执中手机号码为空，则需要根据MSG_ID去数据库查询提交数据中对应的手机号码填充
-     * PS：此处可能存在上家报文回执过快，我方未入库情况，这时候需要异常处理
+     * TODO 如果报文回执中手机号码为空，则需要根据MSG_ID去数据库查询提交数据中对应的手机号码填充 PS：此处可能存在上家报文回执过快，我方未入库情况，这时候需要异常处理
      *
      * @param delivers
      */

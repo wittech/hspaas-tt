@@ -32,7 +32,7 @@ public class PassageMtReportPullThread extends BaseThread implements Runnable {
     private IPassageMonitorService passageMonitorService;
 
     // 单次组大小
-//    private static final int       GROUP_SIZE_BY_SINGLE = 500;
+    // private static final int GROUP_SIZE_BY_SINGLE = 500;
 
     public PassageMtReportPullThread(SmsPassageAccess smsPassageAccess, ISmsMtDeliverService smsMtDeliverService,
                                      ISmsProviderService smsProviderService,
@@ -66,28 +66,28 @@ public class PassageMtReportPullThread extends BaseThread implements Runnable {
                 // 睡眠时间
                 int intevel = getSleepTime(smsPassageAccess);
                 long start = System.currentTimeMillis();
-                List<SmsMtMessageDeliver> list = smsProviderService.doPullStatusReport(smsPassageAccess);
+                List<SmsMtMessageDeliver> list = smsProviderService.pullMtReport(smsPassageAccess);
                 long costTime = System.currentTimeMillis() - start;
                 if (CollectionUtils.isNotEmpty(list)) {
                     logger.info("通道轮训状态报告回执信息共获取{}条", list.size());
 
                     int avaiableCount = 0;
-//                    int times = 0;
-//                    if (list.size() > GROUP_SIZE_BY_SINGLE) {
-//                        List<List<SmsMtMessageDeliver>> groupList = reGroup(list, GROUP_SIZE_BY_SINGLE);
-//                        for (List<SmsMtMessageDeliver> glist : groupList) {
-//                            avaiableCount += smsMtDeliverService.doFinishDeliver(glist);
-//                            times++;
-//                        }
-//
-//                    } else {
-//                        avaiableCount = smsMtDeliverService.doFinishDeliver(list);
-//                        times++;
-//                    }
-                    
+                    // int times = 0;
+                    // if (list.size() > GROUP_SIZE_BY_SINGLE) {
+                    // List<List<SmsMtMessageDeliver>> groupList = reGroup(list, GROUP_SIZE_BY_SINGLE);
+                    // for (List<SmsMtMessageDeliver> glist : groupList) {
+                    // avaiableCount += smsMtDeliverService.doFinishDeliver(glist);
+                    // times++;
+                    // }
+                    //
+                    // } else {
+                    // avaiableCount = smsMtDeliverService.doFinishDeliver(list);
+                    // times++;
+                    // }
+
                     avaiableCount = smsMtDeliverService.doFinishDeliver(list);
 
-//                    logger.info("通道轮训状态报告共处理有效数据：{}条，此次耗费 {}次", avaiableCount, times + 1);
+                    // logger.info("通道轮训状态报告共处理有效数据：{}条，此次耗费 {}次", avaiableCount, times + 1);
                     PassagePullReport report = new PassagePullReport();
                     report.setIntevel(intevel);
                     report.setLastTime(DateUtil.getNow());

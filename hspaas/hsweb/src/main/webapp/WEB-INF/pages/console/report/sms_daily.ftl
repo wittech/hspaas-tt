@@ -25,13 +25,13 @@
                         <div class="layui-inline">
                             <label class="layui-search-label">开始日期</label>
                             <div class="layui-input-inline">
-                                <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" lay-verify="required" value="${(startDate)!}">
+                                <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" lay-verify="date" value="${(startDate)!}">
                             </div>
                         </div>
                         <div class="layui-inline">
                             <label class="layui-search-label">截止日期</label>
                             <div class="layui-input-inline">
-                                <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" lay-verify="required" value="${(endDate)!}">
+                                <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" lay-verify="date" value="${(endDate)!}">
                             </div>
                         </div>
                         <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
@@ -113,7 +113,7 @@ layui.use(['element', 'tree', 'table', 'form', 'laydate'], function() {
             ,page: false
         });
     };
-
+    
     form.on('submit(search)', function(data) {
         searchObj = data.field;
         currpage = 1;

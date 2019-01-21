@@ -6,10 +6,13 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -44,7 +47,11 @@ public class UserSmsConfigService implements IUserSmsConfigService {
         }
 
         try {
-            stringRedisTemplate.opsForValue().get(getKey(userId));
+            String text = stringRedisTemplate.opsForValue().get(getKey(userId));
+            if(StringUtils.isNotEmpty(text)) {
+                return JSON.parseObject(text, UserSmsConfig.class);
+            }
+            
         } catch (Exception e) {
             logger.warn("REDIS获取用户短信配置失败", e);
         }
@@ -56,8 +63,12 @@ public class UserSmsConfigService implements IUserSmsConfigService {
         return CommonRedisConstant.RED_USER_SMS_CONFIG + ":" + userId;
     }
 
-    @Override
-    public UserSmsConfig save(int userId, int words, String extNumber) {
+    /**
+     * 
+       * TODO 默认初始化配置
+       * @return
+     */
+    private UserSmsConfig defaultConfig() {
         UserSmsConfig userSmsConfig = new UserSmsConfig();
         userSmsConfig.setCreateTime(new Date());
         userSmsConfig.setAutoTemplate(false);
@@ -65,33 +76,21 @@ public class UserSmsConfigService implements IUserSmsConfigService {
         userSmsConfig.setNeedTemplate(true);
         userSmsConfig.setSmsReturnRule(SmsReturnRule.NO.getValue());
         userSmsConfig.setSmsTimeout(0L);
-        userSmsConfig.setUserId(userId);
-        userSmsConfig.setExtNumber(extNumber);
-        if (words == 0) {
-            SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.SMS_WORDS_PER_NUM.name(),
-                                                                             SMS_CONFIG_KEY);
-            if (systemConfig == null) {
-                userSmsConfig.setSmsWords(UserBalanceConstant.WORDS_SIZE_PER_NUM);
-            } else {
-                userSmsConfig.setSmsWords(Integer.parseInt(systemConfig.getAttrValue()));
-            }
-
-        } else {
-            userSmsConfig.setSmsWords(words);
-        }
-        pushToRedis(userSmsConfig);
-
-        userSmsConfigMapper.insertSelective(userSmsConfig);
 
         return userSmsConfig;
     }
 
     @Override
-    public boolean save(UserSmsConfig userSmsConfig) {
-        if (userSmsConfig == null) {
-            return false;
-        }
+    public boolean save(int userId, int words, String extNumber) {
+        UserSmsConfig userSmsConfig = defaultConfig();
+        userSmsConfig.setUserId(userId);
+        userSmsConfig.setExtNumber(extNumber);
+        userSmsConfig.setSmsWords(words);
 
+        return save(userSmsConfig);
+    }
+
+    private void setWords(UserSmsConfig userSmsConfig) {
         if (userSmsConfig.getSmsWords() == 0) {
             SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.SMS_WORDS_PER_NUM.name(),
                                                                              SMS_CONFIG_KEY);
@@ -100,16 +99,37 @@ public class UserSmsConfigService implements IUserSmsConfigService {
             } else {
                 userSmsConfig.setSmsWords(Integer.parseInt(systemConfig.getAttrValue()));
             }
-
         }
-
-        userSmsConfig.setCreateTime(new Date());
-        pushToRedis(userSmsConfig);
-
-        return userSmsConfigMapper.insertSelective(userSmsConfig) > 0;
     }
 
     @Override
+    @Transactional
+    public boolean save(UserSmsConfig userSmsConfig) {
+        if (userSmsConfig == null) {
+            return false;
+        }
+
+        try {
+            setWords(userSmsConfig);
+            userSmsConfig.setCreateTime(new Date());
+
+            int result = userSmsConfigMapper.insertSelective(userSmsConfig);
+            if (result > 0) {
+                pushToRedis(userSmsConfig);
+                return true;
+            }
+
+        } catch (Exception e) {
+            logger.error("添加短信配置信息失败 {}", JSON.toJSONString(userSmsConfig), e);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            removeFromRedis(userSmsConfig.getUserId());
+        }
+
+        return false;
+    }
+
+    @Override
+    @Transactional
     public boolean update(UserSmsConfig config) {
         config.setUpdateTime(new Date());
         pushToRedis(config);
@@ -128,6 +148,15 @@ public class UserSmsConfigService implements IUserSmsConfigService {
 
         } catch (Exception e) {
             logger.warn("REDIS 操作用户短信配置失败", e);
+        }
+    }
+
+    private void removeFromRedis(Integer userId) {
+        try {
+            stringRedisTemplate.delete(getKey(userId));
+
+        } catch (Exception e) {
+            logger.warn("REDIS 移除用户彩信配置失败", e);
         }
     }
 

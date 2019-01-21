@@ -78,7 +78,7 @@ public class PassageMonitorService implements IPassageMonitorService {
      * TODO 通道下行状态扫描
      */
     private void doSmsPassageStatusPulling() {
-        List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.STATUS_RECEIPT_WITH_SELF_GET);
+        List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET);
         if (CollectionUtils.isEmpty(list)) {
             logger.warn("未检索到通道下行状态报告回执");
             return;
@@ -93,7 +93,7 @@ public class PassageMonitorService implements IPassageMonitorService {
      * TODO 通道上行回执数据扫描
      */
     private void doSmsPassageMoPulling() {
-        List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.SMS_MO_REPORT_WITH_SELF_GET);
+        List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.MO_REPORT_WITH_SELF_GET);
         if (CollectionUtils.isEmpty(list)) {
             logger.warn("未检索到通道上行报告回执");
             return;
@@ -192,12 +192,12 @@ public class PassageMonitorService implements IPassageMonitorService {
             PassageCallType callType = PassageCallType.parse(access.getCallType());
 
             switch (callType) {
-                case STATUS_RECEIPT_WITH_SELF_GET:
+                case MT_STATUS_RECEIPT_WITH_SELF_GET:
                     thread = new Thread(new PassageMtReportPullThread(access, smsMtDeliverService, smsProviderService,
                                                                       this), threadName);
                     break;
 
-                case SMS_MO_REPORT_WITH_SELF_GET:
+                case MO_REPORT_WITH_SELF_GET:
                     thread = new Thread(new PassageMoReportPullThread(access, smsMoMessageService, smsProviderService,
                                                                       this), threadName);
                     break;

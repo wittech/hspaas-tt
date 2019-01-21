@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.mms.passage.dao.MmsPassageProvinceMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.mms.passage.domain.MmsPassageProvince">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="province_code" property="provinceCode"
+			jdbcType="INTEGER" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, passage_id, province_code
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage_province
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		mms_passage_province
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.mms.passage.domain.MmsPassageProvince">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage_province (passage_id, province_code)
+		values
+		(#{passageId,jdbcType=INTEGER}, #{provinceCode,jdbcType=INTEGER})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.mms.passage.domain.MmsPassageProvince">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage_province
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="provinceCode != null">
+				province_code,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="provinceCode != null">
+				#{provinceCode,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.passage.domain.MmsPassageProvince">
+		update mms_passage_province
+		<set>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="provinceCode != null">
+				province_code = #{provinceCode,jdbcType=INTEGER},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.passage.domain.MmsPassageProvince">
+		update
+		mms_passage_province
+		set passage_id = #{passageId,jdbcType=INTEGER},
+		province_code = #{provinceCode,jdbcType=INTEGER}
+		where id =
+		#{id,jdbcType=BIGINT}
+	</update>
+
+	<delete id="deleteByPassageId">
+		delete from mms_passage_province where passage_id =
+		#{passageId}
+	</delete>
+
+	<select id="getListByPassageId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		mms_passage_province where passage_id = #{passageId}
+	</select>
+
+	<insert id="batchInsert" parameterType="List">
+		insert into mms_passage_province (passage_id, province_code)
+		values
+
+		<foreach collection="list" item="element" index="index"
+			separator=",">
+			(#{element.passageId,jdbcType=INTEGER},
+			#{element.provinceCode,jdbcType=INTEGER})
+		</foreach>
+	</insert>
+</mapper>

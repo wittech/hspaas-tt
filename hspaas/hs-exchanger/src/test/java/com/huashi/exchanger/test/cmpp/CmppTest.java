@@ -124,7 +124,7 @@ public class CmppTest {
         public void run() {
             content += RandomUtil.getRandomNum(6);
             for(int i=0; i< 100; i++) {
-                List<ProviderSendResponse> list = smsProviderService.doTransport(smsPassageParameter, mobile, content, fee,
+                List<ProviderSendResponse> list = smsProviderService.sendSms(smsPassageParameter, mobile, content, fee,
                                                                                  extNumber);
                 System.out.println("当前线程：" + Thread.currentThread().getName() + "-----" +i +"===== 返回值：" + list);
             }

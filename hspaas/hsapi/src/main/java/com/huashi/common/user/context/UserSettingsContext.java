@@ -29,6 +29,34 @@ public class UserSettingsContext {
 			return title;
 		}
 	}
+	
+	/**
+     * 
+     * TODO 用户短信失败返还规则
+     * 
+     * @author zhengying
+     * @version V1.0
+     * @date 2016年9月18日 下午6:09:23
+     */
+    public enum MmsReturnRule {
+        NO(0, "不返回"), YES_WITH_AUTO(1, "失败自动返还"), YES_WITH_TIMEOUT(2, "超时未回执返还");
+        
+        private int value;
+        private String title;
+
+        private MmsReturnRule(int value, String title) {
+            this.value = value;
+            this.title = title;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+    }
 
 	/**
 	 * 

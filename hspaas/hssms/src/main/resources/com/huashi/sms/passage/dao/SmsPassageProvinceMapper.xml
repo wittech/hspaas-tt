@@ -19,7 +19,8 @@
 		where id = #{id,jdbcType=BIGINT}
 	</select>
 	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-		delete from sms_passage_province
+		delete from
+		sms_passage_province
 		where id = #{id,jdbcType=BIGINT}
 	</delete>
 	<insert id="insert" parameterType="com.huashi.sms.passage.domain.SmsPassageProvince">
@@ -28,7 +29,8 @@
 			SELECT LAST_INSERT_ID()
 		</selectKey>
 		insert into sms_passage_province (passage_id, province_code)
-		values (#{passageId,jdbcType=INTEGER}, #{provinceCode,jdbcType=INTEGER})
+		values
+		(#{passageId,jdbcType=INTEGER}, #{provinceCode,jdbcType=INTEGER})
 	</insert>
 	<insert id="insertSelective" parameterType="com.huashi.sms.passage.domain.SmsPassageProvince">
 		<selectKey resultType="java.lang.Long" keyProperty="id"
@@ -66,17 +68,32 @@
 		where id = #{id,jdbcType=BIGINT}
 	</update>
 	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.passage.domain.SmsPassageProvince">
-		update sms_passage_province
+		update
+		sms_passage_province
 		set passage_id = #{passageId,jdbcType=INTEGER},
 		province_code = #{provinceCode,jdbcType=INTEGER}
-		where id = #{id,jdbcType=BIGINT}
+		where id =
+		#{id,jdbcType=BIGINT}
 	</update>
 
 	<delete id="deleteByPassageId">
-		delete from sms_passage_province where passage_id = #{passageId}
+		delete from sms_passage_province where passage_id =
+		#{passageId}
 	</delete>
 
 	<select id="getListByPassageId" resultMap="BaseResultMap">
-		select * from sms_passage_province where passage_id = #{passageId}
+		select * from
+		sms_passage_province where passage_id = #{passageId}
 	</select>
+
+	<insert id="batchInsert" parameterType="List">
+		insert into sms_passage_province (passage_id, province_code)
+		values
+
+		<foreach collection="list" item="element" index="index"
+			separator=",">
+			(#{element.passageId,jdbcType=INTEGER},
+			#{element.provinceCode,jdbcType=INTEGER})
+		</foreach>
+	</insert>
 </mapper>

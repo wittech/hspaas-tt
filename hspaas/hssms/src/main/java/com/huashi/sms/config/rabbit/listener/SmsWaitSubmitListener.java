@@ -136,7 +136,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
                 }
                 
                 // 调用网关通道处理器，提交短信信息，并接收回执
-                List<ProviderSendResponse> responses = smsProviderService.doTransport(getPassageParameter(packets,
+                List<ProviderSendResponse> responses = smsProviderService.sendSms(getPassageParameter(packets,
                                                                                                           smsPassage),
                                                                                                           groupMobile,
                                                                                       packets.getContent(),

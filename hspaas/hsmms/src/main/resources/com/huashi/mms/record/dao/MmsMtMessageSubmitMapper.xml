@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.mms.record.dao.MmsMtMessageSubmitMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.mms.record.domain.MmsMtMessageSubmit">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="sid" property="sid" jdbcType="BIGINT" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="province_code" property="provinceCode"
+			jdbcType="INTEGER" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="template_id" property="templateId" jdbcType="BIGINT" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="attach" property="attach" jdbcType="VARCHAR" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="need_push" property="needPush" jdbcType="BIT" />
+		<result column="push_url" property="pushUrl" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="create_unixtime" property="createUnixtime"
+			jdbcType="BIGINT" />
+		<result column="destnation_no" property="destnationNo"
+			jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="msg_id" property="msgId" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_id, sid, mobile, province_code, cmcp, template_id,
+		title,
+		content,
+		attach, passage_id,
+		need_push, push_url, create_time,
+		create_unixtime, destnation_no, status,
+		remark,
+		msg_id
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from mms_mt_message_submit
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		mms_mt_message_submit
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.mms.record.domain.MmsMtMessageSubmit">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_mt_message_submit (user_id, sid, mobile,
+		province_code, cmcp, template_id, title,
+		content, attach, passage_id,
+		need_push, push_url, create_time,
+		create_unixtime, destnation_no,
+		status,
+		remark, msg_id)
+		values (#{userId,jdbcType=INTEGER},
+		#{sid,jdbcType=BIGINT},
+		#{mobile,jdbcType=VARCHAR},
+		#{provinceCode,jdbcType=INTEGER}, #{cmcp,jdbcType=INTEGER},
+		#{templateId,jdbcType=BIGINT},
+		#{title,jdbcType=VARCHAR},
+		#{content,jdbcType=VARCHAR},
+		#{attach,jdbcType=VARCHAR},
+		#{passageId,jdbcType=INTEGER},
+		#{needPush,jdbcType=BIT},
+		#{pushUrl,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{createUnixtime,jdbcType=BIGINT},
+		#{destnationNo,jdbcType=VARCHAR},
+		#{status,jdbcType=INTEGER},
+		#{remark,jdbcType=VARCHAR},
+		#{msgId,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.mms.record.domain.MmsMtMessageSubmit">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_mt_message_submit
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				user_id,
+			</if>
+			<if test="sid != null">
+				sid,
+			</if>
+			<if test="mobile != null">
+				mobile,
+			</if>
+			<if test="provinceCode != null">
+				province_code,
+			</if>
+			<if test="cmcp != null">
+				cmcp,
+			</if>
+			<if test="templateId != null">
+				template_id,
+			</if>
+			<if test="title != null">
+				title,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+			<if test="attach != null">
+				attach,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="needPush != null">
+				need_push,
+			</if>
+			<if test="pushUrl != null">
+				push_url,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="createUnixtime != null">
+				create_unixtime,
+			</if>
+			<if test="destnationNo != null">
+				destnation_no,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="msgId != null">
+				msg_id,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">
+				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=BIGINT},
+			</if>
+			<if test="mobile != null">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="provinceCode != null">
+				#{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="cmcp != null">
+				#{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="templateId != null">
+				#{templateId,jdbcType=BIGINT},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				#{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="needPush != null">
+				#{needPush,jdbcType=BIT},
+			</if>
+			<if test="pushUrl != null">
+				#{pushUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createUnixtime != null">
+				#{createUnixtime,jdbcType=BIGINT},
+			</if>
+			<if test="destnationNo != null">
+				#{destnationNo,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="msgId != null">
+				#{msgId,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.record.domain.MmsMtMessageSubmit">
+		update mms_mt_message_submit
+		<set>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="sid != null">
+				sid = #{sid,jdbcType=BIGINT},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="provinceCode != null">
+				province_code = #{provinceCode,jdbcType=INTEGER},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="templateId != null">
+				template_id = #{templateId,jdbcType=BIGINT},
+			</if>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="attach != null">
+				attach = #{attach,jdbcType=VARCHAR},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="needPush != null">
+				need_push = #{needPush,jdbcType=BIT},
+			</if>
+			<if test="pushUrl != null">
+				push_url = #{pushUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createUnixtime != null">
+				create_unixtime = #{createUnixtime,jdbcType=BIGINT},
+			</if>
+			<if test="destnationNo != null">
+				destnation_no = #{destnationNo,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="msgId != null">
+				msg_id = #{msgId,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.record.domain.MmsMtMessageSubmit">
+		update
+		mms_mt_message_submit
+		set user_id = #{userId,jdbcType=INTEGER},
+		sid =
+		#{sid,jdbcType=BIGINT},
+		mobile = #{mobile,jdbcType=VARCHAR},
+		province_code = #{provinceCode,jdbcType=INTEGER},
+		cmcp =
+		#{cmcp,jdbcType=INTEGER},
+		template_id = #{templateId,jdbcType=BIGINT},
+		title = #{title,jdbcType=VARCHAR},
+		content =
+		#{content,jdbcType=VARCHAR},
+		attach =
+		#{attach,jdbcType=VARCHAR},
+		passage_id = #{passageId,jdbcType=INTEGER},
+		need_push =
+		#{needPush,jdbcType=BIT},
+		push_url =
+		#{pushUrl,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		create_unixtime =
+		#{createUnixtime,jdbcType=BIGINT},
+		destnation_no =
+		#{destnationNo,jdbcType=VARCHAR},
+		status = #{status,jdbcType=INTEGER},
+		remark = #{remark,jdbcType=VARCHAR},
+		msg_id = #{msgId,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp,
+		s.title,
+		s.content,
+		s.attach, s.passage_id,
+		s.need_push,
+		s.push_url,s.create_time,
+		s.create_unixtime,
+		s.status, s.remark,
+		s.msg_id,s.destnation_no,
+		sd.mobile
+		deliver_mobile,sd.id
+		deliver_id,sd.status_code
+		deliver_status_code,
+		sd.status
+		deliver_status,sd.deliver_time,sd.create_time
+		deliver_create_time,sd.remark deliver_remark
+		from
+		mms_mt_message_submit
+		s
+		left join mms_mt_message_deliver sd on
+		sd.msg_id = s.msg_id and
+		sd.mobile = s.mobile
+		where 1 = 1
+		<if test="userId != null and userId > -1">
+			and s.user_id = #{userId}
+		</if>
+		<if test="sid != null and sid != ''">
+			and s.sid = #{sid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and s.mobile like '${mobile}%'
+		</if>
+		<if test="title != null and title != ''">
+			and s.title like '%${title}%'
+		</if>
+		<if test="passageId != null and passageId != ''">
+			and s.passage_id = #{passageId}
+		</if>
+		<if test="startDate != null and startDate !=''">
+			and s.create_unixtime &gt;=#{startDate}
+		</if>
+		<if test="endDate != null and endDate !=''">
+			and s.create_unixtime &lt;=#{endDate}
+		</if>
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
+			and s.status = #{sendStatus}
+		</if>
+
+		<!-- deliverStatus is 2, it means that has no deliver data, waitting for 
+			gateway callback -->
+		<if test="deliverStatus == 2">
+			and sd.status is null
+		</if>
+		<!-- 0: success, 1:failure -->
+		<if test="deliverStatus == 0 or deliverStatus == 1">
+			and sd.status = #{deliverStatus}
+		</if>
+
+		order by s.create_unixtime desc limit #{start},#{end}
+	</select>
+
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(0) from mms_mt_message_submit s
+		left join
+		mms_mt_message_deliver sd on sd.msg_id = s.msg_id and sd.mobile =
+		s.mobile
+		where 1 = 1
+		<if test="userId != null and userId > -1">
+			and s.user_id = #{userId}
+		</if>
+		<if test="sid != null and sid != ''">
+			and s.sid = #{sid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and s.mobile like '${mobile}%'
+		</if>
+		<if test="title != null and title != ''">
+			and s.title like '%${title}%'
+		</if>
+		<if test="passageId != null and passageId != ''">
+			and s.passage_id = #{passageId}
+		</if>
+		<if test="startDate != null and startDate !=''">
+			and s.create_unixtime &gt;=#{startDate}
+		</if>
+		<if test="endDate != null and endDate !=''">
+			and s.create_unixtime &lt;=#{endDate}
+		</if>
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
+			and s.status = #{sendStatus}
+		</if>
+		<!-- deliverStatus is 2, it means that has no deliver data, waitting for 
+			gateway callback -->
+		<if test="deliverStatus == 2">
+			and sd.status is null
+		</if>
+		<!-- 0: success, 1:failure -->
+		<if test="deliverStatus == 0 or deliverStatus == 1">
+			and sd.status = #{deliverStatus}
+		</if>
+	</select>
+
+
+	<select id="findListByUser" resultMap="BaseResultMap">
+		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp,
+		s.title,
+		s.content,
+		s.attach, s.passage_id,
+		s.need_push,
+		s.push_url,s.create_time,
+		s.create_unixtime,
+		s.status, s.remark,
+		s.msg_id,s.destnation_no
+		from mms_mt_message_submit
+		s
+		where s.user_id =
+		#{userId} and s.create_unixtime &gt;=#{startDate}
+		and
+		s.create_unixtime
+		&lt;=#{endDate}
+
+		<if test="sid != null and sid != ''">
+			and s.sid = #{sid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and s.mobile like '${mobile}%'
+		</if>
+		<if test="title != null and title != ''">
+			and s.title like '%${title}%'
+		</if>
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
+			and s.status = #{sendStatus}
+		</if>
+
+		order by s.create_unixtime desc limit #{start},#{end}
+	</select>
+
+
+	<select id="findCountByUser" resultType="java.lang.Integer">
+		select count(0) from mms_mt_message_submit s
+		where user_id = #{userId}
+		and s.create_unixtime &gt;=#{startDate} and s.create_unixtime
+		&lt;=#{endDate}
+		<if test="sid != null and sid != ''">
+			and s.sid = #{sid}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			and s.mobile like '${mobile}%'
+		</if>
+		<if test="title != null and title != ''">
+			and s.title like '%${title}%'
+		</if>
+		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
+			and s.status = #{sendStatus}
+		</if>
+
+	</select>
+
+
+	<select id="findBySid" resultMap="BaseResultMap">
+		select s.*,p.name passage_name
+		from mms_mt_message_submit s,mms_passage p
+		where s.passage_id = p.id
+		and s.sid = #{sid} order by id desc
+	</select>
+
+	<select id="selectByMsgId" resultMap="BaseResultMap">
+		select
+		id,user_id,sid,msg_id,mobile,passage_id, create_time, need_push,
+		push_url,attach,destnation_no from
+		mms_mt_message_submit where msg_id =
+		#{msgId} order by id desc limit 1
+	</select>
+
+	<select id="selectByMobile" resultMap="BaseResultMap">
+		select
+		id,user_id,sid,msg_id,mobile,passage_id, create_time, need_push,
+		push_url,attach,destnation_no from
+		mms_mt_message_submit where mobile =
+		#{mobile} order by
+		id desc limit 1
+	</select>
+
+	<select id="selectByMsgIdAndMobile" resultMap="BaseResultMap">
+		select
+		id,user_id,sid,msg_id,mobile,passage_id, create_time, need_push,
+		push_url,attach,destnation_no from
+		mms_mt_message_submit where msg_id =
+		#{msgId} and mobile
+		= #{mobile} order by id desc limit 1
+	</select>
+
+	<select id="selectByPsm" resultMap="BaseResultMap">
+		select
+		id,user_id,sid,msg_id,mobile,passage_id, create_time, need_push,
+		push_url,attach,destnation_no from
+		mms_mt_message_submit where
+		passage_id = #{passageId} and
+		msg_id = #{msgId} and mobile = #{mobile}
+		order by id desc limit 1
+	</select>
+
+	<insert id="batchInsert" parameterType="List">
+		insert ignore into mms_mt_message_submit (user_id, sid, mobile,
+		province_code, cmcp, template_id, title,
+		content, attach, passage_id,
+		need_push, push_url, create_time,
+		create_unixtime, destnation_no,
+		status,
+		remark, msg_id) values
+
+		<foreach collection="list" item="message" index="index"
+			separator=",">
+			(#{message.userId,jdbcType=INTEGER},
+			#{message.sid,jdbcType=BIGINT},
+			#{message.mobile,jdbcType=VARCHAR},
+			#{message.provinceCode,jdbcType=INTEGER},
+			#{message.cmcp,jdbcType=INTEGER},
+			#{message.templateId,jdbcType=INTEGER},
+			#{message.title,jdbcType=VARCHAR},
+			#{message.content,jdbcType=VARCHAR},
+			#{message.attach,jdbcType=VARCHAR},
+			#{message.passageId,jdbcType=INTEGER},
+			#{message.needPush,jdbcType=BIT},
+			#{message.pushUrl,jdbcType=VARCHAR},
+			#{message.createTime,jdbcType=TIMESTAMP},
+			#{message.createUnixtime,jdbcType=BIGINT},
+			#{message.destnationNo,jdbcType=VARCHAR},
+			#{message.status,jdbcType=INTEGER},
+			#{message.remark,jdbcType=VARCHAR},
+			#{message.msgId,jdbcType=VARCHAR})
+		</foreach>
+	</insert>
+
+	<select id="findByDate" resultMap="BaseResultMap">
+		select user_id,sum(fee) fee,
+		count(*) amount from
+		mms_mt_message_submit where create_time = #{date}
+		group by user_id
+	</select>
+
+	<select id="getRecordListToMonitor" resultMap="BaseResultMap">
+		select ss.*,sd.id
+		deliver_id,sd.status deliver_status from mms_mt_message_submit ss
+		left
+		join mms_mt_message_deliver sd on ss.msg_id = sd.msg_id and ss.mobile
+		= sd.mobile
+		where ss.passage_id = #{passageId} and ss.create_unixtime
+		&gt;= #{startTime}
+		and ss.create_unixtime &lt;= #{endTime} order by
+		sd.id desc
+	</select>
+
+	<select id="selectSubmitReport" resultType="java.util.Map">
+		SELECT s.user_id,
+		s.province_code, s.passage_id,
+		count(*) as submit_count,
+		sum(s.fee) as
+		bill_count,
+		sum(CASE sd.status WHEN 0 THEN fee ELSE 0 END) AS
+		success_count,
+		sum(CASE WHEN sd.status IS NOT NULL AND sd.status!=0
+		THEN fee ELSE 0 END) AS
+		submit_failed_count,
+		sum(CASE WHEN sd.status IS
+		NULL THEN fee ELSE 0 END) AS unknown_count
+		FROM mms_mt_message_submit s
+		LEFT JOIN mms_mt_message_deliver sd
+		ON sd.msg_id = s.msg_id AND
+		sd.mobile = s.mobile
+		WHERE s.create_unixtime &gt;= #{startTime} and
+		s.create_unixtime &lt;=
+		#{endTime}
+		GROUP BY s.user_id, s.province_code,
+		s.passage_id
+	</select>
+
+	<select id="selectByUserIdAndMobile" resultType="java.util.Map">
+		SELECT s.id,
+		s.user_id, s.content, s.create_time, s.status as send_status,
+		sd.status as deliver_status, sd.create_time as deliver_time,
+		sd.status_code
+		FROM mms_mt_message_submit s LEFT JOIN
+		mms_mt_message_deliver sd
+		ON sd.msg_id = s.msg_id AND sd.mobile =
+		s.mobile
+		WHERE s.user_id = #{userId} and s.mobile = #{mobile}
+	</select>
+
+	<select id="selectCmcpReport" resultType="java.util.Map">
+		SELECT COUNT(*) as
+		count, province_code, cmcp FROM mms_mt_message_submit
+		WHERE
+		create_unixtime &gt;= #{startTime} and create_unixtime &lt;=
+		#{endTime}
+		GROUP BY province_code, cmcp
+	</select>
+
+</mapper>

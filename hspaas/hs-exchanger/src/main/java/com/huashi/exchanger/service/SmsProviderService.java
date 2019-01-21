@@ -18,11 +18,12 @@ import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.ProtocolType;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.exception.ExchangeProcessException;
-import com.huashi.exchanger.resolver.cmpp.v2.CmppProxySender;
-import com.huashi.exchanger.resolver.cmpp.v3.Cmpp3ProxySender;
-import com.huashi.exchanger.resolver.http.HttpSender;
-import com.huashi.exchanger.resolver.sgip.SgipProxySender;
-import com.huashi.exchanger.resolver.smgp.SmgpProxySender;
+import com.huashi.exchanger.resolver.sms.cmpp.v2.CmppProxySender;
+import com.huashi.exchanger.resolver.sms.cmpp.v3.Cmpp3ProxySender;
+import com.huashi.exchanger.resolver.sms.http.HttpSender;
+import com.huashi.exchanger.resolver.sms.sgip.SgipProxySender;
+import com.huashi.exchanger.resolver.sms.smgp.SmgpProxySender;
+import com.huashi.exchanger.service.template.SmsProxyManagerTemplate;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
@@ -32,26 +33,23 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 public class SmsProviderService implements ISmsProviderService {
 
     @Autowired
-    private HttpSender             httpResolver;
+    private HttpSender           httpResolver;
     @Autowired
-    private CmppProxySender        cmppProxySender;
+    private CmppProxySender      cmppProxySender;
 
     @Autowired
-    private Cmpp3ProxySender       cmpp3ProxySender;
+    private Cmpp3ProxySender     cmpp3ProxySender;
     @Autowired
-    private SgipProxySender        sgipProxySender;
+    private SgipProxySender      sgipProxySender;
     @Autowired
-    private SmgpProxySender        smgpProxySender;
+    private SmgpProxySender      smgpProxySender;
 
-    @Autowired
-    private ISmsProxyManageService smsProxyManageService;
-
-    private final Logger           logger                     = LoggerFactory.getLogger(getClass());
+    private final Logger         logger                     = LoggerFactory.getLogger(getClass());
 
     /**
      * 默认限流计流数
      */
-    private static final Integer   DEFAULT_RATE_LIMITER_TIMES = 1;
+    private static final Integer DEFAULT_RATE_LIMITER_TIMES = 1;
 
     // /**
     // * 网关每个包分包手机号码上限数
@@ -60,8 +58,8 @@ public class SmsProviderService implements ISmsProviderService {
     // private int gatewayMobilesPerSecond;
 
     @Override
-    public List<ProviderSendResponse> doTransport(SmsPassageParameter parameter, String mobile, String content,
-                                                  Integer fee, String extNumber) throws ExchangeProcessException {
+    public List<ProviderSendResponse> sendSms(SmsPassageParameter parameter, String mobile, String content,
+                                              Integer fee, String extNumber) throws ExchangeProcessException {
 
         validate(parameter);
 
@@ -244,7 +242,7 @@ public class SmsProviderService implements ISmsProviderService {
     }
 
     @Override
-    public List<SmsMtMessageDeliver> doStatusReport(SmsPassageAccess access, JSONObject report) {
+    public List<SmsMtMessageDeliver> receiveMtReport(SmsPassageAccess access, JSONObject report) {
         try {
             return httpResolver.deliver(access, report);
         } catch (Exception e) {
@@ -255,7 +253,7 @@ public class SmsProviderService implements ISmsProviderService {
     }
 
     @Override
-    public List<SmsMtMessageDeliver> doPullStatusReport(SmsPassageAccess access) {
+    public List<SmsMtMessageDeliver> pullMtReport(SmsPassageAccess access) {
         try {
             return httpResolver.deliver(access);
         } catch (Exception e) {
@@ -265,7 +263,7 @@ public class SmsProviderService implements ISmsProviderService {
     }
 
     @Override
-    public List<SmsMoMessageReceive> doMoReport(SmsPassageAccess access, JSONObject report) {
+    public List<SmsMoMessageReceive> receiveMoReport(SmsPassageAccess access, JSONObject report) {
         try {
             return httpResolver.mo(access, report);
         } catch (Exception e) {
@@ -276,7 +274,7 @@ public class SmsProviderService implements ISmsProviderService {
     }
 
     @Override
-    public List<SmsMoMessageReceive> doPullMoReport(SmsPassageAccess access) {
+    public List<SmsMoMessageReceive> pullMoReport(SmsPassageAccess access) {
         try {
             return httpResolver.mo(access);
         } catch (Exception e) {
@@ -293,13 +291,13 @@ public class SmsProviderService implements ISmsProviderService {
      * @return
      */
     private static RateLimiter getRateLimiter(Integer passageId, Integer speed) {
-        RateLimiter limiter = SmsProxyManageService.GLOBAL_RATE_LIMITERS.get(passageId);
+        RateLimiter limiter = SmsProxyManagerTemplate.GLOBAL_RATE_LIMITERS.get(passageId);
         if (limiter == null) {
             ReentrantLock reentrantLock = new ReentrantLock();
             reentrantLock.tryLock();
             try {
-                limiter = RateLimiter.create((speed == null || speed == 0) ? SmsProxyManageService.DEFAULT_LIMIT_SPEED : speed);
-                SmsProxyManageService.GLOBAL_RATE_LIMITERS.put(passageId, limiter);
+                limiter = RateLimiter.create((speed == null || speed == 0) ? SmsProxyManagerTemplate.DEFAULT_LIMIT_SPEED : speed);
+                SmsProxyManagerTemplate.GLOBAL_RATE_LIMITERS.put(passageId, limiter);
             } finally {
                 reentrantLock.unlock();
             }

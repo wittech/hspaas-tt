@@ -2,7 +2,7 @@
 <!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
 <generatorConfiguration>
 	<classPathEntry
-		location="E:\\repository\\mysql\\mysql-connector-java\\5.1.38\\mysql-connector-java-5.1.38.jar" />
+		location="D:\\repository\\mysql\\mysql-connector-java\\5.1.40\\mysql-connector-java-5.1.40.jar" />
 
 	<context id="HspaasTables" defaultModelType="conditional"
 		targetRuntime="MyBatis3">
@@ -126,7 +126,14 @@
 		
 		-->
 		
-		<table tableName="hspaas_user_balance_log" domainObjectName="UserBalanceLog"
+		<!-- <table tableName="hspaas_user_balance_log" domainObjectName="UserBalanceLog"
+			enableCountByExample="false" enableUpdateByExample="false"
+			enableDeleteByExample="false" enableSelectByExample="false"
+			selectByExampleQueryId="false">
+			<generatedKey column="id" sqlStatement="Mysql" identity="true" />
+		</table> -->
+		
+		<table tableName="hspaas_user_mms_config" domainObjectName="UserMmsConfig"
 			enableCountByExample="false" enableUpdateByExample="false"
 			enableDeleteByExample="false" enableSelectByExample="false"
 			selectByExampleQueryId="false">

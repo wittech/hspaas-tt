@@ -16,74 +16,73 @@ import com.huashi.sms.record.service.ISmsMtDeliverService;
 
 public class PassageStatusReportPullTask implements Runnable {
 
-	// 默认线程休眠20秒
-	private static final int SLEEP_TIME = 20 * 1000;
-	// 自定义间隔时间
-	private static final String INTERVAL_KEY = "interval";
+    // 默认线程休眠20秒
+    private static final int     SLEEP_TIME   = 20 * 1000;
+    // 自定义间隔时间
+    private static final String  INTERVAL_KEY = "interval";
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger               logger       = LoggerFactory.getLogger(getClass());
 
-	private SmsPassageAccess smsPassageAccess;
-	private ISmsMtDeliverService smsMtDeliverService;
-	private ISmsProviderService smsProviderService;
+    private SmsPassageAccess     smsPassageAccess;
+    private ISmsMtDeliverService smsMtDeliverService;
+    private ISmsProviderService  smsProviderService;
 
-	public PassageStatusReportPullTask(SmsPassageAccess smsPassageAccess, ISmsMtDeliverService smsMtDeliverService,
-			ISmsProviderService smsProviderService) {
-		this.smsPassageAccess = smsPassageAccess;
-		this.smsMtDeliverService = smsMtDeliverService;
-		this.smsProviderService = smsProviderService;
-	}
+    public PassageStatusReportPullTask(SmsPassageAccess smsPassageAccess, ISmsMtDeliverService smsMtDeliverService,
+                                       ISmsProviderService smsProviderService) {
+        this.smsPassageAccess = smsPassageAccess;
+        this.smsMtDeliverService = smsMtDeliverService;
+        this.smsProviderService = smsProviderService;
+    }
 
-	@Override
+    @Override
     public void run() {
-		while (true) {
-			try {
-				List<SmsMtMessageDeliver> list = smsProviderService.doPullStatusReport(smsPassageAccess);
-				if (CollectionUtils.isNotEmpty(list)) {
-					smsMtDeliverService.doFinishDeliver(list);
-					logger.info("通道轮训状态报告回执信息共处理{}条", list.size());
-				} else {
-//					logger.info("通道轮训状态报告回执信息无数据");
-//					continue;
-				}
+        while (true) {
+            try {
+                List<SmsMtMessageDeliver> list = smsProviderService.pullMtReport(smsPassageAccess);
+                if (CollectionUtils.isNotEmpty(list)) {
+                    smsMtDeliverService.doFinishDeliver(list);
+                    logger.info("通道轮训状态报告回执信息共处理{}条", list.size());
+                } else {
+                    // logger.info("通道轮训状态报告回执信息无数据");
+                    // continue;
+                }
 
-				Thread.sleep(getSleepTime(smsPassageAccess));
+                Thread.sleep(getSleepTime(smsPassageAccess));
 
-			} catch (Exception e) {
-				logger.warn("通道解析间隔时间失败，采用默认休眠轮训时间 : {} ms", SLEEP_TIME , e);
-			}
-		}
-	}
+            } catch (Exception e) {
+                logger.warn("通道解析间隔时间失败，采用默认休眠轮训时间 : {} ms", SLEEP_TIME, e);
+            }
+        }
+    }
 
-	/**
-	 * 
-	 * TODO 获取间隔睡眠时间
-	 * 
-	 * @param smsPassageAccess
-	 * @return
-	 */
-	private int getSleepTime(SmsPassageAccess smsPassageAccess) {
-		if (smsPassageAccess == null || StringUtils.isEmpty(smsPassageAccess.getParams())) {
+    /**
+     * TODO 获取间隔睡眠时间
+     * 
+     * @param smsPassageAccess
+     * @return
+     */
+    private int getSleepTime(SmsPassageAccess smsPassageAccess) {
+        if (smsPassageAccess == null || StringUtils.isEmpty(smsPassageAccess.getParams())) {
             {
                 return SLEEP_TIME;
             }
         }
 
-		try {
-			JSONObject jsonObject = JSON.parseObject(smsPassageAccess.getParams());
-			String str = jsonObject.getString(INTERVAL_KEY);
-			if (StringUtils.isEmpty(str)) {
+        try {
+            JSONObject jsonObject = JSON.parseObject(smsPassageAccess.getParams());
+            String str = jsonObject.getString(INTERVAL_KEY);
+            if (StringUtils.isEmpty(str)) {
                 {
                     return SLEEP_TIME;
                 }
             }
 
-			return Integer.parseInt(str);
+            return Integer.parseInt(str);
 
-		} catch (Exception e) {
-			logger.warn("通道解析间隔时间失败", e);
-			return SLEEP_TIME;
-		}
-	}
+        } catch (Exception e) {
+            logger.warn("通道解析间隔时间失败", e);
+            return SLEEP_TIME;
+        }
+    }
 
 }

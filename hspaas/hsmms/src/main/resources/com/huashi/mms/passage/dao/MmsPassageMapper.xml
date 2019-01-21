@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huashi.mms.passage.dao.MmsPassageMapper">
+	<resultMap id="BaseResultMap" type="com.huashi.mms.passage.domain.MmsPassage">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<result column="priority" property="priority" jdbcType="TINYINT" />
+		<result column="status" property="status" jdbcType="TINYINT" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="access_code" property="accessCode" jdbcType="VARCHAR" />
+		<result column="account" property="account" jdbcType="VARCHAR" />
+		<result column="pay_type" property="payType" jdbcType="TINYINT" />
+		<result column="balance" property="balance" jdbcType="INTEGER" />
+		<result column="mobile_size" property="mobileSize" jdbcType="INTEGER" />
+		<result column="packets_size" property="packetsSize" jdbcType="INTEGER" />
+		<result column="connection_size" property="connectionSize"
+			jdbcType="INTEGER" />
+		<result column="read_timeout" property="readTimeout" jdbcType="INTEGER" />
+		<result column="ext_number" property="extNumber" jdbcType="INTEGER" />
+		<result column="born_term" property="bornTerm" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, name, code, cmcp, priority, status, remark,
+		access_code, account,
+		pay_type, balance,
+		mobile_size, packets_size,
+		connection_size, read_timeout, ext_number, born_term,
+		create_time,
+		update_time
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from
+		mms_passage
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.huashi.mms.passage.domain.MmsPassage">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage (name, code, cmcp,
+		priority, status, remark,
+		access_code, account, pay_type,
+		balance, mobile_size, packets_size,
+		connection_size, read_timeout, ext_number,
+		born_term, create_time,
+		update_time
+		)
+		values (#{name,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{cmcp,jdbcType=INTEGER},
+		#{priority,jdbcType=TINYINT}, #{status,jdbcType=TINYINT},
+		#{remark,jdbcType=VARCHAR},
+		#{accessCode,jdbcType=VARCHAR},
+		#{account,jdbcType=VARCHAR},
+		#{payType,jdbcType=TINYINT},
+		#{balance,jdbcType=INTEGER}, #{mobileSize,jdbcType=INTEGER},
+		#{packetsSize,jdbcType=INTEGER},
+		#{connectionSize,jdbcType=INTEGER},
+		#{readTimeout,jdbcType=INTEGER},
+		#{extNumber,jdbcType=INTEGER},
+		#{bornTerm,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.huashi.mms.passage.domain.MmsPassage">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null">
+				name,
+			</if>
+			<if test="code != null">
+				code,
+			</if>
+			<if test="cmcp != null">
+				cmcp,
+			</if>
+			<if test="priority != null">
+				priority,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="accessCode != null">
+				access_code,
+			</if>
+			<if test="account != null">
+				account,
+			</if>
+			<if test="payType != null">
+				pay_type,
+			</if>
+			<if test="balance != null">
+				balance,
+			</if>
+			<if test="mobileSize != null">
+				mobile_size,
+			</if>
+			<if test="packetsSize != null">
+				packets_size,
+			</if>
+			<if test="connectionSize != null">
+				connection_size,
+			</if>
+			<if test="readTimeout != null">
+				read_timeout,
+			</if>
+			<if test="extNumber != null">
+				ext_number,
+			</if>
+			<if test="bornTerm != null">
+				born_term,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				#{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="priority != null">
+				#{priority,jdbcType=TINYINT},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="accessCode != null">
+				#{accessCode,jdbcType=VARCHAR},
+			</if>
+			<if test="account != null">
+				#{account,jdbcType=VARCHAR},
+			</if>
+			<if test="payType != null">
+				#{payType,jdbcType=TINYINT},
+			</if>
+			<if test="balance != null">
+				#{balance,jdbcType=INTEGER},
+			</if>
+			<if test="mobileSize != null">
+				#{mobileSize,jdbcType=INTEGER},
+			</if>
+			<if test="packetsSize != null">
+				#{packetsSize,jdbcType=INTEGER},
+			</if>
+			<if test="connectionSize != null">
+				#{connectionSize,jdbcType=INTEGER},
+			</if>
+			<if test="readTimeout != null">
+				#{readTimeout,jdbcType=INTEGER},
+			</if>
+			<if test="extNumber != null">
+				#{extNumber,jdbcType=INTEGER},
+			</if>
+			<if test="bornTerm != null">
+				#{bornTerm,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.passage.domain.MmsPassage">
+		update mms_passage
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				code = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="cmcp != null">
+				cmcp = #{cmcp,jdbcType=INTEGER},
+			</if>
+			<if test="priority != null">
+				priority = #{priority,jdbcType=TINYINT},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="accessCode != null">
+				access_code = #{accessCode,jdbcType=VARCHAR},
+			</if>
+			<if test="account != null">
+				account = #{account,jdbcType=VARCHAR},
+			</if>
+			<if test="payType != null">
+				pay_type = #{payType,jdbcType=TINYINT},
+			</if>
+			<if test="balance != null">
+				balance = #{balance,jdbcType=INTEGER},
+			</if>
+			<if test="mobileSize != null">
+				mobile_size = #{mobileSize,jdbcType=INTEGER},
+			</if>
+			<if test="packetsSize != null">
+				packets_size = #{packetsSize,jdbcType=INTEGER},
+			</if>
+			<if test="connectionSize != null">
+				connection_size = #{connectionSize,jdbcType=INTEGER},
+			</if>
+			<if test="readTimeout != null">
+				read_timeout = #{readTimeout,jdbcType=INTEGER},
+			</if>
+			<if test="extNumber != null">
+				ext_number = #{extNumber,jdbcType=INTEGER},
+			</if>
+			<if test="bornTerm != null">
+				born_term = #{bornTerm,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.passage.domain.MmsPassage">
+		update mms_passage
+		set name = #{name,jdbcType=VARCHAR},
+		code = #{code,jdbcType=VARCHAR},
+		cmcp = #{cmcp,jdbcType=INTEGER},
+		priority =
+		#{priority,jdbcType=TINYINT},
+		status = #{status,jdbcType=TINYINT},
+		remark = #{remark,jdbcType=VARCHAR},
+		access_code =
+		#{accessCode,jdbcType=VARCHAR},
+		account = #{account,jdbcType=VARCHAR},
+		pay_type = #{payType,jdbcType=TINYINT},
+		balance =
+		#{balance,jdbcType=INTEGER},
+		mobile_size =
+		#{mobileSize,jdbcType=INTEGER},
+		packets_size =
+		#{packetsSize,jdbcType=INTEGER},
+		connection_size =
+		#{connectionSize,jdbcType=INTEGER},
+		read_timeout =
+		#{readTimeout,jdbcType=INTEGER},
+		ext_number =
+		#{extNumber,jdbcType=INTEGER},
+		born_term =
+		#{bornTerm,jdbcType=INTEGER},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select * from mms_passage
+		<where>
+			<if test="keyword != null and keyword != ''">
+				name like '%${keyword}%'
+			</if>
+		</where>
+		order by status asc, id desc limit #{start},#{end}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(id) from mms_passage
+		<where>
+			<if test="keyword != null and keyword != ''">
+				name like '%${keyword}%'
+			</if>
+		</where>
+	</select>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage
+		where status = 0 order by id desc
+	</select>
+
+	<select id="selectByGroupId" resultMap="BaseResultMap">
+		select
+		passage.id,
+		passage.name, passage.code, passage.cmcp,
+		passage.status,
+		passage.remark,
+		passage.access_code,
+		passage.account,
+		passage.pay_type,
+		passage.balance,
+		passage.packets_size,
+		passage.mobile_size,
+		passage.connection_size,
+		passage.read_timeout,
+		passage.born_term,
+		passage.create_time,
+		passage.modify_time,
+		detail.priority
+		from
+		mms_passage passage
+		join mms_passage_group_detail
+		detail on passage.id =
+		detail.passage_id
+		join mms_passage_group gp on
+		detail.group_id = gp.id
+		where gp.id =
+		#{groupId}
+		order by detail.priority
+		asc
+	</select>
+
+	<select id="getByCmcp" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage where status = 0 and (cmcp = #{0} or cmcp = 4)
+	</select>
+
+	<select id="selectAvaiablePassages" resultMap="BaseResultMap">
+		select distinct
+		sp.id,sp.name,sp.cmcp,spgd.priority from mms_passage sp
+		inner join
+		mms_passage_group_detail spgd on sp.id=spgd.passage_id
+		where
+		spgd.group_id=#{groupId,jdbcType=INTEGER}
+		and
+		(sp.cmcp=#{cmcp,jdbcType=INTEGER} or sp.cmcp=4)
+		and
+		spgd.route_type=#{routeType,jdbcType=INTEGER}
+		and
+		sp.status=#{status,jdbcType=INTEGER}
+		order by spgd.priority asc
+	</select>
+
+	<select id="findByCmcpOrAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage where status = 0 and type = 0 and (cmcp = #{0} or
+		cmcp = 4)
+	</select>
+
+	<select id="getByProvinceAndCmcp" resultMap="BaseResultMap">
+		select distinct s.*
+		from mms_passage s,mms_passage_province p
+		where s.id = p.passage_id and
+		(s.cmcp = #{cmcp} or s.cmcp = 4) and
+		(p.province_code = #{provinceCode}
+		or p.province_code = 0)
+		order by s.id desc
+	</select>
+
+	<select id="getPassageByCode" resultMap="BaseResultMap">
+		select s.id, s.status,
+		s.create_time from mms_passage s where s.code = #{code} limit 1
+	</select>
+
+	<select id="selectAvaiableCodes" resultType="java.lang.String">
+		select distinct(code) from mms_passage passage
+		<!-- where status = 0 -->
+	</select>
+</mapper>

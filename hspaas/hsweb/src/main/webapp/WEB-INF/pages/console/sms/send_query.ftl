@@ -35,39 +35,16 @@
                         <div class="layui-input-inline">
                             <input type="text" id="mobile" name="mobile" placeholder="手机号码" autocomplete="off" class="layui-input-search">
                         </div>
+                        <div class="layui-input-inline">
+                            <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" lay-verify="date" value="${(startDate)!}">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" lay-verify="date" value="${(endDate)!}">
+                        </div>
                         <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
-                        <a href="javascript:;" id="openSearch" class="layui-btn layui-btn-sm layui-btn-primary">更多条件查询</a>
                     </div>
                 </div>
             </blockquote>
-            <div class="layui-advance-search">
-                    <div class="layui-form-search">
-                        <div class="layui-inline">
-                            <label class="layui-search-label">开始日期</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" value="${(startDate)!}">
-                            </div>
-                        </div>
-                        <div class="layui-inline">
-                            <label class="layui-search-label">截止日期</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" value="${(endDate)!}">
-                            </div>
-                        </div>
-                        <#--
-                        <div class="layui-inline">
-                            <label class="layui-search-label">发送状态</label>
-                            <div class="layui-input-inline layui-select-search">
-                                <select name="status" lay-filter="status">
-                                    <option value="0">请选择状态</option>
-                                    <option value="1">发送成功</option>
-                                    <option value="2">发送失败</option>
-                                </select>
-                            </div>
-                        </div>
-                        -->
-                    </div>
-            </div>
             </form>
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">

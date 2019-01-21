@@ -43,7 +43,7 @@ import net.sf.json.JSONObject;
  * @created_at 2016年8月25日下午4:15:11
  */
 @ControllerBind(controllerKey = "/sms/passage")
-@ViewMenu(code = MenuCode.MENU_CODE_2001001)
+@ViewMenu(code = MenuCode.MENU_CODE_2003001)
 public class PassageController extends BaseController {
 
     @BY_NAME

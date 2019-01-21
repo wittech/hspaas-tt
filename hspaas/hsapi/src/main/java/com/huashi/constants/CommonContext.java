@@ -175,12 +175,8 @@ public class CommonContext {
      * @date 2016年9月5日 下午9:57:52
      */
     public enum CallbackUrlType {
-
-        /**
-         * 短信状态报告
-         */
-        SMS_STATUS(1, "短信状态报告"), SMS_MO(2, "短信上行报告"), FLUX_CHARGE_RESULT(3, "流量充值结果"),
-        VOICE_SEND_STATUS(4, "语音验证码发送报告");
+        SMS_STATUS(1, "短信状态报告"), SMS_MO(2, "短信上行报告"), MMS_STATUS(3, "彩信状态报告"), MMS_MO(4, "彩信上行报告"),
+        FLUX_CHARGE_RESULT(5, "流量充值结果"), VOICE_SEND_STATUS(6, "语音验证码发送报告");
 
         private int    code;
         private String name;
@@ -222,15 +218,21 @@ public class CommonContext {
          */
         DATA_SEND(1, "数据发送"),
 
-        STATUS_RECEIPT_WITH_PUSH(2, "状态报告网关推送"),
+        MT_STATUS_RECEIPT_WITH_PUSH(2, "状态报告网关推送"),
 
-        STATUS_RECEIPT_WITH_SELF_GET(3, "状态回执自取"),
+        MT_STATUS_RECEIPT_WITH_SELF_GET(3, "状态回执自取"),
 
-        SMS_MO_REPORT_WITH_PUSH(4, "短信上行推送"),
+        MO_REPORT_WITH_PUSH(4, "上行推送"),
 
-        SMS_MO_REPORT_WITH_SELF_GET(5, "短信上行自取"),
+        MO_REPORT_WITH_SELF_GET(5, "上行自取"),
 
-        PASSAGE_BALANCE_GET(6, "通道余额查询");
+        MODEL_REPORT_SUBMIT(6, "模板报备"),
+
+        MODEL_REPORT_CALLBACK_WITH_PUSH(7, "模板回执推送"),
+
+        MODEL_REPORT_CALLBACK_WITH_SELF_GET(8, "模板回执自取"),
+
+        PASSAGE_BALANCE_GET(100, "通道余额查询");
 
         private int    code;
         private String name;

@@ -74,7 +74,7 @@ public class RabbitMessageQueueManager {
      * @param channelAwareMessageListener 监听相关
      */
     public void createQueue(String queueName, boolean isDirectProtocol,
-                            ChannelAwareMessageListener channelAwareMessageListener) {
+                            ChannelAwareMessageListener channelAwareMessageListener) throws Exception {
         try {
             DirectExchange exchange = new DirectExchange(RabbitConstant.EXCHANGE_SMS, true, false);
             rabbitAdmin.declareExchange(exchange);
@@ -100,6 +100,7 @@ public class RabbitMessageQueueManager {
 
         } catch (Exception e) {
             logger.error("创建队列：{}失败", queueName, e);
+            throw e;
         }
     }
 
@@ -108,8 +109,8 @@ public class RabbitMessageQueueManager {
      * 
      * @param queueName
      */
-    public void removeQueue(String queueName) {
-        rabbitAdmin.deleteQueue(queueName);
+    public boolean removeQueue(String queueName) {
+        return rabbitAdmin.deleteQueue(queueName);
     }
 
     /**

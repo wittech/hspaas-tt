@@ -18,9 +18,11 @@
 		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
 	</resultMap>
 	<sql id="Base_Column_List">
-		id, passage_id, protocol, call_type, url, params_definition, params,
+		id, passage_id, protocol, call_type, url,
+		params_definition, params,
 		result_format,
-		success_code, position, create_time
+		success_code, position,
+		create_time
 	</sql>
 	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
 		parameterType="java.lang.Integer">
@@ -30,7 +32,8 @@
 		where id = #{id,jdbcType=INTEGER}
 	</select>
 	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-		delete from sms_passage_parameter
+		delete from
+		sms_passage_parameter
 		where id = #{id,jdbcType=INTEGER}
 	</delete>
 	<insert id="insert" parameterType="com.huashi.sms.passage.domain.SmsPassageParameter">
@@ -42,10 +45,13 @@
 		url, params_definition, params,
 		result_format, success_code, position,
 		create_time)
-		values (#{passageId,jdbcType=INTEGER}, #{protocol,jdbcType=VARCHAR},
+		values (#{passageId,jdbcType=INTEGER},
+		#{protocol,jdbcType=VARCHAR},
 		#{callType,jdbcType=TINYINT},
-		#{url,jdbcType=VARCHAR}, #{paramsDefinition,jdbcType=VARCHAR}, #{params,jdbcType=VARCHAR},
-		#{resultFormat,jdbcType=VARCHAR}, #{successCode,jdbcType=VARCHAR},
+		#{url,jdbcType=VARCHAR}, #{paramsDefinition,jdbcType=VARCHAR},
+		#{params,jdbcType=VARCHAR},
+		#{resultFormat,jdbcType=VARCHAR},
+		#{successCode,jdbcType=VARCHAR},
 		#{position,jdbcType=VARCHAR},
 		#{createTime,jdbcType=TIMESTAMP})
 	</insert>
@@ -157,17 +163,24 @@
 		where id = #{id,jdbcType=INTEGER}
 	</update>
 	<update id="updateByPrimaryKey" parameterType="com.huashi.sms.passage.domain.SmsPassageParameter">
-		update sms_passage_parameter
+		update
+		sms_passage_parameter
 		set passage_id = #{passageId,jdbcType=INTEGER},
 		protocol = #{protocol,jdbcType=VARCHAR},
-		call_type = #{callType,jdbcType=TINYINT},
+		call_type =
+		#{callType,jdbcType=TINYINT},
 		url = #{url,jdbcType=VARCHAR},
 		params_definition = #{paramsDefinition,jdbcType=VARCHAR},
-		params = #{params,jdbcType=VARCHAR},
-		result_format = #{resultFormat,jdbcType=VARCHAR},
-		success_code = #{successCode,jdbcType=VARCHAR},
-		position = #{position,jdbcType=VARCHAR},
-		create_time = #{createTime,jdbcType=TIMESTAMP}
+		params =
+		#{params,jdbcType=VARCHAR},
+		result_format =
+		#{resultFormat,jdbcType=VARCHAR},
+		success_code =
+		#{successCode,jdbcType=VARCHAR},
+		position =
+		#{position,jdbcType=VARCHAR},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP}
 		where id = #{id,jdbcType=INTEGER}
 	</update>
 
@@ -189,12 +202,35 @@
 		#{callType}
 		order by id desc limit 1
 	</select>
-	
+
 	<select id="selectSendProtocol" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
-		from sms_passage_parameter where passage_id = #{passageId} and call_type = 1
+		from sms_passage_parameter where passage_id = #{passageId} and
+		call_type = 1
 		order by id desc limit 1
 	</select>
-	
+
+	<insert id="batchInsert" parameterType="List">
+		insert into sms_passage_parameter (passage_id, protocol, call_type,
+		url, params_definition, params,
+		result_format, success_code, position,
+		create_time)
+		values
+
+		<foreach collection="list" item="element" index="index"
+			separator=",">
+			(#{element.passageId,jdbcType=INTEGER},
+			#{element.protocol,jdbcType=VARCHAR},
+			#{element.callType,jdbcType=TINYINT},
+			#{element.url,jdbcType=VARCHAR},
+			#{element.paramsDefinition,jdbcType=VARCHAR},
+			#{element.params,jdbcType=VARCHAR},
+			#{element.resultFormat,jdbcType=VARCHAR},
+			#{element.successCode,jdbcType=VARCHAR},
+			#{element.position,jdbcType=VARCHAR},
+			#{element.createTime,jdbcType=TIMESTAMP})
+		</foreach>
+	</insert>
+
 </mapper>

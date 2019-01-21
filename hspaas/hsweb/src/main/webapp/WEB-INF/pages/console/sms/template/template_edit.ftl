@@ -69,7 +69,7 @@
     };
 
 	layui.config({
-	    base: '${rc.contextPath}/static/plugins/layui2/lib/'
+	    base: '${rc.contextPath}/static/plugins/layui2/lay/modules/'
 	}).use(['form', 'element'], function(){
 		var $ = layui.$
                 ,admin = layui.admin
