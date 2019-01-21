@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.common.util.DateUtil;
 import com.huashi.exchanger.domain.ProviderSendResponse;
-import com.huashi.exchanger.resolver.http.HttpClientUtil;
+import com.huashi.exchanger.resolver.http.HttpClientManager;
 import com.huashi.exchanger.resolver.http.custom.AbstractPassageResolver;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
@@ -50,7 +50,7 @@ public class CmccopenPassageResolver extends AbstractPassageResolver {
 					.getParams());
 
 			// 转换参数，并调用网关接口，接收返回结果
-			String result = HttpClientUtil.postJson(parameter.getUrl(), sendRequestHeader(tparameter),
+			String result = HttpClientManager.postJson(parameter.getUrl(), sendRequestHeader(tparameter),
 					sendRequestParameter(tparameter, mobile, content, extNumber,
 					parameter.getSmsTemplateId(), 
 					buildVariableParamsReport(parameter.getVariableParamNames(), parameter.getVariableParamValues())));
@@ -327,9 +327,9 @@ public class CmccopenPassageResolver extends AbstractPassageResolver {
 	}
 
 	@Override
-	public Object balance(Object param) {
-		return 0;
-	}
+    public Double balance(TParameter tparameter, String url, Integer passageId) {
+        return 0d;
+    }
 
 	@Override
 	public String code() {

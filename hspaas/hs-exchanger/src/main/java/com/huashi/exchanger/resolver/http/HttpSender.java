@@ -29,7 +29,7 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
   * @date 2017年12月28日 上午10:00:17
  */
 @Component
-public class HttpResolver{
+public class HttpSender{
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     
@@ -52,7 +52,7 @@ public class HttpResolver{
         setNecesaryMessageNode(tparameter, mobile, content);
 
         // 转换参数，并调用网关接口，接收返回结果
-        String result = HttpClientUtil.post(parameter.getUrl(), tparameter);
+        String result = HttpClientManager.post(parameter.getUrl(), tparameter);
 
         logger.info("发送接口返回值：{}", result);
 

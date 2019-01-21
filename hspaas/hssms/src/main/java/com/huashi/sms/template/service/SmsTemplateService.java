@@ -247,7 +247,7 @@ public class SmsTemplateService implements ISmsTemplateService {
         }
         template.setCreateTime(new Date());
 
-        template.setStatus(ApproveStatus.WAITING.getValue());
+        template.setStatus(ApproveStatus.SUCCESS.getValue());
         // 融合平台判断 后台添加 状态默认
         // if (AppType.WEB.getCode() == template.getAppType()) {
         // template.setStatus(ApproveStatus.WAITING.getValue());
@@ -277,7 +277,7 @@ public class SmsTemplateService implements ISmsTemplateService {
         }
 
         if (AppType.WEB.getCode() == template.getAppType()) {
-            template.setStatus(ApproveStatus.WAITING.getValue());
+            template.setStatus(ApproveStatus.SUCCESS.getValue());
         }
 
         Set<String> set = new HashSet<>();

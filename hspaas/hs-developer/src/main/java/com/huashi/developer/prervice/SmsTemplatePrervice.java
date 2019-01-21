@@ -239,15 +239,15 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             String timestamp = paramsMap.get("timestamp")[0];
             String sign = paramsMap.get("sign")[0];
 
-            String finalContext = context;
-            if (StringUtils.isNotEmpty(modeSign)) {
-                // 后置签名
-                if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
-                    finalContext = context + "【" + modeSign + "】";
-                } else {
-                    finalContext = "【" + modeSign + "】" + context;
-                }
-            }
+//            String finalContext = context;
+//            if (StringUtils.isNotEmpty(modeSign)) {
+//                // 后置签名
+//                if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
+//                    finalContext = context + "【" + modeSign + "】";
+//                } else {
+//                    finalContext = "【" + modeSign + "】" + context;
+//                }
+//            }
 
             // 校验数据
             verify(appId, title, modeSign, context, location, type, timestamp, sign);
@@ -255,7 +255,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             MessageTemplate template = new MessageTemplate();
             template.setUserId(appId);
             template.setRemark(title);
-            template.setContent(finalContext);
+            template.setContent(context);
             template.setRegexValue(modeSign);
             template.setNoticeMode(type);
             template.setMobile(location);
@@ -307,15 +307,15 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             String timestamp = paramsMap.get("timestamp")[0];
             String sign = paramsMap.get("sign")[0];
 
-            String finalContext = context;
-            if (StringUtils.isNotEmpty(modeSign)) {
-                // 后置签名
-                if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
-                    finalContext = context + "【" + modeSign + "】";
-                } else {
-                    finalContext = "【" + modeSign + "】" + context;
-                }
-            }
+//            String finalContext = context;
+//            if (StringUtils.isNotEmpty(modeSign)) {
+//                // 后置签名
+//                if (StringUtils.isNotEmpty(location) && "0".equals(location)) {
+//                    finalContext = context + "【" + modeSign + "】";
+//                } else {
+//                    finalContext = "【" + modeSign + "】" + context;
+//                }
+//            }
 
             // 校验数据
             verify(appId, modeId, title, modeSign, context, location, timestamp, sign);
@@ -324,7 +324,7 @@ public class SmsTemplatePrervice extends AbstractPrervice {
             template.setId(Long.valueOf(modeId));
             template.setUserId(appId);
             template.setRemark(title);
-            template.setContent(finalContext);
+            template.setContent(context);
             template.setRegexValue(modeSign);
             template.setMobile(location);
             boolean isOk = smsTemplateService.update(template);

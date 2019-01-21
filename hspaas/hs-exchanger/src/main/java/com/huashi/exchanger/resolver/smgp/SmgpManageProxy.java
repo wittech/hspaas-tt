@@ -7,24 +7,24 @@ import com.huawei.smproxy.SMGPSMProxy;
 
 public class SmgpManageProxy extends SMGPSMProxy {
 
-	private Integer passageId;
-	private SmgpProxySender smgpProxySender;
+    private Integer         passageId;
+    private SmgpProxySender smgpProxySender;
 
-	public SmgpManageProxy(SmgpProxySender smgpProxySender, Integer passageId, Args args) {
-		super(args);
-		this.passageId = passageId;
-		this.smgpProxySender = smgpProxySender;
-	}
+    public SmgpManageProxy(SmgpProxySender smgpProxySender, Integer passageId, Args args) {
+        super(args);
+        this.passageId = passageId;
+        this.smgpProxySender = smgpProxySender;
+    }
 
-	@Override
-	public SMGPMessage onDeliver(SMGPDeliverMessage msg) {
-		smgpProxySender.doProcessDeliverMessage(msg);
-		return super.onDeliver(msg);
-	}
+    @Override
+    public SMGPMessage onDeliver(SMGPDeliverMessage msg) {
+        smgpProxySender.doProcessDeliverMessage(msg);
+        return super.onDeliver(msg);
+    }
 
-	@Override
-	public void onTerminate() {
-		smgpProxySender.onTerminate(passageId);
-	}
+    @Override
+    public void onTerminate() {
+        smgpProxySender.onTerminate(passageId);
+    }
 
 }

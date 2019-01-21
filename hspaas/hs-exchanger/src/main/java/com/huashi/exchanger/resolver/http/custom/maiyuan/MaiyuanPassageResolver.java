@@ -20,7 +20,7 @@ import org.xml.sax.InputSource;
 import com.huashi.common.util.DateUtil;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.exchanger.domain.ProviderSendResponse;
-import com.huashi.exchanger.resolver.http.HttpClientUtil;
+import com.huashi.exchanger.resolver.http.HttpClientManager;
 import com.huashi.exchanger.resolver.http.custom.AbstractPassageResolver;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
@@ -53,8 +53,8 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver{
 			TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
 			
 			// 转换参数，并调用网关接口，接收返回结果
-			String result = HttpClientUtil.post(parameter.getUrl(), null, request(tparameter, mobile, content, extNumber),
-					HttpClientUtil.DEFAULT_MAX_TOTAL, HttpClientUtil.DEFAULT_MAX_PER_ROUTE,
+			String result = HttpClientManager.post(parameter.getUrl(), null, request(tparameter, mobile, content, extNumber),
+					HttpClientManager.DEFAULT_MAX_TOTAL, HttpClientManager.DEFAULT_MAX_PER_ROUTE,
 					60000);
 			
 //			parameter.getReadTimeout()
@@ -280,9 +280,9 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public Object balance(Object param) {
-		return 0;
-	}
+    public Double balance(TParameter tparameter, String url, Integer passageId) {
+        return 0d;
+    }
 
 	@Override
 	public String code() {
@@ -290,9 +290,9 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public List<SmsMtMessageDeliver> mtPullDeliver(TParameter tparameter, String url, String successCode) {
+	public List<SmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
 		try {
-			String result = HttpClientUtil.post(url, request(tparameter));
+			String result = HttpClientManager.post(url, request(tparameter));
 			
 			// 解析返回结果并返回
 			return deliverResponse(result, successCode);
@@ -303,10 +303,10 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public List<SmsMoMessageReceive> moPullReceive(TParameter tparameter, String url, Integer passageId) {
+	public List<SmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
 		
 		try {
-			String result = HttpClientUtil.post(url, request(tparameter));
+			String result = HttpClientManager.post(url, request(tparameter));
 			
 			// 解析返回结果并返回
 			return moResponse(result, passageId);

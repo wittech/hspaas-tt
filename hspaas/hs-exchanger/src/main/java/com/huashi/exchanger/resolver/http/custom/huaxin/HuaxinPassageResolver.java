@@ -21,7 +21,7 @@ import org.xml.sax.InputSource;
 import com.huashi.common.util.DateUtil;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.exchanger.domain.ProviderSendResponse;
-import com.huashi.exchanger.resolver.http.HttpClientUtil;
+import com.huashi.exchanger.resolver.http.HttpClientManager;
 import com.huashi.exchanger.resolver.http.custom.AbstractPassageResolver;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
@@ -54,7 +54,7 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 			TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
 			
 			// 转换参数，并调用网关接口，接收返回结果
-			String result = HttpClientUtil.post(parameter.getUrl(), request(tparameter, mobile, content, extNumber));
+			String result = HttpClientManager.post(parameter.getUrl(), request(tparameter, mobile, content, extNumber));
 			
 			// 解析返回结果并返回
 			return sendResponse(result, parameter.getSuccessCode());
@@ -285,9 +285,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public Object balance(Object param) {
-		return 0;
-	}
+    public Double balance(TParameter tparameter, String url, Integer passageId) {
+        return 0d;
+    }
 
 	@Override
 	public String code() {
@@ -295,9 +295,9 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public List<SmsMtMessageDeliver> mtPullDeliver(TParameter tparameter, String url, String successCode) {
+	public List<SmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
 		try {
-			String result = HttpClientUtil.post(url, request(tparameter));
+			String result = HttpClientManager.post(url, request(tparameter));
 			
 			// 解析返回结果并返回
 			return deliverResponse(result, successCode);
@@ -308,10 +308,10 @@ public class HuaxinPassageResolver extends AbstractPassageResolver{
 	}
 
 	@Override
-	public List<SmsMoMessageReceive> moPullReceive(TParameter tparameter, String url, Integer passageId) {
+	public List<SmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
 		
 		try {
-			String result = HttpClientUtil.post(url, request(tparameter));
+			String result = HttpClientManager.post(url, request(tparameter));
 			
 			// 解析返回结果并返回
 			return moResponse(result, passageId);
