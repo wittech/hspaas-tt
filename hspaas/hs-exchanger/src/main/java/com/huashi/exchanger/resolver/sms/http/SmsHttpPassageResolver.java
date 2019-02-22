@@ -8,7 +8,7 @@ import com.huashi.sms.passage.domain.SmsPassageParameter;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 
-public interface HttpPassageResolver {
+public interface SmsHttpPassageResolver {
 
     /**
      * TODO 发送短信（提交至通道商）

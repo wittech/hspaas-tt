@@ -29,7 +29,7 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
   * @date 2017年12月28日 上午10:00:17
  */
 @Component
-public class HttpSender{
+public class SmsHttpSender{
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     

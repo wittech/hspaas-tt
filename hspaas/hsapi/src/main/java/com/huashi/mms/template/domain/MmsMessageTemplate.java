@@ -1,63 +1,70 @@
 package com.huashi.mms.template.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.huashi.common.user.model.UserModel;
 
 public class MmsMessageTemplate {
 
-    private Long      id;
+    private Long                               id;
 
-    private Long      modelId;
+    private Long                               modelId;
 
-    private Integer   userId;
+    private Integer                            userId;
 
-    private Integer   status;
+    private Integer                            status;
 
-    private Byte      isRunning;
+    private Byte                               isRunning;
 
-    private Integer   appType;
+    private Integer                            appType;
 
-    private Integer   noticeMode;
+    private Integer                            noticeMode;
 
-    private String    mobile;
+    private String                             mobile;
 
-    private Integer   submitInterval;
+    private Integer                            submitInterval;
 
-    private Integer   limitTimes;
+    private Integer                            limitTimes;
 
-    private Integer   routeType;
+    private Integer                            routeType;
 
-    private Integer   priority;
+    private Integer                            priority;
 
-    private String    extNumber;
+    private String                             extNumber;
 
-    private Date      createTime;
+    private Date                               createTime;
 
-    private Date      updateTime;
+    private Date                               updateTime;
 
-    private Date      approveTime;
+    private Date                               approveTime;
 
-    private String    approveUser;
+    private String                             approveUser;
 
-    private String    approveDesc;
+    private String                             approveDesc;
 
-    private String    remark;
+    private String                             remark;
 
     /**
      * 用户信息
      */
-    private UserModel userModel;
+    private UserModel                          userModel;
 
     /**
      * 路由类型名称
      */
-    private String    routeTypeText;
+    private String                             routeTypeText;
 
     /**
      * 平台类型名称
      */
-    private String    apptypeText;
+    private String                             apptypeText;
+
+    /**
+     * 模板报文数据集合
+     */
+    private final List<MmsMessageTemplateBody> bodies = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -234,4 +241,9 @@ public class MmsMessageTemplate {
     public void setApptypeText(String apptypeText) {
         this.apptypeText = apptypeText;
     }
+
+    public List<MmsMessageTemplateBody> getBodies() {
+        return bodies;
+    }
+
 }

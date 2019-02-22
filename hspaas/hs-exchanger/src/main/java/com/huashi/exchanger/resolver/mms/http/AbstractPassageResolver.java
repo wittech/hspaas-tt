@@ -1,4 +1,4 @@
-package com.huashi.exchanger.resolver.sms.http;
+package com.huashi.exchanger.resolver.mms.http;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -6,57 +6,46 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.huashi.common.util.DateUtil;
-import com.huashi.exchanger.resolver.sms.http.SmsHttpPassageResolver;
 import com.huashi.exchanger.template.vo.TParameter;
-import com.huashi.sms.record.domain.SmsMoMessageReceive;
-import com.huashi.sms.record.domain.SmsMtMessageDeliver;
+import com.huashi.mms.record.domain.MmsMoMessageReceive;
+import com.huashi.mms.record.domain.MmsMtMessageDeliver;
 
 /**
  * TODO HTTP基础处理器
- *
+ * 
  * @author zhengying
  * @version V1.0
- * @date 2018年01月27日 下午10:07:37
+ * @date 2019年1月23日 下午5:54:07
  */
-public abstract class AbstractPassageResolver implements SmsHttpPassageResolver {
-
-    @Resource
-    private StringRedisTemplate                     stringRedisTemplate;
+public abstract class AbstractPassageResolver implements MmsHttpPassageResolver {
 
     /**
      * 通道简码对应的处理器实体类关系
      */
-    private static Map<String, SmsHttpPassageResolver> CODE_REFRENCE_BEANS             = new HashMap<>();
+    private static Map<String, MmsHttpPassageResolver> CODE_REFRENCE_BEANS           = new HashMap<>();
 
-    protected final Logger                          logger                          = LoggerFactory.getLogger(getClass());
-
-    /**
-     * 下行状态HTTP状态报告REDIS前置（主要用于状态回执报告中没有手机号码， 顾发送短信需要提前设置MSG_ID和MOBILE对应关系）
-     */
-    private static final String                     REDIS_MT_REPORT_HTTP_PRIFIX_KEY = "mt_http_map";
+    protected final Logger                          logger                        = LoggerFactory.getLogger(getClass());
 
     /**
      * 公共状态回执成功码
      */
-    public static final String                      COMMON_MT_STATUS_SUCCESS_CODE   = "DELIVRD";
+    public static final String                      COMMON_MT_STATUS_SUCCESS_CODE = "DELIVRD";
 
     /**
      * 多个手机号码分隔符
      */
-    protected static final String                   MULTI_MOBILES_SEPERATOR         = ",";
+    protected static final String                   MULTI_MOBILES_SEPERATOR       = ",";
 
     /**
      * 默认中文编码
      */
-    protected static final String                   DEFAULT_ENCODING                = "UTF-8";
+    protected static final String                   DEFAULT_ENCODING              = "UTF-8";
 
     /**
      * TODO 初始化通道简码对应的实体映射
@@ -64,7 +53,7 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
     @PostConstruct
     protected void loadCodeRefrenceBeans() {
         if (CODE_REFRENCE_BEANS.containsKey(code())) {
-            throw new RuntimeException("Passage's code[" + code() + "] is exists in current factory");
+            throw new RuntimeException("Mms passage's code[" + code() + "] is exists in current factory");
         }
 
         try {
@@ -81,10 +70,10 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
      * @param code 通道简码
      * @return
      */
-    public static SmsHttpPassageResolver getInstance(String code) {
-        SmsHttpPassageResolver instance = CODE_REFRENCE_BEANS.get(code);
+    public static MmsHttpPassageResolver getInstance(String code) {
+        MmsHttpPassageResolver instance = CODE_REFRENCE_BEANS.get(code);
         if (instance == null) {
-            throw new RuntimeException("Passage's custom code[" + code + "] can't find any reference");
+            throw new RuntimeException("Mms passage's custom code[" + code + "] can't find any reference");
         }
 
         return instance;
@@ -96,7 +85,7 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
      * @param report
      * @return
      */
-    public List<SmsMtMessageDeliver> mtDeliver(String report, String successCode) {
+    public List<MmsMtMessageDeliver> mtDeliver(String report, String successCode) {
         throw new UnsupportedOperationException("It needs implement by child class");
     }
 
@@ -108,7 +97,7 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
      * @param successCode
      * @return
      */
-    public List<SmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
+    public List<MmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
         throw new UnsupportedOperationException("It needs implement by child class");
     }
 
@@ -118,7 +107,7 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
      * @param report
      * @return
      */
-    public List<SmsMoMessageReceive> moReceive(String report, Integer passageId) {
+    public List<MmsMoMessageReceive> moReceive(String report, Integer passageId) {
         throw new UnsupportedOperationException("It needs implement by child class");
     }
 
@@ -130,7 +119,7 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
      * @param passageId
      * @return
      */
-    public List<SmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
+    public List<MmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
         throw new UnsupportedOperationException("It needs implement by child class");
     }
 
@@ -181,65 +170,6 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
             return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(ff.parse(dataNumber.toString()));
         } catch (Exception e) {
             return DateUtil.getNow();
-        }
-    }
-
-    /**
-     * TODO 获取HTTP通道发送 消息ID对应手机号码REDIS KEY
-     *
-     * @param msgId
-     * @return
-     */
-    private String getRedisMtMsgIdKey(String msgId) {
-        return String.format("%s:%s:%s", REDIS_MT_REPORT_HTTP_PRIFIX_KEY, code(), msgId);
-    }
-
-    /**
-     * TODO 设置发送报告MSG_ID和手机号码对应关系至REDIS
-     *
-     * @param msgId
-     * @param mobile
-     */
-    protected void setReportMsgIdWithMobile(String msgId, String mobile) {
-        try {
-            stringRedisTemplate.opsForValue().set(getRedisMtMsgIdKey(msgId), mobile);
-        } catch (Exception e) {
-            logger.error("Redis 设置发送状态MSG_ID: {} 和MOBILE : {} 对应关系失败", msgId, mobile, e);
-        }
-    }
-
-    /**
-     * TODO 获取发送报告MSG_ID和手机号码对应关系至REDIS
-     *
-     * @param msgId
-     * @return
-     */
-    protected String getReportMsgIdWithMobile(String msgId) {
-        try {
-            Object obj = stringRedisTemplate.opsForValue().get(getRedisMtMsgIdKey(msgId));
-            if (obj == null) {
-                logger.error("Redis 获取发送状态MSG_ID: {} 数据为空", msgId);
-                return null;
-            }
-
-            return obj.toString();
-        } catch (Exception e) {
-            logger.error("Redis 获取发送状态MSG_ID: {} 和MOBILE对应关系失败", msgId, e);
-            return null;
-        }
-    }
-
-    /**
-     * TODO 移除发送报告MSG_ID和手机号码对应关系至REDIS
-     *
-     * @param msgId
-     */
-    protected void removeReportMsgIdWithMobile(String msgId) {
-        try {
-            stringRedisTemplate.delete(getRedisMtMsgIdKey(msgId));
-
-        } catch (Exception e) {
-            logger.error("Redis 移除发送状态MSG_ID: {} 和MOBILE对应关系失败", msgId, e);
         }
     }
 
