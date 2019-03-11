@@ -30,23 +30,20 @@ public class MmsPassageParameter {
     private String  position;
 
     private Date    createTime;
-    
+
     /**
      * 限流速度
      */
     private Integer packetsSize;
-    
-    // 通道方短信模板ID（提前报备）
-    private String smsTemplateId;
-    // 变量参数，专指用于类似点对点短信数组/或者JSON变量传递 add by zhengying 20170825
-    private String[] variableParamNames;
-    
-    private String[] variableParamValues;
-    
-    
-    // 最大连接数
+
+    /**
+     * 最大连接数
+     */
     private Integer connectionSize;
-    // 读取数据流超时时间（针对已经和目标服务器建立连接，对方处理时间过慢，相应超时时间）
+
+    /**
+     * 读取数据流超时时间（针对已经和目标服务器建立连接，对方处理时间过慢，相应超时时间）
+     */
     private Integer readTimeout;
 
     public Integer getId() {
@@ -143,6 +140,30 @@ public class MmsPassageParameter {
 
     public void setPassageCode(String passageCode) {
         this.passageCode = passageCode;
+    }
+
+    public Integer getPacketsSize() {
+        return packetsSize;
+    }
+
+    public void setPacketsSize(Integer packetsSize) {
+        this.packetsSize = packetsSize;
+    }
+
+    public Integer getConnectionSize() {
+        return connectionSize;
+    }
+
+    public void setConnectionSize(Integer connectionSize) {
+        this.connectionSize = connectionSize;
+    }
+
+    public Integer getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Integer readTimeout) {
+        this.readTimeout = readTimeout;
     }
 
 }

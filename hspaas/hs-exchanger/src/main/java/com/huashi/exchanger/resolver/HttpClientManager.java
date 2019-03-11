@@ -13,6 +13,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -209,8 +210,10 @@ public class HttpClientManager {
      * @author SHANHY
      * @create 2015年12月18日
      */
-    public static String get(String url) {
-        HttpGet httpget = new HttpGet(url);
+    public static String get(String url, Map<String, Object> params) {
+        String parameters = setHttpGetParameters(params);
+
+        HttpGet httpget = new HttpGet(StringUtils.isEmpty(parameters) ? url : url + "?" + parameters);
         RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(CONNECTION_REQUEST_TIMEOUT).setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(SOCKET_TIMEOUT).build();
         httpget.setConfig(requestConfig);
 
@@ -218,22 +221,34 @@ public class HttpClientManager {
         try {
             response = getHttpClient(url, DEFAULT_MAX_TOTAL, DEFAULT_MAX_PER_ROUTE).execute(httpget,
                                                                                             HttpClientContext.create());
-            HttpEntity entity = response.getEntity();
-            String result = EntityUtils.toString(entity, ENCODING_UTF_8);
-            EntityUtils.consume(entity);
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (response != null) {
-                    response.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            // 获取响应内容
+            StatusLine statusLine = response.getStatusLine();
+            // 响应码
+            int statusCode = statusLine.getStatusCode();
+            // String reasonPhrase = statusLine.getReasonPhrase();// 响应信息
+
+            if (statusCode != 200) {
+                httpget.abort();
+                throw new IllegalStateException("Http response code[" + statusCode + "]");
             }
+
+            HttpEntity entity = response.getEntity();
+            String result = null;
+            if (entity != null) {
+                result = EntityUtils.toString(entity, "UTF-8");
+            }
+            EntityUtils.consume(entity);
+            response.close();
+            return result;
+
+        } catch (Exception e) {
+            httpget.abort();
+            logger.error("URL:{} 请求处理失败", url, e);
+            throw new RuntimeException(String.format("URL: %s 调用失败！", url));
+        } finally {
+            // 释放资源
+            httpget.releaseConnection();
         }
-        return null;
     }
 
     /**
@@ -314,6 +329,42 @@ public class HttpClientManager {
         } catch (UnsupportedEncodingException e) {
             logger.error("Encoding http form entity failed", e);
         }
+    }
+
+    /**
+     * TODO 设置HTTP参数信息
+     * 
+     * @param httpPost
+     * @param params
+     */
+    private static String setHttpGetParameters(Map<String, Object> params) {
+        return setHttpGetParameters(params, ENCODING_UTF_8);
+    }
+
+    /**
+     * TODO 设置HTTP参数信息（包含编码）
+     * 
+     * @param httpPost
+     * @param params
+     * @param encoding
+     */
+    private static String setHttpGetParameters(Map<String, Object> params, String encoding) {
+        if (MapUtils.isEmpty(params)) {
+            return "";
+        }
+
+        List<NameValuePair> pairs = new ArrayList<NameValuePair>(params.size());
+        for (String key : params.keySet()) {
+            pairs.add(new BasicNameValuePair(key, params.get(key).toString()));
+        }
+
+        try {
+            return EntityUtils.toString(new UrlEncodedFormEntity(pairs, encoding));
+        } catch (ParseException | IOException e) {
+            logger.error("Encoding http form entity failed", e);
+        }
+
+        return "";
     }
 
     /**

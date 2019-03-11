@@ -16,33 +16,29 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.util.concurrent.RateLimiter;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.ProtocolType;
+import com.huashi.exchanger.domain.ProviderModelResponse;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.exception.ExchangeProcessException;
-import com.huashi.exchanger.resolver.sms.cmpp.v2.CmppProxySender;
-import com.huashi.exchanger.resolver.sms.cmpp.v3.Cmpp3ProxySender;
-import com.huashi.exchanger.resolver.sms.http.SmsHttpSender;
-import com.huashi.exchanger.resolver.sms.sgip.SgipProxySender;
-import com.huashi.exchanger.resolver.sms.smgp.SmgpProxySender;
+import com.huashi.exchanger.resolver.mms.http.MmsHttpSender;
 import com.huashi.exchanger.service.template.SmsProxyManagerTemplate;
-import com.huashi.sms.passage.domain.SmsPassageAccess;
-import com.huashi.sms.passage.domain.SmsPassageParameter;
-import com.huashi.sms.record.domain.SmsMoMessageReceive;
-import com.huashi.sms.record.domain.SmsMtMessageDeliver;
+import com.huashi.mms.passage.domain.MmsPassageAccess;
+import com.huashi.mms.passage.domain.MmsPassageParameter;
+import com.huashi.mms.record.domain.MmsMoMessageReceive;
+import com.huashi.mms.record.domain.MmsMtMessageDeliver;
+import com.huashi.mms.template.domain.MmsMessageTemplate;
 
+/**
+ * TODO 彩信接口提供服务
+ * 
+ * @author zhengying
+ * @version V1.0
+ * @date 2019年3月6日 下午11:07:44
+ */
 @Service
-public class SmsProviderService implements ISmsProviderService {
+public class MmsProviderService implements IMmsProviderService {
 
     @Autowired
-    private SmsHttpSender        httpResolver;
-    @Autowired
-    private CmppProxySender      cmppProxySender;
-
-    @Autowired
-    private Cmpp3ProxySender     cmpp3ProxySender;
-    @Autowired
-    private SgipProxySender      sgipProxySender;
-    @Autowired
-    private SmgpProxySender      smgpProxySender;
+    private MmsHttpSender        mmsHttpSender;
 
     private final Logger         logger                     = LoggerFactory.getLogger(getClass());
 
@@ -51,21 +47,20 @@ public class SmsProviderService implements ISmsProviderService {
      */
     private static final Integer DEFAULT_RATE_LIMITER_TIMES = 1;
 
-    // /**
-    // * 网关每个包分包手机号码上限数
-    // */
-    // @Value("${gateway.mobiles-per-sencond:10}")
-    // private int gatewayMobilesPerSecond;
+    @Override
+    public ProviderModelResponse applyModel(MmsPassageParameter parameter, MmsMessageTemplate mmsMessageTemplate) {
+        return null;
+    }
 
     @Override
-    public List<ProviderSendResponse> sendSms(SmsPassageParameter parameter, String mobile, String content,
-                                              Integer fee, String extNumber) throws ExchangeProcessException {
+    public List<ProviderSendResponse> sendMms(MmsPassageParameter parameter, String extNumber, String mobile,
+                                              String modelId) throws ExchangeProcessException {
 
         validate(parameter);
 
         // 判断是否需要限流
         if (!isNeedLimitSpeed(parameter.getProtocol())) {
-            return submitData2Gateway(parameter, mobile, content, extNumber);
+            return mmsHttpSender.post(parameter, mobile, extNumber, modelId);
         }
 
         // 获取通道对应的流速设置
@@ -74,7 +69,7 @@ public class SmsProviderService implements ISmsProviderService {
 
         // 目前HTTP用途并不是很大（因为取决于HTTP自身的瓶颈）
         List<String[]> packets = recombineMobilesByLimitSpeedInSecond(mobiles,
-                                                                      getRateLimiterAmount(parameter.getProtocol(), fee),
+                                                                      getRateLimiterAmount(parameter.getProtocol()),
                                                                       parameter.getPacketsSize());
 
         // 如果手机号码同时传递多个，需要对流速进行控制，多余流速的需要分批提交
@@ -82,7 +77,43 @@ public class SmsProviderService implements ISmsProviderService {
         for (String[] m : packets) {
             // 设置acquire 当前分包后的数量
             rateLimiter.acquire(Integer.parseInt(m[0]));
-            List<ProviderSendResponse> reponsePerGroup = submitData2Gateway(parameter, m[1], content, extNumber);
+            List<ProviderSendResponse> reponsePerGroup = mmsHttpSender.post(parameter, m[1], extNumber, modelId);
+            if (CollectionUtils.isEmpty(reponsePerGroup)) {
+                continue;
+            }
+
+            responsesInMultiGroup.addAll(reponsePerGroup);
+        }
+
+        return responsesInMultiGroup;
+    }
+
+    @Override
+    public List<ProviderSendResponse> sendMms(MmsPassageParameter parameter, String mobile, String extNumber,
+                                              String title, String body) throws ExchangeProcessException {
+
+        validate(parameter);
+
+        // 判断是否需要限流
+        if (!isNeedLimitSpeed(parameter.getProtocol())) {
+            return mmsHttpSender.post(parameter, mobile, extNumber, title, body);
+        }
+
+        // 获取通道对应的流速设置
+        RateLimiter rateLimiter = getRateLimiter(parameter.getPassageId(), parameter.getPacketsSize());
+        String[] mobiles = mobile.split(MobileNumberCatagoryUtil.DATA_SPLIT_CHARCATOR);
+
+        // 目前HTTP用途并不是很大（因为取决于HTTP自身的瓶颈）
+        List<String[]> packets = recombineMobilesByLimitSpeedInSecond(mobiles,
+                                                                      getRateLimiterAmount(parameter.getProtocol()),
+                                                                      parameter.getPacketsSize());
+
+        // 如果手机号码同时传递多个，需要对流速进行控制，多余流速的需要分批提交
+        List<ProviderSendResponse> responsesInMultiGroup = new ArrayList<ProviderSendResponse>(packets.size());
+        for (String[] m : packets) {
+            // 设置acquire 当前分包后的数量
+            rateLimiter.acquire(Integer.parseInt(m[0]));
+            List<ProviderSendResponse> reponsePerGroup = mmsHttpSender.post(parameter, m[1], extNumber, title, body);
             if (CollectionUtils.isEmpty(reponsePerGroup)) {
                 continue;
             }
@@ -94,23 +125,23 @@ public class SmsProviderService implements ISmsProviderService {
     }
 
     /**
-     * TODO 计算限流总次数 根据协议类型判断多条短信是否以多次限流计数（直连按照计费条数计数，如4条（长短信）计4次，其他协议，如HTTP则按照一次计数）
+     * TODO 计算限流总次数 根据协议类型判断多条短信是否以多次限流计数
      * 
      * @param protocol
-     * @param fee
      * @return
      */
-    private static Integer getRateLimiterAmount(String protocol, Integer fee) {
+    private static Integer getRateLimiterAmount(String protocol) {
         // 如果协议类型无法识别或者为空则按照 1次计数
         if (StringUtils.isEmpty(protocol)) {
             return DEFAULT_RATE_LIMITER_TIMES;
         }
 
-        ProtocolType protocolType = ProtocolType.parse(protocol);
-        if (protocolType != null
-            && (protocolType == ProtocolType.CMPP2 || protocolType == ProtocolType.SGIP || protocolType == ProtocolType.SMGP)) {
-            return fee;
-        }
+        // ProtocolType protocolType = ProtocolType.parse(protocol);
+        // if (protocolType != null
+        // && (protocolType == ProtocolType.CMPP2 || protocolType == ProtocolType.SGIP || protocolType ==
+        // ProtocolType.SMGP)) {
+        // return fee;
+        // }
 
         return DEFAULT_RATE_LIMITER_TIMES;
     }
@@ -129,57 +160,6 @@ public class SmsProviderService implements ISmsProviderService {
         ProtocolType protocolType = ProtocolType.parse(protocol);
 
         return !(protocolType == null || protocolType == ProtocolType.HTTP || protocolType == ProtocolType.WEBSERVICE);
-    }
-
-    /**
-     * TODO 提交数据到网关（此网关可能是真正网关也可能是上家渠道）
-     * 
-     * @param parameter
-     * @param mobile
-     * @param content
-     * @param extNumber
-     * @return
-     */
-    private List<ProviderSendResponse> submitData2Gateway(SmsPassageParameter parameter, String mobile, String content,
-                                                          String extNumber) {
-
-        ProtocolType pt = ProtocolType.parse(parameter.getProtocol());
-        if (pt == null) {
-            logger.warn("协议类型不匹配，跳过");
-            return null;
-        }
-
-        List<ProviderSendResponse> list = null;
-        switch (pt) {
-            case HTTP: {
-                list = httpResolver.post(parameter, mobile, content, extNumber);
-                break;
-            }
-            case WEBSERVICE: {
-                break;
-            }
-            case CMPP2: {
-                list = cmppProxySender.send(parameter, extNumber, mobile, content);
-                break;
-            }
-            case CMPP3: {
-                list = cmpp3ProxySender.send(parameter, extNumber, mobile, content);
-                break;
-            }
-            case SGIP: {
-                list = sgipProxySender.send(parameter, extNumber, mobile, content);
-                break;
-            }
-            case SMGP: {
-                list = smgpProxySender.send(parameter, extNumber, mobile, content);
-                break;
-            }
-            default:
-                logger.warn("Ignored by protocol is not matched");
-                break;
-        }
-
-        return list;
     }
 
     /**
@@ -230,21 +210,26 @@ public class SmsProviderService implements ISmsProviderService {
      * 
      * @param parameter
      */
-    private void validate(SmsPassageParameter parameter) {
+    private void validate(MmsPassageParameter parameter) {
         if (StringUtils.isEmpty(parameter.getUrl())) {
-            throw new IllegalArgumentException("SmsPassageParameter's url is empty");
+            throw new IllegalArgumentException("MmsPassageParameter's url is empty");
         }
 
         if (StringUtils.isEmpty(parameter.getParams())) {
-            throw new IllegalArgumentException("SmsPassageParameter's params are empty");
+            throw new IllegalArgumentException("MmsPassageParameter's params are empty");
+        }
+
+        ProtocolType pt = ProtocolType.parse(parameter.getProtocol());
+        if (pt == null) {
+            throw new IllegalArgumentException("MmsPassageParameter's protocol is undefined");
         }
 
     }
 
     @Override
-    public List<SmsMtMessageDeliver> receiveMtReport(SmsPassageAccess access, JSONObject report) {
+    public List<MmsMtMessageDeliver> receiveMtReport(MmsPassageAccess access, JSONObject report) {
         try {
-            return httpResolver.deliver(access, report);
+            return mmsHttpSender.deliver(access, report);
         } catch (Exception e) {
             logger.error("Failed by args - SmsPassageAccess[" + JSON.toJSONString(access) + "], JSONObject["
                                  + report.toJSONString() + "] ", e);
@@ -253,9 +238,9 @@ public class SmsProviderService implements ISmsProviderService {
     }
 
     @Override
-    public List<SmsMtMessageDeliver> pullMtReport(SmsPassageAccess access) {
+    public List<MmsMtMessageDeliver> pullMtReport(MmsPassageAccess access) {
         try {
-            return httpResolver.deliver(access);
+            return mmsHttpSender.deliver(access);
         } catch (Exception e) {
             logger.error("Failed by args - SmsPassageAccess[" + JSON.toJSONString(access) + "]", e);
             throw new ExchangeProcessException(e);
@@ -263,22 +248,22 @@ public class SmsProviderService implements ISmsProviderService {
     }
 
     @Override
-    public List<SmsMoMessageReceive> receiveMoReport(SmsPassageAccess access, JSONObject report) {
+    public List<MmsMoMessageReceive> receiveMoReport(MmsPassageAccess access, JSONObject report) {
         try {
-            return httpResolver.mo(access, report);
+            return mmsHttpSender.mo(access, report);
         } catch (Exception e) {
-            logger.error("Failed by args - SmsPassageAccess[" + JSON.toJSONString(access) + "], JSONObject["
+            logger.error("Failed by args - MmsPassageAccess[" + JSON.toJSONString(access) + "], JSONObject["
                                  + report.toJSONString() + "] ", e);
             throw new ExchangeProcessException(e);
         }
     }
 
     @Override
-    public List<SmsMoMessageReceive> pullMoReport(SmsPassageAccess access) {
+    public List<MmsMoMessageReceive> pullMoReport(MmsPassageAccess access) {
         try {
-            return httpResolver.mo(access);
+            return mmsHttpSender.mo(access);
         } catch (Exception e) {
-            logger.error("Failed by args - SmsPassageAccess[" + JSON.toJSONString(access) + "]", e);
+            logger.error("Failed by args - MmsPassageAccess[" + JSON.toJSONString(access) + "]", e);
             throw new ExchangeProcessException(e);
         }
     }

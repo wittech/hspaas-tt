@@ -138,7 +138,7 @@ public class ItissmPassageResolver extends AbstractPassageResolver {
      * @param report
      * @param successCode
      * @return
-     * @see com.huashi.exchanger.resolver.http.custom.AbstractPassageResolver#mtDeliver(java.lang.String,
+     * @see com.huashi.exchanger.resolver.AbstractMmsPassageResolver.custom.AbstractPassageResolver#mtDeliver(java.lang.String,
      * java.lang.String)
      */
     @Override
@@ -212,7 +212,7 @@ public class ItissmPassageResolver extends AbstractPassageResolver {
      * @param report
      * @param passageId
      * @return
-     * @see com.huashi.exchanger.resolver.http.custom.AbstractPassageResolver#moReceive(java.lang.String,
+     * @see com.huashi.exchanger.resolver.AbstractMmsPassageResolver.custom.AbstractPassageResolver#moReceive(java.lang.String,
      * java.lang.Integer)
      */
     @Override

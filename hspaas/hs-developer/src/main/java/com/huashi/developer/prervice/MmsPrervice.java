@@ -26,23 +26,24 @@ import com.huashi.developer.constant.RabbitConstant.WordsPriority;
 import com.huashi.developer.model.SmsModel;
 import com.huashi.developer.model.SmsP2PModel;
 import com.huashi.developer.model.SmsP2PTemplateModel;
+import com.huashi.developer.response.mms.MmsSendResponse;
 import com.huashi.developer.response.sms.SmsBalanceResponse;
 import com.huashi.developer.response.sms.SmsSendResponse;
+import com.huashi.mms.task.domain.MmsMtTask;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
-import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.task.context.TaskContext.TaskSubmitType;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.exception.QueueProcessException;
 
 /**
- * TODO 短信前置服务
- *
+ * TODO 彩信前置服务
+ * 
  * @author zhengying
  * @version V1.0
- * @date 2017年4月6日 下午1:29:15
+ * @date 2019年3月3日 下午5:18:09
  */
 @Service
-public class SmsPrervice {
+public class MmsPrervice {
 
     private final Logger              logger = LoggerFactory.getLogger(getClass());
 
@@ -52,8 +53,6 @@ public class SmsPrervice {
     private RabbitTemplate            rabbitTemplate;
     @Reference
     private IUserBalanceService       userBalanceService;
-    @Reference
-    private ISmsApiFaildRecordService smsApiFaildRecordService;
 
     /**
      * TODO 发送短信信息
@@ -61,40 +60,11 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendMessage(SmsModel model) {
-        SmsMtTask task = new SmsMtTask();
+    public MmsSendResponse sendMessage(SmsModel model) {
+        MmsMtTask task = new MmsMtTask();
 
         BeanUtils.copyProperties(model, task);
         task.setAppType(model.getAppType());
-
-        try {
-
-            long sid = joinTask2Queue(task);
-            if (sid != 0L) {
-                return new SmsSendResponse(model.getTotalFee(), sid);
-            }
-
-        } catch (QueueProcessException e) {
-            logger.error("发送短信至队列错误， {}", e);
-        }
-
-        return new SmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
-    }
-
-    /**
-     * TODO 发送点对点短信信息
-     *
-     * @param model
-     * @return
-     */
-    public SmsSendResponse sendP2PMessage(SmsP2PModel model) {
-        SmsMtTask task = new SmsMtTask();
-
-        BeanUtils.copyProperties(model, task);
-        task.setAppType(model.getAppType());
-        task.setSubmitType(TaskSubmitType.POINT_TO_POINT.getCode());
-        task.setP2pBody(model.getBody());
-        task.setP2pBodies(model.getP2pBodies());
 
         try {
 
@@ -193,7 +163,7 @@ public class SmsPrervice {
      * @param task
      * @return
      */
-    private long joinTask2Queue(SmsMtTask task) {
+    private long joinTask2Queue(MmsMtTask task) {
         try {
             // 更新用户余额
             boolean isSuccess = userBalanceService.deductBalance(task.getUserId(), -task.getTotalFee(),

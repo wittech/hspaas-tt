@@ -2,15 +2,28 @@ package com.huashi.exchanger.config;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.huashi.common.util.IdGenerator;
+
 @Configuration
 @Order(value = 1)
 public class AsyncConfiguration {
+    
+    @Bean
+    public IdGenerator idGenerator() {
+        return new IdGenerator(1);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter messageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
 
     /**
      * 自定义异步线程池

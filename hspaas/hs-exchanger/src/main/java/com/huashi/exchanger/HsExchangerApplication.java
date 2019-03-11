@@ -2,6 +2,7 @@ package com.huashi.exchanger;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -14,6 +15,7 @@ import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
 @EnableAsync
+@EnableRabbit
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsExchangerApplication {
 

@@ -22,15 +22,29 @@ public interface MmsHttpPassageResolver {
     ProviderModelResponse applyModel(MmsPassageParameter parameter, MmsMessageTemplate mmsMessageTemplate);
 
     /**
-     * TODO 发送彩信（提交至通道商）
-     *
-     * @param parameter 通道参数
-     * @param mobile 手机号码
-     * @param content 短信内容
-     * @param extNumber 用户扩展号码
-     * @return
+     * 
+       * 发送彩信（模板发送）
+       * 
+       * @param parameter
+       * @param mobile
+       * @param extNumber
+       * @param modelId
+       * @return
      */
-    List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String content, String extNumber);
+    List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber, String modelId);
+    
+    /**
+     * 
+       * 发送彩信(自定义内容发送)
+       * @param parameter
+       * @param mobile
+       * @param extNumber
+       * @param title
+       *    
+       * @param body
+       * @return
+     */
+    List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber, String title, String body);
 
     /**
      * TODO 下行状态报告回执(推送)

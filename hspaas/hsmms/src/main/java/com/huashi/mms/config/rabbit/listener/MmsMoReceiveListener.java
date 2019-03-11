@@ -17,13 +17,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
-import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.exchanger.service.IMmsProviderService;
 import com.huashi.mms.config.rabbit.AbstartRabbitListener;
 import com.huashi.mms.config.rabbit.constant.RabbitConstant;
-import com.huashi.sms.passage.domain.SmsPassageAccess;
-import com.huashi.sms.passage.service.ISmsPassageAccessService;
-import com.huashi.sms.record.domain.SmsMoMessageReceive;
-import com.huashi.sms.record.service.ISmsMoMessageService;
+import com.huashi.mms.passage.domain.MmsPassageAccess;
+import com.huashi.mms.passage.service.IMmsPassageAccessService;
+import com.huashi.mms.record.domain.MmsMoMessageReceive;
+import com.huashi.mms.record.service.IMmsMoMessageService;
 import com.rabbitmq.client.Channel;
 
 /**
@@ -37,13 +37,13 @@ import com.rabbitmq.client.Channel;
 public class MmsMoReceiveListener extends AbstartRabbitListener {
 
     @Reference
-    private ISmsProviderService          smsProviderService;
+    private IMmsProviderService          mmsProviderService;
     @Autowired
     private Jackson2JsonMessageConverter messageConverter;
     @Autowired
-    private ISmsMoMessageService         smsMoMessageService;
+    private IMmsMoMessageService         mmsMoMessageService;
     @Autowired
-    private ISmsPassageAccessService     smsPassageAccessService;
+    private IMmsPassageAccessService     mmsPassageAccessService;
 
     @Override
     @RabbitListener(queues = RabbitConstant.MQ_MMS_MO_RECEIVE)
@@ -56,12 +56,12 @@ public class MmsMoReceiveListener extends AbstartRabbitListener {
                 return;
             }
 
-            List<SmsMoMessageReceive> receives;
+            List<MmsMoMessageReceive> receives;
             if (object instanceof JSONObject) {
                 receives = doReceiveMessage((JSONObject) object);
             } else if (object instanceof List) {
                 ObjectMapper mapper = new ObjectMapper();
-                receives = mapper.convertValue(object, new TypeReference<List<SmsMoMessageReceive>>() {
+                receives = mapper.convertValue(object, new TypeReference<List<MmsMoMessageReceive>>() {
                 });
             } else {
                 logger.error("上行回执数据类型无法匹配");
@@ -74,11 +74,11 @@ public class MmsMoReceiveListener extends AbstartRabbitListener {
             }
 
             // 处理回执完成后的持久操作
-            smsMoMessageService.doFinishReceive(receives);
+            mmsMoMessageService.doFinishReceive(receives);
 
         } catch (Exception e) {
             logger.error("MQ消费网关上行数据失败： {}", messageConverter.fromMessage(message), e);
-            smsMoMessageService.doReceiveToException(message);
+            mmsMoMessageService.doReceiveToException(message);
         } finally {
             // 确认消息成功消费
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -91,26 +91,26 @@ public class MmsMoReceiveListener extends AbstartRabbitListener {
      * @param jsonObject
      * @return
      */
-    private List<SmsMoMessageReceive> doReceiveMessage(JSONObject jsonObject) {
+    private List<MmsMoMessageReceive> doReceiveMessage(JSONObject jsonObject) {
         // 提供商代码（通道）
         String providerCode = jsonObject.getString(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE);
         if (StringUtils.isEmpty(providerCode)) {
             logger.warn("上行报告解析失败：回执码为空");
             jsonObject.put("reason", "上行报告解析失败：回执码为空");
-            smsMoMessageService.doReceiveToException(jsonObject);
+            mmsMoMessageService.doReceiveToException(jsonObject);
             return null;
         }
 
-        SmsPassageAccess access = smsPassageAccessService.getByType(PassageCallType.MO_REPORT_WITH_PUSH, providerCode);
+        MmsPassageAccess access = mmsPassageAccessService.getByType(PassageCallType.MO_REPORT_WITH_PUSH, providerCode);
         if (access == null) {
             logger.warn("上行报告通道参数无法匹配：{}", jsonObject.toJSONString());
             jsonObject.put("reason", "上行报告报告通道参数无法匹配");
-            smsMoMessageService.doReceiveToException(jsonObject);
+            mmsMoMessageService.doReceiveToException(jsonObject);
             return null;
         }
 
         // 回执数据解析后的报文
-        List<SmsMoMessageReceive> receives = smsProviderService.doMoReport(access, jsonObject);
+        List<MmsMoMessageReceive> receives = mmsProviderService.doMoReport(access, jsonObject);
         if (CollectionUtils.isEmpty(receives)) {
             return null;
         }

@@ -105,6 +105,7 @@ layui.use(['form', 'element', 'laydate', 'upload'], function(){
             	l_index = layer.load(1);
             },
             type: "POST",
+            async: false,
             success: function (result) {
             	layer.close(l_index);
             	if(result.code == "0") {

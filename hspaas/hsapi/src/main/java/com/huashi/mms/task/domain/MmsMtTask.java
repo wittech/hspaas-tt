@@ -13,7 +13,7 @@ public class MmsMtTask {
 
     private Long                          sid;
 
-    private Byte                          appType;
+    private Integer                          appType;
 
     private String                        title;
 
@@ -133,11 +133,11 @@ public class MmsMtTask {
         this.sid = sid;
     }
 
-    public Byte getAppType() {
+    public Integer getAppType() {
         return appType;
     }
 
-    public void setAppType(Byte appType) {
+    public void setAppType(Integer appType) {
         this.appType = appType;
     }
 

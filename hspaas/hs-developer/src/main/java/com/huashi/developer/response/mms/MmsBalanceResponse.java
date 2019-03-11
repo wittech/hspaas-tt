@@ -1,13 +1,13 @@
-package com.huashi.developer.response.sms;
+package com.huashi.developer.response.mms;
 
 /**
- * TODO 短信余额回执信息
- *
+ * TODO 彩信余额回执
+ * 
  * @author zhengying
- * @version V1.0.0
- * @date 2017年2月21日 下午9:50:00
+ * @version V1.0
+ * @date 2019年3月3日 下午5:21:06
  */
-public class SmsBalanceResponse {
+public class MmsBalanceResponse {
 
     /**
      * 状态码
@@ -32,17 +32,17 @@ public class SmsBalanceResponse {
         this.code = code;
     }
 
-    public SmsBalanceResponse() {
+    public MmsBalanceResponse() {
         super();
     }
 
-    public SmsBalanceResponse(String code) {
+    public MmsBalanceResponse(String code) {
         this.type = "0";
         this.balance = "0";
         this.code = code;
     }
 
-    public SmsBalanceResponse(String code, int balance, int type) {
+    public MmsBalanceResponse(String code, int balance, int type) {
         super();
         this.code = code;
         this.balance = balance + "";

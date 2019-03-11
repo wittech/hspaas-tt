@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.huashi.common.util.DateUtil;
+import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.template.vo.TParameter;
+import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.record.domain.MmsMoMessageReceive;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
 
@@ -23,29 +25,29 @@ import com.huashi.mms.record.domain.MmsMtMessageDeliver;
  * @version V1.0
  * @date 2019年1月23日 下午5:54:07
  */
-public abstract class AbstractPassageResolver implements MmsHttpPassageResolver {
+public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolver {
 
     /**
      * 通道简码对应的处理器实体类关系
      */
     private static Map<String, MmsHttpPassageResolver> CODE_REFRENCE_BEANS           = new HashMap<>();
 
-    protected final Logger                          logger                        = LoggerFactory.getLogger(getClass());
+    protected final Logger                             logger                        = LoggerFactory.getLogger(getClass());
 
     /**
      * 公共状态回执成功码
      */
-    public static final String                      COMMON_MT_STATUS_SUCCESS_CODE = "DELIVRD";
+    public static final String                         COMMON_MT_STATUS_SUCCESS_CODE = "DELIVRD";
 
     /**
      * 多个手机号码分隔符
      */
-    protected static final String                   MULTI_MOBILES_SEPERATOR       = ",";
+    protected static final String                      MULTI_MOBILES_SEPERATOR       = ",";
 
     /**
      * 默认中文编码
      */
-    protected static final String                   DEFAULT_ENCODING              = "UTF-8";
+    protected static final String                      DEFAULT_ENCODING              = "UTF-8";
 
     /**
      * TODO 初始化通道简码对应的实体映射
@@ -109,6 +111,21 @@ public abstract class AbstractPassageResolver implements MmsHttpPassageResolver 
      */
     public List<MmsMoMessageReceive> moReceive(String report, Integer passageId) {
         throw new UnsupportedOperationException("It needs implement by child class");
+    }
+
+    /**
+     * 彩信自定义内容发送
+     * 
+     * @param parameter
+     * @param mobile
+     * @param extNumber
+     * @param title
+     * @param body
+     * @return
+     */
+    public List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber,
+                                           String title, String body) {
+        throw new UnsupportedOperationException("Code [" + code() + "] custom body api is not supported");
     }
 
     /**

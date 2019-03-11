@@ -17,7 +17,7 @@ import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
 import com.huashi.constants.CommonContext.CMCP;
-import com.huashi.exchanger.config.RabbitMqConfiguration;
+import com.huashi.exchanger.config.rabbit.SmsRabbitMqConfiguration;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.sms.AbstractSmProxySender;
 import com.huashi.exchanger.resolver.sms.cmpp.constant.CmppConstant;
@@ -420,7 +420,7 @@ public class CmppProxySender extends AbstractSmProxySender {
 
             if (CollectionUtils.isNotEmpty(list)) {
                 // 发送异步消息
-                rabbitTemplate.convertAndSend(RabbitMqConfiguration.MQ_SMS_MT_WAIT_RECEIPT, list);
+                rabbitTemplate.convertAndSend(SmsRabbitMqConfiguration.MQ_SMS_MT_WAIT_RECEIPT, list);
             }
 
             // 解析返回结果并返回
@@ -490,7 +490,7 @@ public class CmppProxySender extends AbstractSmProxySender {
             list.add(response);
 
             if (CollectionUtils.isNotEmpty(list)) {
-                rabbitTemplate.convertAndSend(RabbitMqConfiguration.MQ_SMS_MO_RECEIVE, list);
+                rabbitTemplate.convertAndSend(SmsRabbitMqConfiguration.MQ_SMS_MO_RECEIVE, list);
             }
 
         } catch (Exception e) {

@@ -44,19 +44,12 @@ import com.huashi.mms.passage.service.IMmsPassageService;
 import com.huashi.mms.record.domain.MmsMtMessageSubmit;
 import com.huashi.mms.record.service.IMmsMtSubmitService;
 import com.huashi.mms.task.domain.MmsMtTaskPackets;
-import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
-import com.huashi.sms.passage.context.PassageContext.PassageSmsTemplateParam;
-import com.huashi.sms.passage.domain.SmsPassageMessageTemplate;
-import com.huashi.sms.passage.domain.SmsPassageParameter;
-import com.huashi.sms.record.domain.SmsMtMessageSubmit;
-import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
+import com.huashi.mms.template.domain.MmsPassageMessageTemplate;
 import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
-import com.huashi.sms.task.domain.SmsMtTask;
-import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.rabbitmq.client.Channel;
 
 /**
- * TODO 短信待提交队列监听
+ * TODO 彩信待提交队列监听
  *
  * @author zhengying
  * @version V1.0
@@ -93,7 +86,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      *
      * @param packets 子任务
      */
-    private void transport2Gateway(SmsMtTaskPackets packets) {
+    private void transport2Gateway(MmsMtTaskPackets packets) {
         if (StringUtils.isBlank(packets.getMobile())) {
             throw new RuntimeException("手机号码数据包为空，无法解析");
         }
@@ -106,7 +99,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
 
         // 查询推送地址信息
         PushConfig pushConfig = pushConfigService.getPushUrl(packets.getUserId(),
-                                                             PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                             PlatformType.MULTIMEDIA_MESSAGE_SERVICE.getCode(),
                                                              packets.getCallback());
 
         try {
@@ -123,23 +116,20 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
             // 根据网关分包数要求对手机号码进行拆分，分批提交
             List<String> groupMobiles = regroupMobileByPacketsSize(packets.getMobile(), mmsPassage);
 
-            // add by zhengying 20179610 加入签名自动前置后置等逻辑
-            packets.setContent(changeMessageContentBySignMode(packets.getContent(), packets.getPassageSignMode()));
-
             for (String groupMobile : groupMobiles) {
                 if (StringUtils.isEmpty(groupMobile)) {
                     continue;
                 }
 
                 // 调用网关通道处理器，提交短信信息，并接收回执
-                List<ProviderSendResponse> responses = mmsProviderService.doTransport(getPassageParameter(packets,
+                List<ProviderSendResponse> responses = mmsProviderService.sendMms(getPassageParameter(packets,
                                                                                                           smsPassage),
                                                                                       groupMobile,
                                                                                       packets.getContent(),
                                                                                       packets.getSingleFee(), extNumber);
 
                 // ProviderSendResponse response = list.iterator().next();
-                List<SmsMtMessageSubmit> list = makeSubmitReport(packets, groupMobile, responses, extNumber, pushConfig);
+                List<MmsMtMessageSubmit> list = makeSubmitReport(packets, groupMobile, responses, extNumber, pushConfig);
                 if (CollectionUtils.isEmpty(list)) {
                     logger.error("解析上家回执数据逻辑数据为空，伪造包逻辑处理");
                     continue;
@@ -209,71 +199,6 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * 短信签名前缀符号
-     */
-    private static final String MESSAGE_SIGNATURE_PRIFIX              = "【";
-
-    /**
-     * 短信签名后缀符号
-     */
-    private static final String MESSAGE_SIGNATURE_SUFFIX              = "】";
-
-    /**
-     * 扩展号码长度无限
-     */
-    private static final int    PASSAGE_EXT_NUMBER_LENGTH_ENDLESS     = -1;
-
-    /**
-     * 扩展号码不可扩展
-     */
-    private static final int    PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED = 0;
-
-    /**
-     * TODO 根据签名模式调整短信内容（主要针对签名位置）
-     *
-     * @param content 短信内容
-     * @param signMode 签名模型
-     * @return
-     */
-    private static String changeMessageContentBySignMode(String content, Integer signMode) {
-        if (StringUtils.isEmpty(content)) {
-            return null;
-        }
-
-        if (signMode == null || PassageSignMode.IGNORED.getValue() == signMode) {
-            return content;
-        }
-
-        if (PassageSignMode.SIGNATURE_AUTO_PREPOSITION.getValue() == signMode) {
-            // 自动前置
-            if (content.endsWith(MESSAGE_SIGNATURE_SUFFIX)) {
-                return content.substring(content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX))
-                       + content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
-            }
-
-        } else if (PassageSignMode.SIGNATURE_AUTO_POSTPOSITION.getValue() == signMode) {
-            // 自动后置
-            if (content.startsWith(MESSAGE_SIGNATURE_PRIFIX)) {
-                return content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length())
-                       + content.substring(0, content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1);
-            }
-
-        } else if (PassageSignMode.REMOVE_SIGNATURE.getValue() == signMode) {
-            // 自动去签名
-            if (content.startsWith(MESSAGE_SIGNATURE_PRIFIX)) {
-                content = content.substring(content.indexOf(MESSAGE_SIGNATURE_SUFFIX) + 1, content.length());
-            }
-
-            if (content.endsWith(MESSAGE_SIGNATURE_SUFFIX)) {
-                content = content.substring(0, content.lastIndexOf(MESSAGE_SIGNATURE_PRIFIX));
-            }
-
-        }
-
-        return content;
-    }
-
-    /**
      * TODO 转换获取通道参数信息
      *
      * @param packets 分包信息
@@ -291,28 +216,16 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
         parameter.setPassageId(packets.getFinalPassageId());
         parameter.setPacketsSize(packets.getPassageSpeed());
 
-        if (smsPassage == null) {
+        if (mmsPassage == null) {
             return parameter;
         }
 
         // add by 20170831 加入最大连接数和连接超时时间限制（目前主要用于HTTP请求）
-        parameter.setConnectionSize(smsPassage.getConnectionSize());
-        parameter.setReadTimeout(smsPassage.getReadTimeout());
-
-        if (smsPassage.getWordNumber() != null && smsPassage.getWordNumber() != UserBalanceConstant.WORDS_SIZE_PER_NUM) {
-            parameter.setFeeByWords(smsPassage.getWordNumber());
-        }
-
-        // add by 20170918 判断通道是否为强制参数模式
-        if (smsPassage.getSmsTemplateParam() == null
-            || PassageSmsTemplateParam.NO.getValue() == smsPassage.getSmsTemplateParam()) {
-            return parameter;
-        }
-
-        logger.info("通道：{} 为携参通道", smsPassage.getId());
+        parameter.setConnectionSize(mmsPassage.getConnectionSize());
+        parameter.setReadTimeout(mmsPassage.getReadTimeout());
 
         // 根据短信内容查询通道短信模板参数
-        SmsPassageMessageTemplate smsPassageMessageTemplate = smsPassageMessageTemplateService.getByMessageContent(smsPassage.getId(),
+        MmsPassageMessageTemplate mmsPassageMessageTemplate = mmsPassageMessageTemplateService.getByMessageContent(smsPassage.getId(),
                                                                                                                    packets.getContent());
         if (smsPassageMessageTemplate == null) {
             logger.warn("通道：{} 短信模板参数信息匹配为空", smsPassage.getId());
@@ -358,7 +271,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      * @param pushConfig
      * @return
      */
-    private List<SmsMtMessageSubmit> makeSubmitReport(SmsMtTaskPackets packets, String mobileStr,
+    private List<MmsMtMessageSubmit> makeSubmitReport(MmsMtTaskPackets packets, String mobileStr,
                                                       List<ProviderSendResponse> responses, String extNumber,
                                                       PushConfig pushConfig) {
         String[] mobiles = mobileStr.split(",");
@@ -366,7 +279,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
             return null;
         }
 
-        SmsMtMessageSubmit submitTemplate = makeMessageSubmitTemplate(packets, pushConfig, extNumber);
+        MmsMtMessageSubmit submitTemplate = makeMessageSubmitTemplate(packets, pushConfig, extNumber);
 
         List<SmsMtMessageSubmit> submits = new ArrayList<>();
 
@@ -405,9 +318,9 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      * @param extNumber
      * @return
      */
-    private SmsMtMessageSubmit makeMessageSubmitTemplate(SmsMtTaskPackets packets, PushConfig pushConfig,
+    private MmsMtMessageSubmit makeMessageSubmitTemplate(MmsMtTaskPackets packets, PushConfig pushConfig,
                                                          String extNumber) {
-        SmsMtMessageSubmit submitTemplate = new SmsMtMessageSubmit();
+        MmsMtMessageSubmit submitTemplate = new MmsMtMessageSubmit();
 
         // 排除子任务中的通道ID（要以最终通道为准 : finalPassageId）
         // mobile子任务中是以逗号隔开的多个手机号码，submit需要分开赋值

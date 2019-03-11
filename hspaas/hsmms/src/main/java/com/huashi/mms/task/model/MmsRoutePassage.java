@@ -11,7 +11,7 @@ import org.apache.commons.collections.MapUtils;
 
 import com.alibaba.druid.util.StringUtils;
 import com.huashi.common.third.model.MobileCatagory;
-import com.huashi.sms.passage.domain.SmsPassageAccess;
+import com.huashi.mms.passage.domain.MmsPassageAccess;
 
 /**
  * TODO 用户路由通道信息
@@ -20,19 +20,30 @@ import com.huashi.sms.passage.domain.SmsPassageAccess;
  * @version V1.0
  * @date 2016年10月11日 上午11:57:29
  */
-public class SmsRoutePassage implements Serializable {
+public class MmsRoutePassage implements Serializable {
 
-    private static final long              serialVersionUID = 7468557377818340963L;
+    private static final long              serialVersionUID = 988928139119189884L;
+
     private Integer                        userId;
 
-    // 通道手机号码信息（手机号码以逗号分割）
+    /**
+     * 通道手机号码信息（手机号码以逗号分割）
+     */
     private Map<Integer, String>           passageMobiles   = new HashMap<>();
-    // 未找到对应通道手机号码集合
-    private Set<String>                    unkonwnMobiles   = new HashSet<>();
-    // 通道信息
-    private Map<Integer, SmsPassageAccess> passaegAccesses  = new HashMap<>();
 
-    // 错误信息
+    /**
+     * 未找到对应通道手机号码集合
+     */
+    private Set<String>                    unkonwnMobiles   = new HashSet<>();
+
+    /**
+     * 通道信息
+     */
+    private Map<Integer, MmsPassageAccess> passaegAccesses  = new HashMap<>();
+
+    /**
+     * 错误信息
+     */
     private String                         errorMessage;
 
     public Integer getUserId() {
@@ -51,11 +62,11 @@ public class SmsRoutePassage implements Serializable {
         this.passageMobiles = passageMobiles;
     }
 
-    public Map<Integer, SmsPassageAccess> getPassaegAccesses() {
+    public Map<Integer, MmsPassageAccess> getPassaegAccesses() {
         return passaegAccesses;
     }
 
-    public void setPassaegAccesses(Map<Integer, SmsPassageAccess> passaegAccesses) {
+    public void setPassaegAccesses(Map<Integer, MmsPassageAccess> passaegAccesses) {
         this.passaegAccesses = passaegAccesses;
     }
 

@@ -32,43 +32,27 @@ import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.context.UserSettingsContext.SmsSignatureSource;
+import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.service.IUserBalanceService;
+import com.huashi.common.user.service.IUserMmsConfigService;
 import com.huashi.common.user.service.IUserPassageService;
-import com.huashi.common.user.service.IUserSmsConfigService;
 import com.huashi.common.util.PatternUtil;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
-import com.huashi.sms.config.rabbit.AbstartRabbitListener;
-import com.huashi.sms.config.rabbit.constant.RabbitConstant;
-import com.huashi.sms.passage.context.PassageContext;
-import com.huashi.sms.passage.context.PassageContext.PassageStatus;
-import com.huashi.sms.passage.context.PassageContext.RouteType;
-import com.huashi.sms.passage.domain.SmsPassageAccess;
-import com.huashi.sms.passage.service.ISmsPassageAccessService;
-import com.huashi.sms.record.domain.SmsMtMessageSubmit;
-import com.huashi.sms.record.service.ISmsMtSubmitService;
-import com.huashi.sms.settings.service.IForbiddenWordsService;
-import com.huashi.sms.settings.service.ISmsMobileBlackListService;
-import com.huashi.sms.settings.service.ISmsMobileTablesService;
-import com.huashi.sms.settings.service.ISmsMobileWhiteListService;
-import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
-import com.huashi.sms.task.context.TaskContext.PacketsActionActor;
-import com.huashi.sms.task.context.TaskContext.PacketsActionPosition;
-import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
+import com.huashi.mms.config.rabbit.AbstartRabbitListener;
+import com.huashi.mms.config.rabbit.constant.RabbitConstant;
+import com.huashi.mms.passage.domain.MmsPassageAccess;
+import com.huashi.mms.passage.service.IMmsPassageAccessService;
+import com.huashi.mms.record.service.IMmsMtSubmitService;
+import com.huashi.mms.task.domain.MmsMtTask;
+import com.huashi.mms.task.model.MmsRoutePassage;
+import com.huashi.mms.task.service.IMmsMtTaskService;
+import com.huashi.mms.template.service.IMmsTemplateService;
 import com.huashi.sms.task.context.TaskContext.PacketsProcessStatus;
-import com.huashi.sms.task.domain.SmsMtTask;
-import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.huashi.sms.task.exception.QueueProcessException;
-import com.huashi.sms.task.model.SmsRoutePassage;
-import com.huashi.sms.task.service.ISmsMtTaskService;
-import com.huashi.sms.template.context.TemplateContext;
-import com.huashi.sms.template.context.TemplateContext.IgnoreBlacklist;
-import com.huashi.sms.template.context.TemplateContext.IgnoreForbiddenWords;
-import com.huashi.sms.template.domain.MessageTemplate;
-import com.huashi.sms.template.service.ISmsTemplateService;
 import com.rabbitmq.client.Channel;
 
 /**
@@ -87,15 +71,14 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     private Jackson2JsonMessageConverter       messageConverter;
 
     @Autowired
-    private ISmsMtTaskService                  smsMtTaskService;
+    private IMmsMtTaskService                  mmsMtTaskService;
     @Autowired
-    private ISmsMtSubmitService                smtMtSubmitService;
+    private IMmsMtSubmitService                mmtMtSubmitService;
     @Autowired
-    private ISmsTemplateService                smsTemplateService;
+    private IMmsTemplateService                mmsTemplateService;
     @Autowired
-    private IForbiddenWordsService             forbiddenWordsService;
-    @Autowired
-    private ISmsPassageAccessService           smsPassageAccessService;
+    private IMmsPassageAccessService           mmsPassageAccessService;
+
     @Autowired
     private ISmsMobileTablesService            smsMobileTablesService;
     @Autowired
@@ -112,7 +95,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     @Reference
     private IUserPassageService                userPassageService;
     @Reference
-    private IUserSmsConfigService              userSmsConfigService;
+    private IUserMmsConfigService              userMmsConfigService;
 
     /**
      * 根据当前用户ID和短信内容提取出的短信模板信息
@@ -122,7 +105,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     /**
      * 当前用户传递的消息报文数据
      */
-    private final ThreadLocal<SmsMtTask>       smsMtTaskLocal       = new ThreadLocal<>();
+    private final ThreadLocal<MmsMtTask>       mmsMtTaskLocal       = new ThreadLocal<>();
 
     /**
      * 错误序列号计数器
@@ -135,10 +118,10 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @param mobileCatagory
      * @param routePassage
      */
-    private void doPassagePacketsFinished(MobileCatagory mobileCatagory, SmsRoutePassage routePassage) {
+    private void doPassagePacketsFinished(MobileCatagory mobileCatagory, MmsRoutePassage routePassage) {
         try {
             // 初始化分包信息
-            smsMtTaskLocal.get().setPackets(new ArrayList<>());
+            mmsMtTaskLocal.get().setPackets(new ArrayList<>());
 
             subpackage(routePassage);
 
@@ -155,7 +138,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @param task
      */
     private void asyncSendTask() {
-        smsMtTaskLocal.get().setPackets(null);
+        mmsMtTaskLocal.get().setPackets(null);
         asyncSendTask(null);
     }
 
@@ -166,7 +149,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @return
      */
     private void asyncSendTask(MobileCatagory mobileCatagory) {
-        SmsMtTask task = smsMtTaskLocal.get();
+        MmsMtTask task = mmsMtTaskLocal.get();
         task.setFinalContent(task.getContent());
         // 中间可能存在 去除黑名单等逻辑剔除不符合手机号码，但主任务需要保留原号码数据
         task.setMobile(task.getOriginMobile());
@@ -198,7 +181,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         // stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_TASK_LIST,
         // JSON.toJSONString(task));
 
-        smsMtTaskService.save(task);
+        MmsMtTaskService.save(task);
 
         // 分包状态="分包完成"
         if (PacketsProcessStatus.PROCESS_COMPLETE.getCode() == task.getProcessStatus()
@@ -219,7 +202,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @param task
      * @param mobileCatagory
      */
-    private void returnFeeToUser(SmsMtTask task, MobileCatagory mobileCatagory) {
+    private void returnFeeToUser(MmsMtTask task, MobileCatagory mobileCatagory) {
         if (task.getReturnFee() != null && task.getReturnFee() != 0 && mobileCatagory != null) {
             logger.info("用户ID：{} 发送短信 存在错号：{}个，重复号码：{}个，单条计费：{}条，共扣费：{}条，共需返还{}条", task.getUserId(),
                         mobileCatagory.getFilterSize(), mobileCatagory.getRepeatSize(), task.getFee(),
@@ -264,27 +247,27 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     private MobileCatagory findOutMatchedMobiles() {
         // 转换手机号码数组
         List<String> mobiles = new ArrayList<>(
-                                               Arrays.asList(smsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+                                               Arrays.asList(mmsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 
         // 移除上次 黑名单数据（主要针对重新分包黑名单不要重复产生记录）add by 2017-04-08
-        if (StringUtils.isNotEmpty(smsMtTaskLocal.get().getBlackMobiles())) {
-            mobiles.removeAll(Arrays.asList(smsMtTaskLocal.get().getBlackMobiles().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+        if (StringUtils.isNotEmpty(mmsMtTaskLocal.get().getBlackMobiles())) {
+            mobiles.removeAll(Arrays.asList(mmsMtTaskLocal.get().getBlackMobiles().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
         }
 
         // 黑名单手机号码
         List<String> blackMobiles = mobileBlackListService.filterBlacklistMobile(mobiles, isIgnoreBlacklist());
         if (CollectionUtils.isNotEmpty(blackMobiles)) {
             // 移除需要执行的手机号码
-            smsMtTaskLocal.get().setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
+            mmsMtTaskLocal.get().setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
             doExceptionOverWithReport(blackMobiles, SmsPushCode.SMS_MOBILE_BLACKLIST.getCode());
-            smsMtTaskLocal.get().setBlackMobiles(StringUtils.join(blackMobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
+            mmsMtTaskLocal.get().setBlackMobiles(StringUtils.join(blackMobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
             logger.warn("手机黑名单: {}", StringUtils.join(blackMobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
         }
 
         // 经过黑名单处理后，如果可用手机号码为空则直接插入主任务
         if (CollectionUtils.isEmpty(mobiles)) {
             // 黑名单直接插入SUBMIT，自己制作伪造包BLACK状态推送给用户（推送队列）
-            smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("可用手机号码为空（为空或不符合手机号码）"));
+            mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("可用手机号码为空（为空或不符合手机号码）"));
             logger.warn("可用手机号码为空，逻辑结束");
             return null;
         }
@@ -292,12 +275,12 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         // 号码分流
         MobileCatagory mobileNumberResponse = mobileLocalService.doCatagory(mobiles);
         if (mobileNumberResponse == null) {
-            smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("手机号码解析错误（为空或不符合手机号码"));
+            mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("手机号码解析错误（为空或不符合手机号码"));
             return null;
         }
 
         if (!mobileNumberResponse.isSuccess()) {
-            smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("手机号码分流失败"));
+            mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("手机号码分流失败"));
             logger.warn(mobileNumberResponse.getMsg());
             return null;
         }
@@ -316,32 +299,30 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             return false;
         }
 
-        SmsMtTask smsMtTask = (SmsMtTask) messageConverter.fromMessage(message);
-        if (smsMtTask == null) {
+        MmsMtTask MmsMtTask = (MmsMtTask) messageConverter.fromMessage(message);
+        if (MmsMtTask == null) {
             logger.error("待处理任务数据为空");
             return false;
         }
 
-        smsMtTask.setOriginMobile(smsMtTask.getMobile());
+        MmsMtTask.setOriginMobile(MmsMtTask.getMobile());
 
-        smsMtTaskLocal.set(smsMtTask);
+        mmsMtTaskLocal.set(MmsMtTask);
 
         return true;
     }
 
     @Override
-    @RabbitListener(queues = RabbitConstant.MQ_SMS_MT_WAIT_PROCESS)
+    @RabbitListener(queues = RabbitConstant.MQ_MMS_MT_WAIT_PROCESS)
     public void onMessage(Message message, Channel channel) throws Exception {
         if (!validate(message)) {
             return;
         }
 
-        checkIsStartingConsumeMessage();
-
         try {
 
-            // 用户短信配置中心数据
-            UserSmsConfig smsConfig = getSmsConfig();
+            // 用户彩信配置中心数据
+            UserMmsConfig mmsConfig = getMmsConfig();
 
             // 获取短信模板信息
             loadSmsTemplateByContent(smsConfig);
@@ -363,7 +344,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             }
 
             // 获取用户路由（分省）通道信息
-            SmsRoutePassage routePassage = getUserRoutePassage(mobileCatagory);
+            MmsRoutePassage routePassage = getUserRoutePassage(mobileCatagory);
 
             // 通道分包逻辑
             doPassagePacketsFinished(mobileCatagory, routePassage);
@@ -373,7 +354,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         } finally {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             // 清除ThreadLocal对象，加速GC，减小内存压力
-            smsMtTaskLocal.remove();
+            mmsMtTaskLocal.remove();
             messageTemplateLocal.remove();
             // 置分包异常提示计数器清零
             errorNo.set(0);
@@ -403,16 +384,23 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     /**
      * TODO 验证数据有效性并返回用户短信配置信息
      */
-    private UserSmsConfig getSmsConfig() {
-        if (StringUtils.isEmpty(smsMtTaskLocal.get().getMobile())) {
-            throw new QueueProcessException("手机号码为空");
+    private UserMmsConfig getMmsConfig() {
+        if (StringUtils.isEmpty(mmsMtTaskLocal.get().getMobile())) {
+            throw new RuntimeException("手机号码为空");
         }
 
-        UserSmsConfig userSmsConfig = userSmsConfigService.getByUserId(smsMtTaskLocal.get().getUserId());
-        if (userSmsConfig == null) {
-            userSmsConfigService.save(smsMtTaskLocal.get().getUserId(), UserBalanceConstant.WORDS_SIZE_PER_NUM,
-                                      smsMtTaskLocal.get().getExtNumber());
-            smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("户短信配置为空，需要更新"));
+        UserMmsConfig userMmsConfig = userMmsConfigService.getByUserId(mmsMtTaskLocal.get().getUserId());
+        if (userMmsConfig == null) {
+            userMmsConfig = new UserMmsConfig();
+            userMmsConfig.setUserId(mmsMtTaskLocal.get().getUserId());
+            userMmsConfig.setLimitTimes(limitTimes);
+            
+            userMmsConfig.setExtNumber(mmsMtTaskLocal.get().getExtNumber());
+            
+            
+            userMmsConfigService.save(mmsMtTaskLocal.get().getUserId(), UserBalanceConstant.WORDS_SIZE_PER_NUM,
+                                      mmsMtTaskLocal.get().getExtNumber());
+            mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("户短信配置为空，需要更新"));
         }
 
         return userSmsConfig;
@@ -425,72 +413,72 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @param passageAccess 可用通道信息
      */
     private void joinTaskPackets(String mobile, SmsPassageAccess passageAccess) {
-        SmsMtTask task = smsMtTaskLocal.get();
+        MmsMtTask task = mmsMtTaskLocal.get();
 
-        SmsMtTaskPackets smsMtTaskPackets = new SmsMtTaskPackets();
-        smsMtTaskPackets.setSid(task.getSid());
-        smsMtTaskPackets.setMobile(mobile);
+        MmsMtTaskPackets MmsMtTaskPackets = new MmsMtTaskPackets();
+        MmsMtTaskPackets.setSid(task.getSid());
+        MmsMtTaskPackets.setMobile(mobile);
 
         // 本次通道对应的运营商和省份代码
         if (passageAccess != null) {
-            smsMtTaskPackets.setCmcp(passageAccess.getCmcp());
-            smsMtTaskPackets.setProvinceCode(passageAccess.getProvinceCode());
+            MmsMtTaskPackets.setCmcp(passageAccess.getCmcp());
+            MmsMtTaskPackets.setProvinceCode(passageAccess.getProvinceCode());
         } else {
-            smsMtTaskPackets.setCmcp(CMCP.local(mobile).getCode());
+            MmsMtTaskPackets.setCmcp(CMCP.local(mobile).getCode());
         }
 
-        smsMtTaskPackets.setContent(task.getContent());
-        smsMtTaskPackets.setMobileSize(mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length);
+        MmsMtTaskPackets.setContent(task.getContent());
+        MmsMtTaskPackets.setMobileSize(mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length);
 
         // edit by zhengying 20170621 针对短信模板加入扩展号码逻辑
         if (messageTemplateLocal.get() != null) {
-            smsMtTaskPackets.setMessageTemplateId(messageTemplateLocal.get().getId());
-            smsMtTaskPackets.setTemplateExtNumber(messageTemplateLocal.get().getExtNumber());
+            MmsMtTaskPackets.setMessageTemplateId(messageTemplateLocal.get().getId());
+            MmsMtTaskPackets.setTemplateExtNumber(messageTemplateLocal.get().getExtNumber());
         }
 
         if (passageAccess != null) {
-            smsMtTaskPackets.setPassageId(passageAccess.getPassageId());
-            smsMtTaskPackets.setPassageCode(passageAccess.getPassageCode());
-            smsMtTaskPackets.setFinalPassageId(passageAccess.getPassageId());
-            smsMtTaskPackets.setPassageProtocol(passageAccess.getProtocol());
-            smsMtTaskPackets.setPassageUrl(passageAccess.getUrl());
-            smsMtTaskPackets.setPassageParameter(passageAccess.getParams());
-            smsMtTaskPackets.setResultFormat(passageAccess.getResultFormat());
-            smsMtTaskPackets.setPosition(passageAccess.getPosition());
-            smsMtTaskPackets.setSuccessCode(passageAccess.getSuccessCode());
-            smsMtTaskPackets.setPassageSpeed(passageAccess.getPacketsSize());
+            MmsMtTaskPackets.setPassageId(passageAccess.getPassageId());
+            MmsMtTaskPackets.setPassageCode(passageAccess.getPassageCode());
+            MmsMtTaskPackets.setFinalPassageId(passageAccess.getPassageId());
+            MmsMtTaskPackets.setPassageProtocol(passageAccess.getProtocol());
+            MmsMtTaskPackets.setPassageUrl(passageAccess.getUrl());
+            MmsMtTaskPackets.setPassageParameter(passageAccess.getParams());
+            MmsMtTaskPackets.setResultFormat(passageAccess.getResultFormat());
+            MmsMtTaskPackets.setPosition(passageAccess.getPosition());
+            MmsMtTaskPackets.setSuccessCode(passageAccess.getSuccessCode());
+            MmsMtTaskPackets.setPassageSpeed(passageAccess.getPacketsSize());
 
             // add by zhengying 20170610 加入签名模式
-            smsMtTaskPackets.setPassageSignMode(passageAccess.getSignMode());
+            MmsMtTaskPackets.setPassageSignMode(passageAccess.getSignMode());
         }
 
-        smsMtTaskPackets.setRemark(task.getErrorMessageReport().toString());
-        smsMtTaskPackets.setForceActions(task.getForceActionsReport().toString());
-        smsMtTaskPackets.setRetryTimes(0);
-        smsMtTaskPackets.setCreateTime(new Date());
+        MmsMtTaskPackets.setRemark(task.getErrorMessageReport().toString());
+        MmsMtTaskPackets.setForceActions(task.getForceActionsReport().toString());
+        MmsMtTaskPackets.setRetryTimes(0);
+        MmsMtTaskPackets.setCreateTime(new Date());
 
         // 如果账号是华时系统通知账号则直接通过
         // boolean isAvaiable = isHsAdmin(task.getAppKey());
 
         // 短信模板ID为空，短信包含敏感词及其他错误信息，短信通道为空 均至状态为 待人工处理
-        if (passageAccess == null || StringUtils.isNotEmpty(smsMtTaskPackets.getRemark())
+        if (passageAccess == null || StringUtils.isNotEmpty(MmsMtTaskPackets.getRemark())
             || messageTemplateLocal.get() == null || messageTemplateLocal.get().getId() == null) {
-            smsMtTaskPackets.setStatus(PacketsApproveStatus.WAITING.getCode());
+            MmsMtTaskPackets.setStatus(PacketsApproveStatus.WAITING.getCode());
         } else {
-            smsMtTaskPackets.setStatus(PacketsApproveStatus.AUTO_COMPLETE.getCode());
+            MmsMtTaskPackets.setStatus(PacketsApproveStatus.AUTO_COMPLETE.getCode());
         }
 
         // 用户自定义内容，一般为他方子平台的开发者ID（渠道），用于标识
-        smsMtTaskPackets.setAttach(task.getAttach());
+        MmsMtTaskPackets.setAttach(task.getAttach());
         // 设置用户自设置的扩展号码
-        smsMtTaskPackets.setExtNumber(task.getExtNumber());
-        smsMtTaskPackets.setCallback(task.getCallback());
-        smsMtTaskPackets.setUserId(task.getUserId());
-        smsMtTaskPackets.setFee(task.getFee() == null ? UserBalanceConstant.CONTENT_WORDS_EXCEPTION_COUNT_FEE : task.getFee());
-        smsMtTaskPackets.setSingleFee(smsMtTaskPackets.getFee());
+        MmsMtTaskPackets.setExtNumber(task.getExtNumber());
+        MmsMtTaskPackets.setCallback(task.getCallback());
+        MmsMtTaskPackets.setUserId(task.getUserId());
+        MmsMtTaskPackets.setFee(task.getFee() == null ? UserBalanceConstant.CONTENT_WORDS_EXCEPTION_COUNT_FEE : task.getFee());
+        MmsMtTaskPackets.setSingleFee(MmsMtTaskPackets.getFee());
 
         // 追加子任务
-        task.getPackets().add(smsMtTaskPackets);
+        task.getPackets().add(MmsMtTaskPackets);
     }
 
     /**
@@ -526,17 +514,17 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             && smsConfig.getSignatureSource() == SmsSignatureSource.HSPAAS_AUTO_APPEND.getValue()) {
 
             if (StringUtils.isEmpty(smsConfig.getSignatureContent())) {
-                smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("短信内容强制签名但用户签名内容未设置"));
+                mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("短信内容强制签名但用户签名内容未设置"));
             } else {
-                smsMtTaskLocal.get().setContent(String.format("【%s】%s", smsConfig.getSignatureContent(),
-                                                              smsMtTaskLocal.get().getContent()));
+                mmsMtTaskLocal.get().setContent(String.format("【%s】%s", smsConfig.getSignatureContent(),
+                                                              mmsMtTaskLocal.get().getContent()));
             }
 
         } else {
 
             // 如果签名为客户自维护，则需要判断签名相关信息
-            if (!PatternUtil.isContainsSignature(smsMtTaskLocal.get().getContent())) {
-                smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("用户短信内容不包含签名"));
+            if (!PatternUtil.isContainsSignature(mmsMtTaskLocal.get().getContent())) {
+                mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("用户短信内容不包含签名"));
             }
 
             // 判断短信内容是否包含多个签名 edit by 20170610 暂时屏蔽
@@ -563,20 +551,20 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         // 判断短信内容是否包含敏感词
         Set<String> filterWords;
         if (StringUtils.isEmpty(whiteWordsRecord)) {
-            filterWords = forbiddenWordsService.filterForbiddenWords(smsMtTaskLocal.get().getContent());
+            filterWords = forbiddenWordsService.filterForbiddenWords(mmsMtTaskLocal.get().getContent());
 
         } else {
             // 报备的免审敏感词（报备后对敏感词有效）
             Set<String> whiteWordsSet = new HashSet<>(Arrays.asList(whiteWordsRecord.split("\\|")));
-            filterWords = forbiddenWordsService.filterForbiddenWords(smsMtTaskLocal.get().getContent(), whiteWordsSet);
+            filterWords = forbiddenWordsService.filterForbiddenWords(mmsMtTaskLocal.get().getContent(), whiteWordsSet);
         }
 
         if (CollectionUtils.isNotEmpty(filterWords)) {
-            smsMtTaskLocal.get().setForbiddenWords(StringUtils.join(filterWords, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
-            smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("用户短信内容存在敏感词，敏感词为："
+            mmsMtTaskLocal.get().setForbiddenWords(StringUtils.join(filterWords, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
+            mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("用户短信内容存在敏感词，敏感词为："
                                                                               + filterWords.toString()));
             refillForceActions(PacketsActionPosition.FOBIDDEN_WORDS.getPosition(),
-                               smsMtTaskLocal.get().getForceActionsReport());
+                               mmsMtTaskLocal.get().getForceActionsReport());
         }
 
     }
@@ -624,9 +612,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @param mobileCatagory 分省后手机号码组
      * @return
      */
-    private SmsRoutePassage getUserRoutePassage(MobileCatagory mobileCatagory) {
-        SmsRoutePassage routePassage = new SmsRoutePassage();
-        routePassage.setUserId(smsMtTaskLocal.get().getUserId());
+    private MmsRoutePassage getUserRoutePassage(MobileCatagory mobileCatagory) {
+        MmsRoutePassage routePassage = new MmsRoutePassage();
+        routePassage.setUserId(mmsMtTaskLocal.get().getUserId());
 
         Integer routeType = getMessageRouteType();
         Map<Integer, String> provinceCmcpMobileNumbers;
@@ -639,7 +627,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             Set<Integer> provinceCodes = provinceCmcpMobileNumbers.keySet();
             for (Integer provinceCode : provinceCodes) {
                 // 获取可用通道
-                SmsPassageAccess passageAccess = getPassageAccess(routePassage.getUserId(), routeType, cmcp.getCode(),
+                MmsPassageAccess passageAccess = getPassageAccess(routePassage.getUserId(), routeType, cmcp.getCode(),
                                                                   provinceCode);
                 if (passageAccess != null) {
                     routePassage.addPassageMobilesMapping(passageAccess.getPassageId(),
@@ -647,9 +635,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
                     routePassage.getPassaegAccesses().put(passageAccess.getPassageId(), passageAccess);
                 } else {
                     // edit by 20180414 如果未找到相关CMCP的通道及全国通道，则分包异常
-                    smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("通道不可用"));
+                    mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("通道不可用"));
                     refillForceActions(PacketsActionPosition.PASSAGE_NOT_AVAIABLE.getPosition(),
-                                       smsMtTaskLocal.get().getForceActionsReport());
+                                       mmsMtTaskLocal.get().getForceActionsReport());
 
                     // 如果没有可用通道，则直接将省份手机号码进行分配异常通道
                     routePassage.addPassageMobilesMapping(PassageContext.EXCEPTION_PASSAGE_ID,
@@ -669,8 +657,8 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @param provinceCode
      * @return
      */
-    private SmsPassageAccess getPassageAccess(int userId, int routeType, int cmcp, int provinceCode) {
-        SmsPassageAccess passageAccess = smsPassageAccessService.get(userId, routeType, cmcp, provinceCode);
+    private MmsPassageAccess getPassageAccess(int userId, int routeType, int cmcp, int provinceCode) {
+        MmsPassageAccess passageAccess = smsPassageAccessService.get(userId, routeType, cmcp, provinceCode);
         if (passageAccess != null && isSmsPassageAccessAvaiable(passageAccess)) {
             return passageAccess;
         }
@@ -713,12 +701,12 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
 
         } else {
             // 根据短信内容匹配模板，短信模板需要报备而查出的短信模板为空则提至人工处理信息中
-            template = smsTemplateService.getByContent(smsMtTaskLocal.get().getUserId(),
-                                                       smsMtTaskLocal.get().getContent());
+            template = smsTemplateService.getByContent(mmsMtTaskLocal.get().getUserId(),
+                                                       mmsMtTaskLocal.get().getContent());
             if (template == null) {
-                smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("用户短信模板未报备"));
+                mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("用户短信模板未报备"));
                 refillForceActions(PacketsActionPosition.SMS_TEMPLATE_MISSED.getPosition(),
-                                   smsMtTaskLocal.get().getForceActionsReport());
+                                   mmsMtTaskLocal.get().getForceActionsReport());
             }
         }
 
@@ -757,11 +745,11 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         }
 
         // 根据userId获取白名单手机号码数据
-        Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(smsMtTaskLocal.get().getUserId());
+        Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(mmsMtTaskLocal.get().getUserId());
 
         // 转换手机号码数组
         List<String> mobiles = new ArrayList<>(
-                                               Arrays.asList(smsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+                                               Arrays.asList(mmsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 
         // 过滤超速集合
         List<String> benyondSpeedList = new ArrayList<>();
@@ -776,7 +764,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             }
 
             // 判断短信发送是否超速
-            int beyondExpected = smsMobileTablesService.checkMobileIsBeyondExpected(smsMtTaskLocal.get().getUserId(),
+            int beyondExpected = smsMobileTablesService.checkMobileIsBeyondExpected(mmsMtTaskLocal.get().getUserId(),
                                                                                     messageTemplateLocal.get().getId(),
                                                                                     mobile,
                                                                                     messageTemplateLocal.get().getSubmitInterval(),
@@ -796,7 +784,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         if (CollectionUtils.isNotEmpty(benyondSpeedList)) {
             // 移除需要执行的手机号码
             mobiles.removeAll(benyondSpeedList);
-            smsMtTaskLocal.get().setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
+            mmsMtTaskLocal.get().setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
             doExceptionOverWithReport(benyondSpeedList,
                                       SmsPushCode.SMS_SAME_MOBILE_NUM_SEND_BY_HIGN_FREQUENCY.getCode());
             logger.warn("手机号码超速 {}", StringUtils.join(benyondSpeedList, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
@@ -805,7 +793,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         if (CollectionUtils.isNotEmpty(benyondTimesList)) {
             // 移除需要执行的手机号码
             mobiles.removeAll(benyondTimesList);
-            smsMtTaskLocal.get().setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
+            mmsMtTaskLocal.get().setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
             doExceptionOverWithReport(benyondTimesList,
                                       SmsPushCode.SMS_SAME_MOBILE_NUM_BEYOND_LIMIT_IN_ONE_DAY.getCode());
             logger.warn("手机号码超量 {}", StringUtils.join(benyondSpeedList, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
@@ -847,7 +835,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @param remark 备注
      */
     private void doExceptionOverWithReport(List<String> mobiles, String remark) {
-        SmsMtTask task = smsMtTaskLocal.get();
+        MmsMtTask task = mmsMtTaskLocal.get();
         SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
         submit.setUserId(task.getUserId());
         submit.setSid(task.getSid());
@@ -897,7 +885,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      *
      * @param routePassage 用户运营商路由下对应的通道信息
      */
-    private void subpackage(SmsRoutePassage routePassage) {
+    private void subpackage(MmsRoutePassage routePassage) {
         String mobile;
         SmsPassageAccess passage;
 
@@ -915,7 +903,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             // 通道信息为空，则子任务插入空数据
             if (passage == null) {
                 joinTaskPackets(mobile, null);
-                logger.info("通道信息为空, sid: {}, mobile:{}", smsMtTaskLocal.get().getSid(), mobile);
+                logger.info("通道信息为空, sid: {}, mobile:{}", mmsMtTaskLocal.get().getSid(), mobile);
                 continue;
             }
 
