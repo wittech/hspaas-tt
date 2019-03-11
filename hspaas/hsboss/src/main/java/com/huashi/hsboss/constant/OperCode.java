@@ -278,5 +278,28 @@ public class OperCode {
     public static final String   OPER_CODE_8003002       = "8003002";
     /** 短信通道监控设置_启用|停用 */
     public static final String   OPER_CODE_8003003       = "8003003";
+    
+    /** 彩信-通道管理_添加模板 */
+    public static final String   OPER_CODE_10001001001    = "10001001001";
+    /** 彩信-通道管理_编辑 */
+    public static final String   OPER_CODE_10001001002    = "10001001002";
+    /** 彩信-通道管理_删除 */
+    public static final String   OPER_CODE_10001001003    = "10001001003";
+    /** 彩信-通道管理_禁用 */
+    public static final String   OPER_CODE_10001001004    = "10001001004";
+    /** 彩信-通道管理_断连接 */
+    public static final String   OPER_CODE_10001001005    = "10001001005";
+    /** 彩信-通道管理_测试通道 */
+    public static final String   OPER_CODE_10001001006    = "10001001006";
+    
+    /** 彩信-通道组管理_添加通道组 */
+    public static final String   OPER_CODE_10001002001    = "10001002001";
+    /** 彩信-通道组管理_编辑 */
+    public static final String   OPER_CODE_10001002002    = "10001002002";
+    
+    /** 彩信-用户运行中通道管理_重载redis */
+    public static final String   OPER_CODE_10001003001    = "10001003001";
+    /** 彩信-用户运行中通道管理_编辑 */
+    public static final String   OPER_CODE_10001003002    = "10001003002";
 
 }

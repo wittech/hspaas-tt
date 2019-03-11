@@ -162,5 +162,16 @@ public class MenuCode {
     public static final String MENU_CODE_8002001    = "8002001";
     /** 短信通道监控设置 */
     public static final String MENU_CODE_8003       = "8003";
+    
+    /** 彩信 */
+    public static final String MENU_CODE_10000       = "10000";
+    /** 彩信-通道管理 */
+    public static final String MENU_CODE_10001       = "10001";
+    /** 彩信-通道管理 */
+    public static final String MENU_CODE_10001001    = "10001001";
+    /** 彩信-通道组管理 */
+    public static final String MENU_CODE_10001002    = "10001002";
+    /** 彩信-用户运行中通道管理 */
+    public static final String MENU_CODE_10001003    = "10001003";
 
 }
