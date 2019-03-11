@@ -110,7 +110,7 @@ public class MmsMoReceiveListener extends AbstartRabbitListener {
         }
 
         // 回执数据解析后的报文
-        List<MmsMoMessageReceive> receives = mmsProviderService.doMoReport(access, jsonObject);
+        List<MmsMoMessageReceive> receives = mmsProviderService.receiveMoReport(access, jsonObject);
         if (CollectionUtils.isEmpty(receives)) {
             return null;
         }

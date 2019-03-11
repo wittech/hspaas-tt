@@ -123,7 +123,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
 
                 // 调用网关通道处理器，提交短信信息，并接收回执
                 List<ProviderSendResponse> responses = mmsProviderService.sendMms(getPassageParameter(packets,
-                                                                                                          smsPassage),
+                                                                                                      mmsPassage),
                                                                                       groupMobile,
                                                                                       packets.getContent(),
                                                                                       packets.getSingleFee(), extNumber);
@@ -202,7 +202,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      * TODO 转换获取通道参数信息
      *
      * @param packets 分包信息
-     * @param smsPassage 通道信息
+     * @param mmsPassage 通道信息
      * @return
      */
     private MmsPassageParameter getPassageParameter(MmsMtTaskPackets packets, MmsPassage mmsPassage) {
@@ -223,23 +223,6 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
         // add by 20170831 加入最大连接数和连接超时时间限制（目前主要用于HTTP请求）
         parameter.setConnectionSize(mmsPassage.getConnectionSize());
         parameter.setReadTimeout(mmsPassage.getReadTimeout());
-
-        // 根据短信内容查询通道短信模板参数
-        MmsPassageMessageTemplate mmsPassageMessageTemplate = mmsPassageMessageTemplateService.getByMessageContent(smsPassage.getId(),
-                                                                                                                   packets.getContent());
-        if (smsPassageMessageTemplate == null) {
-            logger.warn("通道：{} 短信模板参数信息匹配为空", smsPassage.getId());
-            return parameter;
-        }
-
-        // 针对通道方指定模板ID及模板内变量名称数据模式设置参数
-        parameter.setSmsTemplateId(smsPassageMessageTemplate.getTemplateId());
-        parameter.setVariableParamNames(smsPassageMessageTemplate.getParamNames().split(","));
-
-        // 根据表达式和参数数量获取本次具体的变量值
-        parameter.setVariableParamValues(MmsPassageMessageTemplateService.pickupValuesByRegex(packets.getContent(),
-                                                                                              smsPassageMessageTemplate.getRegexValue(),
-                                                                                              smsPassageMessageTemplate.getParamNames().split(",").length));
 
         return parameter;
     }

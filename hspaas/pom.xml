@@ -106,7 +106,7 @@
 		<guava.version>21.0</guava.version>
 		<google.version>3.2.1</google.version>
 		<elastic-job.version>2.1.5</elastic-job.version>
-		<oss.version>3.4.0</oss.version>
+		<oss.version>1.1.0</oss.version>
 	</properties>
 
 	<dependencyManagement>
@@ -663,7 +663,7 @@
 				<version>${guava.version}</version>
 			</dependency>
 
-			<!-- google 二维�? zxing -->
+			<!-- google 二维码 zxing -->
 			<dependency>
 				<groupId>com.google.zxing</groupId>
 				<artifactId>core</artifactId>
@@ -675,7 +675,7 @@
 				<version>${google.version}</version>
 			</dependency>
 
-			<!-- elastic-job 分布式任�? -->
+			<!-- elastic-job 分布式任务 -->
 			<dependency>
 				<groupId>com.dangdang</groupId>
 				<artifactId>elastic-job-lite-core</artifactId>
@@ -687,10 +687,10 @@
 				<version>${elastic-job.version}</version>
 			</dependency>
 
-			<!-- 阿里云OSS -->
+			<!-- aliyun oss -->
 			<dependency>
-				<groupId>com.aliyun.oss</groupId>
-				<artifactId>aliyun-sdk-oss</artifactId>
+				<groupId>cn.javaer.aliyun</groupId>
+				<artifactId>aliyun-spring-boot-starter-oss</artifactId>
 				<version>${oss.version}</version>
 			</dependency>
 

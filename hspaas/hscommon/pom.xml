@@ -146,6 +146,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>cn.javaer.aliyun</groupId>
+			<artifactId>aliyun-spring-boot-starter-oss</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>

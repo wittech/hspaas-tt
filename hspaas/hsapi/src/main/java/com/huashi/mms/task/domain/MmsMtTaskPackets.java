@@ -95,6 +95,12 @@ public class MmsMtTaskPackets {
      * 通道流速
      */
     private Integer   passageSpeed;
+    
+    private String modelId;
+    
+    private String title;
+    
+    private String body;
 
     public Long getId() {
         return id;
