@@ -173,5 +173,24 @@ public class MenuCode {
     public static final String MENU_CODE_10001002    = "10001002";
     /** 彩信-用户运行中通道管理 */
     public static final String MENU_CODE_10001003    = "10001003";
+    
+    /** 彩信-模板管理 */
+    public static final String MENU_CODE_10002       = "10002";
+    
+    /** 彩信-短信记录查询 */
+    public static final String MENU_CODE_10003       = "10003";
+    /** 彩信-待处理短信任务 */
+    public static final String MENU_CODE_10003001    = "10003001";
+    /** 彩信-短信发送记录 */
+    public static final String MENU_CODE_10003002    = "10003002";
+    /** 彩信-已完成短信任务 */
+    public static final String MENU_CODE_10003003    = "10003003";
+    /** 彩信-短信上行接收记录 */
+    public static final String MENU_CODE_10003004    = "10003004";
+    /** 彩信-短信调用失败记录 */
+    public static final String MENU_CODE_10003005    = "10003005";
+    /** 彩信-短信处理失败记录 */
+    public static final String MENU_CODE_10003006    = "10003006";
+    
 
 }

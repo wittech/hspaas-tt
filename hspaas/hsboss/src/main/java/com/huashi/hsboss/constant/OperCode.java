@@ -301,5 +301,53 @@ public class OperCode {
     public static final String   OPER_CODE_10001003001    = "10001003001";
     /** 彩信-用户运行中通道管理_编辑 */
     public static final String   OPER_CODE_10001003002    = "10001003002";
+    
+    /** 彩信-模板管理_重载redis */
+    public static final String   OPER_CODE_10002001       = "10002001";
+    /** 彩信-模板管理_添加模板 */
+    public static final String   OPER_CODE_10002002       = "10002002";
+    /** 彩信-模板管理_编辑 */
+    public static final String   OPER_CODE_10002003       = "10002003";
+    /** 彩信-模板管理_删除 */
+    public static final String   OPER_CODE_10002004       = "10002004";
+    /** 彩信-模板管理_测试 */
+    public static final String   OPER_CODE_10002005       = "10002005";
+    /** 彩信-模板管理_审批 */
+    public static final String   OPER_CODE_10002006       = "10002006";
+    
+    /** 彩信-待处理短信任务_审核通过 */
+    public static final String   OPER_CODE_10003001001    = "10003001001";
+    /** 彩信-待处理短信任务_同内容批放 */
+    public static final String   OPER_CODE_10003001002    = "10003001002";
+    /** 彩信-待处理短信任务_驳回 */
+    public static final String   OPER_CODE_10003001003    = "10003001003";
+    /** 彩信-待处理短信任务_同内容驳回 */
+    public static final String   OPER_CODE_10003001004    = "10003001004";
+    /** 彩信-待处理短信任务_切换通道 */
+    public static final String   OPER_CODE_10003001005    = "10003001005";
+    /** 彩信-待处理短信任务_重新分包 */
+    public static final String   OPER_CODE_10003001006    = "10003001006";
+    /** 彩信-待处理短信任务_修改内容 */
+    public static final String   OPER_CODE_10003001007    = "10003001007";
+    /** 彩信-待处理短信任务_子任务 */
+    public static final String   OPER_CODE_10003001008    = "10003001008";
+    /** 彩信-待处理短信任务_模板报备 */
+    public static final String   OPER_CODE_10003001009    = "10003001009";
+    /** 彩信-待处理短信任务_敏感词导白 */
+    public static final String   OPER_CODE_10003001010    = "10003001010";
+    /** 彩信-短信发送记录_短信发送记录 */
+    public static final String   OPER_CODE_10003002001    = "10003002001";
+    /** 彩信-已完成短信任务_子任务 */
+    public static final String   OPER_CODE_10003003001    = "10003003001";
+    /** 彩信-已完成短信任务_发送记录 */
+    public static final String   OPER_CODE_10003003002    = "10003003002";
+    /** 彩信-已完成短信任务_模板 */
+    public static final String   OPER_CODE_10003003003    = "10003003003";
+    /** 彩信-短信上行接收记录_短信发送记录 */
+    public static final String   OPER_CODE_10003004001    = "10003004001";
+    /** 彩信-短信调用失败记录_短信调用失败记录 */
+    public static final String   OPER_CODE_10003005001    = "10003005001";
+    /** 彩信-短信处理失败记录_短信调用失败记录 */
+    public static final String   OPER_CODE_10003006001    = "10003006001";
 
 }
