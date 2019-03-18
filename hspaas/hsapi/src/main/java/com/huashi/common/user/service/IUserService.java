@@ -7,6 +7,7 @@ import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.user.domain.User;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.domain.UserFluxDiscount;
+import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.domain.UserProfile;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.model.UserModel;
@@ -155,6 +156,20 @@ public interface IUserService {
      */
     boolean updateSms(int userId, String balance, int payType, List<PushConfig> pushConfigList, int passageGroupId,
                       UserSmsConfig userSmsConfig);
+    
+    /**
+     * TODO 更新用户彩信相关信息
+     * 
+     * @param userId 用户ID
+     * @param balance 短信剩余条数
+     * @param payType 付费类型：预付/后付
+     * @param pushConfigList 彩信推送配置信息（下行报告和上行报告）
+     * @param passageGroupId 通道组ID
+     * @param userMmsConfig 彩信基础配置信息
+     * @return
+     */
+    boolean updateMms(int userId, String balance, int payType, List<PushConfig> pushConfigList, int passageGroupId,
+                      UserMmsConfig userMmsConfig);
 
     /**
      * TODO 更新用户流量信息

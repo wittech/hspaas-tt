@@ -6,8 +6,10 @@
 		<result column="user_id" property="userId" jdbcType="INTEGER" />
 		<result column="sid" property="sid" jdbcType="BIGINT" />
 		<result column="app_type" property="appType" jdbcType="TINYINT" />
+		<result column="send_type" property="sendType" jdbcType="INTEGER" />
+		<result column="model_id" property="modelId" jdbcType="VARCHAR" />
 		<result column="title" property="title" jdbcType="VARCHAR" />
-		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="body" property="body" jdbcType="VARCHAR" />
 		<result column="ext_number" property="extNumber" jdbcType="VARCHAR" />
 		<result column="attach" property="attach" jdbcType="VARCHAR" />
 		<result column="callback" property="callback" jdbcType="VARCHAR" />
@@ -18,10 +20,7 @@
 			jdbcType="INTEGER" />
 		<result column="approve_status" property="approveStatus"
 			jdbcType="INTEGER" />
-		<result column="final_content" property="finalContent"
-			jdbcType="VARCHAR" />
-		<result column="message_template_id" property="messageTemplateId"
-			jdbcType="BIGINT" />
+		<result column="final_body" property="finalBody" jdbcType="VARCHAR" />
 		<result column="process_time" property="processTime" jdbcType="TIMESTAMP" />
 		<result column="force_actions" property="forceActions"
 			jdbcType="VARCHAR" />
@@ -38,18 +37,20 @@
 			jdbcType="VARCHAR" />
 	</resultMap>
 	<sql id="Base_Column_List">
-		id, user_id, sid, app_type, title, content, ext_number,
+		id, user_id, sid, app_type, send_type, modelId, title,
+		body, ext_number,
 		attach, callback,
 		fee, return_fee,
-		ip, process_status, approve_status,
-		final_content, message_template_id,
+		ip, process_status,
+		approve_status,
+		final_body,
 		process_time,
 		force_actions, remark,
 		create_time, create_unixtime, mobile, error_mobiles,
 		repeat_mobiles,
 		black_mobiles
 	</sql>
-	<select id="selectByPrimaryKey" resultMap="ResultMap"
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
 		parameterType="java.lang.Long">
 		select
 		<include refid="Base_Column_List" />
@@ -66,32 +67,44 @@
 			order="AFTER">
 			SELECT LAST_INSERT_ID()
 		</selectKey>
-		insert into mms_mt_task (user_id, sid, app_type,
-		title, content,
+		insert into mms_mt_task (user_id, sid, app_type, send_type,
+		model_id,
+		title, body,
 		ext_number,
 		attach, callback, fee,
-		return_fee, ip, process_status,
-		approve_status, final_content, message_template_id,
+		return_fee, ip,
+		process_status,
+		approve_status, final_body,
 		process_time,
-		force_actions, remark,
+		force_actions,
+		remark,
 		create_time, create_unixtime, mobile,
-		error_mobiles, repeat_mobiles, black_mobiles
+		error_mobiles,
+		repeat_mobiles, black_mobiles
 		)
 		values
-		(#{userId,jdbcType=INTEGER}, #{sid,jdbcType=BIGINT},
+		(#{userId,jdbcType=INTEGER},
+		#{sid,jdbcType=BIGINT},
 		#{appType,jdbcType=TINYINT},
+		#{sendType,jdbcType=INTEGER},
+		#{modelId,jdbcType=VARCHAR},
 		#{title,jdbcType=VARCHAR},
-		#{content,jdbcType=VARCHAR}, #{extNumber,jdbcType=VARCHAR},
-		#{attach,jdbcType=VARCHAR}, #{callback,jdbcType=VARCHAR},
+		#{body,jdbcType=VARCHAR},
+		#{extNumber,jdbcType=VARCHAR},
+		#{attach,jdbcType=VARCHAR},
+		#{callback,jdbcType=VARCHAR},
 		#{fee,jdbcType=INTEGER},
 		#{returnFee,jdbcType=INTEGER},
-		#{ip,jdbcType=VARCHAR}, #{processStatus,jdbcType=INTEGER},
-		#{approveStatus,jdbcType=INTEGER}, #{finalContent,jdbcType=VARCHAR},
-		#{messageTemplateId,jdbcType=BIGINT},
-		#{processTime,jdbcType=TIMESTAMP}, #{forceActions,jdbcType=VARCHAR},
+		#{ip,jdbcType=VARCHAR},
+		#{processStatus,jdbcType=INTEGER},
+		#{approveStatus,jdbcType=INTEGER},
+		#{finalBody,jdbcType=VARCHAR},
+		#{processTime,jdbcType=TIMESTAMP},
+		#{forceActions,jdbcType=VARCHAR},
 		#{remark,jdbcType=VARCHAR},
 		#{createTime,jdbcType=TIMESTAMP},
-		#{createUnixtime,jdbcType=BIGINT}, #{mobile,jdbcType=LONGVARCHAR},
+		#{createUnixtime,jdbcType=BIGINT},
+		#{mobile,jdbcType=LONGVARCHAR},
 		#{errorMobiles,jdbcType=LONGVARCHAR},
 		#{repeatMobiles,jdbcType=LONGVARCHAR},
 		#{blackMobiles,jdbcType=LONGVARCHAR}
@@ -113,11 +126,17 @@
 			<if test="appType != null">
 				app_type,
 			</if>
+			<if test="sendType != null">
+				send_type,
+			</if>
+			<if test="modelId != null">
+				body,
+			</if>
 			<if test="title != null">
 				title,
 			</if>
-			<if test="content != null">
-				content,
+			<if test="body != null">
+				body,
 			</if>
 			<if test="extNumber != null">
 				ext_number,
@@ -143,11 +162,8 @@
 			<if test="approveStatus != null">
 				approve_status,
 			</if>
-			<if test="finalContent != null">
-				final_content,
-			</if>
-			<if test="messageTemplateId != null">
-				message_template_id,
+			<if test="finalBody != null">
+				final_body,
 			</if>
 			<if test="processTime != null">
 				process_time,
@@ -187,11 +203,17 @@
 			<if test="appType != null">
 				#{appType,jdbcType=TINYINT},
 			</if>
+			<if test="sendType != null">
+				#{sendType,jdbcType=INTEGER},
+			</if>
+			<if test="modelId != null">
+				#{modelId,jdbcType=VARCHAR},
+			</if>
 			<if test="title != null">
 				#{title,jdbcType=VARCHAR},
 			</if>
-			<if test="content != null">
-				#{content,jdbcType=VARCHAR},
+			<if test="body != null">
+				#{body,jdbcType=VARCHAR},
 			</if>
 			<if test="extNumber != null">
 				#{extNumber,jdbcType=VARCHAR},
@@ -217,11 +239,8 @@
 			<if test="approveStatus != null">
 				#{approveStatus,jdbcType=INTEGER},
 			</if>
-			<if test="finalContent != null">
-				#{finalContent,jdbcType=VARCHAR},
-			</if>
-			<if test="messageTemplateId != null">
-				#{messageTemplateId,jdbcType=BIGINT},
+			<if test="finalBody != null">
+				#{finalBody,jdbcType=VARCHAR},
 			</if>
 			<if test="processTime != null">
 				#{processTime,jdbcType=TIMESTAMP},
@@ -264,11 +283,17 @@
 			<if test="appType != null">
 				app_type = #{appType,jdbcType=TINYINT},
 			</if>
+			<if test="sendType != null">
+				send_type = #{sendType,jdbcType=INTEGER},
+			</if>
+			<if test="modelId != null">
+				model_id = #{modelId,jdbcType=VARCHAR},
+			</if>
 			<if test="title != null">
 				title = #{title,jdbcType=VARCHAR},
 			</if>
-			<if test="content != null">
-				content = #{content,jdbcType=VARCHAR},
+			<if test="body != null">
+				body = #{body,jdbcType=VARCHAR},
 			</if>
 			<if test="extNumber != null">
 				ext_number = #{extNumber,jdbcType=VARCHAR},
@@ -294,12 +319,8 @@
 			<if test="approveStatus != null">
 				approve_status = #{approveStatus,jdbcType=INTEGER},
 			</if>
-			<if test="finalContent != null">
-				final_content = #{finalContent,jdbcType=VARCHAR},
-			</if>
-			<if test="messageTemplateId != null">
-				message_template_id =
-				#{messageTemplateId,jdbcType=BIGINT},
+			<if test="finalBody != null">
+				final_body = #{finalBody,jdbcType=VARCHAR},
 			</if>
 			<if test="processTime != null">
 				process_time = #{processTime,jdbcType=TIMESTAMP},
@@ -338,24 +359,29 @@
 		sid =
 		#{sid,jdbcType=BIGINT},
 		app_type = #{appType,jdbcType=TINYINT},
+		send_type = #{appType,jdbcType=INTEGER},
+		model_id =
+		#{modelId,jdbcType=VARCHAR},
 		title =
 		#{title,jdbcType=VARCHAR},
-		content = #{content,jdbcType=VARCHAR},
-		ext_number = #{extNumber,jdbcType=VARCHAR},
+		body =
+		#{body,jdbcType=VARCHAR},
+		ext_number =
+		#{extNumber,jdbcType=VARCHAR},
 		attach =
 		#{attach,jdbcType=VARCHAR},
-		callback = #{callback,jdbcType=VARCHAR},
+		callback =
+		#{callback,jdbcType=VARCHAR},
 		fee = #{fee,jdbcType=INTEGER},
-		return_fee =
+		return_fee
+		=
 		#{returnFee,jdbcType=INTEGER},
 		ip = #{ip,jdbcType=VARCHAR},
 		process_status = #{processStatus,jdbcType=INTEGER},
 		approve_status =
 		#{approveStatus,jdbcType=INTEGER},
-		final_content =
-		#{finalContent,jdbcType=VARCHAR},
-		message_template_id =
-		#{messageTemplateId,jdbcType=BIGINT},
+		final_body =
+		#{finalBody,jdbcType=VARCHAR},
 		process_time =
 		#{processTime,jdbcType=TIMESTAMP},
 		force_actions =
@@ -379,9 +405,12 @@
 		set user_id = #{userId,jdbcType=INTEGER},
 		sid = #{sid,jdbcType=BIGINT},
 		app_type = #{appType,jdbcType=TINYINT},
+		send_type =
+		#{sendType,jdbcType=INTEGER},
+		model_id = #{modelId,jdbcType=VARCHAR},
 		title =
 		#{title,jdbcType=VARCHAR},
-		content = #{content,jdbcType=VARCHAR},
+		body = #{body,jdbcType=VARCHAR},
 		ext_number = #{extNumber,jdbcType=VARCHAR},
 		attach =
 		#{attach,jdbcType=VARCHAR},
@@ -393,10 +422,8 @@
 		process_status = #{processStatus,jdbcType=INTEGER},
 		approve_status =
 		#{approveStatus,jdbcType=INTEGER},
-		final_content =
-		#{finalContent,jdbcType=VARCHAR},
-		message_template_id =
-		#{messageTemplateId,jdbcType=BIGINT},
+		final_body =
+		#{finalBody,jdbcType=VARCHAR},
 		process_time =
 		#{processTime,jdbcType=TIMESTAMP},
 		force_actions =
@@ -507,16 +534,19 @@
 	</select>
 
 	<insert id="batchInsert" parameterType="List">
-		insert into mms_mt_task (user_id, sid, app_type,
-		title, content,
+		insert into mms_mt_task (user_id, sid, app_type, send_time, model_id,
+		title, body,
 		ext_number,
 		attach, callback, fee,
-		return_fee, ip, process_status,
-		approve_status, final_content, message_template_id,
+		return_fee, ip,
+		process_status,
+		approve_status, final_body,
 		process_time,
-		force_actions, remark,
+		force_actions,
+		remark,
 		create_time, create_unixtime, mobile,
-		error_mobiles, repeat_mobiles, black_mobiles)
+		error_mobiles,
+		repeat_mobiles, black_mobiles)
 		values
 
 		<foreach collection="list" item="task" index="index"
@@ -524,8 +554,10 @@
 			(#{task.userId,jdbcType=INTEGER},
 			#{task.sid,jdbcType=BIGINT},
 			#{task.appType,jdbcType=TINYINT},
+			#{task.sendType,jdbcType=INTEGER},
+			#{task.modelId,jdbcType=VARCHAR},
 			#{task.title,jdbcType=VARCHAR},
-			#{task.content,jdbcType=VARCHAR},
+			#{task.body,jdbcType=VARCHAR},
 			#{task.extNumber,jdbcType=VARCHAR},
 			#{task.attach,jdbcType=VARCHAR},
 			#{task.callback,jdbcType=VARCHAR},
@@ -534,8 +566,7 @@
 			#{task.ip,jdbcType=VARCHAR},
 			#{task.processStatus,jdbcType=INTEGER},
 			#{task.approveStatus,jdbcType=INTEGER},
-			#{task.finalContent,jdbcType=VARCHAR},
-			#{task.messageTemplateId,jdbcType=BIGINT},
+			#{task.finalBody,jdbcType=VARCHAR},
 			#{task.processTime,jdbcType=TIMESTAMP},
 			#{task.forceActions,jdbcType=VARCHAR},
 			#{task.remark,jdbcType=VARCHAR},

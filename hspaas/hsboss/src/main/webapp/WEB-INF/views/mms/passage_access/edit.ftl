@@ -39,15 +39,15 @@
                             </div>
                             <!-- Panel body -->
                                <form id="myform" class="form-horizontal">
-                                  <input type="hidden" name="smsPassageAccess.id" value="${smsPassageAccess.id!''}">
+                                  <input type="hidden" name="mmsPassageAccess.id" value="${mmsPassageAccess.id!''}">
                                   <div class="panel-body">
 	                                  <div class="form-group">
 					    			  		<label class="col-xs-2 control-label">通道名称</label>
 								    		<div class="col-xs-4">
-								    			<select id="passageId" name="smsPassageAccess.passageId"  onchange="findPassageParameter();" class="form-control">
+								    			<select id="passageId" name="mmsPassageAccess.passageId"  onchange="findPassageParameter();" class="form-control">
 								    				<#if passageList??>
 										    			<#list passageList as p>
-										    				<option value="${p.id!''}" <#if p.id==smsPassageAccess.passageId>selected</#if>>${p.name!''}</option>
+										    				<option value="${p.id!''}" <#if p.id==mmsPassageAccess.passageId>selected</#if>>${p.name!''}</option>
 										    			</#list>
 									    			</#if>
 								    			</select>
@@ -56,7 +56,7 @@
 								    	<div class="form-group">
 					    			  		<label class="col-xs-2 control-label">通道状态</label>
 								    		<div class="col-xs-4">
-								    			<#if smsPassageAccess.status == 0>
+								    			<#if mmsPassageAccess.status == 0>
 		                                            <span class="label label-success">使用中</span>
 		                                        <#else>
 		                                        	<span class="label label-danger">停用</span>
@@ -66,79 +66,79 @@
 							    		<div class="form-group">
 	                                        <label class="col-xs-2 control-label">通道地址</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.url" value="${smsPassageAccess.url!''}" id="url" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.url" value="${mmsPassageAccess.url!''}" id="url" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">结果格式</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.resultFormat" value="${smsPassageAccess.resultFormat!''}" id="resultFormat" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.resultFormat" value="${mmsPassageAccess.resultFormat!''}" id="resultFormat" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">成功代码</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.successCode" value="${smsPassageAccess.successCode!''}" id="successCode" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.successCode" value="${mmsPassageAccess.successCode!''}" id="successCode" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">定位解析</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.position" value="${smsPassageAccess.position!''}" id="position" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.position" value="${mmsPassageAccess.position!''}" id="position" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">路由类型</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.routeType" value="${smsPassageAccess.routeTypeText!''}" id="routeType" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.routeType" value="${mmsPassageAccess.routeTypeText!''}" id="routeType" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">省份名称</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.provinceName" value="${smsPassageAccess.provinceName!''}" id="provinceName" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.provinceName" value="${mmsPassageAccess.provinceName!''}" id="provinceName" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">运营商</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.cmcpName" value="${smsPassageAccess.cmcpName!''}" id="cmcpName" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.cmcpName" value="${mmsPassageAccess.cmcpName!''}" id="cmcpName" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">号码分包数</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.mobileSize" value="${smsPassageAccess.mobileSize!''}" id="mobileSize" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.mobileSize" value="${mmsPassageAccess.mobileSize!''}" id="mobileSize" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">流速</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.packetsSize" value="${smsPassageAccess.packetsSize!''}" id="packetsSize" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.packetsSize" value="${mmsPassageAccess.packetsSize!''}" id="packetsSize" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">最大连接数</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.connectionSize" value="${smsPassageAccess.connectionSize!''}" id="connectionSize" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.connectionSize" value="${mmsPassageAccess.connectionSize!''}" id="connectionSize" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">请求超时时间（毫秒）</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.readTimeout" value="${smsPassageAccess.readTimeout!''}" id="connectionSize" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.readTimeout" value="${mmsPassageAccess.readTimeout!''}" id="connectionSize" readonly="true" />
 	                                        </div>
 			                        	</div>
 			                        	<div class="form-group">
 	                                        <label class="col-xs-2 control-label">接入号码</label>
 	                                        <div class="col-xs-4">
-	                                            <input type="text" class="form-control validate[required]" name="smsPassageAccess.accessCode" value="${smsPassageAccess.accessCode!''}" id="accessCode" readonly="true" />
+	                                            <input type="text" class="form-control validate[required]" name="mmsPassageAccess.accessCode" value="${mmsPassageAccess.accessCode!''}" id="accessCode" readonly="true" />
 	                                        </div>
 			                        	</div>
 	                                    <div class="form-group">
 	                                        <label class="col-xs-2 control-label">通道参数</label>
 	                                        <div class="col-xs-5">
-	                                             <textarea class="form-control validate[required,maxSize[1000]]" readonly="true" id="paramsDefinition" name="smsPassageAccess.paramsDefinition" rows="8">${smsPassageAccess.paramsDefinition!''}</textarea>
+	                                             <textarea class="form-control validate[required,maxSize[1000]]" readonly="true" id="paramsDefinition" name="mmsPassageAccess.paramsDefinition" rows="8">${mmsPassageAccess.paramsDefinition!''}</textarea>
 	                                        </div>
 	                                    </div>
 	                                    <div class="form-group">

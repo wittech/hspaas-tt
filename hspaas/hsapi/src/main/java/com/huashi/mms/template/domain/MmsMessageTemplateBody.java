@@ -3,21 +3,37 @@ package com.huashi.mms.template.domain;
 import java.util.Date;
 
 public class MmsMessageTemplateBody {
-    private Long id;
 
-    private Long templateId;
+    private Long             id;
 
-    private String mediaName;
+    private Long             templateId;
 
-    private String mediaType;
+    private String           mediaName;
 
-    private String content;
+    private String           mediaType;
 
-    private Byte sort;
+    private String           content;
 
-    private Date createTime;
+    private Integer          sort;
 
-    private Date updateTime;
+    private Date             createTime;
+
+    private Date             updateTime;
+
+    /**
+     * OSS 资源URL信息
+     */
+    private String           url;
+
+    /**
+     * HTML
+     */
+    private String           html;
+
+    /**
+     * 二进制数据（不做序列化）
+     */
+    private transient byte[] data;
 
     public Long getId() {
         return id;
@@ -59,11 +75,11 @@ public class MmsMessageTemplateBody {
         this.content = content == null ? null : content.trim();
     }
 
-    public Byte getSort() {
+    public Integer getSort() {
         return sort;
     }
 
-    public void setSort(Byte sort) {
+    public void setSort(Integer sort) {
         this.sort = sort;
     }
 
@@ -82,4 +98,29 @@ public class MmsMessageTemplateBody {
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
 }

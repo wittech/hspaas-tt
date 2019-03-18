@@ -1,4 +1,4 @@
-package com.huashi.developer.validator;
+package com.huashi.developer.validator.sms;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +17,12 @@ import com.huashi.common.user.model.P2pBalanceResponse;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.constants.OpenApiCode.SmsApiCode;
 import com.huashi.developer.exception.ValidateException;
 import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.model.SmsP2PModel;
+import com.huashi.developer.model.sms.SmsP2PSendRequest;
+import com.huashi.developer.validator.PassportValidator;
+import com.huashi.developer.validator.Validator;
 
 @Component
 public class SmsP2PValidator extends Validator {
@@ -37,21 +40,21 @@ public class SmsP2PValidator extends Validator {
      * @return
      * @throws ValidateException
      */
-    public SmsP2PModel validate(Map<String, String[]> paramMap, String ip) throws ValidateException {
+    public SmsP2PSendRequest validate(Map<String, String[]> paramMap, String ip) throws ValidateException {
 
-        SmsP2PModel model = new SmsP2PModel();
-        super.validateAndParseFields(model, paramMap);
-        
+        SmsP2PSendRequest smsP2PSendRequest = new SmsP2PSendRequest();
+        super.validateAndParseFields(smsP2PSendRequest, paramMap);
+
         // 获取授权通行证实体
         PassportModel passportModel = passportValidator.validate(paramMap, ip);
 
-        model.setIp(ip);
-        model.setUserId(passportModel.getUserId());
+        smsP2PSendRequest.setIp(ip);
+        smsP2PSendRequest.setUserId(passportModel.getUserId());
 
         // 点对点短信如果内容为空，则返回错误码
-        String body = model.getBody();
+        String body = smsP2PSendRequest.getBody();
         if (StringUtils.isEmpty(body)) {
-            throw new ValidateException(CommonApiCode.COMMON_P2P_BODY_IS_WRONG);
+            throw new ValidateException(SmsApiCode.SMS_P2P_BODY_IS_WRONG);
         }
 
         List<JSONObject> p2pBodies = JSON.parseObject(body, new TypeReference<List<JSONObject>>() {
@@ -61,7 +64,7 @@ public class SmsP2PValidator extends Validator {
         removeElementWhenNodeIsEmpty(p2pBodies);
 
         if (CollectionUtils.isEmpty(p2pBodies)) {
-            throw new ValidateException(CommonApiCode.COMMON_P2P_BODY_IS_WRONG);
+            throw new ValidateException(SmsApiCode.SMS_P2P_BODY_IS_WRONG);
         }
 
         P2pBalanceResponse p2pBalanceResponse;
@@ -84,13 +87,13 @@ public class SmsP2PValidator extends Validator {
             throw new ValidateException(CommonApiCode.COMMON_BALANCE_NOT_ENOUGH);
         }
 
-        model.setFee(p2pBalanceResponse.getTotalFee());
-        model.setTotalFee(p2pBalanceResponse.getTotalFee());
-        model.setIp(ip);
-        model.setUserId(passportModel.getUserId());
-        model.setP2pBodies(p2pBalanceResponse.getP2pBodies());
+        smsP2PSendRequest.setFee(p2pBalanceResponse.getTotalFee());
+        smsP2PSendRequest.setTotalFee(p2pBalanceResponse.getTotalFee());
+        smsP2PSendRequest.setIp(ip);
+        smsP2PSendRequest.setUserId(passportModel.getUserId());
+        smsP2PSendRequest.setP2pBodies(p2pBalanceResponse.getP2pBodies());
 
-        return model;
+        return smsP2PSendRequest;
     }
 
     /**
@@ -100,7 +103,7 @@ public class SmsP2PValidator extends Validator {
      */
     private void removeElementWhenNodeIsEmpty(List<JSONObject> p2pBodies) throws ValidateException {
         if (CollectionUtils.isEmpty(p2pBodies)) {
-            throw new ValidateException(CommonApiCode.COMMON_P2P_BODY_IS_WRONG);
+            throw new ValidateException(SmsApiCode.SMS_P2P_BODY_IS_WRONG);
         }
 
         List<JSONObject> removeBodies = new ArrayList<>();

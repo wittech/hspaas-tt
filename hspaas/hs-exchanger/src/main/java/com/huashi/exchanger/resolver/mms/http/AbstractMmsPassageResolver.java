@@ -17,6 +17,7 @@ import com.huashi.exchanger.template.vo.TParameter;
 import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.record.domain.MmsMoMessageReceive;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 /**
  * TODO HTTP基础处理器
@@ -124,7 +125,7 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
      * @return
      */
     public List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber,
-                                           String title, String body) {
+                                           String title, List<MmsMessageTemplateBody> bobies) {
         throw new UnsupportedOperationException("Code [" + code() + "] custom body api is not supported");
     }
 
@@ -189,5 +190,27 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
             return DateUtil.getNow();
         }
     }
+
+    /**
+     * TODO 生成彩信模板标题
+     * 
+     * @param id
+     * @return
+     */
+    protected String generateModelTitle(Long id) {
+        return "HsppasMmsTitle[" + id + "] code-[" + code() + "]";
+    }
+
+    /**
+     * TODO 生成彩信模板名称
+     * 
+     * @param id
+     * @return
+     */
+    protected String generateModelName(Long id) {
+        return "HsppasMmsName[" + id + "] code-[" + code() + "]";
+    }
+
+    // protected boolean
 
 }

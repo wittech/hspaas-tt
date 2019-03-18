@@ -35,7 +35,7 @@ public class UserSmsConfigService implements IUserSmsConfigService {
     @Resource
     private StringRedisTemplate  stringRedisTemplate;
 
-    private Logger               logger         = LoggerFactory.getLogger(getClass());
+    private final Logger         logger         = LoggerFactory.getLogger(getClass());
 
     // 短信配置 KEY
     public static final String   SMS_CONFIG_KEY = "sms_words";
@@ -48,10 +48,10 @@ public class UserSmsConfigService implements IUserSmsConfigService {
 
         try {
             String text = stringRedisTemplate.opsForValue().get(getKey(userId));
-            if(StringUtils.isNotEmpty(text)) {
+            if (StringUtils.isNotEmpty(text)) {
                 return JSON.parseObject(text, UserSmsConfig.class);
             }
-            
+
         } catch (Exception e) {
             logger.warn("REDIS获取用户短信配置失败", e);
         }
@@ -64,9 +64,9 @@ public class UserSmsConfigService implements IUserSmsConfigService {
     }
 
     /**
+     * TODO 默认初始化配置
      * 
-       * TODO 默认初始化配置
-       * @return
+     * @return
      */
     private UserSmsConfig defaultConfig() {
         UserSmsConfig userSmsConfig = new UserSmsConfig();

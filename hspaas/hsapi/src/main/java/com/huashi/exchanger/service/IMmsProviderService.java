@@ -11,6 +11,7 @@ import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.record.domain.MmsMoMessageReceive;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 /**
  * TODO 彩信服务接口
@@ -48,12 +49,12 @@ public interface IMmsProviderService {
      * @param mobile
      * @param extNumber
      * @param title
-     * @param body
+     * @param bobies
      * @return
      * @throws ExchangeProcessException
      */
     List<ProviderSendResponse> sendMms(MmsPassageParameter parameter, String mobile, String extNumber, String title,
-                                       String body) throws ExchangeProcessException;
+                                       List<MmsMessageTemplateBody> bobies) throws ExchangeProcessException;
 
     /**
      * TODO 下行状态报告（推送）

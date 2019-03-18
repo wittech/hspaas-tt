@@ -148,6 +148,11 @@
 			<artifactId>spring-jdbc</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>cn.javaer.aliyun</groupId>
+			<artifactId>aliyun-spring-boot-starter-oss</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

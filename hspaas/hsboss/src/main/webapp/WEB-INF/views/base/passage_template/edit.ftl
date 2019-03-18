@@ -60,31 +60,20 @@
                             <div class="form-group">
                                 <label class="col-xs-2 control-label">模板类型</label>
                                 <div class="col-xs-4">
-                                    <label class="form-radio form-icon"><input type="radio" class="passageType"
-                                                                               id="type_1" name="passageType"
-                                                                               <#if template.passageType == 1>checked</#if>
-                                                                               value="1">短信模板</label>&nbsp;&nbsp;
-                                    <label class="form-radio form-icon"><input type="radio" class="passageType"
-                                                                               id="type_2" name="passageType"
-                                                                               <#if template.passageType == 2>checked</#if>
-                                                                               value="2">流量模板</label>&nbsp;&nbsp;
-                                    <label class="form-radio form-icon"><input type="radio" class="passageType"
-                                                                               id="type_3" name="passageType"
-                                                                               <#if template.passageType == 3>checked</#if>
-                                                                               value="3">语音模板</label>&nbsp;&nbsp;
-                                </div>
-                                <input type="hidden" name="template.passageType" id="passageType"
-                                       value="${template.passageType}">
+                                	<select class="form-control" id="passageType" name="template.passageType">
+                            	   	    <#list passageTempateNames as pn>
+							      		<option value="${(pn.value)!}" <#if template.passageType?? && template.passageType == pn.value>selected</#if>>${(pn.getName())!}</option>
+							            </#list>
+							        </select>
+							    </div>
                                 <label class="col-xs-1 control-label">模板规则</label>
                                 <div class="col-xs-4">
                                     <div class="input-group">
-                                        <select class="form-control" id="ruleType">
-                                            <option value="1">发送模板</option>
-                                            <option value="2">状态回执推送</option>
-                                            <option value="3">状态回执自取</option>
-                                            <option value="4">上行推送</option>
-                                            <option value="5">上行自取</option>
-                                        </select>
+                                    	<select class="form-control" id="ruleType">
+								      		<#list passageTemplateDetailTypes as t>
+								      		<option value="${(t.value)!}">${(t.getName())!}</option>
+								            </#list>
+								        </select>
                                         <span class="input-group-btn">
 										        <button class="btn btn-default" type="button"
                                                         onclick="setRuleDetail();">设置</button>
@@ -99,17 +88,10 @@
                                 <div class="col-xs-10">
                                 <#list template.detailList as pd>
                                     <div class="btn-group showRuleTag_${pd.callType}">
-                                        <#assign showCn = "发送模板">
-                                        <#if pd.callType == 2>
-                                            <#assign showCn = "状态回执推送">
-                                        <#elseif pd.callType == 3>
-                                            <#assign showCn = "状态回执自取">
-                                        <#elseif pd.callType == 4>
-                                            <#assign showCn = "上行推送">
-                                        <#elseif pd.callType == 5>
-                                            <#assign showCn = "上行自取">
-                                        </#if>
-
+                                        <#list passageTemplateDetailTypes as t>
+                                        <#if pd.callType == t.value><#assign showCn = "${(t.getName()!)}"></#if>
+								        </#list>
+                                    
                                         <a class="btn btn-info btn-xs"
                                            onclick="showSelectedRule(${pd.callType});">${showCn}</a>
                                         <a class="btn btn-default btn-xs" onclick="removeSelectedRule(${pd.callType});">删除</a>
@@ -395,8 +377,12 @@
     }
 
     function resetRuleTypeSelectOption() {
-        var ruleCn = ["发送模板", "状态回执推送", "状态回执自取", "上行推送", "上行自取"];
-        var ruleVal = [1, 2, 3, 4, 5];
+        var ruleCn = [];
+		var ruleVal = [];
+		<#list passageTemplateDetailTypes as t>
+			ruleCn[${(t_index)!}] = "${(t.getName())!}";
+			ruleVal[${(t_index)!}] = ${(t.getValue())!};
+        </#list>
 
         var hasRules = $('.detailRuleType');
         var hasRuleTypes = "";
@@ -438,7 +424,12 @@
         var ruleHtml = $('#myModelBody').html();
         $('#ruleDetailDiv').append(ruleHtml);
         $('#detail_form_' + ruleType).hide();
-        var ruleCn = ["发送模板", "状态回执推送", "状态回执自取", "上行推送", "上行自取"];
+        
+        var ruleCn = [];
+		<#list passageTemplateDetailTypes as t>
+			ruleCn[${(t_index)!}] = "${(t.getName())!}";
+        </#list>
+        
         var showCn = ruleCn[parseInt(ruleType) - 1];
         var showTagHtml = '<div class="btn-group showRuleTag_' + ruleType + '">' +
                 '<a class="btn btn-info btn-xs" onclick="showSelectedRule(' + ruleType + ');">' + showCn + '</a>' +

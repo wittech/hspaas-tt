@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.exchanger.constant.ParameterFilterContext;
+import com.huashi.exchanger.domain.ProviderModelResponse;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
@@ -14,6 +15,8 @@ import com.huashi.mms.passage.domain.MmsPassageAccess;
 import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.record.domain.MmsMoMessageReceive;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
+import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 /**
  * TODO http 自定义处理器
@@ -26,32 +29,44 @@ import com.huashi.mms.record.domain.MmsMtMessageDeliver;
 public class MmsHttpSender {
 
     /**
-     * TODO 调用上家通道接口
+     * TODO 调用模板报备接口
+     * 
+     * @param parameter
+     * @param mmsMessageTemplate
+     * @return
+     */
+    public ProviderModelResponse applyModel(MmsPassageParameter parameter, MmsMessageTemplate mmsMessageTemplate) {
+        return AbstractMmsPassageResolver.getInstance(RequestTemplateHandler.parse(parameter.getParams()).customPassage()).applyModel(parameter,
+                                                                                                                                      mmsMessageTemplate);
+    }
+
+    /**
+     * TODO 调用彩信发送接口
      * 
      * @param parameter
      * @param extNumber
      * @param title
-     * @param body
+     * @param bobies
      * @return
      */
-    public List<ProviderSendResponse> post(MmsPassageParameter parameter, String mobile, String extNumber,
-                                           String title, String body) {
+    public List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber,
+                                           String title, List<MmsMessageTemplateBody> bobies) {
         return AbstractMmsPassageResolver.getInstance(RequestTemplateHandler.parse(parameter.getParams()).customPassage()).send(parameter,
                                                                                                                                 mobile,
                                                                                                                                 extNumber,
                                                                                                                                 title,
-                                                                                                                                body);
+                                                                                                                                bobies);
     }
 
     /**
-     * TODO 模板彩信发送
+     * TODO 调用彩信发送接口
      * 
      * @param parameter
      * @param extNumber
      * @param modelId
      * @return
      */
-    public List<ProviderSendResponse> post(MmsPassageParameter parameter, String mobile, String extNumber,
+    public List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber,
                                            String modelId) {
         return AbstractMmsPassageResolver.getInstance(RequestTemplateHandler.parse(parameter.getParams()).customPassage()).send(parameter,
                                                                                                                                 mobile,

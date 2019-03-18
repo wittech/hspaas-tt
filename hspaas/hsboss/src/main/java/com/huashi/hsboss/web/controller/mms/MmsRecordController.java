@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.util.DateUtil;
-import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.ResponseMessage;
 import com.huashi.hsboss.annotation.ActionMode;
 import com.huashi.hsboss.annotation.AuthCode;
@@ -21,47 +20,37 @@ import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
-import com.huashi.sms.passage.service.ISmsPassageService;
-import com.huashi.sms.record.domain.SmsApiFailedRecord;
-import com.huashi.sms.record.service.ISmsApiFaildRecordService;
-import com.huashi.sms.record.service.ISmsMoMessageService;
-import com.huashi.sms.record.service.ISmsMtProcessFailedService;
-import com.huashi.sms.record.service.ISmsMtSubmitService;
-import com.huashi.sms.task.domain.SmsMtTaskPackets;
-import com.huashi.sms.task.service.ISmsMtTaskService;
-import com.huashi.sms.template.service.ISmsTemplateService;
+import com.huashi.mms.passage.service.IMmsPassageService;
+import com.huashi.mms.record.service.IMmsMoMessageService;
+import com.huashi.mms.record.service.IMmsMtSubmitService;
+import com.huashi.mms.task.domain.MmsMtTaskPackets;
+import com.huashi.mms.task.service.IMmsMtTaskService;
+import com.huashi.mms.template.service.IMmsTemplateService;
 import com.jfinal.ext.route.ControllerBind;
 
-/**
- * 短信记录查询 Author youngmeng Created 2016-10-12 20:02
- */
 @ControllerBind(controllerKey = "/mms/record")
 @ViewMenu(code = { MenuCode.MENU_CODE_10003001, MenuCode.MENU_CODE_10003002, MenuCode.MENU_CODE_10003003,
                   MenuCode.MENU_CODE_10003004, MenuCode.MENU_CODE_10003005, MenuCode.MENU_CODE_10003006 })
-public class SmsRecordController extends BaseController {
+public class MmsRecordController extends BaseController {
 
     @Inject.BY_NAME
-    private ISmsMoMessageService       iSmsMoMessageService;
+    private IMmsMoMessageService iMmsMoMessageService;
     @Inject.BY_NAME
-    private ISmsMtProcessFailedService iSmsMtProcessFailedService;
+    private IMmsMtTaskService    iMmsMtTaskService;
     @Inject.BY_NAME
-    private ISmsApiFaildRecordService  iSmsApiFaildRecordService;
+    private IMmsMtSubmitService  iMmsMtSubmitService;
     @Inject.BY_NAME
-    private ISmsMtTaskService          iSmsMtTaskService;
+    private IMmsPassageService   iMmsPassageService;
     @Inject.BY_NAME
-    private ISmsMtSubmitService        iSmsMtSubmitService;
+    private IMmsTemplateService  iMmsTemplateService;
     @Inject.BY_NAME
-    private ISmsPassageService         iSmsPassageService;
-    @Inject.BY_NAME
-    private ISmsTemplateService        iSmsTemplateService;
-    @Inject.BY_NAME
-    private IUserService               iUserService;
+    private IUserService         iUserService;
 
-    private static final Integer       UNWDER_WAY = 0;
-    private static final Integer       COMPLETED  = 1;
+    private static final Integer UNWDER_WAY = 0;
+    private static final Integer COMPLETED  = 1;
 
     public void index() {
-        redirect("/sms/record/under_way_list");
+        redirect("/mms/record/under_way_list");
     }
 
     /**
@@ -76,15 +65,15 @@ public class SmsRecordController extends BaseController {
     public void under_way_list() {
         Map<String, Object> condition = appendTaskQueryParams(UNWDER_WAY);
 
-        setAttr("page", iSmsMtTaskService.findPage(condition));
+        setAttr("page", iMmsMtTaskService.findPage(condition));
         setAttrs(condition);
 
-        setAttr("passageList", iSmsPassageService.findAll());
+        setAttr("passageList", iMmsPassageService.findAll());
         setAttr("userList", iUserService.findAll());
     }
 
     /**
-     * 已完成的短信任务
+     * 已完成的彩信任务
      */
     @ViewMenu(code = MenuCode.MENU_CODE_10003003)
     @AuthCode(code = { OperCode.OPER_CODE_10003003001, OperCode.OPER_CODE_10003003002, OperCode.OPER_CODE_10003003003 })
@@ -92,7 +81,7 @@ public class SmsRecordController extends BaseController {
     public void completed_list() {
         Map<String, Object> condition = appendTaskQueryParams(COMPLETED);
 
-        setAttr("page", iSmsMtTaskService.findPage(condition));
+        setAttr("page", iMmsMtTaskService.findPage(condition));
         setAttrs(condition);
         setAttr("userList", iUserService.findAll());
     }
@@ -104,7 +93,7 @@ public class SmsRecordController extends BaseController {
     @AuthCode(code = OperCode.OPER_CODE_10003001008)
     @ActionMode
     public void child_task() {
-        List<SmsMtTaskPackets> taskList = iSmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
+        List<MmsMtTaskPackets> taskList = iMmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
         setAttr("taskList", taskList);
     }
 
@@ -115,7 +104,7 @@ public class SmsRecordController extends BaseController {
     @AuthCode(code = OperCode.OPER_CODE_10003003001)
     @ActionMode
     public void complate_child_task() {
-        List<SmsMtTaskPackets> taskList = iSmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
+        List<MmsMtTaskPackets> taskList = iMmsMtTaskService.findChildTaskBySid(getParaToLong("sid"));
         setAttr("taskList", taskList);
     }
 
@@ -123,7 +112,7 @@ public class SmsRecordController extends BaseController {
      * TODO 根据运营商查询通道列表信息
      */
     public void passage_list() {
-        renderJson(iSmsPassageService.findByCmcpOrAll(getParaToInt("cmcp")));
+        renderJson(iMmsPassageService.findByCmcpOrAll(getParaToInt("cmcp")));
     }
 
     /**
@@ -155,33 +144,6 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * 调用失败记录
-     */
-    @ViewMenu(code = MenuCode.MENU_CODE_10003005)
-    @AuthCode(code = OperCode.OPER_CODE_10003005001)
-    @ActionMode
-    public void invoke_fail_list() {
-        String keyword = getPara("keyword");
-        BossPaginationVo<SmsApiFailedRecord> page = iSmsApiFaildRecordService.findPage(getPN(), keyword);
-        setAttr("page", page);
-        setAttr("keyword", keyword);
-    }
-
-    /**
-     * 处理失败记录
-     */
-    @ViewMenu(code = MenuCode.MENU_CODE_10003006)
-    @AuthCode(code = OperCode.OPER_CODE_10003006001)
-    @ActionMode
-    public void disponse_fail_list() {
-        String keyword = getPara("keyword");
-        Long sid = getParaToLong("sid");
-        setAttr("page", iSmsMtProcessFailedService.findPage(getPN(), keyword, sid));
-        setAttr("keyword", keyword);
-        setAttr("sid", sid);
-    }
-
-    /**
      * 短信发送记录(短信下行记录查询 submit)
      */
     @ViewMenu(code = MenuCode.MENU_CODE_10003002)
@@ -190,9 +152,9 @@ public class SmsRecordController extends BaseController {
     public void send_record_list() {
         Map<String, Object> condition = appendQueryParams();
 
-        setAttr("page", iSmsMtSubmitService.findPage(condition));
+        setAttr("page", iMmsMtSubmitService.findPage(condition));
         setAttrs(condition);
-        setAttr("passageList", iSmsPassageService.findAll());
+        setAttr("passageList", iMmsPassageService.findAll());
     }
 
     /**
@@ -240,7 +202,7 @@ public class SmsRecordController extends BaseController {
     @AuthCode(code = OperCode.OPER_CODE_10003004001)
     @ActionMode
     public void up_revice_list() {
-        setAttr("page", iSmsMoMessageService.findPage(getPN(), getPara("keyword")));
+        setAttr("page", iMmsMoMessageService.findPage(getPN(), getPara("keyword")));
         setAttr("keyword", getPara("keyword"));
     }
 
@@ -251,29 +213,9 @@ public class SmsRecordController extends BaseController {
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void batchPass() {
         try {
-            renderJson(iSmsMtTaskService.doTaskApproved(getPara("ids")));
+            renderJson(iMmsMtTaskService.doTaskApproved(getPara("ids")));
         } catch (Exception e) {
             renderJson(new ResponseMessage(e.getMessage()));
-        }
-    }
-
-    /**
-     * TODO 同内容批放
-     */
-    @AuthCode(code = { OperCode.OPER_CODE_10003001002 })
-    @ActionMode(type = EnumConstant.ActionType.JSON)
-    public void sameContentPass() {
-        try {
-            int result = iSmsMtTaskService.approvedBySameContent(getPara("content"),
-                                                                 getParaToInt("like_pattern", 0) == 1);
-            if (result >= 0) {
-                renderResultJson(true, String.format("共处理：%d条", result));
-                return;
-            }
-
-            renderResultJson(false);
-        } catch (Exception e) {
-            renderResultJson(false);
         }
     }
 
@@ -284,22 +226,7 @@ public class SmsRecordController extends BaseController {
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void batchRefuse() {
         try {
-            renderResultJson(iSmsMtTaskService.doRejectInTask(getPara("ids")));
-        } catch (Exception e) {
-            renderResultJson(false);
-        }
-    }
-
-    /**
-     * TODO 同内容驳回
-     */
-    @AuthCode(code = { OperCode.OPER_CODE_10003001004 })
-    @ActionMode(type = EnumConstant.ActionType.JSON)
-    public void sameContentReject() {
-        try {
-            int result = iSmsMtTaskService.rejectBySameContent(getPara("content"), getParaToInt("like_pattern", 0) == 1);
-
-            renderResultJson(result >= 0);
+            renderResultJson(iMmsMtTaskService.doRejectInTask(getPara("ids")));
         } catch (Exception e) {
             renderResultJson(false);
         }
@@ -312,7 +239,7 @@ public class SmsRecordController extends BaseController {
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void batchSwitchPassage() {
         try {
-            renderResultJson(iSmsMtTaskService.changeTaskPacketsPassage(getPara("ids"), getParaToInt("switchPassageId")));
+            renderResultJson(iMmsMtTaskService.changeTaskPacketsPassage(getPara("ids"), getParaToInt("switchPassageId")));
         } catch (Exception e) {
             renderResultJson(false);
         }
@@ -324,23 +251,14 @@ public class SmsRecordController extends BaseController {
     @AuthCode(code = { OperCode.OPER_CODE_10003001006 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void repeatTask() {
-        renderResultJson(iSmsMtTaskService.batchDoRePackets(getPara("ids")));
-    }
-
-    /**
-     * TODO 批量更新短信内容
-     */
-    @AuthCode(code = { OperCode.OPER_CODE_10003001007 })
-    @ActionMode(type = EnumConstant.ActionType.JSON)
-    public void batchUpdateContent() {
-        renderResultJson(iSmsMtTaskService.batchUpdateSmsContent(getPara("sidArray"), getPara("content")));
+        renderResultJson(iMmsMtTaskService.batchDoRePackets(getPara("ids")));
     }
 
     /**
      * TODO 驳回（子任务）
      */
     public void refuse_task() {
-        renderResultJson(iSmsMtTaskService.doRejectInTaskPackets(getParaToLong("childId")));
+        renderResultJson(iMmsMtTaskService.doRejectInTaskPackets(getParaToLong("childId")));
     }
 
     /**
@@ -348,7 +266,7 @@ public class SmsRecordController extends BaseController {
      */
     public void pass_task() {
         try {
-            renderResultJson(iSmsMtTaskService.updateTaskPacketsStatus(getParaToLong("childId"), getParaToInt("status")));
+            renderResultJson(iMmsMtTaskService.updateTaskPacketsStatus(getParaToLong("childId"), getParaToInt("status")));
         } catch (Exception e) {
             renderResultJson(false);
         }

@@ -1,6 +1,6 @@
 package com.huashi.sms.template.context;
 
-public class TemplateContext {
+public class SmsTemplateContext {
 
     // 无需检验模板模板ID标识
     public static final long SUPER_TEMPLATE_ID       = 0L;

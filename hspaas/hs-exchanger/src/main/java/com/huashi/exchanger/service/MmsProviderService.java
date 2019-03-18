@@ -26,6 +26,7 @@ import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.record.domain.MmsMoMessageReceive;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 /**
  * TODO 彩信接口提供服务
@@ -49,7 +50,9 @@ public class MmsProviderService implements IMmsProviderService {
 
     @Override
     public ProviderModelResponse applyModel(MmsPassageParameter parameter, MmsMessageTemplate mmsMessageTemplate) {
-        return null;
+        validate(parameter);
+
+        return mmsHttpSender.applyModel(parameter, mmsMessageTemplate);
     }
 
     @Override
@@ -60,7 +63,7 @@ public class MmsProviderService implements IMmsProviderService {
 
         // 判断是否需要限流
         if (!isNeedLimitSpeed(parameter.getProtocol())) {
-            return mmsHttpSender.post(parameter, mobile, extNumber, modelId);
+            return mmsHttpSender.send(parameter, mobile, extNumber, modelId);
         }
 
         // 获取通道对应的流速设置
@@ -77,7 +80,7 @@ public class MmsProviderService implements IMmsProviderService {
         for (String[] m : packets) {
             // 设置acquire 当前分包后的数量
             rateLimiter.acquire(Integer.parseInt(m[0]));
-            List<ProviderSendResponse> reponsePerGroup = mmsHttpSender.post(parameter, m[1], extNumber, modelId);
+            List<ProviderSendResponse> reponsePerGroup = mmsHttpSender.send(parameter, m[1], extNumber, modelId);
             if (CollectionUtils.isEmpty(reponsePerGroup)) {
                 continue;
             }
@@ -90,13 +93,14 @@ public class MmsProviderService implements IMmsProviderService {
 
     @Override
     public List<ProviderSendResponse> sendMms(MmsPassageParameter parameter, String mobile, String extNumber,
-                                              String title, String body) throws ExchangeProcessException {
+                                              String title, List<MmsMessageTemplateBody> bobies)
+                                                                                                throws ExchangeProcessException {
 
         validate(parameter);
 
         // 判断是否需要限流
         if (!isNeedLimitSpeed(parameter.getProtocol())) {
-            return mmsHttpSender.post(parameter, mobile, extNumber, title, body);
+            return mmsHttpSender.send(parameter, mobile, extNumber, title, bobies);
         }
 
         // 获取通道对应的流速设置
@@ -113,7 +117,7 @@ public class MmsProviderService implements IMmsProviderService {
         for (String[] m : packets) {
             // 设置acquire 当前分包后的数量
             rateLimiter.acquire(Integer.parseInt(m[0]));
-            List<ProviderSendResponse> reponsePerGroup = mmsHttpSender.post(parameter, m[1], extNumber, title, body);
+            List<ProviderSendResponse> reponsePerGroup = mmsHttpSender.send(parameter, m[1], extNumber, title, bobies);
             if (CollectionUtils.isEmpty(reponsePerGroup)) {
                 continue;
             }

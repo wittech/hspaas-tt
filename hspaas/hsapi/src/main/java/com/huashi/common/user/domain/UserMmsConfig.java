@@ -11,9 +11,9 @@ public class UserMmsConfig implements Serializable {
 
     private Integer           userId;
 
-    private Integer           smsReturnRule;
+    private Integer           mmsReturnRule;
 
-    private Long              smsTimeout;
+    private Long              mmsTimeout;
 
     private Boolean           messagePass;
 
@@ -44,19 +44,19 @@ public class UserMmsConfig implements Serializable {
     }
 
     public Integer getSmsReturnRule() {
-        return smsReturnRule;
+        return mmsReturnRule;
     }
 
-    public void setSmsReturnRule(Integer smsReturnRule) {
-        this.smsReturnRule = smsReturnRule;
+    public void setSmsReturnRule(Integer mmsReturnRule) {
+        this.mmsReturnRule = mmsReturnRule;
     }
 
     public Long getSmsTimeout() {
-        return smsTimeout;
+        return mmsTimeout;
     }
 
-    public void setSmsTimeout(Long smsTimeout) {
-        this.smsTimeout = smsTimeout;
+    public void setSmsTimeout(Long mmsTimeout) {
+        this.mmsTimeout = mmsTimeout;
     }
 
     public Boolean getMessagePass() {

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import com.huashi.common.passage.context.TemplateEnum.PassageTemplateType;
 import com.huashi.common.passage.domain.PassageTemplate;
 import com.huashi.common.passage.dto.ParseParamDto;
@@ -17,7 +20,7 @@ import com.huashi.common.user.domain.UserProfile;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext;
-import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.exchanger.service.IMmsProviderService;
 import com.huashi.hsboss.annotation.ActionMode;
 import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.annotation.ViewMenu;
@@ -26,85 +29,74 @@ import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
+import com.huashi.mms.passage.domain.MmsPassage;
+import com.huashi.mms.passage.domain.MmsPassageParameter;
+import com.huashi.mms.passage.domain.MmsPassageProvince;
+import com.huashi.mms.passage.service.IMmsPassageAccessService;
+import com.huashi.mms.passage.service.IMmsPassageParameterService;
+import com.huashi.mms.passage.service.IMmsPassageService;
 import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
-import com.huashi.sms.passage.domain.SmsPassage;
-import com.huashi.sms.passage.domain.SmsPassageParameter;
-import com.huashi.sms.passage.domain.SmsPassageProvince;
-import com.huashi.sms.passage.service.ISmsPassageAccessService;
-import com.huashi.sms.passage.service.ISmsPassageParameterService;
-import com.huashi.sms.passage.service.ISmsPassageService;
 import com.jfinal.ext.route.ControllerBind;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
-/**
- * @author ym
- * @created_at 2016年8月25日下午4:15:11
- */
 @ControllerBind(controllerKey = "/mms/passage")
 @ViewMenu(code = MenuCode.MENU_CODE_10001001)
-public class PassageController extends BaseController {
+public class MmsPassageController extends BaseController {
 
     @BY_NAME
-    private ISmsPassageService iSmsPassageService;
+    private IUserService                iUserService;
     @BY_NAME
-    private IPassageTemplateService iPassageTemplateService;
+    private IMmsPassageService          iMmsPassageService;
     @BY_NAME
-    private IUserService iUserService;
+    private IMmsPassageAccessService    iMmsPassageAccessService;
     @BY_NAME
-    private ISmsPassageAccessService iSmsPassageAccessService;
+    private IMmsPassageParameterService iMmsPassageParameterService;
     @BY_NAME
-    private ISmsPassageParameterService iSmsPassageParameterService;
+    private IMmsProviderService         iMmsProviderService;
     @BY_NAME
-    private ISmsProviderService iSmsProviderService;
+    private IProvinceService            iProvinceService;
     @BY_NAME
-    private IProvinceService iProvinceService;
-
+    private IPassageTemplateService     iPassageTemplateService;
 
     /**
-     * 
-       * TODO 列表页面
+     * TODO 列表页面
      */
-    @AuthCode(code= {OperCode.OPER_CODE_10001001001, OperCode.OPER_CODE_10001001002,OperCode.OPER_CODE_10001001003
-			,OperCode.OPER_CODE_10001001004,OperCode.OPER_CODE_10001001005,OperCode.OPER_CODE_10001001006})
-	@ActionMode
+    @AuthCode(code = { OperCode.OPER_CODE_10001001001, OperCode.OPER_CODE_10001001002, OperCode.OPER_CODE_10001001003,
+            OperCode.OPER_CODE_10001001004, OperCode.OPER_CODE_10001001005, OperCode.OPER_CODE_10001001006 })
+    @ActionMode
     public void index() {
         String keyword = getPara("keyword");
-        BossPaginationVo<SmsPassage> page = iSmsPassageService.findPage(getPN(), keyword);
+        BossPaginationVo<MmsPassage> page = iMmsPassageService.findPage(getPN(), keyword);
         setAttr("page", page);
         setAttr("keyword", keyword);
     }
 
     /**
-     * 
-       * TODO 跳转添加页面
+     * TODO 跳转添加页面
      */
-    @AuthCode(code= OperCode.OPER_CODE_10001001001)
-	@ActionMode
+    @AuthCode(code = OperCode.OPER_CODE_10001001001)
+    @ActionMode
     public void add() {
         setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.SMS.getValue()));
         setAttr("cmcp", CommonContext.CMCP.values());
-        setAttr("provinceList",iProvinceService.findAvaiable());
+        setAttr("provinceList", iProvinceService.findAvaiable());
         setAttr("signModes", PassageSignMode.values());
     }
 
     /**
-     * 
-       * TODO 添加
+     * TODO 添加
      */
-    @AuthCode(code= OperCode.OPER_CODE_10001001002)
-	@ActionMode(type = EnumConstant.ActionType.JSON)
+    @AuthCode(code = OperCode.OPER_CODE_10001001002)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void create() {
-        SmsPassage passage = getModel(SmsPassage.class, "passage");
+        MmsPassage passage = getModel(MmsPassage.class, "passage");
         String templateDetails = getPara("templateDetails");
         String provinceCodes = getPara("provinceCodes");
         String[] tdArray = templateDetails.split(",");
         PassageTemplate template = iPassageTemplateService.findById(passage.getHspaasTemplateId());
         for (String templateDetail : tdArray) {
-            SmsPassageParameter parameter = getModel(SmsPassageParameter.class, templateDetail);
+            MmsPassageParameter parameter = getModel(MmsPassageParameter.class, templateDetail);
             parameter.setProtocol(template.getProtocol());
-            //请求参数设置
+            // 请求参数设置
             int currentDetailReqParamNum = getParaToInt("reqParam_" + templateDetail, 0);
             Map<String, String> requestMap = new HashMap<String, String>();
             List<RequestParamDto> reqDtoList = new ArrayList<RequestParamDto>();
@@ -114,7 +106,7 @@ public class PassageController extends BaseController {
                 reqDtoList.add(reqParam);
             }
 
-            //解析解析设置
+            // 解析解析设置
             int currentDetailParseParamNum = getParaToInt("parseRule_" + templateDetail, 0);
             Map<String, String> responseMap = new HashMap<String, String>();
             for (int i = 0; i < currentDetailParseParamNum; i++) {
@@ -129,7 +121,7 @@ public class PassageController extends BaseController {
         }
         passage.setCreateTime(new Date());
         passage.setStatus(0);
-        Map<String,Object> map = iSmsPassageService.create(passage,provinceCodes);
+        Map<String, Object> map = iMmsPassageService.add(passage, provinceCodes);
         renderJson(map);
     }
 
@@ -140,16 +132,14 @@ public class PassageController extends BaseController {
     }
 
     /**
-     * 
-       * TODO 跳转修改页面
+     * TODO 跳转修改页面
      */
-    @AuthCode(code= OperCode.OPER_CODE_10001001002)
-	@ActionMode
+    @AuthCode(code = OperCode.OPER_CODE_10001001002)
+    @ActionMode
     public void edit() {
-        SmsPassage passage = iSmsPassageService.findById(getParaToInt("id"));
-        UserProfile user = iUserService.getProfileByUserId(passage.getExclusiveUserId());
+        MmsPassage passage = iMmsPassageService.findById(getParaToInt("id"));
         setAttr("passage", passage);
-        setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.SMS.getValue()));
+        setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.MMS.getValue()));
         setAttr("signModes", PassageSignMode.values());
         List<Province> provinceList = iProvinceService.findAvaiable();
         Province qg = new Province();
@@ -157,35 +147,31 @@ public class PassageController extends BaseController {
         qg.setName("全国");
         qg.setId(0);
         provinceList.add(qg);
-        List<SmsPassageProvince> passageProvinceList = iSmsPassageService
-                .getPassageProvinceById(passage.getId());
-        out:for(Province province : provinceList){
-            for(SmsPassageProvince passageProvince : passageProvinceList){
-                if(province.getCode().equals(passageProvince.getProvinceCode())){
+        List<MmsPassageProvince> passageProvinceList = iMmsPassageService.getPassageProvinceById(passage.getId());
+        out: for (Province province : provinceList) {
+            for (MmsPassageProvince passageProvince : passageProvinceList) {
+                if (province.getCode().equals(passageProvince.getProvinceCode())) {
                     province.setSelect(1);
                     continue out;
                 }
             }
         }
-        setAttr("provinceList",provinceList);
+        setAttr("provinceList", provinceList);
         setAttr("cmcp", CommonContext.CMCP.values());
-        if (user != null) {
-            setAttr("selectUserName", user.getFullName());
-        }
 
     }
 
-    @AuthCode(code= OperCode.OPER_CODE_10001001002)
-	@ActionMode(type = EnumConstant.ActionType.JSON)
+    @AuthCode(code = OperCode.OPER_CODE_10001001002)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void update() {
-        SmsPassage passage = getModel(SmsPassage.class, "passage");
+        MmsPassage passage = getModel(MmsPassage.class, "passage");
         String templateDetails = getPara("templateDetails");
         String[] tdArray = templateDetails.split(",");
         PassageTemplate template = iPassageTemplateService.findById(passage.getHspaasTemplateId());
         for (String templateDetail : tdArray) {
-            SmsPassageParameter parameter = getModel(SmsPassageParameter.class, templateDetail);
+            MmsPassageParameter parameter = getModel(MmsPassageParameter.class, templateDetail);
             parameter.setProtocol(template.getProtocol());
-            //请求参数设置
+            // 请求参数设置
             int currentDetailReqParamNum = getParaToInt("reqParam_" + templateDetail, 0);
             Map<String, String> requestMap = new HashMap<String, String>();
             List<RequestParamDto> reqDtoList = new ArrayList<RequestParamDto>();
@@ -195,7 +181,7 @@ public class PassageController extends BaseController {
                 reqDtoList.add(reqParam);
             }
 
-            //解析解析设置
+            // 解析解析设置
             int currentDetailParseParamNum = getParaToInt("parseRule_" + templateDetail, 0);
             Map<String, String> responseMap = new HashMap<String, String>();
             for (int i = 0; i < currentDetailParseParamNum; i++) {
@@ -208,41 +194,26 @@ public class PassageController extends BaseController {
             passage.getParameterList().add(parameter);
 
         }
-      
-        renderJson(iSmsPassageService.update(passage, getPara("provinceCodes")));
+
+        renderJson(iMmsPassageService.update(passage, getPara("provinceCodes")));
     }
 
-    @AuthCode(code= OperCode.OPER_CODE_10001001003)
-   	@ActionMode(type = EnumConstant.ActionType.JSON)
+    @AuthCode(code = OperCode.OPER_CODE_10001001003)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void delete() {
-        renderResultJson(iSmsPassageService.deleteById(getParaToInt("id")));
+        renderResultJson(iMmsPassageService.deleteById(getParaToInt("id")));
     }
 
     /**
-     * 
-       * TODO 禁用激活
+     * TODO 禁用激活
      */
-    @AuthCode(code= OperCode.OPER_CODE_10001001004)
-   	@ActionMode(type = EnumConstant.ActionType.JSON)
+    @AuthCode(code = OperCode.OPER_CODE_10001001004)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void disabled() {
         try {
-        	renderResultJson(iSmsPassageService.disabledOrActive(getParaToInt("id"), getParaToInt("flag")));
-		} catch (Exception e) {
-			 renderResultJson(false);
-		}
-    }
-    
-    /**
-     * 
-       * TODO 断开通道连接
-     */
-    @AuthCode(code= OperCode.OPER_CODE_10001001005)
-   	@ActionMode(type = EnumConstant.ActionType.JSON)
-    public void kill() {
-        try {
-            renderResultJson(iSmsPassageService.kill(getParaToInt("id")));
+            renderResultJson(iMmsPassageService.disabledOrActive(getParaToInt("id"), getParaToInt("flag")));
         } catch (Exception e) {
-             renderResultJson(false);
+            renderResultJson(false);
         }
     }
 
@@ -252,8 +223,8 @@ public class PassageController extends BaseController {
         String company = getPara("company");
         String cardNo = getPara("cardNo");
         String state = getPara("state");
-        BossPaginationVo<UserProfile> page = iUserService.findPage(getPN(),
-                fullName, mobile, company, cardNo, state, null);
+        BossPaginationVo<UserProfile> page = iUserService.findPage(getPN(), fullName, mobile, company, cardNo, state,
+                                                                   null);
         page.setJumpPageFunction("userJumpPage");
         setAttr("fullName", fullName);
         setAttr("mobile", mobile);
@@ -267,20 +238,20 @@ public class PassageController extends BaseController {
     /**
      * 通道测试
      */
-    @AuthCode(code= OperCode.OPER_CODE_10001001006)
-   	@ActionMode(type = EnumConstant.ActionType.JSON)
+    @AuthCode(code = OperCode.OPER_CODE_10001001006)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void test() {
         Integer passageId = getParaToInt("passageId");
         String mobile = getPara("mobile");
         String content = getPara("content");
-        
-        renderResultJson(iSmsPassageService.doTestPassage(passageId, mobile, content));
+
+        renderResultJson(iMmsPassageService.doTestPassage(passageId, mobile, content));
     }
 
     public void passage_json() {
-        List<SmsPassage> list = iSmsPassageService.findAll();
+        List<MmsPassage> list = iMmsPassageService.findAll();
         List<Object> jsonList = new ArrayList<Object>();
-        for (SmsPassage passage : list) {
+        for (MmsPassage passage : list) {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("id", passage.getId());
             map.put("name", passage.getName());

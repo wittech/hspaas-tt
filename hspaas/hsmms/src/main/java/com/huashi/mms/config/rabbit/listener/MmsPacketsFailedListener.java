@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.huashi.mms.config.rabbit.AbstartRabbitListener;
 import com.huashi.mms.config.rabbit.constant.RabbitConstant;
-import com.huashi.sms.record.domain.SmsMtMessageSubmit;
-import com.huashi.sms.record.service.ISmsMtSubmitService;
+import com.huashi.mms.record.domain.MmsMtMessageSubmit;
+import com.huashi.mms.record.service.IMmsMtSubmitService;
 import com.rabbitmq.client.Channel;
 
 /**
@@ -27,7 +27,7 @@ import com.rabbitmq.client.Channel;
 public class MmsPacketsFailedListener extends AbstartRabbitListener {
 
 	@Autowired
-	private ISmsMtSubmitService smsMtSubmitService;
+	private IMmsMtSubmitService mmsMtSubmitService;
 	@Autowired
 	private Jackson2JsonMessageConverter messageConverter;
 
@@ -36,12 +36,12 @@ public class MmsPacketsFailedListener extends AbstartRabbitListener {
 	public void onMessage(Message message, Channel channel) throws Exception {
 		
 	    try {
-			SmsMtMessageSubmit submit = (SmsMtMessageSubmit) messageConverter.fromMessage(message);
+	        MmsMtMessageSubmit submit = (MmsMtMessageSubmit) messageConverter.fromMessage(message);
 			
-			List<SmsMtMessageSubmit> submits = new ArrayList<>();
+			List<MmsMtMessageSubmit> submits = new ArrayList<>();
 			submits.add(submit);
 			
-			smsMtSubmitService.doSmsException(submits);
+			mmsMtSubmitService.doSmsException(submits);
 
 		} catch (Exception e) {
 			logger.error("MQ消费分包失败数据异常： {}", messageConverter.fromMessage(message), e);

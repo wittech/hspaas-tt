@@ -29,6 +29,7 @@ import com.huashi.common.user.domain.User;
 import com.huashi.common.user.domain.UserBalance;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.domain.UserFluxDiscount;
+import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.domain.UserPassage;
 import com.huashi.common.user.domain.UserProfile;
 import com.huashi.common.user.domain.UserSmsConfig;
@@ -37,6 +38,7 @@ import com.huashi.common.user.service.IRegisterService;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.user.service.IUserFluxDiscountService;
+import com.huashi.common.user.service.IUserMmsConfigService;
 import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.user.service.IUserSmsConfigService;
@@ -52,6 +54,8 @@ import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
+import com.huashi.mms.passage.domain.MmsPassageGroup;
+import com.huashi.mms.passage.service.IMmsPassageGroupService;
 import com.huashi.sms.passage.domain.SmsPassageGroup;
 import com.huashi.sms.passage.service.ISmsPassageGroupService;
 import com.jfinal.ext.route.ControllerBind;
@@ -89,9 +93,14 @@ public class CustomerController extends BaseController {
     @BY_NAME
     private IUserDeveloperService    iUserDeveloperService;
 
-    @AuthCode(code= {OperCode.OPER_CODE_1001001001, OperCode.OPER_CODE_1001001002,OperCode.OPER_CODE_1001001003001,
-			OperCode.OPER_CODE_1001001004,OperCode.OPER_CODE_1001001005})
-	@ActionMode
+    @BY_NAME
+    private IMmsPassageGroupService  iMmsPassageGroupService;
+    @BY_NAME
+    private IUserMmsConfigService    iUserMmsConfigService;
+
+    @AuthCode(code = { OperCode.OPER_CODE_1001001001, OperCode.OPER_CODE_1001001002, OperCode.OPER_CODE_1001001003001,
+            OperCode.OPER_CODE_1001001004, OperCode.OPER_CODE_1001001005 })
+    @ActionMode
     public void index() {
         String fullName = getPara("fullName");
         String mobile = getPara("mobile");
@@ -112,7 +121,7 @@ public class CustomerController extends BaseController {
 
     }
 
-    @AuthCode(code= {OperCode.OPER_CODE_1001001001})
+    @AuthCode(code = { OperCode.OPER_CODE_1001001001 })
     @ActionMode
     public void add() {
         List<SystemConfig> balanceConfigList = iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_BALANCE.name());
@@ -124,12 +133,14 @@ public class CustomerController extends BaseController {
 
         List<SystemConfig> defaultGroupList = iSystemConfigService.findByType(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name());
         List<SmsPassageGroup> smsPassageGroupList = iSmsPassageGroupService.findAll();
-        // List<FluxPassageGroup> fxPassageGroupList = iFsPassageGroupService.findAll();
+
+        List<MmsPassageGroup> mmsPassageGroupList = iMmsPassageGroupService.findAll();
 
         setAttr("balanceConfigMap", balanceConfigMap);
         setAttr("defaultGroupList", defaultGroupList);
         setAttr("fluxConfigList", fluxConfigList);
         setAttr("smsPassageGroupList", smsPassageGroupList);
+        setAttr("mmsPassageGroupList", mmsPassageGroupList);
 
         setAttr("smsReturnRules", SmsReturnRule.values());
         setAttr("smsMessagePass", SmsMessagePass.values());
@@ -139,7 +150,7 @@ public class CustomerController extends BaseController {
         // setAttr("fxPassageGroupList", fxPassageGroupList);
     }
 
-    @AuthCode(code= {OperCode.OPER_CODE_1001001001})
+    @AuthCode(code = { OperCode.OPER_CODE_1001001001 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void create() {
         User user = getModel(User.class, "user");
@@ -182,6 +193,14 @@ public class CustomerController extends BaseController {
         userVsBalance.setPayType(getParaToInt("vsPayType"));
         balanceList.add(userVsBalance);
 
+        String mms_amount = getPara("mms_amount");
+        UserBalance userMmsBalance = new UserBalance();
+        userMmsBalance.setBalance(Double.valueOf(mms_amount));
+        userMmsBalance.setType(UserBalanceType.MMS.getValue());
+        userMmsBalance.setPaySource(PayContext.PaySource.BOSS_INPUT);
+        userMmsBalance.setPayType(getParaToInt("mmsPayType"));
+        balanceList.add(userMmsBalance);
+
         List<UserPassage> passageList = new ArrayList<UserPassage>();
         UserPassage smsPassage = new UserPassage();
         smsPassage.setCreateTime(new Date());
@@ -200,6 +219,12 @@ public class CustomerController extends BaseController {
         fsPassage.setType(TemplateEnum.PassageTemplateType.FS.getValue());
         fsPassage.setPassageGroupId(getParaToInt("flux_money_group_id"));
         passageList.add(fsPassage);
+
+        UserPassage mmsPassage = new UserPassage();
+        fsPassage.setCreateTime(new Date());
+        fsPassage.setType(TemplateEnum.PassageTemplateType.MMS.getValue());
+        fsPassage.setPassageGroupId(getParaToInt("mms_amount_group_id"));
+        passageList.add(mmsPassage);
 
         UserFluxDiscount userFluxDiscount = new UserFluxDiscount();
         userFluxDiscount.setGlobalCmOff(Double.valueOf(getPara("global_cm")));
@@ -220,9 +245,20 @@ public class CustomerController extends BaseController {
             }
         }
 
+        String mmsSendUrl = getPara("mmsSendUrl");
+        int mmsSendUrlFlag = getParaToInt("mmsSendUrlFlag", 0);
+        int mmsSsendUrlType = getParaToInt("mmsSendUrlType", 0);
+        if (mmsSendUrlFlag == 1) {
+            mmsSendUrlFlag = mmsSsendUrlType;
+            if (mmsSsendUrlType == 0) {
+                mmsSendUrl = "";
+            }
+        }
+
         String smsUpUrl = getPara("smsUpUrl");
         String fluxUrl = getPara("fluxUrl");
         String voiceUrl = getPara("voiceUrl");
+        String mmsUpUrl = getPara("mmsUpUrl");
 
         List<PushConfig> configList = new ArrayList<PushConfig>();
         PushConfig smsConfig = new PushConfig();
@@ -246,6 +282,18 @@ public class CustomerController extends BaseController {
         vsConfig.setType(PushConfigType.VS_SEND_REPORT.getCode());
         configList.add(vsConfig);
 
+        // add by zhengying 20190317 增加彩信推送信息
+        PushConfig mmsConfig = new PushConfig();
+        mmsConfig.setUrl(mmsSendUrl);
+        mmsConfig.setStatus(mmsSendUrlFlag);
+        mmsConfig.setType(PushConfigType.MMS_STATUS_REPORT.getCode());
+        configList.add(mmsConfig);
+
+        PushConfig mmsUpConfig = new PushConfig();
+        mmsUpConfig.setUrl(mmsUpUrl);
+        mmsUpConfig.setType(PushConfigType.MMS_MO_REPORT.getCode());
+        configList.add(mmsUpConfig);
+
         RegisterModel registerModel = new RegisterModel(Source.BOSS_INPUT, user);
         registerModel.setUserBalances(balanceList);
         registerModel.setUserProfile(userProfile);
@@ -259,8 +307,8 @@ public class CustomerController extends BaseController {
         renderResultJson(result);
     }
 
-    @AuthCode(code= {OperCode.OPER_CODE_1001001002})
-   	@ActionMode
+    @AuthCode(code = { OperCode.OPER_CODE_1001001002 })
+    @ActionMode
     public void edit() throws Exception {
         int userId = getParaToInt("id");
         UserProfile profile = iUserService.getProfileByUserId(userId);
@@ -296,6 +344,9 @@ public class CustomerController extends BaseController {
         List<SmsPassageGroup> smsPassageGroupList = iSmsPassageGroupService.findAll();
         setAttr("smsPassageGroupList", smsPassageGroupList);
 
+        List<MmsPassageGroup> mmsPassageGroupList = iMmsPassageGroupService.findAll();
+        setAttr("mmsPassageGroupList", mmsPassageGroupList);
+
         setAttr("discountName", discountName);
         setAttr("discountProperty", discountProperty);
         setAttr("fluxMap", fluxMap);
@@ -321,11 +372,12 @@ public class CustomerController extends BaseController {
         setAttr("smsPickupTemplates", SmsPickupTemplate.values());
         setAttr("smsSignatureSources", SmsSignatureSource.values());
         setAttr("userSmsConfig", iUserSmsConfigService.getByUserId(userId));
+        setAttr("userMmsConfig", iUserMmsConfigService.getByUserId(userId));
     }
 
     // 更新帐号信息
-   	@AuthCode(code= {OperCode.OPER_CODE_1001001002})
-   	@ActionMode(type = EnumConstant.ActionType.JSON)
+    @AuthCode(code = { OperCode.OPER_CODE_1001001002 })
+    @ActionMode(type = EnumConstant.ActionType.JSON)
     public void updateUser() {
         User user = getModel(User.class, "user");
 
@@ -364,6 +416,17 @@ public class CustomerController extends BaseController {
                                                 getPushConfigs(userId), getParaToInt("smsGroupId"),
                                                 getModel(UserSmsConfig.class, "userSmsConfig")));
     }
+    
+    /**
+     * TODO 更新彩信配置信息
+     */
+    public void updateMms() {
+        int userId = getParaToInt("userId");
+
+        renderResultJson(iUserService.updateMms(userId, getPara("balance_4"), getParaToInt("mmsPayType"),
+                                                getMmsPushConfigs(userId), getParaToInt("mmsGroupId"),
+                                                getModel(UserMmsConfig.class, "userMmsConfig")));
+    }
 
     /**
      * TODO 组装上/下行推送配置
@@ -395,6 +458,35 @@ public class CustomerController extends BaseController {
         smsUpConfig.setType(PushConfigType.SMS_MO_REPORT.getCode());
         smsUpConfig.setUserId(userId);
         configList.add(smsUpConfig);
+
+        return configList;
+    }
+    
+    
+    private List<PushConfig> getMmsPushConfigs(Integer userId) {
+        String mmsSendUrl = getPara("mmsSendUrl");
+        int sendUrlFlag = getParaToInt("mmsSendUrlFlag", 0);
+        int sendUrlType = getParaToInt("mmsSendUrlType", 0);
+        if (sendUrlFlag == 1) {
+            sendUrlFlag = sendUrlType;
+            if (sendUrlType == 0) {
+                mmsSendUrl = "";
+            }
+        }
+
+        List<PushConfig> configList = new ArrayList<PushConfig>();
+        PushConfig mmsConfig = new PushConfig();
+        mmsConfig.setUrl(mmsSendUrl);
+        mmsConfig.setStatus(sendUrlFlag);
+        mmsConfig.setType(PushConfigType.MMS_STATUS_REPORT.getCode());
+        mmsConfig.setUserId(userId);
+        configList.add(mmsConfig);
+
+        PushConfig mmsUpConfig = new PushConfig();
+        mmsUpConfig.setUrl(getPara("mmsUpUrl"));
+        mmsUpConfig.setType(PushConfigType.MMS_MO_REPORT.getCode());
+        mmsUpConfig.setUserId(userId);
+        configList.add(mmsUpConfig);
 
         return configList;
     }
@@ -433,7 +525,7 @@ public class CustomerController extends BaseController {
     /**
      * TODO 禁用/启用
      */
-    @AuthCode(code= {OperCode.OPER_CODE_1001001005})
+    @AuthCode(code = { OperCode.OPER_CODE_1001001005 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void disabled() {
         renderResultJson(iUserService.changeStatus(getParaToInt("id"), getPara("flag")));

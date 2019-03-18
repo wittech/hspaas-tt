@@ -9,7 +9,6 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.common.settings.service.IHostWhiteListService;
 import com.huashi.common.user.context.UserContext.UserStatus;
 import com.huashi.common.user.domain.UserDeveloper;
-import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.util.SecurityUtil;
@@ -23,8 +22,6 @@ public class PassportValidator extends Validator {
 
     @Reference
     private IUserService          userService;
-    @Reference
-    private IUserBalanceService   userBalanceService;
     @Reference
     private IUserDeveloperService userDeveloperService;
     @Reference

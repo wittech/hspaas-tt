@@ -14,9 +14,11 @@ public class MmsPassage {
 
     private Integer                   cmcp;
 
-    private Integer                      priority;
+    private Integer                   priority;
 
-    private Integer                      status;
+    private Integer                   hspaasTemplateId;
+
+    private Integer                   status;
 
     private String                    remark;
 
@@ -24,7 +26,7 @@ public class MmsPassage {
 
     private String                    account;
 
-    private Integer                      payType;
+    private Integer                   payType;
 
     private Integer                   balance;
 
@@ -220,5 +222,13 @@ public class MmsPassage {
 
     public void setProvinceList(List<MmsPassageProvince> provinceList) {
         this.provinceList = provinceList;
+    }
+
+    public Integer getHspaasTemplateId() {
+        return hspaasTemplateId;
+    }
+
+    public void setHspaasTemplateId(Integer hspaasTemplateId) {
+        this.hspaasTemplateId = hspaasTemplateId;
     }
 }

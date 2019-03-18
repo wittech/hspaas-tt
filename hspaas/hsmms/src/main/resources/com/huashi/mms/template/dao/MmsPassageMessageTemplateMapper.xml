@@ -1,129 +1,176 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.huashi.mms.template.dao.MmsPassageMessageTemplateMapper" >
-  <resultMap id="BaseResultMap" type="com.huashi.mms.template.domain.MmsPassageMessageTemplate" >
-    <id column="id" property="id" jdbcType="BIGINT" />
-    <result column="template_id" property="templateId" jdbcType="VARCHAR" />
-    <result column="passage_id" property="passageId" jdbcType="INTEGER" />
-    <result column="passage_model_id" property="passageModelId" jdbcType="VARCHAR" />
-    <result column="status" property="status" jdbcType="TINYINT" />
-    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
-    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
-    <result column="remark" property="remark" jdbcType="VARCHAR" />
-  </resultMap>
-  <sql id="Base_Column_List" >
-    id, template_id, passage_id, passage_model_id, status, create_time, update_time, 
-    remark
-  </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
-    <include refid="Base_Column_List" />
-    from mms_passage_message_template
-    where id = #{id,jdbcType=BIGINT}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
-    delete from mms_passage_message_template
-    where id = #{id,jdbcType=BIGINT}
-  </delete>
-  <insert id="insert" parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate" >
-    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into mms_passage_message_template (template_id, passage_id, passage_model_id, 
-      status, create_time, update_time, 
-      remark)
-    values (#{templateId,jdbcType=VARCHAR}, #{passageId,jdbcType=INTEGER}, #{passageModelId,jdbcType=VARCHAR}, 
-      #{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
-      #{remark,jdbcType=VARCHAR})
-  </insert>
-  <insert id="insertSelective" parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate" >
-    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into mms_passage_message_template
-    <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="templateId != null" >
-        template_id,
-      </if>
-      <if test="passageId != null" >
-        passage_id,
-      </if>
-      <if test="passageModelId != null" >
-        passage_model_id,
-      </if>
-      <if test="status != null" >
-        status,
-      </if>
-      <if test="createTime != null" >
-        create_time,
-      </if>
-      <if test="updateTime != null" >
-        update_time,
-      </if>
-      <if test="remark != null" >
-        remark,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="templateId != null" >
-        #{templateId,jdbcType=VARCHAR},
-      </if>
-      <if test="passageId != null" >
-        #{passageId,jdbcType=INTEGER},
-      </if>
-      <if test="passageModelId != null" >
-        #{passageModelId,jdbcType=VARCHAR},
-      </if>
-      <if test="status != null" >
-        #{status,jdbcType=TINYINT},
-      </if>
-      <if test="createTime != null" >
-        #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="updateTime != null" >
-        #{updateTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="remark != null" >
-        #{remark,jdbcType=VARCHAR},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate" >
-    update mms_passage_message_template
-    <set >
-      <if test="templateId != null" >
-        template_id = #{templateId,jdbcType=VARCHAR},
-      </if>
-      <if test="passageId != null" >
-        passage_id = #{passageId,jdbcType=INTEGER},
-      </if>
-      <if test="passageModelId != null" >
-        passage_model_id = #{passageModelId,jdbcType=VARCHAR},
-      </if>
-      <if test="status != null" >
-        status = #{status,jdbcType=TINYINT},
-      </if>
-      <if test="createTime != null" >
-        create_time = #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="updateTime != null" >
-        update_time = #{updateTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="remark != null" >
-        remark = #{remark,jdbcType=VARCHAR},
-      </if>
-    </set>
-    where id = #{id,jdbcType=BIGINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate" >
-    update mms_passage_message_template
-    set template_id = #{templateId,jdbcType=VARCHAR},
-      passage_id = #{passageId,jdbcType=INTEGER},
-      passage_model_id = #{passageModelId,jdbcType=VARCHAR},
-      status = #{status,jdbcType=TINYINT},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      update_time = #{updateTime,jdbcType=TIMESTAMP},
-      remark = #{remark,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=BIGINT}
-  </update>
+<mapper namespace="com.huashi.mms.template.dao.MmsPassageMessageTemplateMapper">
+	<resultMap id="BaseResultMap"
+		type="com.huashi.mms.template.domain.MmsPassageMessageTemplate">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="template_id" property="templateId" jdbcType="BIGINT" />
+		<result column="passage_id" property="passageId" jdbcType="INTEGER" />
+		<result column="passage_model_id" property="passageModelId"
+			jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="TINYINT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, template_id, passage_id, passage_model_id, status,
+		create_time,
+		update_time,
+		remark
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage_message_template
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		mms_passage_message_template
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert"
+		parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage_message_template (template_id, passage_id,
+		passage_model_id,
+		status, create_time, update_time,
+		remark)
+		values
+		(#{templateId,jdbcType=BIGINT}, #{passageId,jdbcType=INTEGER},
+		#{passageModelId,jdbcType=VARCHAR},
+		#{status,jdbcType=TINYINT},
+		#{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+		#{remark,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective"
+		parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into mms_passage_message_template
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="templateId != null">
+				template_id,
+			</if>
+			<if test="passageId != null">
+				passage_id,
+			</if>
+			<if test="passageModelId != null">
+				passage_model_id,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="templateId != null">
+				#{templateId,jdbcType=BIGINT},
+			</if>
+			<if test="passageId != null">
+				#{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="passageModelId != null">
+				#{passageModelId,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate">
+		update mms_passage_message_template
+		<set>
+			<if test="templateId != null">
+				template_id = #{templateId,jdbcType=BIGINT},
+			</if>
+			<if test="passageId != null">
+				passage_id = #{passageId,jdbcType=INTEGER},
+			</if>
+			<if test="passageModelId != null">
+				passage_model_id = #{passageModelId,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey"
+		parameterType="com.huashi.mms.template.domain.MmsPassageMessageTemplate">
+		update mms_passage_message_template
+		set template_id =
+		#{templateId,jdbcType=BIGINT},
+		passage_id =
+		#{passageId,jdbcType=INTEGER},
+		passage_model_id =
+		#{passageModelId,jdbcType=VARCHAR},
+		status =
+		#{status,jdbcType=TINYINT},
+		create_time =
+		#{createTime,jdbcType=TIMESTAMP},
+		update_time =
+		#{updateTime,jdbcType=TIMESTAMP},
+		remark = #{remark,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="selectByMmsTemplateId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage_message_template
+		where template_id = #{templateId}
+		order by update_time desc
+	</select>
+
+	<select id="selectByMmsTemplateIdAndPassageId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage_message_template
+		where template_id = #{templateId} and
+		passage_id = #{passageId} order by pmt.id desc limit 1
+	</select>
+
+	<select id="selectByMmsModelIdAndPassageId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template mmt join mms_passage_message_template pmt on
+		mmt.id = pmt.template_id
+		where mmt.model_id = #{modelId} and
+		pmt.passage_id = #{passageId} order by pmt.id desc limit 1
+	</select>
 </mapper>

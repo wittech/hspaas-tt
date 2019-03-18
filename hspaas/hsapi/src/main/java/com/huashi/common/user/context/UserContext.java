@@ -42,7 +42,7 @@ public class UserContext {
 	 * @date 2016年9月18日 下午6:08:15
 	 */
 	public enum UserBalanceType {
-		DEFAULT(0, "默认余额"), SMS(1, "短信余额"), FS(2, "流量余额"), VS(3, "语音余额");
+		DEFAULT(0, "默认余额"), SMS(1, "短信余额"), FS(2, "流量余额"), VS(3, "语音余额"), MMS(4, "彩信余额");
 
 		private int value;
 

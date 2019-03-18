@@ -81,7 +81,8 @@
 	<dubbo:reference id="iMobileWhiteListService"
 		interface="com.huashi.sms.settings.service.ISmsMobileWhiteListService" />
 	<dubbo:reference id="iMobileBlackListService"
-		interface="com.huashi.sms.settings.service.ISmsMobileBlackListService" timeout="1200000"/>
+		interface="com.huashi.sms.settings.service.ISmsMobileBlackListService"
+		timeout="1200000" />
 	<dubbo:reference id="iHostWhiteListService"
 		interface="com.huashi.common.settings.service.IHostWhiteListService" />
 	<dubbo:reference id="iForbiddenWordsService"
@@ -94,6 +95,9 @@
 
 	<dubbo:reference id="iUserSmsConfigService"
 		interface="com.huashi.common.user.service.IUserSmsConfigService" />
+	<dubbo:reference id="iUserMmsConfigService"
+		interface="com.huashi.common.user.service.IUserMmsConfigService" />
+
 	<dubbo:reference id="iTradeOrderService"
 		interface="com.huashi.bill.order.service.ITradeOrderService" />
 	<dubbo:reference id="iUserDeveloperService"
@@ -114,6 +118,27 @@
 	<dubbo:reference id="iSmsPassageMessageTemplateService"
 		interface="com.huashi.sms.passage.service.ISmsPassageMessageTemplateService" />
 
+
+	<dubbo:reference id="iMmsPassageAccessService"
+		interface="com.huashi.mms.passage.service.IMmsPassageAccessService" />
+	<dubbo:reference id="iMmsPassageService"
+		interface="com.huashi.mms.passage.service.IMmsPassageService" />
+	<dubbo:reference id="iMmsTemplateService"
+		interface="com.huashi.mms.template.service.IMmsTemplateService" />
+	<dubbo:reference id="iMmsMtTaskService"
+		interface="com.huashi.mms.task.service.IMmsMtTaskService" />
+
+	<dubbo:reference id="iMmsPassageParameterService"
+		interface="com.huashi.mms.passage.service.IMmsPassageParameterService" />
+	<dubbo:reference id="iMmsProviderService"
+		interface="com.huashi.exchanger.service.IMmsProviderService" />
+	<dubbo:reference id="iMmsPassageGroupService"
+		interface="com.huashi.mms.passage.service.IMmsPassageGroupService" />
+
+	<dubbo:reference id="iMmsMtSubmitService"
+		interface="com.huashi.mms.record.service.IMmsMtSubmitService" />
+	<dubbo:reference id="iMmsMoMessageService"
+		interface="com.huashi.mms.record.service.IMmsMoMessageService" />
 
 
 	<!-- 定义全局的配置，测试中@Reference的check=false不起作用，在这里配置 -->

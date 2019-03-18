@@ -57,20 +57,21 @@
                                     <div class="form-group">
                                         <label class="col-xs-2 control-label">模板类型</label>
                                         <div class="col-xs-4">
-                                             <label class="form-radio form-icon"><input type="radio" class="passageType" id="type_1" name="passageType" checked value="1">短信模板</label>&nbsp;&nbsp;
-                                             <label class="form-radio form-icon"><input type="radio" class="passageType" id="type_2" name="passageType" value="2">流量模板</label>&nbsp;&nbsp;
-                                             <label class="form-radio form-icon"><input type="radio" class="passageType" id="type_3" name="passageType" value="3">语音模板</label>&nbsp;&nbsp;
+                                        	<div class="input-group">
+                                        		<select class="form-control" id="passageType" name="template.passageType">
+                                        	   	    <#list passageTempateNames as pn>
+										      		<option value="${(pn.value)!}">${(pn.getName())!}</option>
+										            </#list>
+										        </select>
+										    </div>
                                         </div>
-                                        <input type="hidden" name="template.passageType" id="passageType" value="1">
                                         <label class="col-xs-1 control-label">模板规则</label>
                                         <div class="col-xs-4">
                                         	<div class="input-group">
 										      <select class="form-control" id="ruleType">
-										      		<option value="1">发送模板</option>
-										      		<option value="2">状态回执推送</option>
-										      		<option value="3">状态回执自取</option>
-										      		<option value="4">上行推送</option>
-										      		<option value="5">上行自取</option>
+										      		<#list passageTemplateDetailTypes as t>
+										      		<option value="${(t.value)!}">${(t.getName())!}</option>
+										            </#list>
 										      </select>
 										      <span class="input-group-btn">
 										        <button class="btn btn-default" type="button" onclick="setRuleDetail();">设置</button>
@@ -259,8 +260,12 @@
 		}
 		
 		function resetRuleTypeSelectOption(){
-			var ruleCn = ["发送模板","状态回执推送","状态回执自取","上行推送","上行自取"];
-			var ruleVal = [1,2,3,4,5];
+			var ruleCn = [];
+			var ruleVal = [];
+			<#list passageTemplateDetailTypes as t>
+				ruleCn[${(t_index)!}] = "${(t.getName())!}";
+				ruleVal[${(t_index)!}] = ${(t.getValue())!};
+            </#list>
 			
 			var hasRules = $('.detailRuleType');
 			var hasRuleTypes = "";
@@ -302,7 +307,12 @@
 			var ruleHtml = $('#myModelBody').html();
 			$('#ruleDetailDiv').append(ruleHtml);
 			$('#detail_form_'+ruleType).hide();
-			var ruleCn = ["发送模板","状态回执推送","状态回执自取","上行推送","上行自取"];
+			
+			var ruleCn = [];
+			<#list passageTemplateDetailTypes as t>
+				ruleCn[${(t_index)!}] = "${(t.getName())!}";
+            </#list>
+			
 			var showCn = ruleCn[parseInt(ruleType) - 1];
 			var showTagHtml = '<div class="btn-group showRuleTag_'+ruleType+'">'+
                                   '<a class="btn btn-info btn-xs" onclick="showSelectedRule('+ruleType+');">'+showCn+'</a>'+

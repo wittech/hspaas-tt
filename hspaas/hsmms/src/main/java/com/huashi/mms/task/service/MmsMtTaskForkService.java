@@ -39,12 +39,10 @@ import com.huashi.mms.task.dao.MmsMtTaskMapper;
 import com.huashi.mms.task.dao.MmsMtTaskPacketsMapper;
 import com.huashi.mms.task.domain.MmsMtTask;
 import com.huashi.mms.task.domain.MmsMtTaskPackets;
-import com.huashi.mms.template.domain.MmsMessageTemplate;
 import com.huashi.mms.template.service.IMmsTemplateService;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
-import com.huashi.sms.template.context.TemplateContext;
 
 /**
  * TODO 任务并行分发服务（主要针对任务批量审批和批量驳回）
@@ -183,8 +181,6 @@ public class MmsMtTaskForkService {
     private ResponseMessage mulitiTaskApprove(List<MmsMtTask> tasks) {
         // 通道ID下的通道数据
         Map<Integer, MmsPassage> passageContainer = new HashMap<>();
-        // 短信模板ID和短信模板扩展号码对应关系
-        Map<Long, String> tempalteExtNumberRef = new HashMap<>();
 
         // 待更新状态的SID集合，即本次处理成功的SID信息
         // List<Long> avaiableSids = new ArrayList<>();
@@ -221,13 +217,6 @@ public class MmsMtTaskForkService {
                 // 设置最终通道属性[编码，限速大小，签名模式]
                 if (!setTaskPacketsPassageAttribute(packets, passageContainer)) {
                     errorReport.append("sid : [" + task.getSid() + "] 包含通道不可用数据;");
-                    continue M;
-                }
-
-                // 设置短信模板扩展号码
-                if (!setTaskPacketsMessageTemplateExtNumber(packets, tempalteExtNumberRef)) {
-                    errorReport.append("sid : [" + task.getSid() + "] 模板: [" + packets.getMessageTemplateId()
-                                       + "]数据为空;");
                     continue M;
                 }
 
@@ -290,35 +279,6 @@ public class MmsMtTaskForkService {
 
         packets.setPassageCode(passage.getCode());
         packets.setPassageSpeed(passage.getPacketsSize());
-
-        return true;
-    }
-
-    /**
-     * TODO 设置通道子任务短信模板扩展号码信息
-     * 
-     * @param packets
-     * @param tempalteExtNumberRef
-     * @return
-     */
-    private boolean setTaskPacketsMessageTemplateExtNumber(MmsMtTaskPackets packets,
-                                                           Map<Long, String> tempalteExtNumberRef) {
-        // 如果短信模板ID没有，审核通过，则表明不用报备模板
-        if (packets.getMessageTemplateId() == null
-            || packets.getMessageTemplateId() == TemplateContext.SUPER_TEMPLATE_ID) {
-            return true;
-        }
-
-        if (!tempalteExtNumberRef.containsKey(packets.getMessageTemplateId())) {
-            packets.setTemplateExtNumber(tempalteExtNumberRef.get(packets.getMessageTemplateId()));
-        } else {
-            MmsMessageTemplate template = mmsTemplateService.get(packets.getMessageTemplateId());
-            if (template == null) {
-                return false;
-            }
-            tempalteExtNumberRef.put(packets.getMessageTemplateId(), template.getExtNumber());
-            packets.setTemplateExtNumber(template.getExtNumber());
-        }
 
         return true;
     }
@@ -439,7 +399,8 @@ public class MmsMtTaskForkService {
             submit.setSid(packets.getSid());
             submit.setMobile(m);
             submit.setCmcp(CMCP.local(m).getCode());
-            submit.setContent(packets.getContent());
+            submit.setTitle(packets.getTitle());
+            submit.setContent(packets.getBody());
             submit.setAttach(packets.getAttach());
             submit.setPassageId(PassageContext.EXCEPTION_PASSAGE_ID);
             submit.setCreateTime(new Date());

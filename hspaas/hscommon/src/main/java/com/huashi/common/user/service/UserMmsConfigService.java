@@ -90,6 +90,7 @@ public class UserMmsConfigService implements IUserMmsConfigService {
 
         try {
             userMmsConfig.setCreateTime(new Date());
+            userMmsConfig.setUpdateTime(new Date());
 
             int result = userMmsConfigMapper.insertSelective(userMmsConfig);
             if (result > 0) {

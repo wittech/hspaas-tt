@@ -27,7 +27,6 @@ import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.settings.service.IPushConfigService;
 import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.third.service.IMobileLocalService;
-import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.service.IUserMmsConfigService;
 import com.huashi.constants.CommonContext.CMCP;
@@ -43,8 +42,14 @@ import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.passage.service.IMmsPassageService;
 import com.huashi.mms.record.domain.MmsMtMessageSubmit;
 import com.huashi.mms.record.service.IMmsMtSubmitService;
+import com.huashi.mms.task.domain.MmsMtTask;
 import com.huashi.mms.task.domain.MmsMtTaskPackets;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 import com.huashi.mms.template.domain.MmsPassageMessageTemplate;
+import com.huashi.mms.template.service.IMmsPassageTemplateService;
+import com.huashi.mms.template.service.IMmsTemplateBodyService;
+import com.huashi.mms.template.service.IMmsTemplateService;
+import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.context.TaskContext.PacketsApproveStatus;
 import com.rabbitmq.client.Channel;
 
@@ -81,6 +86,32 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
     @Resource
     private ThreadPoolTaskExecutor       threadPoolTaskExecutor;
 
+    @Autowired
+    private IMmsTemplateService          mmsTemplateService;
+    @Autowired
+    private IMmsPassageTemplateService   mmsPassageTemplateService;
+    @Autowired
+    private IMmsTemplateBodyService      mmsTemplateBodyService;
+
+    /**
+     * 扩展号码长度无限
+     */
+    private static final int             PASSAGE_EXT_NUMBER_LENGTH_ENDLESS     = -1;
+
+    /**
+     * 扩展号码不可扩展
+     */
+    private static final int             PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED = 0;
+
+    /**
+     * TODO 是否是短信模板发送模式
+     * 
+     * @return
+     */
+    private boolean isMessageByModelSend(MmsMtTaskPackets packets) {
+        return StringUtils.isNotEmpty(packets.getModelId()) && StringUtils.isEmpty(packets.getBody());
+    }
+
     /**
      * TODO 处理分包产生的数据，并调用上家通道接口
      *
@@ -105,7 +136,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
         try {
             // 组装最终发送短信的扩展号码
             String extNumber = getUserExtNumber(packets.getUserId(), packets.getTemplateExtNumber(),
-                                                packets.getExtNumber(), packets.getContent());
+                                                packets.getExtNumber());
 
             // 获取通道信息
             MmsPassage mmsPassage = mmsPassageService.findById(packets.getFinalPassageId());
@@ -122,11 +153,31 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
                 }
 
                 // 调用网关通道处理器，提交短信信息，并接收回执
-                List<ProviderSendResponse> responses = mmsProviderService.sendMms(getPassageParameter(packets,
-                                                                                                      mmsPassage),
-                                                                                      groupMobile,
-                                                                                      packets.getContent(),
-                                                                                      packets.getSingleFee(), extNumber);
+                List<ProviderSendResponse> responses = null;
+                if (isMessageByModelSend(packets)) {
+
+                    MmsPassageMessageTemplate mmsPassageMessageTemplate = mmsPassageTemplateService.getByMmsModelIdAndPassageId(packets.getModelId(),
+                                                                                                                                mmsPassage.getId());
+                    if (mmsPassageMessageTemplate == null
+                        || StringUtils.isEmpty(mmsPassageMessageTemplate.getPassageModelId())) {
+                        logger.error("通道方模板ID获取失败");
+                        continue;
+                    }
+
+                    packets.setTemplateId(mmsPassageMessageTemplate.getTemplateId());
+
+                    responses = mmsProviderService.sendMms(getPassageParameter(packets, mmsPassage), groupMobile,
+                                                           extNumber, mmsPassageMessageTemplate.getPassageModelId());
+                } else {
+                    List<MmsMessageTemplateBody> bodies = mmsTemplateBodyService.getBodies(packets.getBody());
+                    if (CollectionUtils.isEmpty(bodies)) {
+                        logger.error("资源文件:[" + packets.getBody() + "] 结构体数据获取失败");
+                        continue;
+                    }
+
+                    responses = mmsProviderService.sendMms(getPassageParameter(packets, mmsPassage), groupMobile,
+                                                           extNumber, packets.getTitle(), bodies);
+                }
 
                 // ProviderSendResponse response = list.iterator().next();
                 List<MmsMtMessageSubmit> list = makeSubmitReport(packets, groupMobile, responses, extNumber, pushConfig);
@@ -152,7 +203,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      * @param extNumber 用户自定义扩展号码
      * @return
      */
-    private String getUserExtNumber(Integer userId, String templateExtNumber, String extNumber, String content) {
+    private String getUserExtNumber(Integer userId, String templateExtNumber, String extNumber) {
         // 如果短信模板扩展名不为空，则按照此扩展号码为主（忽略用户短信配置的扩展号码）
         if (StringUtils.isNotEmpty(templateExtNumber)) {
             return templateExtNumber + (StringUtils.isEmpty(extNumber) ? "" : extNumber);
@@ -264,14 +315,14 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
 
         MmsMtMessageSubmit submitTemplate = makeMessageSubmitTemplate(packets, pushConfig, extNumber);
 
-        List<SmsMtMessageSubmit> submits = new ArrayList<>();
+        List<MmsMtMessageSubmit> submits = new ArrayList<>();
 
         // 批量获取手机号码省份归属地
         Map<String, ProvinceLocal> mobileProvinceLocals = mobileLocalService.getByMobiles(mobiles);
 
         for (String mobile : mobiles) {
 
-            SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
+            MmsMtMessageSubmit submit = new MmsMtMessageSubmit();
 
             BeanUtils.copyProperties(submitTemplate, submit);
             submit.setMobile(mobile);
@@ -309,6 +360,9 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
         // mobile子任务中是以逗号隔开的多个手机号码，submit需要分开赋值
         BeanUtils.copyProperties(packets, submitTemplate, "passageId", "mobile");
         submitTemplate.setPassageId(packets.getFinalPassageId());
+        submitTemplate.setTemplateId(packets.getTemplateId());
+        submitTemplate.setTitle(packets.getTitle());
+        submitTemplate.setContent(packets.getBody());
 
         // 推送信息为固定地址或者每次传递地址才需要推送
         if (pushConfig != null && pushConfig.getStatus() != PushConfigStatus.NO.getCode()) {
@@ -330,7 +384,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      * @param responses
      * @param sid
      */
-    private void fillSubmitFromResponse(SmsMtMessageSubmit submit, List<ProviderSendResponse> responses, Long sid) {
+    private void fillSubmitFromResponse(MmsMtMessageSubmit submit, List<ProviderSendResponse> responses, Long sid) {
         // 回执数据可能为空（直连协议常见）
         if (CollectionUtils.isEmpty(responses)) {
             submit.setStatus(MessageSubmitStatus.FAILED.getCode());
@@ -375,18 +429,18 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      * @param mobileReport
      * @param pushConfig
      */
-    private void sendMqueueIfFailed(SmsMtTaskPackets packets, String mobileReport, PushConfig pushConfig) {
+    private void sendMqueueIfFailed(MmsMtTaskPackets packets, String mobileReport, PushConfig pushConfig) {
 
-        SmsMtMessageSubmit submitTemplate = makeMessageSubmitTemplate(packets, pushConfig, null);
+        MmsMtMessageSubmit mmsMtMessageSubmit = makeMessageSubmitTemplate(packets, pushConfig, null);
 
-        submitTemplate.setStatus(MessageSubmitStatus.FAILED.getCode());
-        submitTemplate.setRemark(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
-        submitTemplate.setMsgId(packets.getSid() + "");
+        mmsMtMessageSubmit.setStatus(MessageSubmitStatus.FAILED.getCode());
+        mmsMtMessageSubmit.setRemark(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
+        mmsMtMessageSubmit.setMsgId(packets.getSid() + "");
 
         String[] mobiles = mobileReport.split(",");
         for (String mobile : mobiles) {
-            SmsMtMessageSubmit submit = new SmsMtMessageSubmit();
-            BeanUtils.copyProperties(submitTemplate, submit);
+            MmsMtMessageSubmit submit = new MmsMtMessageSubmit();
+            BeanUtils.copyProperties(mmsMtMessageSubmit, submit);
             submit.setCmcp(CMCP.local(mobile).getCode());
             submit.setMobile(mobile);
 
@@ -407,10 +461,10 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
             Object object = messageConverter.fromMessage(message);
 
             // 针对 人工审核处理，重新入队列，入队列数据为子包
-            if (object instanceof SmsMtTaskPackets) {
-                transport2Gateway((SmsMtTaskPackets) object);
+            if (object instanceof MmsMtTaskPackets) {
+                transport2Gateway((MmsMtTaskPackets) object);
             } else {
-                transport2Gateway((SmsMtTask) object);
+                transport2Gateway((MmsMtTask) object);
             }
 
         } catch (Exception e) {
@@ -427,14 +481,14 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
      *
      * @param task
      */
-    private void transport2Gateway(SmsMtTask task) {
+    private void transport2Gateway(MmsMtTask task) {
         if (task == null) {
             logger.error("待提交队列解析失败，主任务为空");
             return;
         }
 
-        List<SmsMtTaskPackets> list = task.getPackets();
-        for (SmsMtTaskPackets packet : list) {
+        List<MmsMtTaskPackets> list = task.getPackets();
+        for (MmsMtTaskPackets packet : list) {
             if (packet.getStatus() == PacketsApproveStatus.WAITING.getCode()
                 || packet.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
                 logger.info("数据包待处理，无需本次分包处理");

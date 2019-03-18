@@ -64,9 +64,9 @@ import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.huashi.sms.task.exception.QueueProcessException;
 import com.huashi.sms.task.model.SmsRoutePassage;
 import com.huashi.sms.task.service.ISmsMtTaskService;
-import com.huashi.sms.template.context.TemplateContext;
-import com.huashi.sms.template.context.TemplateContext.IgnoreBlacklist;
-import com.huashi.sms.template.context.TemplateContext.IgnoreForbiddenWords;
+import com.huashi.sms.template.context.SmsTemplateContext;
+import com.huashi.sms.template.context.SmsTemplateContext.IgnoreBlacklist;
+import com.huashi.sms.template.context.SmsTemplateContext.IgnoreForbiddenWords;
 import com.huashi.sms.template.domain.MessageTemplate;
 import com.huashi.sms.template.service.ISmsTemplateService;
 import com.rabbitmq.client.Channel;
@@ -706,7 +706,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         // 短信是否免审
         if (!smsConfig.getMessagePass()) {
             template = new MessageTemplate();
-            template.setId(TemplateContext.SUPER_TEMPLATE_ID);
+            template.setId(SmsTemplateContext.SUPER_TEMPLATE_ID);
             template.setRouteType(RouteType.DEFAULT.getValue());
             template.setSubmitInterval(smsConfig.getSubmitInterval());
             template.setLimitTimes(smsConfig.getLimitTimes());
@@ -823,16 +823,16 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         MessageTemplate template = messageTemplateLocal.get();
         if (template == null) {
             template = new MessageTemplate();
-            template.setId(TemplateContext.SUPER_TEMPLATE_ID);
+            template.setId(SmsTemplateContext.SUPER_TEMPLATE_ID);
             template.setLimitTimes(smsConfig.getLimitTimes());
             template.setSubmitInterval(smsConfig.getSubmitInterval());
         } else {
             if (template.getLimitTimes() == null) {
-                template.setLimitTimes(TemplateContext.DEFAULT_LIMIT_TIMES);
+                template.setLimitTimes(SmsTemplateContext.DEFAULT_LIMIT_TIMES);
             }
 
             if (template.getSubmitInterval() == null) {
-                template.setSubmitInterval(TemplateContext.DEFAULT_SUBMIT_INTERVAL);
+                template.setSubmitInterval(SmsTemplateContext.DEFAULT_SUBMIT_INTERVAL);
             }
 
         }

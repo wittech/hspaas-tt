@@ -25,7 +25,7 @@ import com.huashi.developer.validator.annotation.ValidateField;
  */
 public class Validator {
 
-    protected Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger      logger                = LoggerFactory.getLogger(getClass());
 
     /**
      * TODO 验证参数信息并赋值给object
@@ -114,20 +114,20 @@ public class Validator {
 
         return param;
     }
-    
+
     /**
+     * TODO 是否为UTF-8编码
      * 
-       * TODO 是否为UTF-8编码
-       * @param value
-       * @return
+     * @param value
+     * @return
      */
     private boolean isUtf8(String value) {
-//        try {
-//            value.getBytes("utf-8");
-//            return true;
-//        } catch (UnsupportedEncodingException e) {
-//            return false;
-//        }
+        // try {
+        // value.getBytes("utf-8");
+        // return true;
+        // } catch (UnsupportedEncodingException e) {
+        // return false;
+        // }
         return true;
     }
 

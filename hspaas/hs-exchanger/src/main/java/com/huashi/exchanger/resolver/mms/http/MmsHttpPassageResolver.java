@@ -9,6 +9,7 @@ import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.record.domain.MmsMoMessageReceive;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 public interface MmsHttpPassageResolver {
 
@@ -22,29 +23,28 @@ public interface MmsHttpPassageResolver {
     ProviderModelResponse applyModel(MmsPassageParameter parameter, MmsMessageTemplate mmsMessageTemplate);
 
     /**
+     * 发送彩信（模板发送）
      * 
-       * 发送彩信（模板发送）
-       * 
-       * @param parameter
-       * @param mobile
-       * @param extNumber
-       * @param modelId
-       * @return
+     * @param parameter
+     * @param mobile
+     * @param extNumber
+     * @param modelId
+     * @return
      */
     List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber, String modelId);
-    
+
     /**
+     * 发送彩信(自定义内容发送)
      * 
-       * 发送彩信(自定义内容发送)
-       * @param parameter
-       * @param mobile
-       * @param extNumber
-       * @param title
-       *    
-       * @param body
-       * @return
+     * @param parameter
+     * @param mobile
+     * @param extNumber
+     * @param title
+     * @param bobies
+     * @return
      */
-    List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber, String title, String body);
+    List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber, String title,
+                                    List<MmsMessageTemplateBody> bobies);
 
     /**
      * TODO 下行状态报告回执(推送)

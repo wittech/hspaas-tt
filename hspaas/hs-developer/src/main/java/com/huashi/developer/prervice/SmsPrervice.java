@@ -23,9 +23,9 @@ import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.constant.RabbitConstant;
 import com.huashi.developer.constant.RabbitConstant.WordsPriority;
-import com.huashi.developer.model.SmsModel;
-import com.huashi.developer.model.SmsP2PModel;
-import com.huashi.developer.model.SmsP2PTemplateModel;
+import com.huashi.developer.model.sms.SmsP2PSendRequest;
+import com.huashi.developer.model.sms.SmsP2PTemplateSendRequest;
+import com.huashi.developer.model.sms.SmsSendRequest;
 import com.huashi.developer.response.sms.SmsBalanceResponse;
 import com.huashi.developer.response.sms.SmsSendResponse;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
@@ -61,17 +61,17 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendMessage(SmsModel model) {
+    public SmsSendResponse sendMessage(SmsSendRequest smsSendRequest) {
         SmsMtTask task = new SmsMtTask();
 
-        BeanUtils.copyProperties(model, task);
-        task.setAppType(model.getAppType());
+        BeanUtils.copyProperties(smsSendRequest, task);
+        task.setAppType(smsSendRequest.getAppType());
 
         try {
 
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new SmsSendResponse(model.getTotalFee(), sid);
+                return new SmsSendResponse(smsSendRequest.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {
@@ -87,7 +87,7 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendP2PMessage(SmsP2PModel model) {
+    public SmsSendResponse sendP2PMessage(SmsP2PSendRequest model) {
         SmsMtTask task = new SmsMtTask();
 
         BeanUtils.copyProperties(model, task);
@@ -116,7 +116,7 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendP2PTemplateMessage(SmsP2PTemplateModel model) {
+    public SmsSendResponse sendP2PTemplateMessage(SmsP2PTemplateSendRequest model) {
         SmsMtTask task = new SmsMtTask();
 
         BeanUtils.copyProperties(model, task);

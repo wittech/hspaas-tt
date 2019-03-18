@@ -12,6 +12,9 @@ package com.huashi.hsboss.web.controller.base;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.json.JSONArray;
+
+import com.huashi.common.passage.context.TemplateEnum;
 import com.huashi.common.passage.context.TemplateEnum.PassageTemplateDetailType;
 import com.huashi.common.passage.domain.PassageTemplate;
 import com.huashi.common.passage.domain.PassageTemplateDetail;
@@ -29,8 +32,6 @@ import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.jfinal.ext.route.ControllerBind;
-
-import net.sf.json.JSONArray;
 
 /**
  * @author ym
@@ -59,6 +60,8 @@ public class PassageTemplateController extends BaseController{
 	@ActionMode
 	public void add(){
 		setAttr("protocolTypes", CommonContext.ProtocolType.values());
+		setAttr("passageTempateNames", TemplateEnum.PassageTemplateType.values());
+		setAttr("passageTemplateDetailTypes", TemplateEnum.PassageTemplateDetailType.values());
 	}
 	
 	@AuthCode(code= {OperCode.OPER_CODE_1004001001})
@@ -99,6 +102,8 @@ public class PassageTemplateController extends BaseController{
 		PassageTemplate template = iPassageTemplateService.findById(getParaToInt("id"));
 		setAttr("template", template);
 		setAttr("protocolTypes", CommonContext.ProtocolType.values());
+        setAttr("passageTempateNames", TemplateEnum.PassageTemplateType.values());
+        setAttr("passageTemplateDetailTypes", TemplateEnum.PassageTemplateDetailType.values());
 	}
 	
 	@AuthCode(code= {OperCode.OPER_CODE_1004001002})

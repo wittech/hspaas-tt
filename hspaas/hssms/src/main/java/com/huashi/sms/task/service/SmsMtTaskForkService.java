@@ -42,7 +42,7 @@ import com.huashi.sms.task.dao.SmsMtTaskMapper;
 import com.huashi.sms.task.dao.SmsMtTaskPacketsMapper;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
-import com.huashi.sms.template.context.TemplateContext;
+import com.huashi.sms.template.context.SmsTemplateContext;
 import com.huashi.sms.template.domain.MessageTemplate;
 import com.huashi.sms.template.service.ISmsTemplateService;
 
@@ -311,7 +311,7 @@ public class SmsMtTaskForkService {
                                                            Map<Long, String> tempalteExtNumberRef) {
         // 如果短信模板ID没有，审核通过，则表明不用报备模板
         if (packets.getMessageTemplateId() == null
-            || packets.getMessageTemplateId() == TemplateContext.SUPER_TEMPLATE_ID) {
+            || packets.getMessageTemplateId() == SmsTemplateContext.SUPER_TEMPLATE_ID) {
             return true;
         }
 

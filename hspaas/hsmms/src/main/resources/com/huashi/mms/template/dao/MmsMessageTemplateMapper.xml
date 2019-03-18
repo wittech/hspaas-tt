@@ -357,6 +357,12 @@
 		order by priority
 	</select>
 
+	<select id="selectByModelId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_message_template where model_id = #{modelId}
+	</select>
+
 	<select id="findAvaiableByUserIdAndType" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />

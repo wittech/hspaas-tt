@@ -1,4 +1,4 @@
-package com.huashi.developer.validator;
+package com.huashi.developer.validator.sms;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +17,12 @@ import com.huashi.common.user.model.P2pBalanceResponse;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.constants.OpenApiCode.SmsApiCode;
 import com.huashi.developer.exception.ValidateException;
 import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.model.SmsP2PTemplateModel;
+import com.huashi.developer.model.sms.SmsP2PTemplateSendRequest;
+import com.huashi.developer.validator.PassportValidator;
+import com.huashi.developer.validator.Validator;
 
 @Component
 public class SmsP2PTemplateValidator extends Validator {
@@ -37,23 +40,23 @@ public class SmsP2PTemplateValidator extends Validator {
      * @return
      * @throws ValidateException
      */
-    public SmsP2PTemplateModel validate(Map<String, String[]> paramMap, String ip) throws ValidateException {
+    public SmsP2PTemplateSendRequest validate(Map<String, String[]> paramMap, String ip) throws ValidateException {
 
-        SmsP2PTemplateModel model = new SmsP2PTemplateModel();
-        super.validateAndParseFields(model, paramMap);
+        SmsP2PTemplateSendRequest smsP2PTemplateSendRequest = new SmsP2PTemplateSendRequest();
+        super.validateAndParseFields(smsP2PTemplateSendRequest, paramMap);
 
         // 获取授权通行证实体
         PassportModel passportModel = passportValidator.validate(paramMap, ip);
 
-        model.setIp(ip);
-        model.setUserId(passportModel.getUserId());
+        smsP2PTemplateSendRequest.setIp(ip);
+        smsP2PTemplateSendRequest.setUserId(passportModel.getUserId());
 
-        model.setUserId(passportModel.getUserId());
+        smsP2PTemplateSendRequest.setUserId(passportModel.getUserId());
 
         // 点对点短信如果内容为空，则返回错误码
-        String body = model.getBody();
+        String body = smsP2PTemplateSendRequest.getBody();
         if (StringUtils.isEmpty(body)) {
-            throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+            throw new ValidateException(SmsApiCode.SMS_P2P_TEMPLATE_BODY_IS_WRONG);
         }
 
         List<JSONObject> p2pBodies = JSON.parseObject(body, new TypeReference<List<JSONObject>>() {
@@ -63,7 +66,7 @@ public class SmsP2PTemplateValidator extends Validator {
         removeElementWhenNodeIsEmpty(p2pBodies);
 
         if (CollectionUtils.isEmpty(p2pBodies)) {
-            throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+            throw new ValidateException(SmsApiCode.SMS_P2P_TEMPLATE_BODY_IS_WRONG);
         }
 
         P2pBalanceResponse p2pBalanceResponse = null;
@@ -87,13 +90,13 @@ public class SmsP2PTemplateValidator extends Validator {
             throw new ValidateException(CommonApiCode.COMMON_BALANCE_NOT_ENOUGH);
         }
 
-        model.setFee(p2pBalanceResponse.getTotalFee());
-        model.setTotalFee(p2pBalanceResponse.getTotalFee());
-        model.setIp(ip);
-        model.setUserId(passportModel.getUserId());
-        model.setP2pBodies(p2pBalanceResponse.getP2pBodies());
+        smsP2PTemplateSendRequest.setFee(p2pBalanceResponse.getTotalFee());
+        smsP2PTemplateSendRequest.setTotalFee(p2pBalanceResponse.getTotalFee());
+        smsP2PTemplateSendRequest.setIp(ip);
+        smsP2PTemplateSendRequest.setUserId(passportModel.getUserId());
+        smsP2PTemplateSendRequest.setP2pBodies(p2pBalanceResponse.getP2pBodies());
 
-        return model;
+        return smsP2PTemplateSendRequest;
     }
 
     /**
@@ -104,7 +107,7 @@ public class SmsP2PTemplateValidator extends Validator {
      */
     private void removeElementWhenNodeIsEmpty(List<JSONObject> p2pBodies) throws ValidateException {
         if (CollectionUtils.isEmpty(p2pBodies)) {
-            throw new ValidateException(CommonApiCode.COMMON_P2P_TEMPLATE_BODY_IS_WRONG);
+            throw new ValidateException(SmsApiCode.SMS_P2P_TEMPLATE_BODY_IS_WRONG);
         }
 
         List<JSONObject> removeBodies = new ArrayList<>();

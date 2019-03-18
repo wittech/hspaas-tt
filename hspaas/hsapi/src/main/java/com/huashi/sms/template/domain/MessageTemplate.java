@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.huashi.common.user.model.UserModel;
-import com.huashi.sms.template.context.TemplateContext.IgnoreBlacklist;
-import com.huashi.sms.template.context.TemplateContext.IgnoreForbiddenWords;
+import com.huashi.sms.template.context.SmsTemplateContext.IgnoreBlacklist;
+import com.huashi.sms.template.context.SmsTemplateContext.IgnoreForbiddenWords;
 
 public class MessageTemplate implements Serializable {
 

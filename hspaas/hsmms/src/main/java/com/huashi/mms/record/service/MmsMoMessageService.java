@@ -58,17 +58,17 @@ public class MmsMoMessageService implements IMmsMoMessageService {
     @Reference
     private IPushConfigService         pushConfigService;
     @Reference
-    private IMmsPassageService         mmsPassageService;
-    @Reference
     private ISystemConfigService       systemConfigService;
-
+    @Autowired
+    private IMmsPassageService         mmsPassageService;
     @Autowired
     private IMmsMtSubmitService        mmsMtSubmitService;
     @Autowired
     private MmsMoMessagePushMapper     mmsMoMessagePushMapper;
     @Autowired
     private MmsMoMessageReceiveMapper  moMessageReceiveMapper;
-    @Autowired
+    
+    @Reference
     private ISmsMobileBlackListService smsMobileBlackListService;
 
     private final Logger               logger = LoggerFactory.getLogger(getClass());

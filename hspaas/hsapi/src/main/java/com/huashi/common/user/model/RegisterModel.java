@@ -12,6 +12,7 @@ import com.huashi.common.user.domain.User;
 import com.huashi.common.user.domain.UserAccount;
 import com.huashi.common.user.domain.UserBalance;
 import com.huashi.common.user.domain.UserFluxDiscount;
+import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.domain.UserPassage;
 import com.huashi.common.user.domain.UserProfile;
 import com.huashi.common.user.domain.UserSmsConfig;
@@ -25,130 +26,189 @@ import com.huashi.common.user.domain.UserSmsConfig;
  */
 public class RegisterModel implements Serializable {
 
-	private static final long serialVersionUID = 5409614827785405814L;
-	private Source source; // 用户新增来源
-	private boolean isSendEmail = true; // 是否发送注册成功邮件
+    private static final long   serialVersionUID = 5409614827785405814L;
 
-	/****************** 用户账号相关 *****************************/
-	private User user; // 用户账号信息
-	private UserProfile userProfile; // 用户基础信息
+    /**
+     * 用户新增来源
+     */
+    private Source              source;
 
-	/****************** 用户账户金额相关 *****************************/
-	private UserAccount userAccount; // 用户账户金额
-	private List<UserBalance> userBalances; // 用户业务量余额
-	private UserFluxDiscount userFluxDiscount; // 流量折扣信息表
-	private UserSmsConfig userSmsConfig; // 短信配置信息表
-	private InvoiceBalance invoiceBalance; // 可开具发票金额（初始化0）
+    /**
+     * 是否发送注册成功邮件
+     */
+    private boolean             isSendEmail      = true;
 
-	// 用户开户平台通道组信息（初始默认）
-	private List<UserPassage> passageList = new ArrayList<UserPassage>();
+    /****************** 用户账号相关 *****************************/
 
-	/****************** 回调URL初始化相关 *****************************/
-	private List<PushConfig> pushConfigs;// 推送记录四条（短信[上行、下行]，流量状态报告，语音状态报告）
+    /**
+     * 用户账号信息
+     */
+    private User                user;
 
-	/****************** 回调URL初始化相关 *****************************/
-	private NotificationMessage notificationMessage; // 系统消息，开户成功等提示,根据系统模板去取
+    /**
+     * 用户基础信息
+     */
+    private UserProfile         userProfile;
 
-	public User getUser() {
-		return user;
-	}
+    /****************** 用户账户金额相关 *****************************/
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    /**
+     * 用户账户金额
+     */
+    private UserAccount         userAccount;
 
-	public UserProfile getUserProfile() {
-		return userProfile;
-	}
+    /**
+     * 用户业务量余额
+     */
+    private List<UserBalance>   userBalances;
 
-	public void setUserProfile(UserProfile userProfile) {
-		this.userProfile = userProfile;
-	}
+    /**
+     * 流量折扣信息表
+     */
+    private UserFluxDiscount    userFluxDiscount;
 
-	public UserAccount getUserAccount() {
-		return userAccount;
-	}
+    /**
+     * 短信配置信息表
+     */
+    private UserSmsConfig       userSmsConfig;
 
-	public void setUserAccount(UserAccount userAccount) {
-		this.userAccount = userAccount;
-	}
+    /**
+     * 彩信配置信息表
+     */
+    private UserMmsConfig       userMmsConfig;
 
-	public List<UserBalance> getUserBalances() {
-		return userBalances;
-	}
+    /**
+     * 可开具发票金额（初始化0）
+     */
+    private InvoiceBalance      invoiceBalance;
 
-	public void setUserBalances(List<UserBalance> userBalances) {
-		this.userBalances = userBalances;
-	}
+    /**
+     * 用户开户平台通道组信息（初始默认）
+     */
+    private List<UserPassage>   passageList      = new ArrayList<UserPassage>();
 
-	public List<PushConfig> getPushConfigs() {
-		return pushConfigs;
-	}
+    /****************** 回调URL初始化相关 *****************************/
 
-	public void setPushConfigs(List<PushConfig> pushConfigs) {
-		this.pushConfigs = pushConfigs;
-	}
+    /**
+     * 推送记录短信[上行、下行]，流量状态报告，语音状态报告...）
+     */
+    private List<PushConfig>    pushConfigs;
 
-	public UserFluxDiscount getUserFluxDiscount() {
-		return userFluxDiscount;
-	}
+    /****************** 回调URL初始化相关 *****************************/
 
-	public void setUserFluxDiscount(UserFluxDiscount userFluxDiscount) {
-		this.userFluxDiscount = userFluxDiscount;
-	}
+    /**
+     * 系统消息，开户成功等提示,根据系统模板去取
+     */
+    private NotificationMessage notificationMessage;
 
-	public InvoiceBalance getInvoiceBalance() {
-		return invoiceBalance;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setInvoiceBalance(InvoiceBalance invoiceBalance) {
-		this.invoiceBalance = invoiceBalance;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public NotificationMessage getNotificationMessage() {
-		return notificationMessage;
-	}
+    public UserProfile getUserProfile() {
+        return userProfile;
+    }
 
-	public void setNotificationMessage(NotificationMessage notificationMessage) {
-		this.notificationMessage = notificationMessage;
-	}
+    public void setUserProfile(UserProfile userProfile) {
+        this.userProfile = userProfile;
+    }
 
-	public Source getSource() {
-		return source;
-	}
+    public UserAccount getUserAccount() {
+        return userAccount;
+    }
 
-	public void setSource(Source source) {
-		this.source = source;
-	}
+    public void setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
+    }
 
-	public RegisterModel(Source source, User user) {
-		super();
-		this.source = source;
-		this.user = user;
-	}
+    public List<UserBalance> getUserBalances() {
+        return userBalances;
+    }
 
-	public boolean isSendEmail() {
-		return isSendEmail;
-	}
+    public void setUserBalances(List<UserBalance> userBalances) {
+        this.userBalances = userBalances;
+    }
 
-	public void setSendEmail(boolean isSendEmail) {
-		this.isSendEmail = isSendEmail;
-	}
+    public List<PushConfig> getPushConfigs() {
+        return pushConfigs;
+    }
 
-	public List<UserPassage> getPassageList() {
-		return passageList;
-	}
+    public void setPushConfigs(List<PushConfig> pushConfigs) {
+        this.pushConfigs = pushConfigs;
+    }
 
-	public void setPassageList(List<UserPassage> passageList) {
-		this.passageList = passageList;
-	}
+    public UserFluxDiscount getUserFluxDiscount() {
+        return userFluxDiscount;
+    }
 
-	public UserSmsConfig getUserSmsConfig() {
-		return userSmsConfig;
-	}
+    public void setUserFluxDiscount(UserFluxDiscount userFluxDiscount) {
+        this.userFluxDiscount = userFluxDiscount;
+    }
 
-	public void setUserSmsConfig(UserSmsConfig userSmsConfig) {
-		this.userSmsConfig = userSmsConfig;
-	}
+    public InvoiceBalance getInvoiceBalance() {
+        return invoiceBalance;
+    }
+
+    public void setInvoiceBalance(InvoiceBalance invoiceBalance) {
+        this.invoiceBalance = invoiceBalance;
+    }
+
+    public NotificationMessage getNotificationMessage() {
+        return notificationMessage;
+    }
+
+    public void setNotificationMessage(NotificationMessage notificationMessage) {
+        this.notificationMessage = notificationMessage;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
+    }
+
+    public RegisterModel(Source source, User user) {
+        super();
+        this.source = source;
+        this.user = user;
+    }
+
+    public boolean isSendEmail() {
+        return isSendEmail;
+    }
+
+    public void setSendEmail(boolean isSendEmail) {
+        this.isSendEmail = isSendEmail;
+    }
+
+    public List<UserPassage> getPassageList() {
+        return passageList;
+    }
+
+    public void setPassageList(List<UserPassage> passageList) {
+        this.passageList = passageList;
+    }
+
+    public UserSmsConfig getUserSmsConfig() {
+        return userSmsConfig;
+    }
+
+    public void setUserSmsConfig(UserSmsConfig userSmsConfig) {
+        this.userSmsConfig = userSmsConfig;
+    }
+
+    public UserMmsConfig getUserMmsConfig() {
+        return userMmsConfig;
+    }
+
+    public void setUserMmsConfig(UserMmsConfig userMmsConfig) {
+        this.userMmsConfig = userMmsConfig;
+    }
 
 }

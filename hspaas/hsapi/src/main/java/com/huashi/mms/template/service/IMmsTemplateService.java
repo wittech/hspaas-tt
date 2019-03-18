@@ -3,6 +3,7 @@ package com.huashi.mms.template.service;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.exception.BodyCheckException;
 
 /**
  * TODO 彩信模板服务接口
@@ -105,18 +106,44 @@ public interface IMmsTemplateService {
     boolean isContentMatched(long id, String content);
 
     /**
-     * TODO 批量添加短信模板（针对其他配置项都一样，只有模板内容为多个的情况）
-     * 
-     * @param template
-     * @param contents
-     * @return
-     */
-    boolean saveToBatchContent(MmsMessageTemplate template, String[] contents);
-
-    /**
      * TODO 将模板数据加载到REDIS
      * 
      * @return
      */
     boolean reloadToRedis();
+
+    /**
+     * TODO 请在此处添加注释
+     * 
+     * @param id
+     * @param userId
+     * @return
+     */
+    MmsMessageTemplate getWithUserId(Long id, int userId);
+
+    /**
+     * TODO 根据对外模板ID查询模板详情
+     * 
+     * @param modelId
+     * @return
+     */
+    MmsMessageTemplate getByModelId(String modelId);
+
+    /**
+     * TODO 模板是否可用
+     * 
+     * @param modelId
+     * @param userId
+     * @return
+     */
+    boolean isModelIdAvaiable(String modelId, int userId);
+
+    /**
+     * TODO 判断BODY内容是否有效
+     * 
+     * @param body
+     * @return
+     */
+    String checkBodyRuleIsRight(String body) throws BodyCheckException;
+
 }

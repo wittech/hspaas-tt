@@ -154,7 +154,13 @@ public class SettingsContext {
         FS_CHARGE_REPORT(3),
 
         // 语音发送报告
-        VS_SEND_REPORT(4);
+        VS_SEND_REPORT(4),
+        
+        // 彩信状态报告(下行)
+        MMS_STATUS_REPORT(5),
+
+        // 彩信上行回执报告
+        MMS_MO_REPORT(6);
 
         private int code;
 

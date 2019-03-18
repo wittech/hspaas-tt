@@ -8,99 +8,95 @@ import com.huashi.common.user.model.UserModel;
 
 public class MmsMtTaskPackets {
 
-    private Long      id;
+    private Long           id;
 
-    private Long      sid;
+    private Long           sid;
 
-    private String    mobile;
+    private String         mobile;
 
-    private Integer   provinceCode;
+    private Integer        provinceCode;
 
     /**
      * 省份名称
      */
-    private String    provinceName;
+    private String         provinceName;
 
-    private Integer   cmcp;
+    private Integer        cmcp;
 
-    private String    title;
+    private String         modelId;
 
-    private String    content;
+    private String         title;
 
-    private Integer   mobileSize;
+    private String         body;
 
-    private Long      messageTemplateId;
+    private Integer        mobileSize;
 
-    private Integer   passageId;
+    private Integer        passageId;
 
-    private String    passageName;
+    private String         passageName;
 
-    private Integer   finalPassageId;
+    private Integer        finalPassageId;
 
-    private String    passageProtocol;
+    private String         passageProtocol;
 
-    private String    passageUrl;
+    private String         passageUrl;
 
-    private String    passageParameter;
+    private String         passageParameter;
 
-    private String    resultFormat;
+    private String         resultFormat;
 
-    private String    successCode;
+    private String         successCode;
 
-    private String    position;
+    private String         position;
 
-    private Integer   priority;
+    private Integer        priority;
 
-    private String    forceActions;
+    private String         forceActions;
 
-    private String    remark;
+    private String         remark;
 
-    private Integer   retryTimes;
+    private Integer        retryTimes;
 
-    private Integer   status;
+    private Integer        status;
 
-    private Date      createTime;
+    private Date           createTime;
 
-    private Date      updateTime;
+    private Date           updateTime;
 
-    private Integer   userId;
-    private String    callback;
+    private Integer        userId;
+    private String         callback;
 
     /**
      * 用户自定义内容，用于回填
      */
-    private String    attach;
+    private String         attach;
 
     /**
      * 用户请求报文传入的扩展号码
      */
-    private String    extNumber;
+    private String         extNumber;
 
     /**
      * 模板扩展号码
      */
-    private String    templateExtNumber;
+    private String         templateExtNumber;
 
     /**
      * 用户实体属性
      */
-    private UserModel userModel;
+    private UserModel      userModel;
 
     /**
      * 通道代码
      */
-    private String    passageCode;
+    private String         passageCode;
 
     /**
      * 通道流速
      */
-    private Integer   passageSpeed;
-    
-    private String modelId;
-    
-    private String title;
-    
-    private String body;
+    private Integer        passageSpeed;
+
+    private transient Long templateId;
 
     public Long getId() {
         return id;
@@ -142,28 +138,12 @@ public class MmsMtTaskPackets {
         this.title = title == null ? null : title.trim();
     }
 
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content == null ? null : content.trim();
-    }
-
     public Integer getMobileSize() {
         return mobileSize;
     }
 
     public void setMobileSize(Integer mobileSize) {
         this.mobileSize = mobileSize;
-    }
-
-    public Long getMessageTemplateId() {
-        return messageTemplateId;
-    }
-
-    public void setMessageTemplateId(Long messageTemplateId) {
-        this.messageTemplateId = messageTemplateId;
     }
 
     public Integer getPassageId() {
@@ -380,4 +360,29 @@ public class MmsMtTaskPackets {
         }
         return null;
     }
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public Long getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(Long templateId) {
+        this.templateId = templateId;
+    }
+
 }

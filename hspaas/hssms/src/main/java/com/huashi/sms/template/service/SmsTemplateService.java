@@ -32,7 +32,7 @@ import com.huashi.constants.CommonContext.AppType;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.passage.context.PassageContext.RouteType;
 import com.huashi.sms.settings.service.IForbiddenWordsService;
-import com.huashi.sms.template.context.TemplateContext.ApproveStatus;
+import com.huashi.sms.template.context.SmsTemplateContext.ApproveStatus;
 import com.huashi.sms.template.dao.MessageTemplateMapper;
 import com.huashi.sms.template.domain.MessageTemplate;
 

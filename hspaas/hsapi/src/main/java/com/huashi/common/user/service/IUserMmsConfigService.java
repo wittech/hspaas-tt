@@ -26,7 +26,7 @@ public interface IUserMmsConfigService {
      * @return
      */
     boolean save(int userId);
-
+    
     /**
      * 修改
      * 

@@ -40,6 +40,7 @@ import com.huashi.common.user.domain.User;
 import com.huashi.common.user.domain.UserBalance;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.domain.UserFluxDiscount;
+import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.model.RegisterModel;
 import com.huashi.common.util.DateUtil;
@@ -67,6 +68,8 @@ public class RegisterService implements IRegisterService {
     @Autowired
     private IUserSmsConfigService      userSmsConfigService;
     @Autowired
+    private IUserMmsConfigService      userMmsConfigService;
+    @Autowired
     private UserFluxDiscountMapper     userFluxDiscountMapper;
     @Autowired
     private PushConfigMapper           pushConfigMapper;
@@ -83,7 +86,7 @@ public class RegisterService implements IRegisterService {
     @Reference
     private ISmsPassageAccessService   smsPassageAccessService;
 
-    private Logger                     logger                     = LoggerFactory.getLogger(getClass());
+    private Logger                     logger = LoggerFactory.getLogger(getClass());
 
     /**
      * 分布式锁相关
@@ -97,7 +100,7 @@ public class RegisterService implements IRegisterService {
     /**
      * 当前业务锁节点名称
      */
-//    private static final String        CURRENT_BUSINESS_LOCK_NODE = "register";
+    // private static final String CURRENT_BUSINESS_LOCK_NODE = "register";
 
     @Autowired
     private PlatformTransactionManager platformTransactionManager;
@@ -121,8 +124,8 @@ public class RegisterService implements IRegisterService {
             return false;
         }
 
-//        Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
-        
+        // Lock lock = new ZookeeperLock(zkConnectUrl, zkLockNode, CURRENT_BUSINESS_LOCK_NODE);
+
         Lock lock = new ReentrantLock();
         lock.lock();
 
@@ -148,6 +151,10 @@ public class RegisterService implements IRegisterService {
                 throw new RuntimeException("Save saveUserSmsConfig failed");
             }
 
+            if (!saveUserMmsConfig(model.getUserMmsConfig(), developer.getUserId())) {
+                throw new RuntimeException("Save saveUserMmsConfig failed");
+            }
+
             if (!userPassageService.initUserPassage(developer.getUserId(), model.getPassageList())) {
                 throw new RuntimeException("Save initUserPassage failed");
             }
@@ -163,9 +170,9 @@ public class RegisterService implements IRegisterService {
             // 此处因为跨DUBBO应用服务，顾需要做 分布式事务回滚，
             // 可采用rabbitMQ通知机制，或者提供简单回滚方法暴露（需考虑）
             // edit by zhengying 20180408 目前暂时取消注册时产生默认可用通道，需要BOSS管理员配置
-//            if (!smsPassageAccessService.updateByModifyUser(developer.getUserId())) {
-//                throw new RuntimeException("Invoke method[updateByModifyUser] to update passsageAccess failed");
-//            }
+            // if (!smsPassageAccessService.updateByModifyUser(developer.getUserId())) {
+            // throw new RuntimeException("Invoke method[updateByModifyUser] to update passsageAccess failed");
+            // }
 
             // 如果发送邮件开关打开，则需要发送邮件，（即使发送失败也不作为回滚条件）
             if (model.isSendEmail()) {
@@ -253,6 +260,25 @@ public class RegisterService implements IRegisterService {
         userSmsConfig.setUserId(userId);
 
         return userSmsConfigService.save(userSmsConfig);
+    }
+
+    /**
+     * 
+       * TODO 保存用户彩信配置
+       * 
+       * @param userMmsConfig
+       * @param userId
+       * @return
+     */
+    private boolean saveUserMmsConfig(UserMmsConfig userMmsConfig, int userId) {
+        if (userMmsConfig == null) {
+            logger.error("用户: {} 彩信配置信息为空", userId);
+            return false;
+        }
+
+        userMmsConfig.setUserId(userId);
+
+        return userMmsConfigService.save(userMmsConfig);
     }
 
     /**

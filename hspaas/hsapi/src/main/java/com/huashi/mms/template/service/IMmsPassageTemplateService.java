@@ -1,7 +1,7 @@
 package com.huashi.mms.template.service;
 
-import com.huashi.common.vo.BossPaginationVo;
-import com.huashi.common.vo.PaginationVo;
+import java.util.List;
+
 import com.huashi.mms.template.domain.MmsPassageMessageTemplate;
 
 /**
@@ -14,17 +14,6 @@ import com.huashi.mms.template.domain.MmsPassageMessageTemplate;
 public interface IMmsPassageTemplateService {
 
     /**
-     * 获取用户模板列表数据(分页)
-     * 
-     * @param userId 用户编号
-     * @param status 审批状态
-     * @param content 模板内容
-     * @param currentPage 当前页码
-     * @return
-     */
-    PaginationVo<MmsPassageMessageTemplate> findPage(int userId, String status, String content, String currentPage);
-
-    /**
      * TODO 添加模板
      * 
      * @param template
@@ -33,14 +22,14 @@ public interface IMmsPassageTemplateService {
     boolean save(MmsPassageMessageTemplate template);
 
     /**
-     * TODO 模板审核
+     * 修改状态
      * 
      * @param id
      * @param status
      * @param remark
      * @return
      */
-    boolean approve(long id, int status, String remark);
+    boolean updateStatus(long id, int status, String remark);
 
     /**
      * TODO 更新模板内容
@@ -59,15 +48,6 @@ public interface IMmsPassageTemplateService {
     boolean deleteById(long id);
 
     /**
-     * TODO 删除模板（判断模板是否属于该用户）
-     * 
-     * @param id
-     * @param userId
-     * @return
-     */
-    boolean delete(long id, int userId);
-
-    /**
      * TODO 根据模板ID查询模板
      * 
      * @param id
@@ -76,42 +56,30 @@ public interface IMmsPassageTemplateService {
     MmsPassageMessageTemplate get(long id);
 
     /**
-     * TODO 后台查询模板内容
+     * TODO 根据彩信模板ID获取通道模板信息
      * 
-     * @param pageNum
-     * @param keyword
-     * @param status
-     * @param userId
+     * @param templateId
      * @return
      */
-    BossPaginationVo<MmsPassageMessageTemplate> findPageBoos(int pageNum, String keyword, String status, String userId);
+    List<MmsPassageMessageTemplate> getByMmsTemplateId(long templateId);
 
     /**
-     * TODO 根据用户ID和短信内容查询模板信息（优先级排序）
+     * TODO 根据模板ID和通道ID获取通道模板信息
      * 
-     * @param userId
-     * @param content
+     * @param templateId
+     * @param passageId
      * @return
      */
-    MmsPassageMessageTemplate getByContent(int userId, String content);
+    MmsPassageMessageTemplate getByMmsTemplateIdAndPassageId(long templateId, int passageId);
 
     /**
-     * TODO 判断输入内容是否符合模板内容
+     * TODO 根据模板ModelID和通道ID获取通道模板信息
      * 
-     * @param id
-     * @param content
+     * @param modelId
+     * @param passageId
      * @return
      */
-    boolean isContentMatched(long id, String content);
-
-    /**
-     * TODO 批量添加短信模板（针对其他配置项都一样，只有模板内容为多个的情况）
-     * 
-     * @param template
-     * @param contents
-     * @return
-     */
-    boolean saveToBatchContent(MmsPassageMessageTemplate template, String[] contents);
+    MmsPassageMessageTemplate getByMmsModelIdAndPassageId(String modelId, int passageId);
 
     /**
      * TODO 将模板数据加载到REDIS

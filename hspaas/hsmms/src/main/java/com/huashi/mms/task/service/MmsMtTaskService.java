@@ -74,22 +74,23 @@ public class MmsMtTaskService implements IMmsMtTaskService {
     private IUserService               userService;
     @Reference
     private IUserBalanceService        userBalanceService;
-    @Autowired
-    private MmsMtTaskMapper            taskMapper;
     @Reference
     private IUserPassageService        userPassageService;
-    @Autowired
-    private MmsMtTaskPacketsMapper     taskPacketsMapper;
     @Reference
     private IUserMmsConfigService      userMmsConfigService;
     @Reference
     private IPushConfigService         pushConfigService;
-    @Autowired
+    @Reference
     private ISmsMobileBlackListService mobileBlackListService;
-    @Autowired
-    private IMmsPassageService         mmsPassageService;
     @Reference
     private IProvinceService           provinceService;
+
+    @Autowired
+    private MmsMtTaskMapper            taskMapper;
+    @Autowired
+    private MmsMtTaskPacketsMapper     taskPacketsMapper;
+    @Autowired
+    private IMmsPassageService         mmsPassageService;
     @Autowired
     private IMmsMtSubmitService        mmsMtSubmitService;
     @Autowired

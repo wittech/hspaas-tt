@@ -73,7 +73,7 @@
                                         <th>编号</th>
                                         <th>模板名称</th>
                                         <th>协议类型</th>
-                                        <th>通道类型</th>
+                                        <th>通道模板类型</th>
                                         <th>创建时间</th>
                                         <th>操作</th>
                                     </tr>
@@ -95,6 +95,8 @@
 												流量通道模板
 											<#elseif pl.passageType == 3>
 												语音通道模板
+											<#elseif pl.passageType == 4>
+												彩信通道模板
 											</#if>
 										</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>

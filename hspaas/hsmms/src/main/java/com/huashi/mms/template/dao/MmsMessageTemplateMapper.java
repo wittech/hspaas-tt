@@ -51,4 +51,12 @@ public interface MmsMessageTemplateMapper {
      * @return
      */
     List<MmsMessageTemplate> findAll();
+
+    /**
+     * TODO 根据模板ID查询模板详情
+     * 
+     * @param modelId
+     * @return
+     */
+    MmsMessageTemplate selectByModelId(@Param("modelId") String modelId);
 }

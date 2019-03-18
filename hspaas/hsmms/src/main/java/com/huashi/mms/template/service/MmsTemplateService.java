@@ -1,5 +1,7 @@
 package com.huashi.mms.template.service;
 
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,16 +26,21 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.user.service.IUserMmsConfigService;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.mms.config.cache.redis.constant.MmsRedisConstant;
+import com.huashi.mms.template.constant.MediaFileDirectory;
+import com.huashi.mms.template.constant.MmsTemplateContext.ApproveStatus;
+import com.huashi.mms.template.constant.MmsTemplateContext.MediaType;
 import com.huashi.mms.template.dao.MmsMessageTemplateMapper;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
+import com.huashi.mms.template.exception.BodyCheckException;
 import com.huashi.sms.passage.context.PassageContext.RouteType;
-import com.huashi.sms.template.context.TemplateContext.ApproveStatus;
 
 /**
  * TODO 彩信模板服务实现
@@ -52,7 +60,26 @@ public class MmsTemplateService implements IMmsTemplateService {
     private IUserMmsConfigService                    userMmsConfigService;
     @Resource
     private StringRedisTemplate                      stringRedisTemplate;
+
+    @Autowired
+    private MmsMediaFileService                      mmsMediaFileService;
+
     private final Logger                             logger                  = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 多媒体类型
+     */
+    private static final String                      NODE_MEDIA_TYPE         = "mediaType";
+
+    /**
+     * 多媒体文件名称
+     */
+    private static final String                      NODE_MEDIA_NAME         = "mediaName";
+
+    /**
+     * 多媒体内容
+     */
+    private static final String                      NODE_CONENT             = "content";
 
     /**
      * 全局彩信模板（与REDIS 同步采用广播模式）
@@ -286,20 +313,6 @@ public class MmsTemplateService implements IMmsTemplateService {
                         continue;
                     }
 
-                    // if (StringUtils.isEmpty(template.getRegexValue())) {
-                    // continue;
-                    // }
-
-                    // if (superTemplateRegex.equalsIgnoreCase(template.getRegexValue())) {
-                    // superTemplate = template;
-                    // continue;
-                    // }
-
-                    // 如果普通彩信模板存在，则以普通模板为主
-                    // if (PatternUtil.isRight(template.getRegexValue(), content)) {
-                    // return template;
-                    // }
-
                 }
             }
 
@@ -360,37 +373,6 @@ public class MmsTemplateService implements IMmsTemplateService {
         }
 
         return mmsMessageTemplateMapper.insertSelective(template) > 0;
-    }
-
-    @Override
-    @Transactional
-    public boolean saveToBatchContent(MmsMessageTemplate template, String[] contents) {
-        if (AppType.WEB.getCode() == template.getAppType()) {
-            template.setStatus(ApproveStatus.WAITING.getValue());
-        }
-
-        Set<String> set = new HashSet<>();
-        CollectionUtils.addAll(set, contents);
-        boolean allResult = true;
-        for (String content : set) {
-            template.setId(null);
-            template.setCreateTime(new Date());
-
-            int result = mmsMessageTemplateMapper.insertSelective(template);
-            if (result <= 0) {
-                allResult = false;
-                break;
-            }
-
-            if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
-                pushToRedis(template.getUserId(), template);
-            }
-        }
-        if (!allResult) {
-            // 非全部成功的，全部回滚
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-        return allResult;
     }
 
     /**
@@ -489,6 +471,144 @@ public class MmsTemplateService implements IMmsTemplateService {
         }
 
         return mmsMessageTemplateMapper.deleteByPrimaryKey(id) > 0;
+    }
+
+    @Override
+    public MmsMessageTemplate getWithUserId(Long id, int userId) {
+        return null;
+    }
+
+    @Override
+    public MmsMessageTemplate getByModelId(String modelId) {
+        return mmsMessageTemplateMapper.selectByModelId(modelId);
+    }
+
+    @Override
+    public boolean isModelIdAvaiable(String modelId, int userId) {
+        MmsMessageTemplate template = getByModelId(modelId);
+        if (template == null) {
+            logger.error("模板ID[" + modelId + "]数据为空");
+            return false;
+        }
+
+        if (userId == 0 || template.getUserId() != userId) {
+            logger.error("模板ID[" + modelId + "] 用户[" + userId + "]数据权限不符");
+            return false;
+        }
+
+        if (ApproveStatus.SUCCESS.getValue() != template.getStatus()) {
+            logger.error("模板ID[" + modelId + "] 状态[" + template.getStatus() + "]下不可用");
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public String checkBodyRuleIsRight(String body) throws BodyCheckException {
+        // body:[{mediaName:”test.jpg”,mediaType:”image”,content:”=bS39888993#jajierj*...”}]
+        if (StringUtils.isEmpty(body)) {
+            throw new BodyCheckException("Body is empty.");
+        }
+
+        try {
+            List<Map<String, String>> list = JSON.parseObject(body, new TypeReference<List<Map<String, String>>>() {
+            });
+
+            List<MmsMessageTemplateBody> bodyReport = new ArrayList<>();
+            int sort = 0;
+            for (Map<String, String> map : list) {
+                String mediaType = map.get(NODE_MEDIA_TYPE);
+                if (StringUtils.isEmpty(mediaType)) {
+                    throw new BodyCheckException("Body's node[mediaType] is empty");
+                }
+
+                if (!MediaType.isTypeRight(mediaType)) {
+                    throw new BodyCheckException("Body's node[mediaType:'" + mediaType + "'] is not avaiable.");
+                }
+
+                String mediaName = map.get(NODE_MEDIA_NAME);
+                if (StringUtils.isEmpty(mediaName)) {
+                    throw new BodyCheckException("Body's node[mediaName] is empty.");
+                }
+
+                String content = map.get(NODE_CONENT);
+                if (StringUtils.isEmpty(content)) {
+                    throw new BodyCheckException("Body's node[content] is empty.");
+                }
+
+                boolean isUtf8 = !isByteType(mediaType);
+
+                byte[] data = parse2Byte(content, isUtf8);
+                if (data == null) {
+                    throw new BodyCheckException("Body's node[content:'" + content + "'] translate failed.");
+                }
+
+                sort++;
+                MmsMessageTemplateBody templateBody = new MmsMessageTemplateBody();
+                templateBody.setMediaName(mediaName);
+                templateBody.setMediaType(mediaType.toLowerCase());
+                templateBody.setData(data);
+                templateBody.setContent(mmsMediaFileService.generateFileName(MediaFileDirectory.CUSTOM_BODY_FILE_DIR,
+                                                                             templateBody.getMediaType()));
+                templateBody.setSort(sort);
+
+                bodyReport.add(templateBody);
+            }
+
+            String finalContext = null;
+            if (CollectionUtils.isNotEmpty(bodyReport)) {
+                for (MmsMessageTemplateBody templateBody : bodyReport) {
+                    mmsMediaFileService.writeFileWithFileName(templateBody.getContent(), templateBody.getData());
+                }
+
+                finalContext = mmsMediaFileService.writeFile(MediaFileDirectory.CUSTOM_BODY_DIR,
+                                                             JSON.toJSONString(bodyReport));
+            }
+
+            return finalContext;
+        } catch (Exception e) {
+            logger.error("自定义内容[" + body + "]解析错误", e);
+            throw new BodyCheckException("Body translate failed");
+        }
+    }
+
+    /**
+     * 是否属于BYTE模式
+     * 
+     * @param mediaType
+     * @return
+     */
+    private static boolean isByteType(String mediaType) {
+        if (StringUtils.isEmpty(mediaType)) {
+            return false;
+        }
+
+        return MediaType.IMAGE.getCode().equals(mediaType) || MediaType.AUDIO.getCode().equals(mediaType)
+               || MediaType.VIDEO.getCode().equals(mediaType);
+    }
+
+    /**
+     * TODO 转换成为BYTE数据
+     * 
+     * @param content
+     * @return
+     */
+    private byte[] parse2Byte(String content, boolean isUtf8) {
+        if (StringUtils.isEmpty(content)) {
+            return null;
+        }
+
+        try {
+            if (isUtf8) {
+                return content.getBytes(Charset.forName(MmsMediaFileService.ENCODING));
+            }
+
+            return Base64.decodeBase64(content);
+        } catch (Exception e) {
+            logger.error("内容[" + content + "]转换Base64失败", e);
+            return null;
+        }
     }
 
 }

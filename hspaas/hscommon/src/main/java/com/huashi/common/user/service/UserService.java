@@ -36,6 +36,7 @@ import com.huashi.common.user.domain.User;
 import com.huashi.common.user.domain.UserBalance;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.domain.UserFluxDiscount;
+import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.domain.UserProfile;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.model.UserModel;
@@ -44,6 +45,7 @@ import com.huashi.common.util.AESUtil;
 import com.huashi.common.util.SecurityUtil;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext.PlatformType;
+import com.huashi.mms.passage.service.IMmsPassageAccessService;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.service.ISmsMtPushService;
 
@@ -68,8 +70,12 @@ public class UserService implements IUserService {
     private IPushConfigService       pushConfigService;
     @Reference
     private ISmsPassageAccessService smsPassageAccessService;
+    @Reference
+    private IMmsPassageAccessService mmsPassageAccessService;
     @Autowired
     private IUserSmsConfigService    userSmsConfigService;
+    @Autowired
+    private IUserMmsConfigService    userMmsConfigService;
     @Autowired
     private IUserAccountService      userAccountService;
     @Resource
@@ -281,15 +287,15 @@ public class UserService implements IUserService {
             if (result > 0) {
                 result = userProfileMapper.updateUserProfileState(userId, status);
             }
-            
+
             // 刷新REDIS
             if (result > 0) {
                 // 如果更新账号基础信息成功，则更新开发者账号信息
                 boolean isOk = userDeveloperService.updateStatus(userId, Integer.parseInt(status));
-                if(!isOk) {
+                if (!isOk) {
                     throw new RuntimeException("Developer update status failed");
                 }
-                
+
                 saveUserModel(userMapper.selectMappingByUserId(userId));
             }
 
@@ -353,7 +359,8 @@ public class UserService implements IUserService {
                 throw new RuntimeException("更新短信余额失败");
             }
 
-            boolean isOk = userPassageService.update(userId, PlatformType.SEND_MESSAGE_SERVICE.getCode(), passageGroupId);
+            boolean isOk = userPassageService.update(userId, PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                     passageGroupId);
 
             if (!isOk) {
                 throw new RuntimeException("更新用户通道组配置失败");
@@ -386,11 +393,58 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public boolean updateMms(int userId, String balance, int payType, List<PushConfig> pushConfigList,
+                             int passageGroupId, UserMmsConfig userMmsConfig) {
+        try {
+            int effect = userBalanceMapper.updateByUserId(new UserBalance(
+                                                                          userId,
+                                                                          PlatformType.MULTIMEDIA_MESSAGE_SERVICE.getCode(),
+                                                                          payType, Double.valueOf(balance)));
+
+            if (effect <= 0) {
+                throw new RuntimeException("更新短信余额失败");
+            }
+
+            boolean isOk = userPassageService.update(userId, PlatformType.MULTIMEDIA_MESSAGE_SERVICE.getCode(),
+                                                     passageGroupId);
+
+            if (!isOk) {
+                throw new RuntimeException("更新用户通道组配置失败");
+            }
+
+            for (PushConfig config : pushConfigList) {
+                effect = pushConfigService.updateByUserId(config);
+                if (effect <= 0) {
+                    throw new RuntimeException("更新彩信推送配置失败");
+                }
+            }
+
+            userMmsConfig.setUserId(userId);
+            isOk = userMmsConfigService.update(userMmsConfig);
+            if (!isOk) {
+                throw new RuntimeException("更新彩信基础配置失败");
+            }
+
+            isOk = mmsPassageAccessService.updateByModifyUser(userId);
+            if (!isOk) {
+                throw new RuntimeException("更新彩信可用通道失败");
+            }
+
+            return true;
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            logger.error("更新用户  [" + userId + "] 彩信配置失败", e);
+            return false;
+        }
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public boolean updateFs(int userId, String balance, int payType, PushConfig pushConfig,
                             UserFluxDiscount userFluxDiscount, int passageGroupId) {
         try {
-            userBalanceMapper.updateByUserId(new UserBalance(userId, PlatformType.FLUX_SERVICE.getCode(), payType, Double.valueOf(balance)));
+            userBalanceMapper.updateByUserId(new UserBalance(userId, PlatformType.FLUX_SERVICE.getCode(), payType,
+                                                             Double.valueOf(balance)));
             userPassageService.update(userId, PlatformType.FLUX_SERVICE.getCode(), passageGroupId);
             userFluxDiscount.setUserId(userId);
             userFluxDiscountMapper.updateByUserId(userFluxDiscount);
@@ -407,7 +461,8 @@ public class UserService implements IUserService {
     @Transactional(readOnly = false)
     public boolean updateVs(int userId, String balance, int payType, PushConfig pushConfig, int passageGroupId) {
         try {
-            userBalanceMapper.updateByUserId(new UserBalance(userId, PlatformType.VOICE_SERVICE.getCode(), payType, Double.valueOf(balance)));
+            userBalanceMapper.updateByUserId(new UserBalance(userId, PlatformType.VOICE_SERVICE.getCode(), payType,
+                                                             Double.valueOf(balance)));
             userPassageService.update(userId, PlatformType.VOICE_SERVICE.getCode(), passageGroupId);
             pushConfigService.updateByUserId(pushConfig);
 
@@ -422,13 +477,13 @@ public class UserService implements IUserService {
     public boolean updatePasword(int userId, String plainPassword, String newPassword) {
         User user = getById(userId);
         if (user == null) {
-            logger.error("用户 ： [ "+ userId+ "]数据异常");
+            logger.error("用户 ： [ " + userId + "]数据异常");
             return false;
         }
 
         boolean isSuccess = SecurityUtil.verify(user.getPassword(), plainPassword, user.getSalt());
         if (!isSuccess) {
-            logger.error("用户 ： [ "+ userId+ "]原密码校验失败");
+            logger.error("用户 ： [ " + userId + "]原密码校验失败");
             return false;
         }
 

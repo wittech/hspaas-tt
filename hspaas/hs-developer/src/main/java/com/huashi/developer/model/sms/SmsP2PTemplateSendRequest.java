@@ -1,8 +1,9 @@
-package com.huashi.developer.model;
+package com.huashi.developer.model.sms;
 
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
+import com.huashi.developer.model.PassportModel;
 import com.huashi.developer.validator.annotation.ValidateField;
 
 /**
@@ -13,7 +14,7 @@ import com.huashi.developer.validator.annotation.ValidateField;
  * @version V1.0.0
  * @date 2017年3月31日 下午9:39:29
  */
-public class SmsP2PTemplateModel extends PassportModel {
+public class SmsP2PTemplateSendRequest extends PassportModel {
 
 	private static final long serialVersionUID = 1271682197751091183L;
 

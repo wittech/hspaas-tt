@@ -3,6 +3,8 @@ package com.huashi.mms.task.domain;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.huashi.common.user.model.UserModel;
 
 public class MmsMtTask {
@@ -13,11 +15,15 @@ public class MmsMtTask {
 
     private Long                          sid;
 
-    private Integer                          appType;
+    private Integer                       appType;
+
+    private Integer                       sendType;
+
+    private String                        modelId;
 
     private String                        title;
 
-    private String                        content;
+    private String                        body;
 
     private String                        extNumber;
 
@@ -29,15 +35,15 @@ public class MmsMtTask {
 
     private Integer                       returnFee;
 
+    private Integer                       totalFee;
+
     private String                        ip;
 
     private Integer                       processStatus;
 
     private Integer                       approveStatus;
 
-    private String                        finalContent;
-
-    private Long                          messageTemplateId;
+    private String                        finalBody;
 
     private Date                          processTime;
 
@@ -71,6 +77,11 @@ public class MmsMtTask {
      * 用户实体属性
      */
     private UserModel                     userModel;
+
+    /**
+     * 是否是模板ID发送模式
+     */
+    private Boolean                       isModelSend;
 
     // 汇总错误信息
     private final transient StringBuilder errorMessageReport = new StringBuilder();
@@ -149,14 +160,6 @@ public class MmsMtTask {
         this.title = title == null ? null : title.trim();
     }
 
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content == null ? null : content.trim();
-    }
-
     public String getExtNumber() {
         return extNumber;
     }
@@ -219,22 +222,6 @@ public class MmsMtTask {
 
     public void setApproveStatus(Integer approveStatus) {
         this.approveStatus = approveStatus;
-    }
-
-    public String getFinalContent() {
-        return finalContent;
-    }
-
-    public void setFinalContent(String finalContent) {
-        this.finalContent = finalContent == null ? null : finalContent.trim();
-    }
-
-    public Long getMessageTemplateId() {
-        return messageTemplateId;
-    }
-
-    public void setMessageTemplateId(Long messageTemplateId) {
-        this.messageTemplateId = messageTemplateId;
     }
 
     public Date getProcessTime() {
@@ -308,4 +295,98 @@ public class MmsMtTask {
     public void setUserModel(UserModel userModel) {
         this.userModel = userModel;
     }
+
+    public Integer getSendType() {
+        return sendType;
+    }
+
+    public void setSendType(Integer sendType) {
+        this.sendType = sendType;
+    }
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public String getFinalBody() {
+        return finalBody;
+    }
+
+    public void setFinalBody(String finalBody) {
+        this.finalBody = finalBody;
+    }
+
+    public Integer getTotalFee() {
+        return totalFee;
+    }
+
+    public void setTotalFee(Integer totalFee) {
+        this.totalFee = totalFee;
+    }
+
+    public Boolean getIsModelSend() {
+        return isModelSend;
+    }
+
+    public void setIsModelSend(Boolean isModelSend) {
+        this.isModelSend = isModelSend;
+    }
+
+    public String[] getMobiles() {
+        if (StringUtils.isNotBlank(mobile)) {
+            return mobile.split(",");
+        }
+        return null;
+    }
+
+    public String getFirstMobile() {
+        String[] mobiles = getMobiles();
+        if (mobiles != null && mobiles.length > 0) {
+            return mobiles[0];
+        }
+        return mobile;
+    }
+
+    public String[] getShowErrorMobiles() {
+        if (StringUtils.isNotBlank(errorMobiles)) {
+            return errorMobiles.split(",");
+        }
+        return null;
+    }
+
+    public String getShowErrorFirstMobile() {
+        String[] mobiles = getShowErrorMobiles();
+        if (mobiles != null && mobiles.length > 0) {
+            return mobiles[0];
+        }
+        return mobile;
+    }
+
+    public String[] getShowRepeatMobiles() {
+        if (StringUtils.isNotBlank(repeatMobiles)) {
+            return repeatMobiles.split(",");
+        }
+        return null;
+    }
+
+    public String getShowRepeatFirstMobiles() {
+        String[] mobiles = getShowRepeatMobiles();
+        if (mobiles != null && mobiles.length > 0) {
+            return mobiles[0];
+        }
+        return mobile;
+    }
+
 }
