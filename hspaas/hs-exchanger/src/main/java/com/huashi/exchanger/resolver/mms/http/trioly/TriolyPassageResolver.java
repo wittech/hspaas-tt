@@ -64,7 +64,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
     /**
      * TODO 签名
      * 
-     * @param appkey
+     * @param appKey
      * @param appId
      * @param mobile
      * @return

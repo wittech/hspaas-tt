@@ -64,8 +64,6 @@ public class MmsTemplateService implements IMmsTemplateService {
     @Autowired
     private MmsMediaFileService                      mmsMediaFileService;
 
-    private final Logger                             logger                  = LoggerFactory.getLogger(getClass());
-
     /**
      * 多媒体类型
      */
@@ -80,6 +78,8 @@ public class MmsTemplateService implements IMmsTemplateService {
      * 多媒体内容
      */
     private static final String                      NODE_CONENT             = "content";
+
+    private final Logger                             logger                  = LoggerFactory.getLogger(getClass());
 
     /**
      * 全局彩信模板（与REDIS 同步采用广播模式）
