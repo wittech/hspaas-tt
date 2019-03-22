@@ -124,32 +124,60 @@ public class CustomerController extends BaseController {
     @AuthCode(code = { OperCode.OPER_CODE_1001001001 })
     @ActionMode
     public void add() {
-        List<SystemConfig> balanceConfigList = iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_BALANCE.name());
-        Map<String, Object> balanceConfigMap = new HashMap<String, Object>();
-        for (SystemConfig config : balanceConfigList) {
-            balanceConfigMap.put(config.getAttrKey(), config);
-        }
-        List<SystemConfig> fluxConfigList = iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_FLUX_DISCOUNT.name());
+        setAttr("defaultGroupList",
+                iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_FLUX_DISCOUNT.name()));
+        setAttr("fluxConfigList", iSystemConfigService.findByType(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name()));
 
-        List<SystemConfig> defaultGroupList = iSystemConfigService.findByType(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name());
-        List<SmsPassageGroup> smsPassageGroupList = iSmsPassageGroupService.findAll();
+        setUserBalance();
 
-        List<MmsPassageGroup> mmsPassageGroupList = iMmsPassageGroupService.findAll();
+        setSmsConfigAttr();
 
-        setAttr("balanceConfigMap", balanceConfigMap);
-        setAttr("defaultGroupList", defaultGroupList);
-        setAttr("fluxConfigList", fluxConfigList);
-        setAttr("smsPassageGroupList", smsPassageGroupList);
-        setAttr("mmsPassageGroupList", mmsPassageGroupList);
+        setMmsConfigAttr();
 
-        setAttr("smsReturnRules", SmsReturnRule.values());
-        setAttr("smsMessagePass", SmsMessagePass.values());
-        setAttr("smsNeedTemplates", SmsNeedTemplate.values());
-        setAttr("smsPickupTemplates", SmsPickupTemplate.values());
-        setAttr("smsSignatureSources", SmsSignatureSource.values());
         // setAttr("fxPassageGroupList", fxPassageGroupList);
     }
 
+    private void setUserBalance() {
+        List<SystemConfig> balanceConfigList = iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_BALANCE.name());
+        Map<String, Object> balanceConfigMap = new HashMap<>();
+        for (SystemConfig config : balanceConfigList) {
+            balanceConfigMap.put(config.getAttrKey(), config);
+        }
+
+        setAttr("balanceConfigMap", balanceConfigMap);
+    }
+
+    /**
+     * TODO 设置短信配置信息
+     */
+    private void setSmsConfigAttr() {
+        try {
+            setAttr("smsPassageGroupList", iSmsPassageGroupService.findAll());
+            setAttr("smsReturnRules", SmsReturnRule.values());
+            setAttr("smsMessagePass", SmsMessagePass.values());
+            setAttr("smsNeedTemplates", SmsNeedTemplate.values());
+            setAttr("smsPickupTemplates", SmsPickupTemplate.values());
+            setAttr("smsSignatureSources", SmsSignatureSource.values());
+        } catch (Exception e) {
+            logger.error("Call setSmsConfigAttr failed msg is '" + e.getMessage() + "'");
+        }
+    }
+
+    /**
+     * TODO 设置彩信配置信息
+     */
+    private void setMmsConfigAttr() {
+        try {
+            setAttr("mmsPassageGroupList", iMmsPassageGroupService.findAll());
+        } catch (Exception e) {
+            logger.error("Call setMmsConfigAttr failed msg is '" + e.getMessage() + "'");
+        }
+    }
+
+    /**
+     * 
+       * TODO 保存
+     */
     @AuthCode(code = { OperCode.OPER_CODE_1001001001 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void create() {
@@ -416,7 +444,7 @@ public class CustomerController extends BaseController {
                                                 getPushConfigs(userId), getParaToInt("smsGroupId"),
                                                 getModel(UserSmsConfig.class, "userSmsConfig")));
     }
-    
+
     /**
      * TODO 更新彩信配置信息
      */
@@ -461,8 +489,7 @@ public class CustomerController extends BaseController {
 
         return configList;
     }
-    
-    
+
     private List<PushConfig> getMmsPushConfigs(Integer userId) {
         String mmsSendUrl = getPara("mmsSendUrl");
         int sendUrlFlag = getParaToInt("mmsSendUrlFlag", 0);

@@ -362,6 +362,7 @@ public class MmsTemplateService implements IMmsTemplateService {
     }
 
     @Override
+    @Transactional(readOnly = false)
     public boolean save(MmsMessageTemplate template) {
         template.setCreateTime(new Date());
         // 融合平台判断 后台添加 状态默认
@@ -373,6 +374,26 @@ public class MmsTemplateService implements IMmsTemplateService {
         }
 
         return mmsMessageTemplateMapper.insertSelective(template) > 0;
+    }
+
+    
+    private boolean dealMessageTemplate(MmsMessageTemplate template) {
+        try {
+            List<MmsMessageTemplateBody> bodies = template.getBodies();
+            if(CollectionUtils.isEmpty(bodies)) {
+                throw new IllegalArgumentException("模板内容结构体数据为空");
+            }
+            
+            
+            
+            
+            
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        
+        
+        return true;
     }
 
     /**

@@ -67,57 +67,13 @@
                                 </#list>
                                 </div>
                                 <input type="hidden" name="passage.cmcp" id="passageType" value="1">
-                                <label class="col-xs-1 control-label">计费字数</label>
-                                <div class="col-xs-4">
-                                    <input type="text"
-                                           class="form-control validate[required,maxSize[100],custom[integer]]"
-                                           name="passage.wordNumber" id="wordNumber" placeholder="请输入计费字数">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-xs-2 control-label">付费方式</label>
-                                <div class="col-xs-4">
+                                 <label class="col-xs-1 control-label">付费方式</label>
+                                 <div class="col-xs-4">
                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_1" name="payType" checked value="1">预付</label>&nbsp;&nbsp;
                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_2" name="payType" value="2">后付</label>
                                 </div>
                                 <input type="hidden" name="passage.payType" id="payType" value="1">
-                                <label class="col-xs-1 control-label">签名模式</label>
-                                <div class="col-xs-4">
-                                	<select id="signMode" name="passage.signMode" class="form-control">
-					    				<#if signModes??>
-                                        <#list signModes as t>
-                                            <option value="${t.value!''}">${t.title!''}</option>
-                                        </#list>
-                                    	</#if>
-					    			</select>
-                                </div>
                             </div>
-
-                            <div class="form-group">
-                                <label class="col-xs-2 control-label">通道类型</label>
-                                <div class="col-xs-4">
-                                    <label class="form-radio form-icon"><input type="radio" class="passageRealType"
-                                                                               id="passageRealType_1"
-                                                                               name="passageRealType" checked value="0">公共通道</label>&nbsp;&nbsp;
-                                    <label class="form-radio form-icon"><input type="radio" class="passageRealType"
-                                                                               id="passageRealType_2"
-                                                                               name="passageRealType"
-                                                                               value="1">独立通道</label>
-                                    <input type="hidden" name="passage.exclusiveUserId" id="userId" value="-1">
-
-                                    <a href="javascript:void(0);" onclick="openUserList();"
-                                       class="btn btn-primary btn-xs selectUserDiv" style="display: none;">选择用户</a>
-                                </div>
-                                <input type="hidden" name="passage.type" id="passageRealType" value="0">
-
-                                <label class="col-xs-1 control-label">省份设置</label>
-                                <div class="col-xs-4">
-                                    <a href="javascript:void(0);" onclick="openProvince();" class="btn btn-primary btn-xs">选择省份</a>
-                                    已选<span id="provinceCount" style="color:red">0</span>个省份
-                                </div>
-                            </div>
-
 
                             <div class="form-group">
                                 <label class="col-xs-2 control-label">接入号</label>
@@ -193,16 +149,11 @@
                             </div>
                             
                             <div class="form-group">
-                            	<label class="col-xs-2 control-label">通道强制参数</label>
+                            	<label class="col-xs-2 control-label"></label>
                                 <div class="col-xs-4">
-                                	<select id="mmsTemplateParam" name="passage.mmsTemplateParam" class="form-control">
-                                         <option value="0" selected="selected">否</option>
-                                         <option value="1">是</option>
-					    			</select>
                                 </div>
-                            	<label class="col-xs-1 control-label">备注</label>
+                            	<label class="col-xs-1 control-label"></label>
                                 <div class="col-xs-4">
-                                    <textarea name="passage.remark" id="remark" rows="5" class="form-control"></textarea>
                                 </div>
                             </div>
 

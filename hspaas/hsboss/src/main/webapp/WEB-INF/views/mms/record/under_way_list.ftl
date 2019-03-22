@@ -27,8 +27,8 @@
                 <div class="breadcrumb-wrapper"><span class="label">所在位置:</span>
                     <ol class="breadcrumb">
                         <li><a href="#"> 管理平台 </a></li>
-                        <li><a href="#"> 短信管理 </a></li>
-                        <li class="active">待处理短信任务</li>
+                        <li><a href="#"> 彩信管理 </a></li>
+                        <li class="active">待处理彩信任务</li>
                     </ol>
                 </div>
             </div>
@@ -68,9 +68,9 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="input-group">
-                                        <span class="input-group-addon">短信内容</span>
-                                        <input type="text" class="form-control" id="content" name="content"
-                                               value="${content!''}" placeholder="输入内容">
+                                        <span class="input-group-addon">彩信标题</span>
+                                        <input type="text" class="form-control" id="content" name="title"
+                                               value="${title!''}" placeholder="输入标题">
                                     </div>
                                 </div>
                             </div>
@@ -131,22 +131,30 @@
                         	<#if macro.doOper("10003001001")>
                             	<a href="javascript:void(0);" class="btn btn-success" onclick="batchPass();">审核通过</a>
                             </#if>
+                            
+                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-mint" onclick="batchPassWithSameContent();">测试</a>
+                            <#-- 
                             <#if macro.doOper("10003001002")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-mint" onclick="batchPassWithSameContent();">同内容批放</a>
                             </#if>
+                            -->
                             <#if macro.doOper("10003001003")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuse();">驳回</a>
                             </#if>
+                            <#-- 
                             <#if macro.doOper("10003001004")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuseWithSameContent();">同内容驳回</a>
                             </#if>
+                            -->
                             <#if macro.doOper("10003001005")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-warning" onclick="openSwitchPassage();">切换通道</a>
                             </#if>
+                            <#-- 
                             <#if macro.doOper("10003001006")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-info" onclick="repeatTask();">重新分包</a>
@@ -155,9 +163,10 @@
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-default" onclick="batchEditContent();">修改内容</a>
                         	</#if>
+                        	-->
                         </div>
                         <h3 class="panel-title">
-                            <span>待处理短信任务</span>
+                            <span>待处理彩信任务</span>
                         </h3>
                     </div>
                     <div class="panel-body">
@@ -167,10 +176,7 @@
                             <tr onclick="selectAllRow();">
                                 <th><input type="checkbox" id="selectAll"></th>
                                 <th>SID</th>
-                                <#--<th>客户名</th>-->
                                 <th>模式</th>
-                                <th>计</th>
-                                <th>返</th>
                                 <th>客户名</th>
                                 <th>手机号</th>
                                 <th>错号</th>
@@ -196,33 +202,15 @@
                                 <td>${(pl.sid)!''}</td>
                                 <td>
                                 	<button type="button" class="btn btn-info btn-xs">
-                                		<#if pl.submitType == 0>
-                                       	 批
-	                                    <#elseif pl.submitType == 1>
-	                                        	点
-	                                    <#elseif pl.submitType == 2>
-	                                        	模
-	                                    <#else>
-	                                                                                 批
+                                		<#if pl.modelId?? && p.modelId != ''>
+                                       	 模<#else>定
 	                                    </#if>
                                 	</button>
                                 </td>
-                                <td>
-                                	<button type="button" class="btn btn-primary btn-xs">${(pl.fee)!'0'}</button>
-                                </td>
-                                <td>
-                                	<button type="button" class="btn btn-success btn-xs">${(pl.returnFee)!'0'}</button>
-                                </td>
-                                <#--<td>${(pl.userProfile.fullName)!''}</td>-->
                                 <td>${(pl.userModel.name)!''}</td>
                                 <td>
                                     <#if pl.mobiles?? && pl.mobiles?size gt 1>
                                     ${pl.firstMobile!''}...
-                                    	<#--
-                                        <button type="button" onclick="showAllMobile('${pl.mobile!''}');"
-                                                class="btn btn-primary btn-xs">${pl.mobiles?size}</button>
-                                         -->
-                                                
                                         <button type="button" class="btn btn-primary btn-xs">${pl.mobiles?size}</button>   
                                     <#else>
                                     ${(pl.mobile)!''}
@@ -274,8 +262,7 @@
                                         D
                                     <#elseif pl.appType == 3>
                                         B
-                                    <#else>
-                                                                                 未知
+                                    <#else>X
                                     </#if>
                                 </td>
                                 <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
@@ -405,9 +392,70 @@
         <div class="modal fade" id="contentPassModal">
             <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
                 <div class="modal-content">
+                	<div class="col-md-6 col-lg-4">
+
+
+                            <!--Default Accordion-->
+                            <!--===================================================-->
+                            <div class="panel-group accordion" id="accordion">
+                                <div class="panel">
+
+                                    <!--Accordion title-->
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+											<a data-parent="#accordion" data-toggle="collapse" href="#collapseOne" aria-expanded="false" class="collapsed">Collapsible Group Item #1</a>
+										</h4>
+                                    </div>
+
+                                    <!--Accordion content-->
+                                    <div class="panel-collapse collapse" id="collapseOne" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven\'t heard of them accusamus labore sustainable VHS.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel">
+
+                                    <!--Accordion title-->
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+											<a data-parent="#accordion" data-toggle="collapse" href="#collapseTwo" class="collapsed" aria-expanded="false">Collapsible Group Item #2</a>
+										</h4>
+                                    </div>
+
+                                    <!--Accordion content-->
+                                    <div class="panel-collapse collapse" id="collapseTwo" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven\'t heard of them accusamus labore sustainable VHS.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel">
+
+                                    <!--Accordion title-->
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+											<a data-parent="#accordion" data-toggle="collapse" href="#collapseThree" class="" aria-expanded="true">Collapsible Group Item #3</a>
+										</h4>
+                                    </div>
+
+                                    <!--Accordion content-->
+                                    <div class="panel-collapse collapse in" id="collapseThree" aria-expanded="true" style="">
+                                        <div class="panel-body">
+                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven\'t heard of them accusamus labore sustainable VHS.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--===================================================-->
+                            <!--End Default Accordion-->
+
+                        </div>
+                
+                	
                     <div class="modal-header">
                         <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">短信内容</h4>
+                        <h4 class="modal-title">彩信内容</h4>
                     </div>
                     <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000" id="myModelBody">
                         <textarea id="sms_content" class="form-control" rows="6"></textarea>
@@ -426,7 +474,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">短信内容</h4>
+                        <h4 class="modal-title">彩信内容</h4>
                     </div>
                     <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000" id="myModelBody">
                         <textarea id="sms_refuse_content" class="form-control" rows="6"></textarea>
@@ -566,16 +614,6 @@
     }
     
     function batchPassWithSameContent() {
-    	var ids = getSelectIds();
-        if(ids == ''){
-            Boss.alert('请选择需要处理的任务！');
-            return;
-        }
-        var realId = ids.split(',')[0];
-        
-        var obj = $('#item_'+realId);
-        var sid = obj.attr('sid');
-        $('#sms_content').val($("#"+sid+"_content").val());
         $('#contentPassModal').modal('show');
     }
 
@@ -586,7 +624,7 @@
             Boss.alert('请选择需要处理的任务！');
             return;
         }
-        var realId = ids.split(',')[0];
+        var realId = ids.split(',')[0];	
 
         var obj = $('#item_'+realId);
         var sid = obj.attr('sid');
@@ -717,7 +755,7 @@
         
         var finalContent = $('#edit_content').val();
         if ($.trim(finalContent) == '') {
-            Boss.alert('请输入短信内容！');
+            Boss.alert('请输入彩信内容！');
             return;
         }
         $.ajax({
@@ -738,11 +776,11 @@
         });
     }
     
-    /**同短信内容审批通过**/    
+    /**同彩信内容审批通过**/    
     function sameContentPass() {
         var finalContent = $('#sms_content').val();
         if ($.trim(finalContent) == '') {
-            Boss.alert('请输入短信内容！');
+            Boss.alert('请输入彩信内容！');
             return;
         }
         
@@ -770,11 +808,11 @@
     }
 
 
-    /**同短信内容驳回**/
+    /**同彩信内容驳回**/
     function sameContentRefuse() {
         var finalContent = $('#sms_refuse_content').val();
         if ($.trim(finalContent) == '') {
-            Boss.alert('请输入短信内容！');
+            Boss.alert('请输入彩信内容！');
             return;
         }
 

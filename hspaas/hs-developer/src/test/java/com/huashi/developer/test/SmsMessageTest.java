@@ -28,7 +28,7 @@ public class SmsMessageTest {
 	@Before
 	public void before() {
 //		url = "http://dev.hspaas.cn:8080/sms/send";
-		url = "http://127.0.0.1:8080/sms/send";
+		url = "http://127.0.0.1:8080/mms/send";
 		
 //		String appkey = "hsjXxJ2gO75iOK";
 //		String password = "468134467dac9849da8902ff953b2d6c";

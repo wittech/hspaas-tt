@@ -61,30 +61,13 @@
                                 </#list>
                                 </div>
                                 <input type="hidden" name="passage.cmcp" id="passageType" value="${passage.cmcp}">
-                                <label class="col-xs-1 control-label">计费字数</label>
+                                <label class="col-xs-1 control-label">付费方式</label>
                                 <div class="col-xs-4">
-                                    <input type="text" class="form-control validate[required,maxSize[100],custom[integer]]" name="passage.wordNumber" value="${passage.wordNumber!0}" id="wordNumber" placeholder="请输入计费字数">
+                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_1" name="payType" <#if passage.payType == 1>checked</#if> value="1">预付</label>&nbsp;&nbsp;
+                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_2" name="payType" <#if passage.payType == 2>checked</#if> value="2">后付</label>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label class="col-xs-2 control-label">付费方式</label>
-                                <div class="col-xs-4">
-                                    <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_1" name="payType" <#if passage.payType == 1>checked</#if> value="1">预付</label>&nbsp;&nbsp;
-                                    <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_2" name="payType" <#if passage.payType == 2>checked</#if> value="2">后付</label>
-                                </div>
-                                <input type="hidden" name="passage.payType" id="payType" value="${passage.payType}">
-                                <label class="col-xs-1 control-label">签名模式</label>
-                                <div class="col-xs-4">
-                                	<select id="signMode" name="passage.signMode" class="form-control">
-					    				<#if signModes??>
-                                        <#list signModes as t>
-                                            <option value="${t.value!''}" <#if passage.signMode?? &&  passage.signMode == t.value>selected="selected"</#if>>${t.title!''}</option>
-                                        </#list>
-                                    	</#if>
-					    			</select>
-                                </div>
-                            </div>
                             <div class="form-group">
                                 <label class="col-xs-2 control-label">通道类型</label>
                                 <div class="col-xs-4">
@@ -424,28 +407,6 @@
             return '* 请选择通道模板';
         };
     };
-
-    function openUserList(){
-        var userId = $('#userId').val();
-        $.ajax({
-            url:'${BASE_PATH}/mms/passage/userList',
-            dataType:'html',
-            type:'POST',
-            data:{userId:userId},
-            success:function(data){
-                $('#userModelBody').html(data);
-                $('#userModal').modal('show');
-            },error:function(data){
-                Boss.alert('请求用户列表异常！');
-            }
-        });
-    }
-
-    function selectUser(userId,fullName,mobile){
-        $('#userId').val(userId);
-        $('.selectUserDiv').html(fullName);
-        $('#userModal').modal('hide');
-    }
 
     function initRuleDetailName(){
         var detailRuleType = $('.detailRuleType');

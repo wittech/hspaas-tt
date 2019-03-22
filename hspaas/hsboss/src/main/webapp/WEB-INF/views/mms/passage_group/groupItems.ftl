@@ -30,12 +30,12 @@
                 <#if currentRouteType?? && group?? && group.detailList?? && group.detailList?size gt 0>
                     <#list group.detailList as gd>
                         <#if gd.routeType == currentRouteType && gd.cmcp ==  cpl.cmcp.getCode()>
-                            <option value="${gd.smsPassage.id}" <#if gd.smsPassage.status?? && gd.smsPassage.status == 1>style="background: red"</#if>>
-                            ${gd.smsPassage.name!''}
-                                <#if gd.smsPassage.type == 1>
+                            <option value="${gd.mmsPassage.id}" <#if gd.mmsPassage.status?? && gd.mmsPassage.status == 1>style="background: red"</#if>>
+                            ${gd.mmsPassage.name!''}
+                                <#if gd.mmsPassage.type == 1>
                                     &nbsp;[独]
                                 </#if>
-                                <#if gd.smsPassage.cmcp == 4>
+                                <#if gd.mmsPassage.cmcp == 4>
                                     &nbsp;[全]
                                 </#if>
                             </option>

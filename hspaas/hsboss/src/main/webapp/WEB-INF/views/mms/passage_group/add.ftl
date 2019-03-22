@@ -61,8 +61,7 @@
                                 </div>
 
                                 <#assign routeType = 0>
-                                <#include "/WEB-INF/views/sms/passage_group/province_cmcp_table.ftl">
-                                <#--<#include "/WEB-INF/views/sms/passage_group/groupItems.ftl">-->
+                                <#include "/WEB-INF/views/mms/passage_group/province_cmcp_table.ftl">
                                 <div class="form-group">
                                     <label class="col-xs-2 control-label">备注</label>
                                     <div class="col-xs-8">
@@ -75,7 +74,7 @@
                                     <input type="hidden" class="routeType" value="${r.getValue()}" />
                                     <#assign routeType = r.getValue()>
                                     <div id="group_${r.getValue()}" style="display:none" class="groupConfig">
-                                        <#include "/WEB-INF/views/sms/passage_group/province_cmcp_table.ftl">
+                                        <#include "/WEB-INF/views/mms/passage_group/province_cmcp_table.ftl">
                                     </div>
                                 </#if>
                             </#list>

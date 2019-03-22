@@ -57,7 +57,7 @@
                         <div class="panel-heading">
                         	<#if macro.doOper("10001002001")>
 	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-	                                <a class="btn btn-success" href="${BASE_PATH}/sms/passage_group/add">添加通道组</a>
+	                                <a class="btn btn-success" href="${BASE_PATH}/mms/passage_group/add">添加通道组</a>
 	                            </div>
 	                        </#if>
                             <h3 class="panel-title">
