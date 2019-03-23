@@ -2,6 +2,8 @@ package com.huashi.hsboss.web.controller.mms;
 
 import java.util.Date;
 
+import com.huashi.mms.template.constant.MmsTemplateContext;
+import com.huashi.sms.task.domain.SmsMtTask;
 import org.apache.commons.lang.StringUtils;
 
 import com.huashi.common.user.service.IUserService;
@@ -24,7 +26,7 @@ import com.jfinal.ext.route.ControllerBind;
 
 /**
  * 彩信模板控制器
- * 
+ *
  * @author zhengying
  * @version V1.0
  * @date 2019年3月17日 下午3:29:29
@@ -34,14 +36,14 @@ import com.jfinal.ext.route.ControllerBind;
 public class MmsMessageTemplateController extends BaseController {
 
     @BY_NAME
-    private IUserService        iUserService;
+    private IUserService iUserService;
     @BY_NAME
     private IMmsTemplateService iMmsTemplateService;
     @BY_NAME
-    private IMmsMtTaskService   iMmsMtTaskService;
+    private IMmsMtTaskService iMmsMtTaskService;
 
-    @AuthCode(code = { OperCode.OPER_CODE_10002001, OperCode.OPER_CODE_10002002, OperCode.OPER_CODE_10002003,
-            OperCode.OPER_CODE_10002004, OperCode.OPER_CODE_10002005, OperCode.OPER_CODE_10002006 })
+    @AuthCode(code = {OperCode.OPER_CODE_10002001, OperCode.OPER_CODE_10002002, OperCode.OPER_CODE_10002003,
+            OperCode.OPER_CODE_10002004, OperCode.OPER_CODE_10002005, OperCode.OPER_CODE_10002006})
     @ActionMode
     public void index() {
         String userId = getPara("userId");
@@ -57,6 +59,15 @@ public class MmsMessageTemplateController extends BaseController {
         setAttr("userId", getParaToInt("userId", -1));
         setAttr("approveStatus", ApproveStatus.values());
         setAttr("userList", iUserService.findUserModels());
+    }
+
+    @AuthCode(code = OperCode.OPER_CODE_10002002)
+    @ActionMode(type = EnumConstant.ActionType.JSON)
+    public void create() {
+        setAttr("templateStatus", ApproveStatus.values());
+        setAttr("routeTypes", PassageContext.RouteType.values());
+        setAttr("userList", iUserService.findUserModels());
+        setAttr("mediaTypes", MmsTemplateContext.MediaType.values());
     }
 
     @AuthCode(code = OperCode.OPER_CODE_10002002)
@@ -108,7 +119,7 @@ public class MmsMessageTemplateController extends BaseController {
     public void approve() {
         boolean result = iMmsTemplateService.approve(getParaToLong("id"), getParaToInt("status"), getPara("remark"));
         logger.info("账号: [" + getLoginName() + "] 审批模板:[" + getParaToLong("id") + "], 状态: [" + getParaToInt("status")
-                    + "], 备注:[" + getParaToInt("status") + "], 审批结果：[" + result + "]");
+                + "], 备注:[" + getParaToInt("status") + "], 审批结果：[" + result + "]");
         renderResultJson(result);
     }
 
