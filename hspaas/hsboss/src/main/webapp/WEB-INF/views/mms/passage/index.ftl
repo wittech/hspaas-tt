@@ -72,7 +72,6 @@
                                         <th>通道名称</th>
                                         <th>通道编码</th>
                                         <th>运营商</th>
-                                        <th>通道类型</th>
                                         <th>优先级</th>
                                         <th>创建时间</th>
                                         <th>操作</th>
@@ -108,13 +107,6 @@
                                             未知
                                         </#if>
                                         </td>
-                                        <td>
-											<#if pl.type == 1>
-												独立通道
-											<#else>
-												公共通道
-											</#if>
-										</td>
 										<td>${pl.priority!'--'}</td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td>

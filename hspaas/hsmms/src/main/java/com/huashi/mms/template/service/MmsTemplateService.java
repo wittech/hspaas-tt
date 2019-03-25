@@ -389,27 +389,10 @@ public class MmsTemplateService implements IMmsTemplateService {
             
             
         } catch (Exception e) {
-            // TODO: handle exception
         }
         
         
         return true;
-    }
-
-    /**
-     * TODO 内容转换正则表达式
-     * 
-     * @param content
-     * @return
-     */
-    private static String parseContent2Regex(String content) {
-        // modify 变量内容 增加不可见字符
-        content = content.replaceAll("#[a-z]*[0-9]*[A-Z]*#", "[\\\\s\\\\S]*").replaceAll("\\{[a-z]*[0-9]*[A-Z]*\\}",
-                                                                                         "[\\\\s\\\\S]*");
-        // 去掉末尾可以增加空格等不可见字符，以免提供商模板不通过
-        // return prefix+oriStr+"\\s*$";
-        return String.format("^%s$", content);
-
     }
 
     @Override

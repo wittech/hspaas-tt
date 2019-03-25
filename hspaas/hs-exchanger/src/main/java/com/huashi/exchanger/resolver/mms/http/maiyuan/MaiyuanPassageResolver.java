@@ -1,13 +1,16 @@
-package com.huashi.exchanger.resolver.sms.http.maiyuan;
+package com.huashi.exchanger.resolver.mms.http.maiyuan;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -21,90 +24,163 @@ import com.huashi.common.util.DateUtil;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.resolver.HttpClientManager;
-import com.huashi.exchanger.resolver.sms.http.AbstractPassageResolver;
+import com.huashi.exchanger.resolver.mms.http.AbstractMmsPassageResolver;
 import com.huashi.exchanger.template.handler.RequestTemplateHandler;
 import com.huashi.exchanger.template.vo.TParameter;
+import com.huashi.mms.passage.domain.MmsPassageParameter;
+import com.huashi.mms.record.domain.MmsMoMessageReceive;
+import com.huashi.mms.record.domain.MmsMtMessageDeliver;
+import com.huashi.mms.template.constant.MmsTemplateContext.MediaType;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
-import com.huashi.sms.passage.domain.SmsPassageParameter;
-import com.huashi.sms.record.domain.SmsMoMessageReceive;
-import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 
 /**
- * TODO 迈远通道处理器
+ * TODO 迈远平台
  * 
  * @author zhengying
  * @version V1.0
- * @date 2016年12月19日 下午2:23:16
+ * @date 2019年3月24日 下午7:38:53
  */
 @Component
-public class MaiyuanPassageResolver extends AbstractPassageResolver {
+public class MaiyuanPassageResolver extends AbstractMmsPassageResolver {
+
+    /**
+     * 参数分隔符
+     */
+    private static final String TEPE_CONTENT_SEPERATOR        = "|";
+
+    /**
+     * 多组数据分隔符
+     */
+    private static final String CONTENT_MULTI_GROUP_SEPERATOR = ";";
+
+    /**
+     * 发送彩信方法名
+     */
+    private static final String ACTION_SEND_MMS               = "send";
+
+    /**
+     * 彩信延迟播放时间
+     */
+    private static final String DELAY_START_TIME              = "3";
+
+    /**
+     * 编码
+     */
+    private static final String ENCODEING_GB2312              = "GB2312";
+
+    /**
+     * 成功辨识
+     */
+    private static final String SUCCESS_CODE_FLAG             = ":";
 
     /**
      * 返回报告中是否含有消息体标识字段，如果含有如下字段，则标识有消息体，需要处理
      */
-    private static final String REPORT_HAS_BODY_FLAG = "taskid";
+    private static final String REPORT_HAS_BODY_FLAG          = "taskid";
 
     @Override
-    public List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content,
-                                           String extNumber) {
-
+    public List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber,
+                                           String title, List<MmsMessageTemplateBody> bobies) {
         try {
             TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
 
-            // 转换参数，并调用网关接口，接收返回结果
-            String result = HttpClientManager.post(parameter.getUrl(), null,
-                                                   request(tparameter, mobile, content, extNumber),
-                                                   HttpClientManager.DEFAULT_MAX_TOTAL,
-                                                   HttpClientManager.DEFAULT_MAX_PER_ROUTE, 60000);
+            String result = HttpClientManager.post(parameter.getUrl(),
+                                                   sendRequest(tparameter, title, bobies, mobile, extNumber));
 
-            // parameter.getReadTimeout()
-
-            // 解析返回结果并返回
             return sendResponse(result, parameter.getSuccessCode());
         } catch (Exception e) {
-            logger.error("解析失败", e);
-            throw new RuntimeException("解析失败");
+            logger.error("迈远彩信服务解析失败", e);
+            throw new RuntimeException("迈远彩信服务解析失败");
         }
     }
 
     /**
-     * TODO 下行发送短信组装请求信息
+     * TODO 发送彩信组装请求信息
      * 
      * @param tparameter
-     * @param mobile 手机号码
-     * @param content 短信内容
-     * @param extNumber 扩展号码
+     * @param title
+     * @param bobies
+     * @param mobile
+     * @param extNumber 扩展号
      * @return
+     * @throws UnsupportedEncodingException
      */
-    private static Map<String, Object> request(TParameter tparameter, String mobile, String content, String extNumber) {
+    private Map<String, Object> sendRequest(TParameter tparameter, String title, List<MmsMessageTemplateBody> bobies,
+                                            String mobile, String extNumber) throws UnsupportedEncodingException {
+
         Map<String, Object> params = new HashMap<>();
-        params.put("userid", tparameter.getString("userid"));
+        params.put("action", ACTION_SEND_MMS);
+        params.put("userid", tparameter.getString("userId"));
         params.put("account", tparameter.getString("account"));
         params.put("password", tparameter.getString("password"));
         params.put("mobile", mobile);
-        params.put("content", content);
-        params.put("sendTime", "");
-        params.put("extno", extNumber == null ? "" : extNumber);
-        params.put("action", tparameter.getString("action"));
+        params.put("title", title);
+        params.put("content", content(bobies));
 
         return params;
     }
 
     /**
-     * TODO 下行回执/上行短信组装请求信息
+     * TODO 拼接content
      * 
-     * @param tparameter
+     * @param bobies
      * @return
+     * @throws UnsupportedEncodingException
      */
-    private static Map<String, Object> request(TParameter tparameter) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("userid", tparameter.getString("userid"));
-        params.put("account", tparameter.getString("account"));
-        params.put("password", tparameter.getString("password"));
-        params.put("action", tparameter.getString("action"));
-        params.put("statusNum", 1000);
+    private String content(List<MmsMessageTemplateBody> bobies) throws UnsupportedEncodingException {
+        if (CollectionUtils.isEmpty(bobies)) {
+            return StringUtils.EMPTY;
+        }
 
-        return params;
+        StringBuilder content = new StringBuilder();
+        for (MmsMessageTemplateBody body : bobies) {
+            content.append(DELAY_START_TIME).append(COMMON_SEPERATOR).append(body.getMediaName()).append(TEPE_CONTENT_SEPERATOR);
+            if (MediaType.TEXT.getCode().equalsIgnoreCase(body.getMediaType())) {
+                content.append(textContent(body.getData()));
+            } else {
+                content.append(urlEncode(body.getData()));
+            }
+
+            content.append(CONTENT_MULTI_GROUP_SEPERATOR);
+        }
+
+        if (StringUtils.isEmpty(content.toString())) {
+            return StringUtils.EMPTY;
+        }
+
+        // 去掉最后一个分隔符
+        return content.substring(0, content.length() - 1);
+    }
+
+    /**
+     * TODO URL加码，防止BASE64字节HTTP 传输丢失
+     * 
+     * @param data
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private String urlEncode(byte[] data) throws UnsupportedEncodingException {
+        if (data == null) {
+            throw new IllegalArgumentException("Byte data is null");
+        }
+
+        return Base64.encodeBase64String(data).replaceAll("\r|\n", "");
+    }
+
+    /**
+     * TODO 文本内容转换
+     * 
+     * @param content
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private String textContent(byte[] content) throws UnsupportedEncodingException {
+        if (content == null) {
+            throw new IllegalArgumentException("Content data is null");
+        }
+
+        return Base64.encodeBase64String(new String(content, DEFAULT_ENCODING).getBytes(ENCODEING_GB2312));
     }
 
     /**
@@ -120,31 +196,18 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
         }
 
         List<ProviderSendResponse> list = new ArrayList<>();
-        StringReader read = new StringReader(result);
-        // 创建新的输入源SAX 解析器将使用 InputSource 对象来确定如何读取 XML 输入
-        InputSource source = new InputSource(read);
-        // 创建一个新的SAXBuilder
-        SAXBuilder sb = new SAXBuilder();
-        try {
-            // 通过输入源构造一个Document
-            Document doc = sb.build(source);
-            // 取的根元素
-            Element root = doc.getRootElement();
-            // 获得XML中的命名空间（XML中未定义可不写）
-            Namespace ns = root.getNamespace();
-            ProviderSendResponse response = new ProviderSendResponse();
-            // response.setMobile(root.getChild("mobile", ns).getText());
-            response.setStatusCode(root.getChild("returnstatus", ns).getText());
-            response.setSid(root.getChild("taskID", ns).getText());
-            response.setSendTime(DateUtil.getNow());
-            response.setSuccess(StringUtils.isNotEmpty(response.getStatusCode())
-                                && successCode.equals(response.getStatusCode()));
+        ProviderSendResponse response = new ProviderSendResponse();
+        if (result.contains(SUCCESS_CODE_FLAG)) {
+            response.setSuccess(true);
+            response.setStatusCode(result.split(SUCCESS_CODE_FLAG)[0]);
+            response.setSid(result.split(SUCCESS_CODE_FLAG)[1]);
             response.setRemark(result);
-            list.add(response);
-
-        } catch (JDOMException | IOException e) {
-            logger.error("解析回执信息失败, {}", result, e);
+        } else {
+            response.setSuccess(false);
+            response.setStatusCode(result);
+            response.setRemark(result);
         }
+        list.add(response);
         return list;
     }
 
@@ -155,7 +218,7 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
      * @param successCode
      * @return
      */
-    private List<SmsMtMessageDeliver> deliverResponse(String result, String successCode) {
+    private List<MmsMtMessageDeliver> deliverResponse(String result, String successCode) {
         if (StringUtils.isEmpty(result) || !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
@@ -164,7 +227,7 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
 
         successCode = StringUtils.isEmpty(successCode) ? COMMON_MT_STATUS_SUCCESS_CODE : successCode;
 
-        List<SmsMtMessageDeliver> list = new ArrayList<>();
+        List<MmsMtMessageDeliver> list = new ArrayList<>();
         StringReader read = new StringReader(result);
         // 创建新的输入源SAX 解析器将使用 InputSource 对象来确定如何读取 XML 输入
         InputSource source = new InputSource(read);
@@ -179,13 +242,13 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
             List<Element> data = root.getChildren();
             // 获得XML中的命名空间（XML中未定义可不写）
             Namespace ns = root.getNamespace();
-            SmsMtMessageDeliver response;
+            MmsMtMessageDeliver response;
             for (Element et : data) {
                 if (et.getChild("taskid", ns) == null) {
                     continue;
                 }
 
-                response = new SmsMtMessageDeliver();
+                response = new MmsMtMessageDeliver();
                 response.setMsgId(et.getChild("taskid", ns).getText());
                 response.setMobile(et.getChild("mobile", ns).getText());
                 response.setCmcp(CMCP.local(response.getMobile()).getCode());
@@ -225,14 +288,14 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
      * @param passageId
      * @return
      */
-    private List<SmsMoMessageReceive> moResponse(String result, Integer passageId) {
+    private List<MmsMoMessageReceive> moResponse(String result, Integer passageId) {
         if (StringUtils.isEmpty(result) || !result.contains(REPORT_HAS_BODY_FLAG)) {
             return null;
         }
 
         logger.info("上行报告简码：{} =========={}", code(), result);
 
-        List<SmsMoMessageReceive> list = new ArrayList<>();
+        List<MmsMoMessageReceive> list = new ArrayList<>();
         StringReader read = new StringReader(result);
         // 创建新的输入源SAX 解析器将使用 InputSource 对象来确定如何读取 XML 输入
         InputSource source = new InputSource(read);
@@ -247,10 +310,10 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
             List<Element> data = root.getChildren();
             // 获得XML中的命名空间（XML中未定义可不写）
             Namespace ns = root.getNamespace();
-            SmsMoMessageReceive response;
+            MmsMoMessageReceive response;
 
             for (Element et : data) {
-                response = new SmsMoMessageReceive();
+                response = new MmsMoMessageReceive();
                 response.setPassageId(passageId);
                 response.setMsgId(et.getChild("taskid", ns).getText());
                 response.setMobile(et.getChild("mobile", ns).getText());
@@ -272,6 +335,50 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
         return list;
     }
 
+    /**
+     * TODO 下行回执/上行彩信组装请求信息
+     * 
+     * @param tparameter
+     * @return
+     */
+    private static Map<String, Object> request(TParameter tparameter) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userid", tparameter.getString("userid"));
+        params.put("account", tparameter.getString("account"));
+        params.put("password", tparameter.getString("password"));
+        params.put("action", tparameter.getString("action"));
+        params.put("statusNum", 1000);
+
+        return params;
+    }
+
+    @Override
+    public List<MmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
+        try {
+            String result = HttpClientManager.post(url, request(tparameter));
+
+            // 解析返回结果并返回
+            return deliverResponse(result, successCode);
+        } catch (Exception e) {
+            logger.error("迈远彩信报告解析失败", e);
+            throw new RuntimeException("迈远彩信解析失败");
+        }
+    }
+
+    @Override
+    public List<MmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
+
+        try {
+            String result = HttpClientManager.post(url, request(tparameter));
+
+            // 解析返回结果并返回
+            return moResponse(result, passageId);
+        } catch (Exception e) {
+            logger.error("迈远彩信上行解析失败", e);
+            throw new RuntimeException("迈远彩信解析失败");
+        }
+    }
+
     @Override
     public Double balance(TParameter tparameter, String url, Integer passageId) {
         return 0d;
@@ -280,33 +387,6 @@ public class MaiyuanPassageResolver extends AbstractPassageResolver {
     @Override
     public String code() {
         return "maiyuan";
-    }
-
-    @Override
-    public List<SmsMtMessageDeliver> mtDeliver(TParameter tparameter, String url, String successCode) {
-        try {
-            String result = HttpClientManager.post(url, request(tparameter));
-
-            // 解析返回结果并返回
-            return deliverResponse(result, successCode);
-        } catch (Exception e) {
-            logger.error("迈远短信报告解析失败", e);
-            throw new RuntimeException("迈远短信解析失败");
-        }
-    }
-
-    @Override
-    public List<SmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
-
-        try {
-            String result = HttpClientManager.post(url, request(tparameter));
-
-            // 解析返回结果并返回
-            return moResponse(result, passageId);
-        } catch (Exception e) {
-            logger.error("迈远短信上行解析失败", e);
-            throw new RuntimeException("迈远短信解析失败");
-        }
     }
 
 }

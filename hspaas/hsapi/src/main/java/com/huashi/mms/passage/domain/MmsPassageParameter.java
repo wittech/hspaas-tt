@@ -1,6 +1,17 @@
 package com.huashi.mms.passage.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.huashi.common.passage.dto.ParseParamDto;
+import com.huashi.common.passage.dto.RequestParamDto;
 
 public class MmsPassageParameter {
 
@@ -164,6 +175,40 @@ public class MmsPassageParameter {
 
     public void setReadTimeout(Integer readTimeout) {
         this.readTimeout = readTimeout;
+    }
+    
+    public List<RequestParamDto> getRequestParams() {
+        List<RequestParamDto> list = new ArrayList<RequestParamDto>();
+        if (StringUtils.isNotBlank(paramsDefinition)) {
+            list = JSONArray.parseArray(paramsDefinition, RequestParamDto.class);
+        }
+        return list;
+    }
+
+    public List<ParseParamDto> getParseParams() {
+        List<ParseParamDto> list = new ArrayList<ParseParamDto>();
+        if (StringUtils.isNotBlank(position)) {
+            Map<String, String> map = JSONObject.parseObject(position, new TypeReference<Map<String, String>>() {
+            });
+            for (Map.Entry<String, String> m : map.entrySet()) {
+                ParseParamDto dto = new ParseParamDto();
+                dto.setPosition(m.getValue());
+                dto.setParseName(m.getKey());
+                dto.setShowName("");
+            }
+        }
+        return list;
+    }
+
+    public String getShowResultFormat() {
+        if (StringUtils.isNotBlank(resultFormat)) {
+            resultFormat = resultFormat.replaceAll("\"", "&quot;");
+            resultFormat = resultFormat.replaceAll("'", "&#39;");
+            resultFormat = resultFormat.replaceAll("<", "&lt;");
+            resultFormat = resultFormat.replaceAll(">", "&gt;");
+            return resultFormat;
+        }
+        return null;
     }
 
 }

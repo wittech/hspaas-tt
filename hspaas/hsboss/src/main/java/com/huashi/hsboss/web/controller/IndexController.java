@@ -12,7 +12,8 @@ import com.jfinal.ext.route.ControllerBind;
 public class IndexController extends BaseController {
 
     @AuthCode(code = OperCode.OPER_CODE_COMMON)
-    public void index(){
+    public void index() {
         redirect("/account");
     }
+
 }

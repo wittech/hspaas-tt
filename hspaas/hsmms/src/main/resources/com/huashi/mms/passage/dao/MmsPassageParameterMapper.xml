@@ -216,6 +216,8 @@
 		url, params_definition, params,
 		result_format, success_code, position,
 		create_time)
+		values
+		
 		<foreach collection="list" item="element" index="index"
 			separator=",">
 			(#{element.passageId,jdbcType=INTEGER},
@@ -230,4 +232,5 @@
 			#{element.createTime,jdbcType=TIMESTAMP})
 		</foreach>
 	</insert>
+	
 </mapper>

@@ -61,28 +61,10 @@
                                 </#list>
                                 </div>
                                 <input type="hidden" name="passage.cmcp" id="passageType" value="${passage.cmcp}">
-                                <label class="col-xs-1 control-label">付费方式</label>
-                                <div class="col-xs-4">
-                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_1" name="payType" <#if passage.payType == 1>checked</#if> value="1">预付</label>&nbsp;&nbsp;
-                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_2" name="payType" <#if passage.payType == 2>checked</#if> value="2">后付</label>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-xs-2 control-label">通道类型</label>
-                                <div class="col-xs-4">
-                                    <label class="form-radio form-icon"><input type="radio" class="passageRealType" id="passageRealType_1" name="passageRealType" <#if passage.type == 0>checked</#if> value="0">公共通道</label>&nbsp;&nbsp;
-                                    <label class="form-radio form-icon"><input type="radio" class="passageRealType" id="passageRealType_2" name="passageRealType" <#if passage.type == 1>checked</#if> value="1">独立通道</label>
-                                    <input type="hidden" name="passage.exclusiveUserId" id="userId" value="${passage.exclusiveUserId!-1}">
-
-                                    <a href="javascript:void(0);"  onclick="openUserList();" class="btn btn-primary btn-xs selectUserDiv" <#if passage.type == 0>style="display: none;"</#if>>${selectUserName!'选择用户'}</a>
-                                </div>
-                                <input type="hidden" name="passage.type" id="passageRealType" value="${passage.type}">
-
                                 <label class="col-xs-1 control-label">省份设置</label>
                                 <div class="col-xs-4">
                                     <a href="javascript:void(0);" onclick="openProvince();" class="btn btn-primary btn-xs">选择省份</a>
-                                    已选<span id="provinceCount" style="color:red">0</span>个省份
+                                    	已选<span id="provinceCount" style="color:red">0</span>个省份
                                 </div>
                             </div>
 
@@ -156,12 +138,11 @@
                             </div>
                             
                              <div class="form-group">
-                             	<label class="col-xs-2 control-label">通道强制参数</label>
+                             	<label class="col-xs-2 control-label">付费方式</label>
                                 <div class="col-xs-4">
-                                	<select id="smsTemplateParam" name="passage.smsTemplateParam" class="form-control">
-                                         <option value="0" selected="selected">否</option>
-                                         <option value="1" <#if passage.smsTemplateParam?? && passage.smsTemplateParam == 1>selected="selected"</#if>>是</option>
-					    			</select>
+                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_1" name="payType" <#if passage.payType?? && passage.payType == 1>checked</#if> value="1">预付</label>&nbsp;&nbsp;
+                                     <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_2" name="payType" <#if passage.payType?? && passage.payType == 2>checked</#if> value="2">后付</label>
+                                     <input type="hidden" name="passage.payType" id="payType" value="${passage.payType}">
                                 </div>
                             	<label class="col-xs-1 control-label">备注</label>
                                 <div class="col-xs-4">
@@ -286,25 +267,6 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
-<div class="modal fade" id="userModal">
-    <div class="modal-dialog" style="width:850px">
-        <div class="modal-content" style="width:850px">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">选择用户</h4>
-            </div>
-            <div class="modal-body" id="userModelBody">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
 <div class="modal fade" id="provinceModal">
     <div class="modal-dialog" style="width:550px">
         <div class="modal-content" style="width:550px">
@@ -355,16 +317,6 @@
             $('#passageType').val($(this).val());
         });
 
-        $('.passageRealType').click(function(){
-            var value = $(this).val();
-            if(value == 1){
-                $('.selectUserDiv').show();
-            }else{
-                $('.selectUserDiv').hide();
-            }
-            $('#passageRealType').val(value);
-        });
-
         initRuleDetailName();
 
         $('#provinceCount').html($('input[name=provinceItem]:checked').length);
@@ -410,7 +362,12 @@
 
     function initRuleDetailName(){
         var detailRuleType = $('.detailRuleType');
-        var callTypeCn = ['','发送模板','状态回执推送','状态回执自取','上行推送','上行自取'];
+        <#-- var callTypeCn = ['','发送模板','状态回执推送','状态回执自取','上行推送','上行自取'];-->
+        var callTypeCn = [];
+		<#list passageTemplateDetailTypes as t>
+			callTypeCn[${(t_index)!}] = "${(t.getName())!}";
+        </#list>
+        
         var html = '';
         for(var i = 0;i<detailRuleType.length;i++){
             var detailType = $(detailRuleType[i]).val();
@@ -432,7 +389,10 @@
             success:function(data){
                 $('#passageTemplateShowDiv').html(data);
                 var detailRuleType = $('.detailRuleType');
-                var callTypeCn = ['','发送模板','状态回执推送','状态回执自取','上行推送','上行自取'];
+                var callTypeCn = [];
+				<#list passageTemplateDetailTypes as t>
+					callTypeCn[${(t_index + 1)!}] = "${(t.getName())!}";
+	            </#list>
                 var html = '';
                 for(var i = 0;i<detailRuleType.length;i++){
                     var detailType = $(detailRuleType[i]).val();
@@ -517,11 +477,6 @@
     function formSubmit(){
         var allCheck = $('#myform').validationEngine('validate');
         if(!allCheck){
-            return;
-        }
-        var passageType = $('#passageRealType').val();
-        if(passageType == 1 && $('#userId').val() == -1){
-            Boss.alert('若是独立通道，请选择用户！');
             return;
         }
 

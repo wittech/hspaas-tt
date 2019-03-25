@@ -12,11 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.huashi.common.util.DateUtil;
+import com.huashi.exchanger.domain.ProviderModelResponse;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.template.vo.TParameter;
 import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.record.domain.MmsMoMessageReceive;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
+import com.huashi.mms.template.domain.MmsMessageTemplate;
 import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 /**
@@ -51,19 +53,29 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
     protected static final String                      DEFAULT_ENCODING              = "UTF-8";
 
     /**
+     * 常规分隔符
+     */
+    protected static final String                      COMMON_SEPERATOR              = MULTI_MOBILES_SEPERATOR;
+
+    /**
+     * MMS路径
+     */
+    private static final String                        MMS_ROUTER                    = "mms/";
+
+    /**
      * TODO 初始化通道简码对应的实体映射
      */
     @PostConstruct
     protected void loadCodeRefrenceBeans() {
-        if (CODE_REFRENCE_BEANS.containsKey(code())) {
-            throw new RuntimeException("Mms passage's code[" + code() + "] is exists in current factory");
+        if (CODE_REFRENCE_BEANS.containsKey(getCode())) {
+            throw new RuntimeException("Mms passage's code[" + getCode() + "] is exists in current factory");
         }
 
         try {
-            CODE_REFRENCE_BEANS.put(code(), this);
-            logger.info("Loading http passage's code[" + code() + "]-ref[" + this + "] succeed");
+            CODE_REFRENCE_BEANS.put(getCode(), this);
+            logger.info("Loading http passage's code[" + getCode() + "]-ref[" + this + "] succeed");
         } catch (Exception e) {
-            logger.error("Loading http passage's code[" + code() + "]-ref[" + this + "] failed", e);
+            logger.error("Loading http passage's code[" + getCode() + "]-ref[" + this + "] failed", e);
         }
     }
 
@@ -74,9 +86,9 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
      * @return
      */
     public static MmsHttpPassageResolver getInstance(String code) {
-        MmsHttpPassageResolver instance = CODE_REFRENCE_BEANS.get(code);
+        MmsHttpPassageResolver instance = CODE_REFRENCE_BEANS.get(getCode(code));
         if (instance == null) {
-            throw new RuntimeException("Mms passage's custom code[" + code + "] can't find any reference");
+            throw new RuntimeException("Mms passage's custom code[" + getCode(code) + "] can't find any reference");
         }
 
         return instance;
@@ -114,6 +126,11 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
         throw new UnsupportedOperationException("It needs implement by child class");
     }
 
+    public List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber,
+                                           String modelId) {
+        throw new UnsupportedOperationException("Code [" + getCode() + "] custom body api is not supported");
+    }
+
     /**
      * 彩信自定义内容发送
      * 
@@ -126,7 +143,7 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
      */
     public List<ProviderSendResponse> send(MmsPassageParameter parameter, String mobile, String extNumber,
                                            String title, List<MmsMessageTemplateBody> bobies) {
-        throw new UnsupportedOperationException("Code [" + code() + "] custom body api is not supported");
+        throw new UnsupportedOperationException("Code [" + getCode() + "] custom body api is not supported");
     }
 
     /**
@@ -138,6 +155,17 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
      * @return
      */
     public List<MmsMoMessageReceive> moReceive(TParameter tparameter, String url, Integer passageId) {
+        throw new UnsupportedOperationException("It needs implement by child class");
+    }
+
+    /**
+     * 报备模板
+     * 
+     * @param parameter
+     * @param mmsMessageTemplate
+     * @return
+     */
+    public ProviderModelResponse applyModel(MmsPassageParameter parameter, MmsMessageTemplate mmsMessageTemplate) {
         throw new UnsupportedOperationException("It needs implement by child class");
     }
 
@@ -209,6 +237,19 @@ public abstract class AbstractMmsPassageResolver implements MmsHttpPassageResolv
      */
     protected String generateModelName(Long id) {
         return "HsppasMmsName[" + id + "] code-[" + code() + "]";
+    }
+
+    /**
+     * TODO 获取最终的CODE（加路由）
+     * 
+     * @return
+     */
+    private String getCode() {
+        return MMS_ROUTER + code();
+    }
+
+    private static String getCode(String code) {
+        return MMS_ROUTER + code;
     }
 
     // protected boolean

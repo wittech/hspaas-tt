@@ -305,36 +305,10 @@
                             </tr>
                             <tr>
                                 <td colspan="13" align="right">
+                                	<span style="word-break:break-all;">
+	                                       ${pl.title!''}
+	                                    </span>
                                 	<input type="hidden" id="${pl.sid}_content" value="${pl.finalContent!''}" />
-                                	<#if pl.forbiddenWordLabels??>
-                                	<#list pl.forbiddenWordLabels as forbiddenWordLabel>
-                                		<span class="label <#if forbiddenWordLabel.word?index_of(".*") == -1>label-warning<#else>label-danger</#if>" style="float:left;margin-right:3px;" data-toggle="popwordover" title="${forbiddenWordLabel.label!''}标签敏感词" data-content="${forbiddenWordLabel.word!''}">${forbiddenWordLabel.label!''}</span>&nbsp;
-                                	</#list>
-	                                	<span style="word-break:break-all;">
-	                                	<#assign content="${pl.finalContent!''}">
-	                                	<#list pl.forbiddenWords?split(",") as word>
-	                                		<#if word?? && word?contains(".*")>
-	                                			<#list word?split(".*") as wildcardWord>
-	                                				<#if wildcardWord?? && wildcardWord != "">
-	                                					<#assign content= content?replace(wildcardWord, "<span style='color:#FF0000;border-bottom:1px solid #FF0000;'>${(wildcardWord)!}</span>")>
-	                                				</#if>
-	                                			</#list>
-	                                		<#else>
-	                                			<#assign content= content?replace(word, "<span style='color:#E9967A'>${(word)!}</span>")>
-	                                		</#if>
-	                                		
-	                                    </#list>
-	                                    ${content!''}
-	                                    </span>
-                                	<#else>
-	                                	<span style="word-break:break-all;">
-	                                       ${pl.finalContent!''}
-	                                    </span>
-                                	</#if>
-                                    
-                                    <span style="color:#808080">
-                                    [字数：${pl.finalContent?length}]
-                                    </span>
                                 </td>
                             </tr>
                             </#list>

@@ -4,36 +4,36 @@ import java.util.Date;
 
 public class MmsMessageTemplateBody {
 
-    private Long             id;
+    private Long    id;
 
-    private Long             templateId;
+    private Long    templateId;
 
-    private String           mediaName;
+    private String  mediaName;
 
-    private String           mediaType;
+    private String  mediaType;
 
-    private String           content;
+    private String  content;
 
-    private Integer          sort;
+    private Integer sort;
 
-    private Date             createTime;
+    private Date    createTime;
 
-    private Date             updateTime;
+    private Date    updateTime;
 
     /**
      * OSS 资源URL信息
      */
-    private String           url;
+    private String  url;
 
     /**
      * HTML
      */
-    private String           html;
+    private String  html;
 
     /**
-     * 二进制数据（不做序列化）
+     * 二进制数据
      */
-    private transient byte[] data;
+    private byte[]  data;
 
     public Long getId() {
         return id;

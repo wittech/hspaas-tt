@@ -7,10 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.huashi.common.vo.FileResponse;
 import com.huashi.mms.template.dao.MmsMessageTemplateBodyMapper;
 import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
@@ -22,6 +24,9 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
 
     @Autowired
     private MmsMessageTemplateBodyMapper mmsMessageTemplateBodyMapper;
+
+    @Value("${aliyun.oss.url}")
+    private String                       ossUrl;
 
     private final Logger                 logger = LoggerFactory.getLogger(getClass());
 
@@ -71,6 +76,22 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
     @Override
     public boolean delete(Long templateId) {
         return mmsMessageTemplateBodyMapper.deleteByTemplateId(templateId) > 0;
+    }
+
+    @Override
+    public FileResponse writeOssFile(String fileName, byte[] fileData, String mediaType) {
+        try {
+            String filename = mmsMediaFileService.writeFile(mediaType, fileData);
+            if (StringUtils.isEmpty(filename)) {
+                return new FileResponse(false, "File gerenate failed");
+            }
+
+            return new FileResponse(true, "success", ossUrl + fileName);
+
+        } catch (Exception e) {
+            logger.error("上传writeOssFile失败", e);
+            return new FileResponse(false, "File gerenate failed");
+        }
     }
 
 }

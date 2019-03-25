@@ -2,6 +2,7 @@ package com.huashi.mms.template.service;
 
 import java.util.List;
 
+import com.huashi.common.vo.FileResponse;
 import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 /**
@@ -12,6 +13,16 @@ import com.huashi.mms.template.domain.MmsMessageTemplateBody;
  * @date 2019年3月17日 上午10:39:48
  */
 public interface IMmsTemplateBodyService {
+
+    /**
+     * TODO 写入OSS文件
+     * 
+     * @param fileName
+     * @param fileData
+     * @param mediaType
+     * @return
+     */
+    FileResponse writeOssFile(String fileName, byte[] fileData, String mediaType);
 
     /**
      * TODO 根据模板ID查询全部报文体数据

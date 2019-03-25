@@ -1,4 +1,4 @@
-package com.huashi.listener.task;
+package com.huashi.listener.task.sms;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.record.domain.SmsMoMessageReceive;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 
-public class PassageMoReportPullTask implements Runnable {
+public class SmsPassageMoReportPullTask implements Runnable {
 
     // 默认线程休眠20秒
     private static final int     SLEEP_TIME   = 5 * 1000;
@@ -27,8 +27,8 @@ public class PassageMoReportPullTask implements Runnable {
     private ISmsMoMessageService smsMoMessageService;
     private ISmsProviderService  smsProviderService;
 
-    public PassageMoReportPullTask(SmsPassageAccess smsPassageAccess, ISmsMoMessageService smsMoMessageService,
-                                   ISmsProviderService smsProviderService) {
+    public SmsPassageMoReportPullTask(SmsPassageAccess smsPassageAccess, ISmsMoMessageService smsMoMessageService,
+                                      ISmsProviderService smsProviderService) {
         this.smsPassageAccess = smsPassageAccess;
         this.smsMoMessageService = smsMoMessageService;
         this.smsProviderService = smsProviderService;
@@ -63,18 +63,14 @@ public class PassageMoReportPullTask implements Runnable {
      */
     private int getSleepTime(SmsPassageAccess smsPassageAccess) {
         if (smsPassageAccess == null || StringUtils.isEmpty(smsPassageAccess.getParams())) {
-            {
-                return SLEEP_TIME;
-            }
+            return SLEEP_TIME;
         }
 
         try {
             JSONObject jsonObject = JSON.parseObject(smsPassageAccess.getParams());
             String str = jsonObject.getString(INTERVAL_KEY);
             if (StringUtils.isEmpty(str)) {
-                {
-                    return SLEEP_TIME;
-                }
+                return SLEEP_TIME;
             }
 
             return Integer.parseInt(str);

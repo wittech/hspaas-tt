@@ -581,9 +581,7 @@
 			                                </div>
 			                            </div>
 	                                    
-	                                    
-	                                    
-	                                    <div class="panel panel-info" style="margin-top:10px">
+	                                    <div class="panel panel-info" style="margin-top:10px;display:none;">
 		                             	   <div class="panel-heading" style="height:40px">
                                                <div class="pull-right"  style="margin-top: 3px;margin-right: 20px;">
                                                    <a onclick="fsFormSubmit();" class="btn btn-primary">保存流量设置</a>
@@ -638,7 +636,7 @@
 	                                    	</div>
 	                                    </div>
 	                                    
-	                                    <div class="panel panel-info" style="margin-top:10px">
+	                                    <div class="panel panel-info" style="margin-top:10px;display:none;">
 		                             	   <div class="panel-heading" style="height:40px">
                                                <div class="pull-right" style="margin-top: 3px;margin-right: 20px;">
                                                    <a onclick="vsFormSubmit();" class="btn btn-primary">保存语音设置</a>

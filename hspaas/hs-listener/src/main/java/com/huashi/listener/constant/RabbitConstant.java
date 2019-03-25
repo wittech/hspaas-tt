@@ -9,16 +9,32 @@ package com.huashi.listener.constant;
  */
 public class RabbitConstant {
 
-    /*-----------------------------------交换机-----------------------------------------*/
-    // 交换机
-    public static final String EXCHANGE_SMS           = "hspaas.sms";
-
     /*-----------------------------------短信下行队列-----------------------------------------*/
-    // 短信下行 已完成上家通道调用，待网关回执队列
+
+    /**
+     * 短信下行 已完成上家通道调用，待网关回执队列
+     */
     public static final String MQ_SMS_MT_WAIT_RECEIPT = "mq_sms_mt_wait_receipt";
 
     /*-----------------------------------短信上行队列----------------------------------------*/
-    // 短信上行回执数据
+
+    /**
+     * 短信上行回执数据
+     */
     public static final String MQ_SMS_MO_RECEIVE      = "mq_sms_mo_receive";
+
+    /*-----------------------------------彩信下行队列-----------------------------------------*/
+
+    /**
+     * 彩信下行 已完成上家通道调用，待网关回执队列
+     */
+    public static final String MQ_MMS_MT_WAIT_RECEIPT = "mq_mms_mt_wait_receipt";
+
+    /*-----------------------------------短信上行队列----------------------------------------*/
+
+    /**
+     * 彩信上行回执数据
+     */
+    public static final String MQ_MMS_MO_RECEIVE      = "mq_mms_mo_receive";
 
 }

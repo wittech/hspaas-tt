@@ -29,49 +29,54 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 public abstract class AbstractPassageResolver implements SmsHttpPassageResolver {
 
     @Resource
-    private StringRedisTemplate                     stringRedisTemplate;
+    private StringRedisTemplate                        stringRedisTemplate;
 
     /**
      * 通道简码对应的处理器实体类关系
      */
     private static Map<String, SmsHttpPassageResolver> CODE_REFRENCE_BEANS             = new HashMap<>();
 
-    protected final Logger                          logger                          = LoggerFactory.getLogger(getClass());
+    protected final Logger                             logger                          = LoggerFactory.getLogger(getClass());
 
     /**
      * 下行状态HTTP状态报告REDIS前置（主要用于状态回执报告中没有手机号码， 顾发送短信需要提前设置MSG_ID和MOBILE对应关系）
      */
-    private static final String                     REDIS_MT_REPORT_HTTP_PRIFIX_KEY = "mt_http_map";
+    private static final String                        REDIS_MT_REPORT_HTTP_PRIFIX_KEY = "mt_http_map";
 
     /**
      * 公共状态回执成功码
      */
-    public static final String                      COMMON_MT_STATUS_SUCCESS_CODE   = "DELIVRD";
+    public static final String                         COMMON_MT_STATUS_SUCCESS_CODE   = "DELIVRD";
 
     /**
      * 多个手机号码分隔符
      */
-    protected static final String                   MULTI_MOBILES_SEPERATOR         = ",";
+    protected static final String                      MULTI_MOBILES_SEPERATOR         = ",";
 
     /**
      * 默认中文编码
      */
-    protected static final String                   DEFAULT_ENCODING                = "UTF-8";
+    protected static final String                      DEFAULT_ENCODING                = "UTF-8";
+
+    /**
+     * SMS路径
+     */
+    private static final String                        SMS_ROUTER                      = "sms/";
 
     /**
      * TODO 初始化通道简码对应的实体映射
      */
     @PostConstruct
     protected void loadCodeRefrenceBeans() {
-        if (CODE_REFRENCE_BEANS.containsKey(code())) {
-            throw new RuntimeException("Passage's code[" + code() + "] is exists in current factory");
+        if (CODE_REFRENCE_BEANS.containsKey(getCode())) {
+            throw new RuntimeException("Passage's code[" + getCode() + "] is exists in current factory");
         }
 
         try {
             CODE_REFRENCE_BEANS.put(code(), this);
-            logger.info("Loading http passage's code[" + code() + "]-ref[" + this + "] succeed");
+            logger.info("Loading http passage's code[" + getCode() + "]-ref[" + this + "] succeed");
         } catch (Exception e) {
-            logger.error("Loading http passage's code[" + code() + "]-ref[" + this + "] failed", e);
+            logger.error("Loading http passage's code[" + getCode() + "]-ref[" + this + "] failed", e);
         }
     }
 
@@ -82,9 +87,9 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
      * @return
      */
     public static SmsHttpPassageResolver getInstance(String code) {
-        SmsHttpPassageResolver instance = CODE_REFRENCE_BEANS.get(code);
+        SmsHttpPassageResolver instance = CODE_REFRENCE_BEANS.get(getCode(code));
         if (instance == null) {
-            throw new RuntimeException("Passage's custom code[" + code + "] can't find any reference");
+            throw new RuntimeException("Passage's custom code[" + getCode(code) + "] can't find any reference");
         }
 
         return instance;
@@ -191,7 +196,7 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
      * @return
      */
     private String getRedisMtMsgIdKey(String msgId) {
-        return String.format("%s:%s:%s", REDIS_MT_REPORT_HTTP_PRIFIX_KEY, code(), msgId);
+        return String.format("%s:%s:%s", REDIS_MT_REPORT_HTTP_PRIFIX_KEY, getCode(), msgId);
     }
 
     /**
@@ -241,6 +246,19 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
         } catch (Exception e) {
             logger.error("Redis 移除发送状态MSG_ID: {} 和MOBILE对应关系失败", msgId, e);
         }
+    }
+
+    /**
+     * TODO 获取最终的CODE（加路由）
+     * 
+     * @return
+     */
+    private String getCode() {
+        return SMS_ROUTER + code();
+    }
+
+    private static String getCode(String code) {
+        return SMS_ROUTER + code;
     }
 
 }

@@ -9,6 +9,7 @@ import java.util.Map;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import com.huashi.common.passage.context.TemplateEnum.PassageTemplateDetailType;
 import com.huashi.common.passage.context.TemplateEnum.PassageTemplateType;
 import com.huashi.common.passage.domain.PassageTemplate;
 import com.huashi.common.passage.dto.ParseParamDto;
@@ -35,7 +36,6 @@ import com.huashi.mms.passage.domain.MmsPassageProvince;
 import com.huashi.mms.passage.service.IMmsPassageAccessService;
 import com.huashi.mms.passage.service.IMmsPassageParameterService;
 import com.huashi.mms.passage.service.IMmsPassageService;
-import com.huashi.sms.passage.context.PassageContext.PassageSignMode;
 import com.jfinal.ext.route.ControllerBind;
 
 @ControllerBind(controllerKey = "/mms/passage")
@@ -76,10 +76,10 @@ public class MmsPassageController extends BaseController {
     @AuthCode(code = OperCode.OPER_CODE_10001001001)
     @ActionMode
     public void add() {
-        setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.SMS.getValue()));
+        setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.MMS.getValue()));
         setAttr("cmcp", CommonContext.CMCP.values());
         setAttr("provinceList", iProvinceService.findAvaiable());
-        setAttr("signModes", PassageSignMode.values());
+        setAttr("passageTemplateDetailTypes", PassageTemplateDetailType.values());
     }
 
     /**
@@ -140,7 +140,6 @@ public class MmsPassageController extends BaseController {
         MmsPassage passage = iMmsPassageService.findById(getParaToInt("id"));
         setAttr("passage", passage);
         setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.MMS.getValue()));
-        setAttr("signModes", PassageSignMode.values());
         List<Province> provinceList = iProvinceService.findAvaiable();
         Province qg = new Province();
         qg.setCode(0);
@@ -158,6 +157,7 @@ public class MmsPassageController extends BaseController {
         }
         setAttr("provinceList", provinceList);
         setAttr("cmcp", CommonContext.CMCP.values());
+        setAttr("passageTemplateDetailTypes", PassageTemplateDetailType.values());
 
     }
 

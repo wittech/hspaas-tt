@@ -530,7 +530,7 @@
                             
                             
 
-                            <div class="panel panel-info" style="margin-top:10px">
+                            <div class="panel panel-info" style="margin-top:10px;display:none;">
                                 <div class="panel-heading" style="height:40px">
                                     <h1 class="panel-title" style="font-size:14px;line-height:40px">流量设置</h1>
                                 </div>
@@ -584,7 +584,7 @@
                                 </div>
                             </div>
 
-                            <div class="panel panel-info" style="margin-top:10px">
+                            <div class="panel panel-info" style="margin-top:10px;display:none;">
                                 <div class="panel-heading" style="height:40px">
                                     <h1 class="panel-title" style="font-size:14px;line-height:40px">语音设置</h1>
                                 </div>

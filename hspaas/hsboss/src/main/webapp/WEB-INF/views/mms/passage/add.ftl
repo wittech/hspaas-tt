@@ -67,12 +67,11 @@
                                 </#list>
                                 </div>
                                 <input type="hidden" name="passage.cmcp" id="passageType" value="1">
-                                 <label class="col-xs-1 control-label">付费方式</label>
-                                 <div class="col-xs-4">
-                                    <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_1" name="payType" checked value="1">预付</label>&nbsp;&nbsp;
-                                    <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_2" name="payType" value="2">后付</label>
+                                <label class="col-xs-1 control-label">省份设置</label>
+                                <div class="col-xs-4">
+                                    <a href="javascript:void(0);" onclick="openProvince();" class="btn btn-primary btn-xs">选择省份</a>
+                                    	已选<span id="provinceCount" style="color:red">0</span>个省份
                                 </div>
-                                <input type="hidden" name="passage.payType" id="payType" value="1">
                             </div>
 
                             <div class="form-group">
@@ -149,11 +148,15 @@
                             </div>
                             
                             <div class="form-group">
-                            	<label class="col-xs-2 control-label"></label>
-                                <div class="col-xs-4">
+                            	<label class="col-xs-2 control-label">付费方式</label>
+                                 <div class="col-xs-4">
+                                    <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_1" name="payType" checked value="1">预付</label>&nbsp;&nbsp;
+                                    <label class="form-radio form-icon"><input type="radio" class="payType" id="payType_2" name="payType" value="2">后付</label>
+                                	<input type="hidden" name="passage.payType" id="payType" value="1">
                                 </div>
-                            	<label class="col-xs-1 control-label"></label>
+                            	<label class="col-xs-1 control-label">备注</label>
                                 <div class="col-xs-4">
+                                	<textarea name="passage.remark" id="remark" rows="5" class="form-control"></textarea>
                                 </div>
                             </div>
 
@@ -199,24 +202,6 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
-<div class="modal fade" id="userModal">
-    <div class="modal-dialog" style="width:850px">
-        <div class="modal-content" style="width:850px">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">选择用户</h4>
-            </div>
-            <div class="modal-body" id="userModelBody">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 
 <div class="modal fade" id="provinceModal">
     <div class="modal-dialog" style="width:550px">
@@ -271,16 +256,6 @@
             $('#passageType').val($(this).val());
         });
 
-        $('.passageRealType').click(function () {
-            var value = $(this).val();
-            if (value == 1) {
-                $('.selectUserDiv').show();
-            } else {
-                $('.selectUserDiv').hide();
-            }
-            $('#passageRealType').val(value);
-        });
-
     });
 
     function selectAll(flag){
@@ -313,35 +288,11 @@
         if (field.val() == -1) {
             //return options.allrules.validate2fields.alertText;
             return '* 请选择通道模板';
-        }
-        ;
+        };
     }
-    ;
 
     function openProvince(){
         $('#provinceModal').modal('show');
-    }
-
-    function openUserList() {
-        var userId = $('#userId').val();
-        $.ajax({
-            url: '${BASE_PATH}/mms/passage/userList',
-            dataType: 'html',
-            type: 'POST',
-            data: {userId: userId},
-            success: function (data) {
-                $('#userModelBody').html(data);
-                $('#userModal').modal('show');
-            }, error: function (data) {
-                Boss.alert('请求用户列表异常！');
-            }
-        });
-    }
-
-    function selectUser(userId, fullName, mobile) {
-        $('#userId').val(userId);
-        $('.selectUserDiv').html(fullName);
-        $('#userModal').modal('hide');
     }
 
     function selectPassageTemplate() {
@@ -357,7 +308,11 @@
             success: function (data) {
                 $('#passageTemplateShowDiv').html(data);
                 var detailRuleType = $('.detailRuleType');
-                var callTypeCn = ['', '发送模板', '状态回执推送', '状态回执自取', '上行推送', '上行自取'];
+                var callTypeCn = [];
+				<#list passageTemplateDetailTypes as t>
+					callTypeCn[${(t_index + 1)!}] = "${(t.getName())!}";
+	            </#list>
+                
                 var html = '';
                 for (var i = 0; i < detailRuleType.length; i++) {
                     var detailType = $(detailRuleType[i]).val();
@@ -432,7 +387,6 @@
         return html;
     }
 
-
     function showSelectedRule(ruleType) {
         ruleTypeTag = ruleType;
         $('#detail_form_' + ruleType).show();
@@ -443,11 +397,6 @@
     function formSubmit() {
         var allCheck = $('#myform').validationEngine('validate');
         if (!allCheck) {
-            return;
-        }
-        var passageType = $('#passageRealType').val();
-        if (passageType == 1 && $('#userId').val() == -1) {
-            Boss.alert('若是独立通道，请选择用户！');
             return;
         }
         var provinceCodes = $('#provinceCodes').val();

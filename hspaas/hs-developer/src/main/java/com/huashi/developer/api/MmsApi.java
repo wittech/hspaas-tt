@@ -29,19 +29,14 @@ public class MmsApi extends BasicApiSupport {
     @Autowired
     private MmsCustomContentSendValidator mmsCustomContentSendValidator;
 
-    /**
-     * TODO 发送彩信
-     *
-     * @return
-     */
-    @RequestMapping(value = "/sendByModelId", method = { RequestMethod.POST, RequestMethod.GET })
-    public MmsSendResponse sendByModelId() {
+    @RequestMapping(value = "/send", method = { RequestMethod.POST, RequestMethod.GET })
+    public MmsSendResponse sendByBody() {
         try {
-            MmsModelSendRequest mmsModelSendRequest = mmsModelSendValidator.validate(request.getParameterMap(),
-                                                                                     getClientIp());
-            mmsModelSendRequest.setAppType(getAppType());
+            MmsCustomContentSendRequest mmsCustomContentSendRequest = mmsCustomContentSendValidator.validate(request.getParameterMap(),
+                                                                                                             getClientIp());
+            mmsCustomContentSendRequest.setAppType(getAppType());
 
-            return mmsPrervice.sendMessage(mmsModelSendRequest);
+            return mmsPrervice.sendMessage(mmsCustomContentSendRequest);
 
         } catch (ValidateException e) {
             return new MmsSendResponse(JSON.parseObject(e.getMessage()));
@@ -51,14 +46,19 @@ public class MmsApi extends BasicApiSupport {
         }
     }
 
-    @RequestMapping(value = "/sendByBody", method = { RequestMethod.POST, RequestMethod.GET })
-    public MmsSendResponse sendByBody() {
+    /**
+     * TODO 发送彩信
+     *
+     * @return
+     */
+    @RequestMapping(value = "/sendByModel", method = { RequestMethod.POST, RequestMethod.GET })
+    public MmsSendResponse sendByModelId() {
         try {
-            MmsCustomContentSendRequest mmsCustomContentSendRequest = mmsCustomContentSendValidator.validate(request.getParameterMap(),
-                                                                                                             getClientIp());
-            mmsCustomContentSendRequest.setAppType(getAppType());
+            MmsModelSendRequest mmsModelSendRequest = mmsModelSendValidator.validate(request.getParameterMap(),
+                                                                                     getClientIp());
+            mmsModelSendRequest.setAppType(getAppType());
 
-            return mmsPrervice.sendMessage(mmsCustomContentSendRequest);
+            return mmsPrervice.sendMessage(mmsModelSendRequest);
 
         } catch (ValidateException e) {
             return new MmsSendResponse(JSON.parseObject(e.getMessage()));

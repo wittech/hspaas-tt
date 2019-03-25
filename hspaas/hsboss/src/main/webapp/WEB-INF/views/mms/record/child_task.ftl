@@ -25,8 +25,8 @@
                 <div class="breadcrumb-wrapper"><span class="label">所在位置:</span>
                     <ol class="breadcrumb">
                         <li><a href="#"> 管理平台 </a></li>
-                        <li><a href="#"> 短信管理 </a></li>
-                        <li class="active"> 短信子任务</li>
+                        <li><a href="#"> 彩信管理 </a></li>
+                        <li class="active"> 彩信子任务</li>
                     </ol>
                 </div>
             </div>
@@ -52,7 +52,6 @@
                                 <th>状态</th>
                                 <th>分包信息</th>
                                 <th>创建时间</th>
-                                <th>操作</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -94,32 +93,10 @@
                                     ${(pl.remark)!}
                                 </td>
                                 <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
-                                <td>
-                                    <#if pl.status == 0>
-                                         <a href="javascript:void(0);"
-                                      		 class="btn btn-warning btn-xs" onclick="refuseTask(${pl.id});">驳回</a>
-                                         <a href="javascript:void(0);"
-                                           class="btn btn-danger btn-xs" onclick="taskPass(${pl.id});">强制通过</a>
-                                        <#if pl.isPassageError()>
-                                        <a href="javascript:void(0);"
-                                           class="btn btn-success btn-xs" onclick="openPassageList(${pl.id},${pl.cmcp});">分配通道</a>
-                                        </#if>
-                                        <#--
-                                        <#if pl.isTemplateError()>
-                                        <a href="${BASE_PATH }/sms/message_template/create?sid=${pl.sid}&childTaskId=${pl.id}"
-                                           class="btn btn-success btn-xs">模板报备</a>
-                                        </#if>
-                                        <#if pl.isWordError()>
-                                        <a  href="${BASE_PATH }/sms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}&childTaskId=${pl.id}"
-                                           class="btn btn-success btn-xs">敏感词导白</a>
-                                        </#if>
-                                        -->
-                                    </#if>
-                                </td>
                             </tr>
                             <tr>
                                 <td colspan="10" align="right" style="word-break:break-all;">
-                                    ${pl.content!''}
+                                    ${pl.title!''}
                                 </td>
                             </tr>
                             </#list>
@@ -130,30 +107,6 @@
             </div>
         <#include "/WEB-INF/views/main/left.ftl">
         </div>
-
-        <div class="modal fade" id="myModal">
-            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" onclick="closeModal();"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">选择通道</h4>
-                    </div>
-                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
-                         id="myModelBody">
-                        <select class="form-control" id="finalPassageId">
-
-                        </select>
-                        <input type="hidden" id="taskChildId" value="-1" />
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success" onclick="saveFinalPassage();">保存</button>
-                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div>
-
 
         <div class="modal fade" id="mobileModal">
             <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">

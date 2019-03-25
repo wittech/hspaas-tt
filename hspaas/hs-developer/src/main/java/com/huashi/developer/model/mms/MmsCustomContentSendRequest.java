@@ -27,7 +27,7 @@ public class MmsCustomContentSendRequest extends PassportModel {
     private String            title;
 
     /**
-     * 彩信报文（数组模式 如：[{mediaName:”test.jpg”, {mediaType:”image”,content:”=bS39888993#jajierj*...”}]）
+     * 彩信报文（数组模式 如：[{mediaName:”test.jpg”, mediaType:”image”,content:”=bS39888993#jajierj*...”}]）
      */
     @ValidateField(value = "body", required = true)
     private String            body;

@@ -75,7 +75,7 @@ public class BossMenuService extends BaseService {
 
     public List<UserMenu> getAllMenu() {
         List<UserMenu> menuList = new ArrayList<UserMenu>();
-        List<BossMenu> topList = BossMenu.DAO.find("select * from hsboss_menu h where h.parent_id = ?", -1);
+        List<BossMenu> topList = BossMenu.DAO.find("select * from hsboss_menu h where h.parent_id = ? order by menu_position asc", -1);
         for (BossMenu menu : topList) {
             UserMenu userMenu = new UserMenu();
             userMenu.setId(menu.getInt("id"));

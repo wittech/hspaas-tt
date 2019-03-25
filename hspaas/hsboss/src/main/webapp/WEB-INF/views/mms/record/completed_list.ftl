@@ -69,9 +69,9 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <span class="input-group-addon">短信内容</span>
-                                        <input type="text" class="form-control" id="content" name="content"
-                                               value="${content!''}" placeholder="输入内容">
+                                        <span class="input-group-addon">标题</span>
+                                        <input type="text" class="form-control" id="title" name="title"
+                                               value="${title!''}" placeholder="输入内容">
                                     </div>
                                 </div>
                             </div>
@@ -104,8 +104,8 @@
                                  <div class="col-md-3">
                                     <div class="input-group">
                                         <span class="input-group-addon">模板ID</span>
-                                        <input type="text" class="form-control" id="template_id" name="template_id"
-                                               value="${(templateId)!}">
+                                        <input type="text" class="form-control" id="modelId" name="modelId"
+                                               value="${(modelId)!}">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -133,7 +133,6 @@
                                 <th width="2%">序</th>
                                 <th width="10%">SID</th>
                                 <th width="5%">模式</th>
-                                <th width="5%">计</th>
                                 <th width="5%">返</th>
                                 <th width="10%">客户名</th>
                                 <th width="10%">手机号</th>
@@ -155,19 +154,10 @@
                                 <td>${(pl.sid)!''}</td>
                                 <td>
                                 	<button type="button" class="btn btn-info btn-xs">
-                                		<#if pl.submitType == 0>
-                                       	 批
-	                                    <#elseif pl.submitType == 1>
-	                                        	点
-	                                    <#elseif pl.submitType == 2>
-	                                        	模
-	                                    <#else>
-	                                                                                 批
+                                		<#if pl.modelId?? && p.modelId != ''>
+                                       	 模<#else>定
 	                                    </#if>
                                 	</button>
-                                </td>
-                                <td>
-                                	<button type="button" class="btn btn-primary btn-xs">${(pl.fee)!'0'}</button>
                                 </td>
                                 <td>
                                 	<button type="button" class="btn btn-success btn-xs">${(pl.returnFee)!'0'}</button>
@@ -234,39 +224,13 @@
                                     	|
                                     	<a href="${BASE_PATH}/mms/record/send_record_list?sid=${pl.sid}" class="btn btn-success btn-xs">发送记录</a>
                                     </#if>
-                                    |
-                                   <#if pl.messageTemplateId?? && pl.messageTemplateId gt 0>
-                                   	<#if tempCheck>
-                                    	<a href="${BASE_PATH}/mms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}"
-			                                       class="btn btn-default btn-xs">模板</a>
-			                        </#if>
-			                        <#else>
-			                        <a href="javascript:void(0);" class="btn btn-default btn-xs">无</a>
-                                    </#if>
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="13" align="right" style="word-break:break-all;" title="${pl.messageTemplateId!'无'}">
-                                    <#if pl.forbiddenWordLabels??>
-                                    <#list pl.forbiddenWordLabels as forbiddenWordLabel>
-                                		<span class="label label-warning" data-toggle="popwordover" title="${forbiddenWordLabel.label!''}标签敏感词" data-content="${forbiddenWordLabel.word!''}">${forbiddenWordLabel.label!''}</span>&nbsp;
-                                	</#list>
-	                                	<span style="word-break:break-all;">
-	                                	<#assign content="${pl.finalContent!''}">
-	                                	<#list pl.forbiddenWords?split(",") as word>
-	                                		<#assign content= content?replace(word, "<span style='color:red'>${(word)!}</span>")>
-	                                    </#list>
-	                                    ${content!''}
+                                <td colspan="13" align="right" style="word-break:break-all;">
+                                    	<span style="word-break:break-all;">
+	                                       ${pl.title!''}
 	                                    </span>
-                                	<#else>
-	                                	<span style="word-break:break-all;">
-	                                       ${pl.finalContent!''}
-	                                    </span>
-                                	</#if>
-                                    
-                                    <span style="color:red">
-                                    [字数：${pl.finalContent?length}]
-                                    </span>
                                 </td>
                             </tr>
                             </#list>

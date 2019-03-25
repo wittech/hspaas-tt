@@ -27,8 +27,8 @@
                 <div class="breadcrumb-wrapper"><span class="label">所在位置:</span>
                     <ol class="breadcrumb">
                         <li><a href="#"> 管理平台 </a></li>
-                        <li><a href="#"> 短信管理 </a></li>
-                        <li class="active"> 短信记录查询</li>
+                        <li><a href="#"> 彩信管理 </a></li>
+                        <li class="active"> 彩信记录查询</li>
                     </ol>
                 </div>
             </div>
@@ -55,9 +55,9 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="input-group">
-                                        <span class="input-group-addon">短信内容</span>
+                                        <span class="input-group-addon">彩信内容</span>
                                         <input type="text" class="form-control" id="content" name="content"
-                                               value="${content!''}" placeholder="短信内容">
+                                               value="${content!''}" placeholder="彩信内容">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -154,7 +154,6 @@
                                 <th>SID</th>
                                 <th>客户名</th>
                                 <th>发送通道</th>
-                                <th>计</th>
                                 <th>手机号</th>
                                 <th>扩展号码</th>
                                 <th>发送状态</th>
@@ -172,7 +171,6 @@
                                 <td>${pl.sid?if_exists}</td>
                                 <td>${(pl.userModel.name)!''}</td>
                                 <td>${pl.passageName!''}</td>
-                                <td>${pl.fee!0}</td>
                                 <td>
                                     ${(pl.mobile?trim)!''}[<#if pl.cmcp?? && pl.cmcp == 1>移动<#elseif pl.cmcp?? && pl.cmcp?? && pl.cmcp == 2>电信<#elseif pl.cmcp?? && pl.cmcp == 3>联通<#else>未知</#if>]
                                 </td>
@@ -225,10 +223,7 @@
                             </tr>
                             <tr>
                                 <td colspan="12" align="right" style="word-break:break-all;">
-                                    ${pl.content!''}
-                                    <span style="color:red">
-                                    [字数：${(pl.content?length)!}]
-                                    </span>
+                                    ${pl.title!''}
                                 </td>
                             </tr>
                             </#list>
