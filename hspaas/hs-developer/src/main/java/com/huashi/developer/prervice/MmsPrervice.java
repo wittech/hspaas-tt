@@ -1,17 +1,5 @@
 package com.huashi.developer.prervice;
 
-import java.util.Date;
-
-import javax.annotation.Resource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.common.user.domain.UserBalance;
 import com.huashi.common.user.service.IUserBalanceService;
@@ -24,11 +12,22 @@ import com.huashi.developer.model.mms.MmsModelSendRequest;
 import com.huashi.developer.response.mms.MmsBalanceResponse;
 import com.huashi.developer.response.mms.MmsSendResponse;
 import com.huashi.mms.task.domain.MmsMtTask;
+import com.huashi.mms.template.service.IMmsTemplateService;
 import com.huashi.sms.task.exception.QueueProcessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.support.CorrelationData;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * TODO 彩信前置服务
- * 
+ *
  * @author zhengying
  * @version V1.0
  * @date 2019年3月3日 下午5:18:09
@@ -40,10 +39,12 @@ public class MmsPrervice {
 
     @Autowired
     private IdGenerator         idGenerator;
-    @Resource
-    private RabbitTemplate      rabbitTemplate;
+    @Resource(name = "mmsRabbitTemplate")
+    private RabbitTemplate      mmsRabbitTemplate;
     @Reference
     private IUserBalanceService userBalanceService;
+    @Reference
+    private IMmsTemplateService mmsTemplateService;
 
     /**
      * 单条默认计费值
@@ -53,7 +54,7 @@ public class MmsPrervice {
     /**
      * TODO 模板发送
      *
-     * @param model
+     * @param smsSendRequest
      * @return
      */
     public MmsSendResponse sendMessage(MmsModelSendRequest smsSendRequest) {
@@ -64,7 +65,6 @@ public class MmsPrervice {
         task.setIsModelSend(true);
 
         try {
-
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
                 return new MmsSendResponse(smsSendRequest.getTotalFee(), sid);
@@ -79,7 +79,7 @@ public class MmsPrervice {
 
     /**
      * TODO 自定义内容发送
-     * 
+     *
      * @param mmsCustomContentSendRequest
      * @return
      */
@@ -144,15 +144,13 @@ public class MmsPrervice {
             task.setCreateTime(new Date());
             task.setCreateUnixtime(task.getCreateTime().getTime());
 
-            // 插入TASK任务（异步）
-            String queueName = RabbitConstant.MQ_MMS_MT_WAIT_PROCESS;
-
-            rabbitTemplate.convertAndSend(queueName, task, new CorrelationData(task.getSid().toString()));
+            mmsRabbitTemplate.convertAndSend(RabbitConstant.MQ_MMS_MT_WAIT_PROCESS, task,
+                                             new CorrelationData(task.getSid().toString()));
 
             return task.getSid();
         } catch (Exception e) {
-            logger.error("发送短信队列失败", e);
-            throw new QueueProcessException("发送短信队列失败");
+            logger.error("发送彩信队列失败", e);
+            throw new QueueProcessException("发送彩信队列失败");
         }
     }
 

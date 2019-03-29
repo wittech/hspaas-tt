@@ -1,4 +1,4 @@
-package com.huashi.developer.validator.annotation;
+package com.huashi.developer.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

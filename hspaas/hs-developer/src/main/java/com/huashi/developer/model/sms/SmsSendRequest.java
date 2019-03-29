@@ -5,7 +5,7 @@ import com.huashi.developer.validator.annotation.ValidateField;
 
 /**
  * 
-  * TODO 单条/批量短信MODEL
+  * 单条/批量短信MODEL
   *
   * @author zhengying
   * @version V1.0.0   

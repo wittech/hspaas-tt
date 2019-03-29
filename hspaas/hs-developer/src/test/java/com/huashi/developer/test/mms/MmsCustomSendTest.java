@@ -1,24 +1,27 @@
 package com.huashi.developer.test.mms;
 
-import java.io.IOException;
-import java.util.Map;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.huashi.common.util.SecurityUtil;
+import com.huashi.constants.CommonContext.AppType;
+import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.mms.template.constant.MmsTemplateContext;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import com.huashi.common.util.RandomUtil;
-import com.huashi.common.util.SecurityUtil;
-import com.huashi.constants.CommonContext.AppType;
-import com.huashi.constants.OpenApiCode.CommonApiCode;
-import com.huashi.developer.validator.annotation.ValidateField;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MmsCustomSendTest {
 
@@ -27,7 +30,7 @@ public class MmsCustomSendTest {
     String           apptype;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         // url = "http://dev.hspaas.cn:8080/sms/send";
         url = "http://127.0.0.1:8080/mms/send";
 
@@ -41,34 +44,38 @@ public class MmsCustomSendTest {
         String mobile = "15868193450";
 
         String time = System.currentTimeMillis() + "";
-
         apptype = AppType.WEB.getCode() + "";
-        
-//        /**
-//         * 彩信标题
-//         */
-//        @ValidateField(value = "title", required = true)
-//        private String            title;
-//
-//        /**
-//         * 彩信报文（数组模式 如：[{mediaName:”test.jpg”, mediaType:”image”,content:”=bS39888993#jajierj*...”}]）
-//         */
-//        @ValidateField(value = "body", required = true)
-//        private String            body;
-        
 
-        String content = String.format("【华时科技】您的短信验证码为：%s", RandomUtil.getRandomNum());
+        String title = "测试标题";
 
-        System.out.println("短信内容：" + content);
+        List<MmsMessageTemplateBody>  bodies = new ArrayList<>();
+        MmsMessageTemplateBody body = new MmsMessageTemplateBody();
+        body.setMediaName("txt");
+        body.setMediaType(MmsTemplateContext.MediaType.TEXT.getCode());
+        body.setContent("测试彩信内容");
+
+        bodies.add(body);
+
+        MmsMessageTemplateBody imageBody = new MmsMessageTemplateBody();
+        imageBody.setMediaName("jpg");
+        imageBody.setMediaType(MmsTemplateContext.MediaType.IMAGE.getCode());
+        imageBody.setContent(Base64.encodeBase64String(Files.readAllBytes(Paths.get("/Users/tenx/Documents/test/image/test.jpg"))));
+
+        bodies.add(imageBody);
+
+        System.out.println("彩信内容：" + JSON.toJSONString(bodies));
 
         // 1467735756927
-        bulider = new FormBody.Builder().add("appkey", appkey).add("appsecret",
-                                                                   SecurityUtil.md5Hex(password + mobile + time)).add("timestamp", time).add("mobile",
-                                                                                                                                mobile).add("content",
-                                                                                                                                            content).add("attach",
-                                                                                                                                                         "test889").add("extNumber",
-                                                                                                                                                                        "333").add("callback",
-                                                                                                                                                                                   "http://localhost:9999/sms/status_report");
+        bulider = new FormBody.Builder()
+                .add("appkey", appkey)
+                .add("appsecret", SecurityUtil.md5Hex(password + mobile + time))
+                .add("timestamp", time)
+                .add("mobile", mobile)
+                .add("title", title)
+                .add("bodies", JSON.toJSONString(bodies))
+                .add("attach", "test889")
+                .add("extNumber","333")
+                .add("callback","http://localhost:9999/sms/status_report");
 
     }
 

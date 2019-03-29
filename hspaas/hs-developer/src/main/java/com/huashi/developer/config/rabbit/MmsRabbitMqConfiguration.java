@@ -10,7 +10,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 /**
@@ -36,7 +35,7 @@ public class MmsRabbitMqConfiguration {
     private String             mqVhost;
 
     @Bean("mmsConnectionFactory")
-    public ConnectionFactory connectionFactory() {
+    public ConnectionFactory mmsConnectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setHost(mqHost);
         connectionFactory.setPort(mqPort);
@@ -53,30 +52,14 @@ public class MmsRabbitMqConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     @Bean("mmsRabbitTemplate")
     RabbitTemplate mmsRabbitTemplate(@Qualifier("mmsConnectionFactory") ConnectionFactory mmsConnectionFactory,
-                                     Jackson2JsonMessageConverter messageConverter) {
+                                     Jackson2JsonMessageConverter jackson2JsonMessageConverter, RetryTemplate retryTemplate) {
         RabbitTemplate mmsRabbitTemplate = new RabbitTemplate(mmsConnectionFactory);
 
-        mmsRabbitTemplate.setMessageConverter(messageConverter);
+        mmsRabbitTemplate.setMessageConverter(jackson2JsonMessageConverter);
 
-        setRetryTemplate(mmsRabbitTemplate);
+        mmsRabbitTemplate.setRetryTemplate(retryTemplate);
 
         return mmsRabbitTemplate;
-    }
-
-    /**
-     * TODO 设置重试模板
-     * 
-     * @param rabbitTemplate
-     */
-    private void setRetryTemplate(RabbitTemplate rabbitTemplate) {
-        // 重试模板
-        RetryTemplate retryTemplate = new RetryTemplate();
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(500);
-        backOffPolicy.setMultiplier(10.0);
-        backOffPolicy.setMaxInterval(10000);
-        retryTemplate.setBackOffPolicy(backOffPolicy);
-        rabbitTemplate.setRetryTemplate(retryTemplate);
     }
 
 }

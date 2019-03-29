@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,13 +80,13 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     @Resource
     private Jackson2JsonMessageConverter          messageConverter;
 
-    @Autowired
+    @Reference
     private IMmsMtTaskService                     mmsMtTaskService;
-    @Autowired
+    @Reference
     private IMmsMtSubmitService                   mmtMtSubmitService;
-    @Autowired
+    @Reference
     private IMmsTemplateService                   mmsTemplateService;
-    @Autowired
+    @Reference
     private IMmsPassageAccessService              mmsPassageAccessService;
 
     @Reference
@@ -143,7 +144,6 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     /**
      * TODO 针对异常情况，提交子任务
      *
-     * @param task
      */
     private void asyncSendTask() {
         mmsMtTaskLocal.get().setPackets(null);
@@ -240,8 +240,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      */
     private MobileCatagory findOutMatchedMobiles() {
         // 转换手机号码数组
-        List<String> mobiles = new ArrayList<>(
-                                               Arrays.asList(mmsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+        List<String> mobiles = Lists.newArrayList(mmsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR));
 
         // 移除上次 黑名单数据（主要针对重新分包黑名单不要重复产生记录）add by 2017-04-08
         if (StringUtils.isNotEmpty(mmsMtTaskLocal.get().getBlackMobiles())) {
@@ -360,7 +359,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      */
     private UserMmsConfig getMmsConfig() {
         if (StringUtils.isEmpty(mmsMtTaskLocal.get().getMobile())) {
-            throw new RuntimeException("手机号码为空");
+            throw new IllegalArgumentException("手机号码为空");
         }
 
         UserMmsConfig userMmsConfig = userMmsConfigService.getByUserId(mmsMtTaskLocal.get().getUserId());
@@ -451,9 +450,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 拼接可操作动作代码
-     *
+     * 拼接可操作动作代码
      * @param index
+     * @param forceActions
      */
     private void refillForceActions(int index, StringBuilder forceActions) {
         // 异常分包情况下允许的操作，如000,010，第一位:未报备模板，第二位：敏感词，第三位：通道不可用
@@ -709,9 +708,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 设置用户归属的模板信息
+     * TODO 设置用户归属的彩信模板信息
      *
-     * @param smsConfig
+     * @param mmsConfig
      */
     private void fillTemplateAttributes(UserMmsConfig mmsConfig) {
         MmsMessageTemplate template = messageTemplateLocal.get();
@@ -735,7 +734,6 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     /**
      * TODO 执行异常结束逻辑(制造状态伪造包，需要判断是否需要状态报告)
      *
-     * @param task
      * @param mobiles
      * @param remark 备注
      */

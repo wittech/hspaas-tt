@@ -39,8 +39,8 @@
 								    <div class="row" style="margin-top:5px">
 								    	<div class="col-md-3">
 								    		<div class="input-group">
-								    			<span class="input-group-addon">模板内容</span>
-								    			<input type="text" class="form-control" id="keyword" name="keyword" value="${keyword!''}" placeholder="模板内容">
+								    			<span class="input-group-addon">模板名称</span>
+								    			<input type="text" class="form-control" id="keyword" name="keyword" value="${keyword!''}" placeholder="模板名称">
 								    		</div>
 								    	</div>
 								    	<div class="col-md-4">
@@ -63,9 +63,7 @@
 								    				<option value="">==全部==</option>
 								    				<#if approveStatus??>
 								    					<#list approveStatus as a>
-								    						<option value="${a.value!''}" 
-								    							<#if status??><#if a.value == status>selected</#if></#if>
-								    						>${a.title!''}</option>
+								    						<option value="${a.value!''}" <#if status??><#if a.value == status>selected</#if></#if>>${a.title!''}</option>
 								    					</#list>
 								    				</#if>
 								    			</select>
@@ -101,6 +99,7 @@
                                     <tr>
                                         <th>序</th>
                                         <th>用户信息</th>
+										<th>模版名称</th>
                                         <th>优先级</th>
                                         <th>操作类型</th>
                                         <th>路由类型</th>
@@ -120,6 +119,7 @@
                                     <tr>
                                         <td rowspan="2">${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
                                         <td>${(pl.userModel.name)!}-${(pl.userModel.username)!}</td>
+										<td>${(pl.name)!}</td>
                                         <td>${(pl.priority)!}</td>
                                         <td>${(pl.apptypeText)!}</td>
                                         <td>${(pl.routeTypeText)!}</td>
@@ -133,18 +133,16 @@
                                         		</#if>
                                         	</#if>
                                         	<#if editCheck>
-                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
-                                        	</#if>
-                                        	<#if deleteCheck>
-                                        		<a href="javascript:remove(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;删除</a>
-                                        	</#if>
-                                        	<#if matchingCheck>
-                                        		<a href="${BASE_PATH}/mms/message_template/matching?id=${pl.id}" class="btn btn-success btn-xs"><i class="fa fa-tags"></i>&nbsp;测试</a>
-                                        	</#if>
+												<a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
+											</#if>
+											<#if editCheck>
+												<a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
+											</#if>
+											<a href="javascript:apply(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;报备</a>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8" align="right"><b>内容：</b>${(pl.content)!}</td>
+                                        <td colspan="8" align="right"><b>标题：</b>${(pl.title)!}</td>
                                     </tr>
                                     </#list>
                                     </#if>
@@ -172,7 +170,7 @@
 		}
 		
 		function remove(id){
-            Boss.confirm('确定要删除该短信模板吗？',function(){
+            Boss.confirm('确定要删除该彩信模板吗？',function(){
                 $.ajax({
                     url:'${BASE_PATH}/mms/message_template/delete',
                     dataType:'json',

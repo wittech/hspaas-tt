@@ -27,7 +27,7 @@
                     <ol class="breadcrumb">
                         <li><a href="#"> 管理平台 </a></li>
                         <li><a href="#"> 模板管理 </a></li>
-                        <li class="active">模板匹配</li>
+                        <li class="active">通道模板报备</li>
                     </ol>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                 <div class="panel">
                     <!-- Panel heading -->
                     <div class="panel-heading">
-                        <h3 class="panel-title">模板匹配</h3>
+                        <h3 class="panel-title">模板报备</h3>
                     </div>
                     <!-- Panel body -->
                     <form id="myform" class="form-horizontal">
@@ -44,8 +44,8 @@
                             <div class="form-group batchContent">
                                 <label class="col-xs-2 control-label">模板内容</label>
                                 <div class="col-xs-5">
-                                    <textarea class="form-control validate[required,maxSize[1000]]"
-                                             id="content"  rows="8"><#if messageTemplate??>${messageTemplate.content!''}</#if></textarea>
+                                    <textarea class="form-control validate[required,maxSize[1000]]" id="content"  rows="8">
+                                        <#if messageTemplate??>${messageTemplate.content!''}</#if></textarea>
                                 </div>
                             </div>
                             <div class="form-group batchContent">
@@ -70,6 +70,51 @@
                             </div>
                         </div>
                     </form>
+
+                    <table id="demo-dt-basic" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>通道</th>
+                            <th>模版ID</th>
+                            <th>状态</th>
+                            <th>备注</th>
+                            <th>创建时间</th>
+                            <th>修改时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <#if templates??>
+                            <#list templates as t>
+                                <tr>
+                                    <td>${(t.passageName)!}</td>
+                                    <td><#if pl.status==0>待审核<#elseif pl.status==1>审核成功<#elseif pl.status==2>审核失败</#if></td>
+                                    <td><#if pl.createTime??>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
+                                    <td><#if pl.updateTime??>${pl.updateTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
+                                    <td>
+                                        <#if pl.status==0>
+                                            <#if auditCheck>
+                                                <a class="btn btn-default btn-xs" href="${BASE_PATH}/mms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批</a>
+                                            </#if>
+                                        </#if>
+                                        <#if editCheck>
+                                            <a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑</a>
+                                        </#if>
+                                        <#if editCheck>
+                                            <a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑</a>
+                                        </#if>
+                                        <a href="javascript:apply(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;报备</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="8" align="right"><b>标题：</b>${(pl.title)!}</td>
+                                </tr>
+                            </#list>
+                        </#if>
+                        </tbody>
+                    </table>
+
+
                 </div>
             </div>
         </div>

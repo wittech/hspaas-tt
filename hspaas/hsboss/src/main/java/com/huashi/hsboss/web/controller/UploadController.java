@@ -1,20 +1,20 @@
 package com.huashi.hsboss.web.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
-
 import com.huashi.hsboss.annotation.AuthCode;
 import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
 import com.jfinal.ext.route.ControllerBind;
 import com.jfinal.upload.UploadFile;
 
+import java.util.List;
+
 @ControllerBind(controllerKey = "/upload")
 public class UploadController extends BaseController {
 
     @AuthCode(code = OperCode.OPER_CODE_COMMON)
     public void uploadFile() {
+
+        List<UploadFile> uploads = this.getFiles();
         UploadFile uploadFile = this.getFile();
 
         String fileName = uploadFile.getOriginalFileName();

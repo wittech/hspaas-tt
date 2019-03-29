@@ -1,19 +1,5 @@
 package com.huashi.developer.prervice;
 
-import java.util.Date;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import org.apache.commons.collections.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.user.domain.UserBalance;
@@ -33,6 +19,19 @@ import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.task.context.TaskContext.TaskSubmitType;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.exception.QueueProcessException;
+import org.apache.commons.collections.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.support.CorrelationData;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * TODO 短信前置服务
@@ -48,8 +47,8 @@ public class SmsPrervice {
 
     @Autowired
     private IdGenerator               idGenerator;
-    @Resource
-    private RabbitTemplate            rabbitTemplate;
+    @Resource(name = "smsRabbitTemplate")
+    private RabbitTemplate            smsRabbitTemplate;
     @Reference
     private IUserBalanceService       userBalanceService;
     @Reference
@@ -58,7 +57,7 @@ public class SmsPrervice {
     /**
      * TODO 发送短信信息
      *
-     * @param model
+     * @param smsSendRequest
      * @return
      */
     public SmsSendResponse sendMessage(SmsSendRequest smsSendRequest) {
@@ -168,7 +167,8 @@ public class SmsPrervice {
     }
 
     private String getAttribute(Map<String, String[]> paramMap, String elementId) {
-        return MapUtils.isEmpty(paramMap) || !paramMap.containsKey(elementId) || paramMap.get(elementId).length == 0 ? null : paramMap.get(elementId)[0];
+        return MapUtils.isEmpty(paramMap) || !paramMap.containsKey(elementId)
+               || paramMap.get(elementId).length == 0 ? null : paramMap.get(elementId)[0];
     }
 
     /**
@@ -219,7 +219,7 @@ public class SmsPrervice {
                 queueName = RabbitConstant.MQ_SMS_MT_P2P_WAIT_PROCESS;
             }
 
-            rabbitTemplate.convertAndSend(queueName, task, (message) -> {
+            smsRabbitTemplate.convertAndSend(queueName, task, (message) -> {
                 message.getMessageProperties().setPriority(priority);
                 return message;
             }, new CorrelationData(task.getSid().toString()));

@@ -10,7 +10,7 @@ public class MmsMessageTemplate {
 
     private Long                               id;
 
-    private Long                               modelId;
+    private String                             modelId;
 
     private Integer                            userId;
 
@@ -74,11 +74,11 @@ public class MmsMessageTemplate {
         this.id = id;
     }
 
-    public Long getModelId() {
+    public String getModelId() {
         return modelId;
     }
 
-    public void setModelId(Long modelId) {
+    public void setModelId(String modelId) {
         this.modelId = modelId;
     }
 

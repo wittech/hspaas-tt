@@ -1,28 +1,5 @@
 package com.huashi.mms.template.service;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Resource;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -41,9 +18,22 @@ import com.huashi.mms.template.domain.MmsMessageTemplate;
 import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 import com.huashi.mms.template.exception.BodyCheckException;
 import com.huashi.sms.passage.context.PassageContext.RouteType;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import javax.annotation.Resource;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * TODO 彩信模板服务实现
+ * 彩信模板服务实现
  * 
  * @author zhengying
  * @version V1.0
@@ -54,15 +44,14 @@ public class MmsTemplateService implements IMmsTemplateService {
 
     @Reference
     private IUserService                             userService;
-    @Autowired
-    private MmsMessageTemplateMapper                 mmsMessageTemplateMapper;
     @Reference
     private IUserMmsConfigService                    userMmsConfigService;
     @Resource
     private StringRedisTemplate                      stringRedisTemplate;
-
     @Autowired
     private MmsMediaFileService                      mmsMediaFileService;
+    @Autowired
+    private MmsMessageTemplateMapper                 mmsMessageTemplateMapper;
 
     /**
      * 多媒体类型
@@ -77,7 +66,7 @@ public class MmsTemplateService implements IMmsTemplateService {
     /**
      * 多媒体内容
      */
-    private static final String                      NODE_CONENT             = "content";
+    private static final String                      NODE_CONTENT             = "content";
 
     private final Logger                             logger                  = LoggerFactory.getLogger(getClass());
 
@@ -123,10 +112,10 @@ public class MmsTemplateService implements IMmsTemplateService {
     }
 
     /**
-     * TODO 添加到REDIS
-     * 
-     * @param template
+     * 添加到REDIS
+     *
      * @param userId
+     * @param template
      */
     private void pushToRedis(int userId, MmsMessageTemplate template) {
         try {
@@ -141,13 +130,12 @@ public class MmsTemplateService implements IMmsTemplateService {
     }
 
     /**
-     * TODO 查询REDIS
+     * 查询REDIS
      * 
      * @param userId
      */
     private Set<String> getFromRedis(int userId) {
         try {
-
             if (MapUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE)
                 || CollectionUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE.get(userId))) {
                 Set<String> set = stringRedisTemplate.opsForZSet().reverseRangeByScore(getKey(userId), 0, 1000);
@@ -214,7 +202,7 @@ public class MmsTemplateService implements IMmsTemplateService {
     }
 
     /**
-     * TODO 是否允许被访问（针对用户ID进行鉴权,防止恶意使用userID来篡改其他userId数据）
+     * 是否允许被访问（针对用户ID进行鉴权,防止恶意使用userID来篡改其他userId数据）
      * 
      * @param userId
      * @param templateId
@@ -293,7 +281,7 @@ public class MmsTemplateService implements IMmsTemplateService {
     }
 
     /**
-     * TODO 由REDIS查询彩信模板
+     * 由REDIS查询彩信模板
      * 
      * @param userId
      * @param content
@@ -362,7 +350,6 @@ public class MmsTemplateService implements IMmsTemplateService {
     }
 
     @Override
-    @Transactional(readOnly = false)
     public boolean save(MmsMessageTemplate template) {
         template.setCreateTime(new Date());
         // 融合平台判断 后台添加 状态默认
@@ -409,14 +396,6 @@ public class MmsTemplateService implements IMmsTemplateService {
         }
 
         return mmsMessageTemplateMapper.updateByPrimaryKeySelective(template) > 0;
-    }
-
-    @Override
-    public boolean isContentMatched(long id, String content) {
-        MmsMessageTemplate template = get(id);
-        // return template != null && PatternUtil.isRight(template.getRegexValue(), content);
-
-        return true;
     }
 
     private void reloadUserTemplate(int userId) {
@@ -536,7 +515,7 @@ public class MmsTemplateService implements IMmsTemplateService {
                     throw new BodyCheckException("Body's node[mediaName] is empty.");
                 }
 
-                String content = map.get(NODE_CONENT);
+                String content = map.get(NODE_CONTENT);
                 if (StringUtils.isEmpty(content)) {
                     throw new BodyCheckException("Body's node[content] is empty.");
                 }
@@ -577,6 +556,11 @@ public class MmsTemplateService implements IMmsTemplateService {
         }
     }
 
+    @Override
+    public String bodyToContext(String body) {
+        return null;
+    }
+
     /**
      * 是否属于BYTE模式
      * 
@@ -593,7 +577,7 @@ public class MmsTemplateService implements IMmsTemplateService {
     }
 
     /**
-     * TODO 转换成为BYTE数据
+     * 转换成为BYTE数据
      * 
      * @param content
      * @return

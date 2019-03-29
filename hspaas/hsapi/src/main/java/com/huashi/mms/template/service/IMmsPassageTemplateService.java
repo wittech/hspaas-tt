@@ -1,8 +1,8 @@
 package com.huashi.mms.template.service;
 
-import java.util.List;
-
 import com.huashi.mms.template.domain.MmsPassageMessageTemplate;
+
+import java.util.List;
 
 /**
  * TODO 提供商彩信模板服务接口
@@ -14,7 +14,7 @@ import com.huashi.mms.template.domain.MmsPassageMessageTemplate;
 public interface IMmsPassageTemplateService {
 
     /**
-     * TODO 添加模板
+     * TODO 添加通道模板
      * 
      * @param template
      * @return

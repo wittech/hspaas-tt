@@ -39,9 +39,6 @@ public class PassportModel implements Serializable {
     private transient String  ip;
     private transient Integer appType;
 
-    // 开发者密钥信息
-    private transient String  dbAppSecret;
-
     public Integer getUserId() {
         return userId;
     }
@@ -104,14 +101,6 @@ public class PassportModel implements Serializable {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public String getDbAppSecret() {
-        return dbAppSecret;
-    }
-
-    public void setDbAppSecret(String dbAppSecret) {
-        this.dbAppSecret = dbAppSecret;
     }
 
 }

@@ -3,7 +3,7 @@ package com.huashi.developer.exception;
 
 /**
  * 
-  * TODO 验证接入数据异常
+  * 验证接入数据异常
   * 
   * @author zhengying
   * @version V1.0   

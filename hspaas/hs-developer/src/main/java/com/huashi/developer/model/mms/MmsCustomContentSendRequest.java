@@ -4,7 +4,7 @@ import com.huashi.developer.model.PassportModel;
 import com.huashi.developer.validator.annotation.ValidateField;
 
 /**
- * TODO 彩信数据模型
+ * 彩信数据模型
  * 
  * @author zhengying
  * @version V1.0

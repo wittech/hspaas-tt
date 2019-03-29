@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>短信模板查询 - 短信平台 - 华时融合平台</title>
+    <title>彩信模板查询 - 彩信平台 - 华时融合平台</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -101,12 +101,12 @@
 	            ,toolbar: '#table-template-toolbar'
 	            ,cols: [[
 	                  {type: 'checkbox', fixed: 'left'}
-		              ,{field: 'content', title: '模板内容'}
+		              ,{field: 'content', title: '模板标题'}
 		              ,{field: 'status', title: '审批状态', width: 160, sort: true}
 		              ,{field: 'createTime', title: '提交时间', width: 180, templet: '#date_format'}
 		              ,{fixed: 'right', title:'操作', toolbar: '#table-template-operation', width:210}
 		         ]]
-	            ,url: server_domain + "/sms/template/page"
+	            ,url: server_domain + "/mms/template/page"
 	            ,loading: true
 	            ,where: searchObj
 	            ,method: 'GET'
@@ -143,8 +143,8 @@
 	        var checkStatus = table.checkStatus(obj.config.id);
 	        switch(obj.event){
 	            case 'add':
-	                modal.open('新增短信模板', server_domain+'/sms/template/add', 600, 300, {
-	                    action: server_domain+'/sms/template/save',
+	                modal.open('新增彩信模板', server_domain+'/mms/template/add', 600, 300, {
+	                    action: server_domain+'/mms/template/save',
 	                    method: 'post',
 	                    beforeSend : function() {
 	                    	l_index = layer.load(1);
@@ -177,7 +177,7 @@
 	                var ids = dsIds.join(",");
 	                modal.confirm("确认要删除选中的" + data.length + "条数据吗?", function() {
 	                    $.ajax({
-	                        url: server_domain+'/sms/template/delete'
+	                        url: server_domain+'/mms/template/delete'
 	                        ,type: 'post'
 	                        ,beforeSend : function() {
 		                    	l_index = layer.load(1);
@@ -211,7 +211,7 @@
 	        if(obj.event === 'remove'){
 	            modal.confirm("你确定删除数据吗?", function() {
 	                $.ajax({
-	                    url: server_domain+'/sms/template/delete'
+	                    url: server_domain+'/mms/template/delete'
 	                    ,type: 'post'
 	                    ,data: {
 	                        "ids": pdata.id
@@ -231,8 +231,8 @@
 	            });
 	
 	        } else if(obj.event === 'edit'){
-	            modal.open('编辑模板信息', server_domain+'/sms/template/edit/?id='+pdata.id, 600, 300, {
-	                action: server_domain+'/sms/template/update',
+	            modal.open('编辑模板信息', server_domain+'/mms/template/edit/?id='+pdata.id, 600, 300, {
+	                action: server_domain+'/mms/template/update',
 	                method: 'post',
 	                beforeSend : function() {
                     	l_index = layer.load(1);

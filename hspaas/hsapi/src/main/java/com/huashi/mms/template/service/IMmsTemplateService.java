@@ -4,9 +4,10 @@ import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
 import com.huashi.mms.template.exception.BodyCheckException;
+import com.huashi.mms.template.exception.ModelApplyException;
 
 /**
- * TODO 彩信模板服务接口
+ * 彩信模板服务接口
  * 
  * @author zhengying
  * @version V1.0
@@ -19,22 +20,22 @@ public interface IMmsTemplateService {
      * 
      * @param userId 用户编号
      * @param status 审批状态
-     * @param content 模板内容
+     * @param title 模板标题
      * @param currentPage 当前页码
      * @return
      */
-    PaginationVo<MmsMessageTemplate> findPage(int userId, String status, String content, String currentPage);
+    PaginationVo<MmsMessageTemplate> findPage(int userId, String status, String title, String currentPage);
 
     /**
-     * TODO 添加模板
+     * 添加模板
      * 
      * @param template
      * @return
      */
-    boolean save(MmsMessageTemplate template);
+    String save(MmsMessageTemplate template) throws ModelApplyException;
 
     /**
-     * TODO 模板审核
+     * 模板审核
      * 
      * @param id
      * @param status
@@ -44,7 +45,7 @@ public interface IMmsTemplateService {
     boolean approve(long id, int status, String remark);
 
     /**
-     * TODO 更新模板内容
+     * 更新模板内容
      * 
      * @param template
      * @return
@@ -52,7 +53,7 @@ public interface IMmsTemplateService {
     boolean update(MmsMessageTemplate template);
 
     /**
-     * TODO 删除模板
+     * 删除模板
      * 
      * @param id
      * @return
@@ -60,7 +61,7 @@ public interface IMmsTemplateService {
     boolean deleteById(long id);
 
     /**
-     * TODO 删除模板（判断模板是否属于该用户）
+     * 删除模板（判断模板是否属于该用户）
      * 
      * @param id
      * @param userId
@@ -69,7 +70,7 @@ public interface IMmsTemplateService {
     boolean delete(long id, int userId);
 
     /**
-     * TODO 根据模板ID查询模板
+     * 根据模板ID查询模板
      * 
      * @param id
      * @return
@@ -77,7 +78,7 @@ public interface IMmsTemplateService {
     MmsMessageTemplate get(long id);
 
     /**
-     * TODO 后台查询模板内容
+     * 后台查询模板内容
      * 
      * @param pageNum
      * @param keyword
@@ -88,7 +89,7 @@ public interface IMmsTemplateService {
     BossPaginationVo<MmsMessageTemplate> findPageBoos(int pageNum, String keyword, String status, String userId);
 
     /**
-     * TODO 根据用户ID和短信内容查询模板信息（优先级排序）
+     * 根据用户ID和短信内容查询模板信息（优先级排序）
      * 
      * @param userId
      * @param content
@@ -97,23 +98,14 @@ public interface IMmsTemplateService {
     MmsMessageTemplate getByContent(int userId, String content);
 
     /**
-     * TODO 判断输入内容是否符合模板内容
-     * 
-     * @param id
-     * @param content
-     * @return
-     */
-    boolean isContentMatched(long id, String content);
-
-    /**
-     * TODO 将模板数据加载到REDIS
+     * 将模板数据加载到REDIS
      * 
      * @return
      */
     boolean reloadToRedis();
 
     /**
-     * TODO 请在此处添加注释
+     * 根据用户ID判断并获取彩信模版
      * 
      * @param id
      * @param userId
@@ -122,7 +114,7 @@ public interface IMmsTemplateService {
     MmsMessageTemplate getWithUserId(Long id, int userId);
 
     /**
-     * TODO 根据对外模板ID查询模板详情
+     * 根据对外模板ID查询模板详情
      * 
      * @param modelId
      * @return
@@ -130,7 +122,7 @@ public interface IMmsTemplateService {
     MmsMessageTemplate getByModelId(String modelId);
 
     /**
-     * TODO 模板是否可用
+     * 模板是否可用
      * 
      * @param modelId
      * @param userId
@@ -139,11 +131,20 @@ public interface IMmsTemplateService {
     boolean isModelIdAvaiable(String modelId, int userId);
 
     /**
-     * TODO 判断BODY内容是否有效
+     * 判断BODY内容是否有效
      * 
      * @param body
      * @return
      */
     String checkBodyRuleIsRight(String body) throws BodyCheckException;
+
+    /**
+     * 参数报文结构体转换
+     * 
+     * @param body
+     * @return
+     */
+    String bodyToContext(String body);
+
 
 }

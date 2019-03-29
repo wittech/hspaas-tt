@@ -43,16 +43,16 @@ public class SmsApi extends BasicApiSupport {
      *
      * @return
      */
-    @ApiOperation(value = "单条/批量短信发送", notes = "单条/批量短信发送!!!", tags = { "huashi.sms.v1" })
+    @ApiOperation(value = "单条/批量短信发送", notes = "单条/批量短信发送!!!", tags = { "huashi.sms.v1" }, httpMethod = "POST")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "appkey", value = "用户接口账号", required = true, dataType = "String"),
             @ApiImplicitParam(name = "appsecret", value = "接口签名", example = "(接口密码、手机号、时间戳32位MD5加密生成),MD5(password+mobile+timestamp)", required = true, dataType = "String"),
             @ApiImplicitParam(name = "mobile", value = "手机号码(多个号码之间用半角逗号隔开，最大不超过1000个号码)", required = true, dataType = "String"),
             @ApiImplicitParam(name = "content", value = "短信内容", required = true, dataType = "String"),
             @ApiImplicitParam(name = "timestamp", value = "时间戳，短信发送当前时间毫秒数，生成数字签名用，有效时间30秒", required = true, dataType = "String"),
-            @ApiImplicitParam(name = "extNumber", value = "扩展号，必须为数字", required = false, dataType = "Integer"),
-            @ApiImplicitParam(name = "attach", value = "自定义信息，状态报告如需推送，将携带本数据一同推送", required = false, dataType = "String"),
-            @ApiImplicitParam(name = "callback", value = "自定义状态报告推送地址，如果用户推送地址设置为固定推送地址，则本值无效，以系统绑定的固定地址为准，否则以本地址为准", required = false, dataType = "String") })
+            @ApiImplicitParam(name = "extNumber", value = "扩展号，必须为数字", dataType = "String"),
+            @ApiImplicitParam(name = "attach", value = "自定义信息，状态报告如需推送，将携带本数据一同推送", dataType = "String"),
+            @ApiImplicitParam(name = "callback", value = "自定义状态报告推送地址，如果用户推送地址设置为固定推送地址，则本值无效，以系统绑定的固定地址为准，否则以本地址为准", dataType = "String") })
     @RequestMapping(value = "/send", method = { RequestMethod.POST, RequestMethod.GET })
     public SmsSendResponse send() {
         try {

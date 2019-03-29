@@ -251,7 +251,7 @@ public class SmsPassageService implements ISmsPassageService {
      * TODO 加载通道代理信息
      * 
      * @param parameter
-     * @param speed
+     * @param packetsSize
      * @return
      */
     private boolean startProxyIfMatched(SmsPassageParameter parameter, Integer packetsSize) {

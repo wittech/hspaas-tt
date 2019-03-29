@@ -1,10 +1,5 @@
 package com.huashi.developer.api;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
@@ -17,6 +12,10 @@ import com.huashi.developer.response.mms.MmsBalanceResponse;
 import com.huashi.developer.response.mms.MmsSendResponse;
 import com.huashi.developer.validator.mms.MmsCustomContentSendValidator;
 import com.huashi.developer.validator.mms.MmsModelSendValidator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/mms")
@@ -29,8 +28,8 @@ public class MmsApi extends BasicApiSupport {
     @Autowired
     private MmsCustomContentSendValidator mmsCustomContentSendValidator;
 
-    @RequestMapping(value = "/send", method = { RequestMethod.POST, RequestMethod.GET })
-    public MmsSendResponse sendByBody() {
+    @RequestMapping(value = "/send")
+    public MmsSendResponse send() {
         try {
             MmsCustomContentSendRequest mmsCustomContentSendRequest = mmsCustomContentSendValidator.validate(request.getParameterMap(),
                                                                                                              getClientIp());
@@ -41,13 +40,13 @@ public class MmsApi extends BasicApiSupport {
         } catch (ValidateException e) {
             return new MmsSendResponse(JSON.parseObject(e.getMessage()));
         } catch (Exception e) {
-            logger.error("用户彩信发送失败", e);
+            logger.error("用户自定义彩信发送失败", e);
             return new MmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
         }
     }
 
     /**
-     * TODO 发送彩信
+     * 发送彩信
      *
      * @return
      */
@@ -63,13 +62,13 @@ public class MmsApi extends BasicApiSupport {
         } catch (ValidateException e) {
             return new MmsSendResponse(JSON.parseObject(e.getMessage()));
         } catch (Exception e) {
-            logger.error("用户彩信发送失败", e);
+            logger.error("用户模版彩信发送失败", e);
             return new MmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
         }
     }
 
     /**
-     * TODO 获取余额
+     * 获取余额
      *
      * @return
      */
@@ -89,6 +88,23 @@ public class MmsApi extends BasicApiSupport {
             }
             return new MmsBalanceResponse(code);
         }
-
     }
+
+    @RequestMapping(value = "/applyModel")
+    public MmsSendResponse applyModel() {
+        try {
+            MmsCustomContentSendRequest mmsCustomContentSendRequest = mmsCustomContentSendValidator.validate(request.getParameterMap(),
+                    getClientIp());
+            mmsCustomContentSendRequest.setAppType(getAppType());
+
+            return mmsPrervice.sendMessage(mmsCustomContentSendRequest);
+
+        } catch (ValidateException e) {
+            return new MmsSendResponse(JSON.parseObject(e.getMessage()));
+        } catch (Exception e) {
+            logger.error("用户自定义彩信发送失败", e);
+            return new MmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+        }
+    }
+
 }
