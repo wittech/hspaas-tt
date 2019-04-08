@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.developer.annotation.ValidateField;
 import com.huashi.developer.exception.ValidateException;
-import com.huashi.developer.validator.annotation.ValidateField;
 
 /**
  * TODO 基础验证
@@ -96,7 +96,7 @@ public class Validator {
                 throw new ValidateException(CommonApiCode.COMMON_REQUEST_EXCEPTION);
             }
 
-            // 如果参数要求是UTF-8编码，需要验证
+            // 如果参数要求是UT`F-8编码，需要验证
             if (vf.utf8() && !isUtf8(paramMap.get(vf.value())[0])) {
                 throw new ValidateException(CommonApiCode.COMMON_REQUEST_ENCODING_ERROR);
             }

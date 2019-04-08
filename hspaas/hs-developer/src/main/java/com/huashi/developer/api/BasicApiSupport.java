@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.CommonContext.AppType;
-import com.huashi.developer.validator.PassportValidator;
+import com.huashi.developer.validator.AuthorizationValidator;
 
 public class BasicApiSupport {
 
@@ -24,7 +24,7 @@ public class BasicApiSupport {
     protected HttpServletResponse response;
     
     @Autowired
-    protected PassportValidator passportValidator;
+    protected AuthorizationValidator passportValidator;
 
     @Override
     public String toString() {

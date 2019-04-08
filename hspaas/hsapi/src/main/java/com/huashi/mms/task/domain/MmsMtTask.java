@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.huashi.common.user.model.UserModel;
+import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 
 public class MmsMtTask {
 
@@ -72,6 +73,11 @@ public class MmsMtTask {
      * 子任务列表
      */
     private List<MmsMtTaskPackets>        packets;
+
+    /**
+     * 预览彩信内容
+     */
+    private List<MmsMessageTemplateBody>  bodies;
 
     /**
      * 用户实体属性
@@ -387,6 +393,14 @@ public class MmsMtTask {
             return mobiles[0];
         }
         return mobile;
+    }
+
+    public List<MmsMessageTemplateBody> getBodies() {
+        return bodies;
+    }
+
+    public void setBodies(List<MmsMessageTemplateBody> bodies) {
+        this.bodies = bodies;
     }
 
 }

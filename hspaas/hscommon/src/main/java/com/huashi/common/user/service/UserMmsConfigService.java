@@ -66,7 +66,7 @@ public class UserMmsConfigService implements IUserMmsConfigService {
         UserMmsConfig userMmsConfig = new UserMmsConfig();
         userMmsConfig.setCreateTime(new Date());
         userMmsConfig.setMessagePass(false);
-        userMmsConfig.setSmsReturnRule(MmsReturnRule.NO.getValue());
+        userMmsConfig.setMmsReturnRule(MmsReturnRule.NO.getValue());
         userMmsConfig.setSmsTimeout(0L);
 
         return userMmsConfig;
@@ -108,11 +108,17 @@ public class UserMmsConfigService implements IUserMmsConfigService {
     }
 
     @Override
+    @Transactional
     public boolean update(UserMmsConfig config) {
         config.setUpdateTime(new Date());
-        pushToRedis(config);
+        
+        int result = userMmsConfigMapper.updateByPrimaryKeySelective(config);
+        if(result > 0) {
+            pushToRedis(config);
+            return true;
+        }
 
-        return userMmsConfigMapper.updateByPrimaryKey(config) > 0;
+        return false;
     }
 
     /**

@@ -248,7 +248,7 @@ public class MmsPassageAccessService implements IMmsPassageAccessService {
     public boolean updateByModifyUser(int userId) {
         try {
             // 根据userId 获取用户彩信通道组关系信息
-            Integer passageGroupId = userPassageService.getByUserIdAndType(userId, PassageTemplateType.SMS.getValue());
+            Integer passageGroupId = userPassageService.getByUserIdAndType(userId, PassageTemplateType.MMS.getValue());
             if (passageGroupId == null) {
                 logger.error("根据用户：{} 查不到相关彩信通道对应关系", userId);
                 return false;

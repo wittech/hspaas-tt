@@ -20,6 +20,9 @@ public class MmsPassageMessageTemplate {
 
     private String  remark;
 
+    private String  passageName;
+    private String  statusText;
+
     public Long getId() {
         return id;
     }
@@ -82,6 +85,22 @@ public class MmsPassageMessageTemplate {
 
     public void setTemplateId(Long templateId) {
         this.templateId = templateId;
+    }
+
+    public String getPassageName() {
+        return passageName;
+    }
+
+    public void setPassageName(String passageName) {
+        this.passageName = passageName;
+    }
+
+    public String getStatusText() {
+        return statusText;
+    }
+
+    public void setStatusText(String statusText) {
+        this.statusText = statusText;
     }
 
 }

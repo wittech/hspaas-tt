@@ -26,7 +26,7 @@
 						<div class="breadcrumb-wrapper"> <span class="label">所在位置:</span>
 							<ol class="breadcrumb">
 								<li> <a href="#"> 管理平台 </a> </li>
-								<li> <a href="#"> 短信管理 </a> </li>
+								<li> <a href="#"> 彩信管理 </a> </li>
 								<li class="active">模板审核</li>
 							</ol>
 						</div>
@@ -55,12 +55,6 @@
 										    </div>
                                         </div>
                                        </div>
-                                     <div class="form-group">
-                                        <label class="col-xs-1 control-label">模板内容</label>
-                                        <div class="col-xs-5">
-                                             <textarea class="form-control id="content" rows="8">${messageTemplate.content!''}</textarea>
-                                        </div>
-                                    </div>
                                     <div class="form-group">
                                         <label class="col-xs-1 control-label">审核备注</label>
                                         <div class="col-xs-5">

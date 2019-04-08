@@ -1,22 +1,24 @@
 package com.huashi.mms.config.datasource;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Date;
+
 import javax.annotation.PreDestroy;
 
-import com.aliyun.oss.ClientException;
-import com.aliyun.oss.OSSException;
-import com.aliyun.oss.common.utils.IOUtils;
-import com.aliyun.oss.model.OSSObject;
-import com.aliyun.oss.model.PutObjectResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import com.aliyun.oss.OSSException;
+import com.aliyun.oss.common.utils.IOUtils;
+import com.aliyun.oss.model.OSSObject;
+import com.aliyun.oss.model.PutObjectResult;
 
 /**
  * 私钥阿里云OSS服务
@@ -80,6 +82,7 @@ public class AliyunOssStorage {
     public byte[] queryFile(String name) {
         OSSObject ossObject;
         try {
+
             ossObject = ossClient.getObject(aliyunOssBucketName, name);
 
             InputStream stream = ossObject.getObjectContent();
@@ -88,6 +91,23 @@ public class AliyunOssStorage {
             logger.error("Executing queryFile[" + name + "] failed", e);
             return null;
         }
+    }
+
+    /**
+     * 获得url链接
+     *
+     * @param key
+     * @return
+     */
+    public String getUrl(String name) {
+        // 设置URL过期时间为10年 3600l* 1000*24*365*10
+        Date expiration = new Date(new Date().getTime() + 3600l * 1000);
+        // 生成URL
+        URL url = ossClient.generatePresignedUrl(aliyunOssBucketName, name, expiration);
+        if (url != null) {
+            return url.toString();
+        }
+        return null;
     }
 
 }

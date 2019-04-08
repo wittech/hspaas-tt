@@ -84,7 +84,7 @@
                                         <td>${pl.comments!''}</td>
                                         <td>
                                         	<#if editCheck>
-                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/sms/passage_group/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
+                                        		<a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/passage_group/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑 </a>
                                         	</#if>
                                         </td>
                                     </tr>

@@ -16,14 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
-import com.huashi.common.notice.service.IMessageSendService;
-import com.huashi.common.notice.vo.SmsResponse;
-import com.huashi.common.user.domain.UserDeveloper;
-import com.huashi.common.user.service.IUserDeveloperService;
+import com.huashi.common.notice.vo.BaseResponse;
 import com.huashi.common.util.DateUtil;
+import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
+import com.huashi.web.client.SmsClient;
 import com.huashi.web.controller.BaseController;
 import com.huashi.web.prervice.sms.SmsSendPrervice;
 
@@ -39,16 +38,15 @@ public class SmsSendController extends BaseController {
     @Reference
     private ISmsMtSubmitService       submitService;
     @Reference
-    private IMessageSendService       messageSendService;
-    @Reference
-    private IUserDeveloperService     userDeveloperService;
-    @Reference
     private ISmsMoMessageService      moMassageReceiveService;
     @Reference
     private ISmsApiFaildRecordService smsApiFailedRecordService;
 
     @Autowired
     private SmsSendPrervice           smsSendPrervice;
+
+    @Autowired
+    private SmsClient                 smsClient;
 
     /**
      * 短信发送
@@ -69,10 +67,13 @@ public class SmsSendController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
-    public @ResponseBody SmsResponse sendSms(String mobile, String content) {
-        UserDeveloper d = userDeveloperService.getByUserId(getCurrentUserId());
-
-        return messageSendService.sendCustomMessage(d.getAppKey(), d.getAppSecret(), mobile, content);
+    public @ResponseBody BaseResponse sendSms(String mobile, String content) {
+        try {
+            return smsClient.sendSms(getCurrentUserId(), mobile, content);
+        } catch (Exception e) {
+            logger.error("Send message failed", e);
+            return new BaseResponse(false, CommonApiCode.COMMON_SERVER_EXCEPTION.getMessage());
+        }
     }
 
     /**
@@ -81,8 +82,7 @@ public class SmsSendController extends BaseController {
      * @param filePath
      */
     @RequestMapping(value = "/read_file/{file_type}", method = RequestMethod.POST)
-    public @ResponseBody JSONObject readFile(@PathVariable(value = "file_type") String fileType,
-                                             MultipartFile file) {
+    public @ResponseBody JSONObject readFile(@PathVariable(value = "file_type") String fileType, MultipartFile file) {
         JSONObject response = new JSONObject();
         try {
             Set<String> mobiles = smsSendPrervice.readMobilesFromFile(fileType, file);

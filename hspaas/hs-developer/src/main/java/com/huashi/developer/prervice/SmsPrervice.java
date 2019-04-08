@@ -1,5 +1,19 @@
 package com.huashi.developer.prervice;
 
+import java.util.Date;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.support.CorrelationData;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.user.domain.UserBalance;
@@ -9,9 +23,9 @@ import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.constant.RabbitConstant;
 import com.huashi.developer.constant.RabbitConstant.WordsPriority;
-import com.huashi.developer.model.sms.SmsP2PSendRequest;
-import com.huashi.developer.model.sms.SmsP2PTemplateSendRequest;
-import com.huashi.developer.model.sms.SmsSendRequest;
+import com.huashi.developer.request.sms.SmsP2PSendRequest;
+import com.huashi.developer.request.sms.SmsP2PTemplateSendRequest;
+import com.huashi.developer.request.sms.SmsSendRequest;
 import com.huashi.developer.response.sms.SmsBalanceResponse;
 import com.huashi.developer.response.sms.SmsSendResponse;
 import com.huashi.sms.record.domain.SmsApiFailedRecord;
@@ -19,19 +33,6 @@ import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.task.context.TaskContext.TaskSubmitType;
 import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.exception.QueueProcessException;
-import org.apache.commons.collections.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * TODO 短信前置服务
@@ -86,20 +87,20 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendP2PMessage(SmsP2PSendRequest model) {
+    public SmsSendResponse sendP2PMessage(SmsP2PSendRequest smsP2PSendRequest) {
         SmsMtTask task = new SmsMtTask();
 
-        BeanUtils.copyProperties(model, task);
-        task.setAppType(model.getAppType());
+        BeanUtils.copyProperties(smsP2PSendRequest, task);
+        task.setAppType(smsP2PSendRequest.getAppType());
         task.setSubmitType(TaskSubmitType.POINT_TO_POINT.getCode());
-        task.setP2pBody(model.getBody());
-        task.setP2pBodies(model.getP2pBodies());
+        task.setP2pBody(smsP2PSendRequest.getBody());
+        task.setP2pBodies(smsP2PSendRequest.getP2pBodies());
 
         try {
 
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new SmsSendResponse(model.getTotalFee(), sid);
+                return new SmsSendResponse(smsP2PSendRequest.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {
@@ -115,18 +116,18 @@ public class SmsPrervice {
      * @param model
      * @return
      */
-    public SmsSendResponse sendP2PTemplateMessage(SmsP2PTemplateSendRequest model) {
+    public SmsSendResponse sendP2PTemplateMessage(SmsP2PTemplateSendRequest rqeuest) {
         SmsMtTask task = new SmsMtTask();
 
-        BeanUtils.copyProperties(model, task);
-        task.setAppType(model.getAppType());
+        BeanUtils.copyProperties(rqeuest, task);
+        task.setAppType(rqeuest.getAppType());
         task.setSubmitType(TaskSubmitType.TEMPLATE_POINT_TO_POINT.getCode());
 
         try {
 
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new SmsSendResponse(model.getTotalFee(), sid);
+                return new SmsSendResponse(rqeuest.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {

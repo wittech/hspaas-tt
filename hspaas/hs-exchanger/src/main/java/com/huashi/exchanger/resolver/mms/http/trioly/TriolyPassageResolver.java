@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.huashi.common.util.DateUtil;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.exchanger.domain.ProviderModelResponse;
 import com.huashi.exchanger.domain.ProviderSendResponse;
@@ -123,18 +122,18 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
      */
     private String translateContext(MmsMessageTemplate template) {
         if (template == null) {
-            throw new RuntimeException("模板数据为空");
+            throw new IllegalArgumentException("模板数据为空");
         }
 
         if (CollectionUtils.isEmpty(template.getBodies())) {
-            throw new RuntimeException("模板结构体数据为空");
+            throw new IllegalArgumentException("模板结构体数据为空");
         }
 
         List<JSONObject> nodes = new ArrayList<>();
         for (MmsMessageTemplateBody body : template.getBodies()) {
             JSONObject node = new JSONObject();
             node.put("type", body.getMediaType());
-            node.put("content", body.getUrl());
+            node.put("content", body.getContent());
 
             nodes.add(node);
         }
@@ -152,20 +151,19 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
      * @param template
      * @return
      */
-    private Map<String, Object> sendModelRequest(TParameter tparameter, MmsMessageTemplate template) {
+    private String sendModelRequest(TParameter tparameter, MmsMessageTemplate template) {
         Map<String, Object> params = new HashMap<>();
         params.put("appId", tparameter.getString("appId"));
-        params.put("name", generateModelName(template.getId()));
-        params.put("title", generateModelTitle(template.getId()));
+        params.put("name", template.getName());
+        params.put("title", template.getTitle());
         params.put("timestamp", System.currentTimeMillis() + "");
         params.put("context", translateContext(template));
 
         params.put("sign",
-                   signature(tparameter.getString("appKey"), tparameter.getString("appId"),
-                             tparameter.getString("name"), tparameter.getString("title"),
-                             tparameter.getString("context"), tparameter.getString("timestamp")));
+                   signature(tparameter.getString("appKey"), tparameter.getString("appId"), template.getName(),
+                             template.getTitle(), params.get("context").toString(), params.get("timestamp").toString()));
 
-        return params;
+        return JSON.toJSONString(params);
     }
 
     /**
@@ -247,7 +245,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
             response = new ProviderSendResponse();
             response.setMobile(map.get("mobile").toString());
             response.setStatusCode(map.get("respCode").toString());
-            response.setSid(map.get("sendId").toString());
+            response.setSid(map.get("sendId") == null ? null : map.get("sendId").toString());
             response.setSuccess(StringUtils.isNotEmpty(response.getStatusCode())
                                 && successCode.equals(response.getStatusCode()));
             response.setRemark(JSON.toJSONString(map));
@@ -262,36 +260,36 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
         try {
             logger.info("MMS下行状态报告简码：{} =========={}", code(), report);
 
-            JSONObject jsonobj = JSONObject.parseObject(report);
-            String msgId = jsonobj.getString("Msg_Id");
-            String mobile = jsonobj.getString("Mobile");
-            String status = jsonobj.getString("Status");
-
-            // String destId = jsonobj.getString("Dest_Id");
-            // String extInfo = null;
-            // if (jsonobj.containsKey("ExtInfo")) {
-            // extInfo = jsonobj.getString("ExtInfo");
-            // }
+            if (StringUtils.isEmpty(report)) {
+                return null;
+            }
 
             List<MmsMtMessageDeliver> list = new ArrayList<>();
+            List<JSONObject> result = JSONObject.parseObject(report, new TypeReference<List<JSONObject>>() {
+            });
+            for (JSONObject jsonobj : result) {
+                String msgId = jsonobj.getString("sendId");
+                String mobile = jsonobj.getString("mobile");
+                String status = jsonobj.getString("status");
 
-            MmsMtMessageDeliver response = new MmsMtMessageDeliver();
-            response.setMsgId(msgId);
-            response.setMobile(mobile);
-            response.setCmcp(CMCP.local(mobile).getCode());
-            response.setStatusCode(status);
-            response.setStatus((StringUtils.isNotEmpty(status) && status.equalsIgnoreCase(successCode) ? DeliverStatus.SUCCESS.getValue() : DeliverStatus.FAILED.getValue()));
-            response.setDeliverTime(DateUtil.getNow());
-            response.setCreateTime(new Date());
-            response.setRemark(report);
+                MmsMtMessageDeliver response = new MmsMtMessageDeliver();
+                response.setMsgId(msgId);
+                response.setMobile(mobile);
+                response.setCmcp(CMCP.local(mobile).getCode());
+                response.setStatusCode(status);
+                response.setStatus((StringUtils.isNotEmpty(status) && status.equalsIgnoreCase(successCode) ? DeliverStatus.SUCCESS.getValue() : DeliverStatus.FAILED.getValue()));
+                response.setDeliverTime(jsonobj.getString("sendTime"));
+                response.setCreateTime(new Date());
+                response.setRemark(report);
 
-            list.add(response);
+                list.add(response);
+            }
 
             // 解析返回结果并返回
             return list;
         } catch (Exception e) {
-            logger.error("解析失败", e);
-            throw new RuntimeException("解析失败");
+            logger.error("三体彩信状态解析失败", e);
+            throw new RuntimeException("三体彩信状态解析失败");
         }
     }
 
@@ -301,30 +299,35 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
 
             logger.info("上行报告简码：{} =========={}", code(), report);
 
-            JSONObject jsonobj = JSONObject.parseObject(report);
-            String msgId = jsonobj.getString("Msg_Id");
-            String destId = jsonobj.getString("Dest_Id");
-            String mobile = jsonobj.getString("Mobile");
-            String content = jsonobj.getString("Content");
+            if (StringUtils.isEmpty(report)) {
+                return null;
+            }
 
             List<MmsMoMessageReceive> list = new ArrayList<>();
+            List<JSONObject> result = JSONObject.parseObject(report, new TypeReference<List<JSONObject>>() {
+            });
+            for (JSONObject jsonobj : result) {
+                MmsMoMessageReceive response = new MmsMoMessageReceive();
+                String msgId = jsonobj.getString("sendId");
+                String destId = jsonobj.getString("destId");
+                String mobile = jsonobj.getString("mobile");
+                String content = jsonobj.getString("content");
 
-            MmsMoMessageReceive response = new MmsMoMessageReceive();
-            response.setPassageId(passageId);
-            response.setMsgId(msgId);
-            response.setMobile(mobile);
-            response.setContent(content);
-            response.setDestnationNo(destId);
-            response.setReceiveTime(DateUtil.getNow());
-            response.setCreateTime(new Date());
-            response.setCreateUnixtime(response.getCreateTime().getTime());
-            list.add(response);
+                response.setPassageId(passageId);
+                response.setMsgId(msgId);
+                response.setMobile(mobile);
+                response.setContent(content);
+                response.setDestnationNo(destId);
+                response.setReceiveTime(jsonobj.getString("receiveTime"));
+                response.setCreateTime(new Date());
+                response.setCreateUnixtime(response.getCreateTime().getTime());
+                list.add(response);
+            }
 
-            // 解析返回结果并返回
             return list;
         } catch (Exception e) {
-            logger.error("解析失败", e);
-            throw new RuntimeException("解析失败");
+            logger.error("三体彩信上行解析失败", e);
+            throw new RuntimeException("三体彩信上行解析失败");
         }
     }
 
@@ -343,7 +346,8 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
         try {
             TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
 
-            String result = HttpClientManager.get(parameter.getUrl(), sendModelRequest(tparameter, mmsMessageTemplate));
+            String result = HttpClientManager.postBody(parameter.getUrl(),
+                                                       sendModelRequest(tparameter, mmsMessageTemplate));
 
             return modelResponse(result, parameter.getSuccessCode());
         } catch (Exception e) {

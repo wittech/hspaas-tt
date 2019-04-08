@@ -135,6 +135,15 @@
 	<dubbo:reference id="iMmsPassageGroupService"
 		interface="com.huashi.mms.passage.service.IMmsPassageGroupService" />
 
+	<dubbo:reference id="iMmsPassageTemplateService"
+		interface="com.huashi.mms.template.service.IMmsPassageTemplateService" />
+
+	<dubbo:reference id="iMmsTemplateBodyService"
+		interface="com.huashi.mms.template.service.IMmsTemplateBodyService" />
+
+
+
+
 	<dubbo:reference id="iMmsMtSubmitService"
 		interface="com.huashi.mms.record.service.IMmsMtSubmitService" />
 	<dubbo:reference id="iMmsMoMessageService"

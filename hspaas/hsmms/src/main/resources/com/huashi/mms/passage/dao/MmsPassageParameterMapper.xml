@@ -211,13 +211,21 @@
 		order by id desc limit 1
 	</select>
 
+	<select id="selectByPassageIdAndType" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from mms_passage_parameter where passage_id = #{passageId} and
+		call_type = #{callType}
+		order by id desc limit 1
+	</select>
+
 	<insert id="batchInsert" parameterType="List">
 		insert into mms_passage_parameter (passage_id, protocol, call_type,
 		url, params_definition, params,
 		result_format, success_code, position,
 		create_time)
 		values
-		
+
 		<foreach collection="list" item="element" index="index"
 			separator=",">
 			(#{element.passageId,jdbcType=INTEGER},
@@ -232,5 +240,5 @@
 			#{element.createTime,jdbcType=TIMESTAMP})
 		</foreach>
 	</insert>
-	
+
 </mapper>

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -21,7 +20,7 @@ import org.springframework.retry.support.RetryTemplate;
  * @version V1.0.0
  * @date 2016年10月3日 下午11:56:40
  */
-@Configuration
+//@Configuration
 public class MmsRabbitMqConfiguration {
 
     /*-----------------------------------彩信下行队列-----------------------------------------*/
@@ -44,18 +43,18 @@ public class MmsRabbitMqConfiguration {
     private String             mqVhost;
 
     @Bean("mmsConnectionFactory")
-    public ConnectionFactory connectionFactory() {
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        connectionFactory.setHost(mqHost);
-        connectionFactory.setPort(mqPort);
-        connectionFactory.setUsername(mqUsername);
-        connectionFactory.setPassword(mqPassword);
-        connectionFactory.setVirtualHost(mqVhost);
-        connectionFactory.setPublisherReturns(true);
+    public ConnectionFactory mmsConnectionFactory() {
+        CachingConnectionFactory mmsConnectionFactory = new CachingConnectionFactory();
+        mmsConnectionFactory.setHost(mqHost);
+        mmsConnectionFactory.setPort(mqPort);
+        mmsConnectionFactory.setUsername(mqUsername);
+        mmsConnectionFactory.setPassword(mqPassword);
+        mmsConnectionFactory.setVirtualHost(mqVhost);
+        mmsConnectionFactory.setPublisherReturns(true);
         // 显性设置后才能进行回调函数设置
-        connectionFactory.setPublisherConfirms(true);
+        mmsConnectionFactory.setPublisherConfirms(true);
 
-        return connectionFactory;
+        return mmsConnectionFactory;
     }
 
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

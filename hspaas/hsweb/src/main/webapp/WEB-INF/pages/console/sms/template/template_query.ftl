@@ -18,28 +18,24 @@
    
         <div class="admin-main">
             <form class="layui-form" action="">
-            <blockquote class="layui-elem-quote">
-                <a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-sm" id="export">检索条件
-                </a>
-                <div style="float:right;">
-                    <div class="layui-form-search" style="margin:0;">
-                        <div class="layui-input-inline">
-                            <input type="text" id="content" name="content" placeholder="请输入模板内容" autocomplete="off" class="layui-input">
-                        </div>
-                        <div class="layui-input-inline">
-                            <select name="status" lay-filter="status">
-                                <option value="" selected>请选择审批状态</option>
-                                <#if approveStatus??>
-                                <#list approveStatus as a>
-                                <option value="${(a.value)!}">${(a.title)!}</option>
-                                </#list>
-                                </#if>
-                            </select>
-                        </div>
-                        <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
-                    </div>
-                </div>
-            </blockquote>
+            	<div style="margin: 6px 0px 6px 3px;">
+	                <div class="layui-form-search">
+	                    <div class="layui-input-inline">
+	                        <input type="text" id="content" name="content" placeholder="请输入模板内容" autocomplete="off" class="layui-input">
+	                    </div>
+	                    <div class="layui-input-inline">
+	                        <select name="status" lay-filter="status">
+	                            <option value="" selected>请选择审批状态</option>
+	                            <#if approveStatus??>
+	                            <#list approveStatus as a>
+	                            <option value="${(a.value)!}">${(a.title)!}</option>
+	                            </#list>
+	                            </#if>
+	                        </select>
+	                    </div>
+	                    <button lay-filter="search" class="layui-btn" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
+	                </div>
+	            </div>
             </form>
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">

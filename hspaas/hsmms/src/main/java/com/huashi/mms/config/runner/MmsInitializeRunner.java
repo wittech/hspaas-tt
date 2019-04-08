@@ -11,7 +11,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import com.huashi.mms.template.service.IMmsTemplateService;
+import com.huashi.mms.record.service.IMmsMtSubmitService;
 
 /**
  * TODO 初始化项目依赖的资源，如REDIS/自定义线程开启等
@@ -23,42 +23,37 @@ import com.huashi.mms.template.service.IMmsTemplateService;
 @Configuration
 @Order(2)
 public class MmsInitializeRunner implements CommandLineRunner {
-    
+
     @Autowired
-    private IMmsTemplateService        mmsTemplateService;
+    private IMmsMtSubmitService    mmsMtSubmitService;
 
-    public static final Lock           LOCK                   = new ReentrantLock();
-    public static final Condition      CONDITION              = LOCK.newCondition();
+    public static final Lock       LOCK                   = new ReentrantLock();
+    public static final Condition  CONDITION              = LOCK.newCondition();
 
-    private Logger                     logger                 = LoggerFactory.getLogger(getClass());
+    private Logger                 logger                 = LoggerFactory.getLogger(getClass());
 
     /**
      * 自定义初始化资源是否完成（因有些服务强依赖某些资源初始化完成，如 rabbit listener 消费）
      */
-    public static volatile boolean     isResourceInitFinished = false;
+    public static volatile boolean isResourceInitFinished = false;
 
     @Override
     public void run(String... arg0) throws Exception {
-        logger.info("=======================数据初始化REDIS=======================");
-        try {
-            initMessageTemplate();
-            logger.info("=======================初始化REDIS完成=======================");
-        } catch (Exception e) {
-            logger.info("=======================初始化REDIS失败=======================", e);
-            throw e;
-        }
+        logger.info("=======================数据初始化MQ=======================");
+        initMessageQueues();
         initSignal();
-        
+        logger.info("=======================数据初始化MQ完成=======================");
     }
-
-    private void initMessageTemplate() {
-        mmsTemplateService.reloadToRedis();
-        logger.info("彩信模板初始化完成");
+    
+    /**
+     * TODO 初始化待提交消息队列信息
+     */
+    private boolean initMessageQueues() {
+        return mmsMtSubmitService.declareWaitSubmitMessageQueues();
     }
 
     /**
-     * 
-       * TODO 初始化信号源控制
+     * TODO 初始化信号源控制
      */
     private void initSignal() {
         LOCK.lock();

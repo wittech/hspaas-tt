@@ -430,13 +430,13 @@
                                     <div class="form-group mmsSendUrlYDiv" style="display:none">
                                         <label class="col-xs-2 control-label"></label>
                                         <div class="col-xs-7">
-                                            <label class="form-radio form-icon"><input type="radio" id="mmsSendUrlType2"
+                                            <label class="form-radio form-icon"><input type="radio" id="mmsSendUrlType1"
                                                                                        name="mmsSendUrlType" checked value="1">
                                                 设置固定推送地址，无需每次发送请求都传callback_url</label>
                                         </div>
                                     </div>
 
-                                    <div class="form-group mmsSendUrlYDiv sendTypeDiv" style="display:none">
+                                    <div class="form-group mmsSendUrlYDiv mmsSendTypeDiv" style="display:none">
                                         <label class="col-xs-2 control-label"></label>
                                         <div class="col-xs-7">
                                             <input type="text" class="form-control validate[maxSize[100]]"
@@ -511,10 +511,10 @@
                                         <label class="col-xs-2 control-label">付费方式</label>
                                         <div class="col-xs-3">
 
-                                            <label class="form-radio form-icon"><input type="radio" id="smsPayType1"
+                                            <label class="form-radio form-icon"><input type="radio" id="mmsPayType1"
                                                                                        name="mmsPayType" checked value="1">
                                                 预付</label>
-                                            <label class="form-radio form-icon"><input type="radio" id="smsPayType2"
+                                            <label class="form-radio form-icon"><input type="radio" id="mmsPayType2"
                                                                                        name="mmsPayType" value="2">
                                                 后付</label>
                                         </div>
@@ -671,7 +671,7 @@
             if($this.val() == 1){
                 $('.mmsSendUrlYDiv').show();
             }else{
-                $('#mmsSendUrlType2').click();
+                $('#mmsSendUrlType1').click();
                 $('.mmsSendUrlYDiv').hide();
             }
         });

@@ -110,7 +110,8 @@ public class OpenApiCode {
      * @date 2019年3月15日 下午10:59:38
      */
     public enum MmsApiCode {
-        MMS_MODEL_ID_UNDEFAINED("M0001", "彩信模板ID不可用"), MMS_CUSTOM_BODY_RULE_NOT_MATCHED("M0002", "彩信自定义发送内容格式不匹配");
+        MMS_MODEL_BODY_RULE_NOT_MATCHED("M0001", "彩信模板信息不匹配"), MMS_MODEL_APPLY_FAILED("M0002", "彩信模板信息报备失败"),
+        MMS_MODEL_ID_UNDEFAINED("M0003", "彩信模板ID不可用"), MMS_CUSTOM_BODY_RULE_NOT_MATCHED("M0004", "彩信发送内容格式不匹配"), ;
 
         private String code;
         private String message;

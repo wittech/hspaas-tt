@@ -1,8 +1,8 @@
-package com.huashi.developer.model;
+package com.huashi.developer.request;
 
 import java.io.Serializable;
 
-import com.huashi.developer.validator.annotation.ValidateField;
+import com.huashi.developer.annotation.ValidateField;
 
 /**
  * TODO 鉴权通行证
@@ -11,7 +11,7 @@ import com.huashi.developer.validator.annotation.ValidateField;
  * @version V1.0
  * @date 2018年3月21日 上午10:22:43
  */
-public class PassportModel implements Serializable {
+public class AuthorizationRequest implements Serializable {
 
     private static final long serialVersionUID = -7218382770115176499L;
 

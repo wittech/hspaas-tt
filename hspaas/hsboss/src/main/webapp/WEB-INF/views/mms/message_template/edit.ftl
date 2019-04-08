@@ -68,6 +68,23 @@
 			                                    </select>
 			                                </div>
 							    		</div>
+							    		
+							    		<div class="form-group">
+			                                <label class="col-xs-2 control-label">模版名称</label>
+			                                <div class="col-xs-4">
+			                                    <input type="text" class="form-control validate[required]" name="messageTemplate.name" id="name"
+			                                           placeholder="请输入模版名称，方便后续快速检索" value="${messageTemplate.name!''}">
+			                                </div>
+			                            </div>
+			                            
+			                            <div class="form-group">
+	                                        <label class="col-xs-2 control-label">模版标题</label>
+			                                <div class="col-xs-4">
+			                                    <input type="text" class="form-control validate[required]" name="messageTemplate.title" id="title"
+			                                           placeholder="请输入模版标题" value="${messageTemplate.title!''}">
+			                                </div>
+				                        </div>
+							    		
 							    		<div class="form-group">
 	                                        <label class="col-xs-2 control-label">提交时间间隔</label>
 	                                        <div class="col-xs-4">
@@ -88,56 +105,11 @@
 			                                           placeholder="请输入模板优先级（越大越优先）" value="${messageTemplate.priority!''}"/>
 			                                </div>
 			                            </div>
-				                        <div class="form-group">
-	                                        <label class="col-xs-2 control-label">敏感词白名单</label>
-	                                        <div class="col-xs-4">
-	                                        	<#if forbiddenWords?? && forbiddenWords != "">
-	                                        	<#else>
-	                                        		<input type="text" class="form-control validate[maxSize[256]]" name="messageTemplate.whiteWord" id="whiteWord" value="${messageTemplate.whiteWord!''}" placeholder="请输入敏感词白名单 |符号隔开">
-	                                        	</#if>
-	                                            
-	                                        </div>
-				                        </div>
-	                                    <div class="form-group">
-	                                        <label class="col-xs-2 control-label">模板内容</label>
-	                                        <div class="col-xs-6">
-	                                             <textarea class="form-control validate[required,maxSize[1000]]" name="messageTemplate.content" id="content" rows="3">${messageTemplate.content!''}</textarea>
-	                                        </div>
-	                                        <div class="col-xs-1">
-			                                	<a href="javascript:void(0);" onclick="insertCode();" class="btn btn-success btn-sm">#code#</a>
-			                                </div>
-	                                    </div>
 	                                    <div class="form-group">
 			                                <label class="col-xs-2 control-label">扩展号码</label>
 			                                <div class="col-xs-4">
-			                                    <input type="text" style="width: 590px;" class="form-control validate[maxSize[20]]"
+			                                    <input type="text" class="form-control validate[maxSize[20]]"
 			                                           name="messageTemplate.extNumber" id="extNumber" value="${messageTemplate.extNumber!''}" placeholder="模板扩展号码" />
-			                                </div>
-			                            </div>
-			                            <div class="form-group">
-			                                <label class="col-xs-2 control-label">黑名单放行</label>
-			                                <div class="col-xs-4">
-			                                	 <label class="form-radio form-icon">
-			                                	 	<input type="radio" class="blacklist" name="blacklist" value="0" <#if messageTemplate.ignoreBlacklist == 0>checked</#if> /><span class="label label-danger">自动拦截，不放行</span>
-			                                	 </label>
-			                                	 &nbsp;&nbsp;
-			                                	 <label class="form-radio form-icon">
-			                                	 	<input type="radio" class="blacklist" name="blacklist" value="1" <#if messageTemplate.ignoreBlacklist == 1>checked</#if> /><span class="label label-success">不拦截，自动放行</span>
-			                                	 </label>
-			                                	 <input type="hidden" id="ignoreBlacklist" name="messageTemplate.ignoreBlacklist" value="${messageTemplate.ignoreBlacklist!'0'}" />
-			                                </div>
-			                            </div>
-			                            <div class="form-group">
-			                                <label class="col-xs-2 control-label">敏感词放行</label>
-			                                <div class="col-xs-4">
-			                                	 <label class="form-radio form-icon">
-			                                	 	<input type="radio" class="fwords" name="fwords" value="0" <#if messageTemplate.ignoreForbiddenWords == 0>checked</#if> /><span class="label label-danger">自动拦截，不放行</span>
-			                                	 </label>
-			                                	 &nbsp;&nbsp;
-			                                	 <label class="form-radio form-icon">
-			                                	 	<input type="radio" class="fwords" name="fwords" value="1" <#if messageTemplate.ignoreForbiddenWords == 1>checked</#if> /><span class="label label-success">不拦截，自动放行</span>
-			                                	 </label>
-			                                	 <input type="hidden" id="ignoreForbiddenWords" name="messageTemplate.ignoreForbiddenWords" value="${messageTemplate.ignoreForbiddenWords!'0'}" />
 			                                </div>
 			                            </div>
 	                                    <div class="form-group">

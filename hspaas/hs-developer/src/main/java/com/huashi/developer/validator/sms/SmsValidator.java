@@ -12,18 +12,18 @@ import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.exception.ValidateException;
-import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.model.sms.SmsSendRequest;
-import com.huashi.developer.validator.PassportValidator;
+import com.huashi.developer.request.AuthorizationRequest;
+import com.huashi.developer.request.sms.SmsSendRequest;
+import com.huashi.developer.validator.AuthorizationValidator;
 import com.huashi.developer.validator.Validator;
 
 @Component
 public class SmsValidator extends Validator {
 
     @Autowired
-    private PassportValidator   passportValidator;
+    private AuthorizationValidator passportValidator;
     @Reference
-    private IUserBalanceService userBalanceService;
+    private IUserBalanceService    userBalanceService;
 
     /**
      * TODO 用户参数完整性校验
@@ -38,7 +38,7 @@ public class SmsValidator extends Validator {
         validateAndParseFields(smsSendRequest, paramMap);
 
         // 获取授权通行证实体
-        PassportModel passportModel = passportValidator.validate(paramMap, ip, smsSendRequest.getMobile());
+        AuthorizationRequest passportModel = passportValidator.validate(paramMap, ip, smsSendRequest.getMobile());
 
         smsSendRequest.setIp(ip);
         smsSendRequest.setUserId(passportModel.getUserId());
@@ -57,7 +57,8 @@ public class SmsValidator extends Validator {
      * @return
      * @throws ValidateException
      */
-    private void checkBalanceAvaiable(SmsSendRequest smsSendRequest, PassportModel passportModel) throws ValidateException {
+    private void checkBalanceAvaiable(SmsSendRequest smsSendRequest, AuthorizationRequest passportModel)
+                                                                                                        throws ValidateException {
         // 获取本次短信内容计费条数
         int fee = userBalanceService.calculateSmsAmount(passportModel.getUserId(), smsSendRequest.getContent());
         if (UserBalanceConstant.CONTENT_WORDS_EXCEPTION_COUNT_FEE == fee) {

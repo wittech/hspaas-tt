@@ -176,8 +176,8 @@ public class CommonContext {
      * @date 2016年9月5日 下午9:57:52
      */
     public enum CallbackUrlType {
-        SMS_STATUS(1, "短信状态报告"), SMS_MO(2, "短信上行报告"), MMS_STATUS(3, "彩信状态报告"), MMS_MO(4, "彩信上行报告"),
-        FLUX_CHARGE_RESULT(5, "流量充值结果"), VOICE_SEND_STATUS(6, "语音验证码发送报告");
+        SMS_STATUS(1, "短信状态报告"), SMS_MO(2, "短信上行报告"), FLUX_CHARGE_RESULT(3, "流量充值结果"),
+        VOICE_SEND_STATUS(4, "语音验证码发送报告"), MMS_STATUS(5, "彩信状态报告"), MMS_MO(6, "彩信上行报告");
 
         private int    code;
         private String name;

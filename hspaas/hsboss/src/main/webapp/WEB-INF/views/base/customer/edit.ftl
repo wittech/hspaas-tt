@@ -446,9 +446,17 @@
 	                                    
 	                                    
 	                                    <div class="panel panel-info" style="margin-top:10px">
-			                                <div class="panel-heading" style="height:40px">
-			                                    <h1 class="panel-title" style="font-size:14px;line-height:40px">彩信设置</h1>
-			                                </div>
+		                             	   <div class="panel-heading" style="height:40px">
+                                               <div class="pull-right"  style="margin-top: 3px;margin-right: 20px;">
+                                                   <a onclick="mmsFormSubmit();" class="btn btn-primary">保存彩信设置</a>
+                                               </div>
+		                                	    <h1 class="panel-title" style="font-size:14px;line-height:40px">
+		                                	    	彩信设置
+		                                	    </h1>
+		                            	   </div>
+			                                
+			                                <form id="mmsForm">
+			                                <input type="hidden" name="userId" value="${user.id}">
 			                                <div class="panel-body">
 			                                	<@init_amount key='balance_4'></@init_amount>
 
@@ -456,7 +464,7 @@
                                                  <#assign url = " "/>
 
                                                  <#list configList as cl>
-                                                    <#if cl.type == 1>
+                                                    <#if cl.type == 5>
                                                         <#assign status = cl.status/>
                                                         <#assign url = cl.url/>
                                                     </#if>
@@ -465,36 +473,36 @@
 			                                    <div class="form-group">
 			                                        <label class="col-xs-2 control-label">彩信发送状态报告URL</label>
 			                                        <div class="col-xs-7">
+			                                        	<input type="hidden" name="userMmsConfig.id" value="${userMmsConfig.id!''}">
 			                                            <label class="form-radio form-icon"><input type="radio" id="mmsSendUrlY"
-			                                                                                       name="mmsSendUrlFlag" value="1">启用</label>&nbsp;&nbsp;
+			                                                                                       name="mmsSendUrlFlag" <#if status != 0>checked</#if> value="1">启用</label>&nbsp;&nbsp;
 			                                            <label class="form-radio form-icon"><input type="radio" id="mmsSendUrlN"
-			                                                                                       name="mmsSendUrlFlag" checked value="0">不启用</label>
+			                                                                                       name="mmsSendUrlFlag" <#if status == 0>checked</#if> value="0">不启用</label>
 			                                        </div>
 			                                    </div>
-			
-			                                    <div class="form-group mmsSendUrlYDiv" style="display:none">
+			                                    <div class="form-group mmsSendUrlYDiv" <#if status == 0>style="display:none"</#if>>
 			                                        <label class="col-xs-2 control-label"></label>
 			                                        <div class="col-xs-7">
 			                                            <label class="form-radio form-icon"><input type="radio" id="mmsSendUrlType0"
-			                                                                                       name="mmsSendUrlType" value="2">
+			                                                                                       name="mmsSendUrlType" <#if status == 2> checked</#if> value="2">
 			                                                不设置固定推送地址，在每个发送请求内传callback_url</label>
 			                                        </div>
 			                                    </div>
-			
-			                                    <div class="form-group mmsSendUrlYDiv" style="display:none">
+			                                    
+			                                    <div class="form-group mmsSendUrlYDiv" <#if status == 0>style="display:none"</#if>>
 			                                        <label class="col-xs-2 control-label"></label>
 			                                        <div class="col-xs-7">
-			                                            <label class="form-radio form-icon"><input type="radio" id="mmsSendUrlType2"
-			                                                                                       name="mmsSendUrlType" checked value="1">
+			                                            <label class="form-radio form-icon"><input type="radio" id="mmsSendUrlType1"
+			                                                                                       name="mmsSendUrlType" <#if status == 0 || status == 1> checked</#if> value="1">
 			                                                设置固定推送地址，无需每次发送请求都传callback_url</label>
 			                                        </div>
 			                                    </div>
 			
-			                                    <div class="form-group mmsSendUrlYDiv sendTypeDiv" style="display:none">
+			                                    <div class="form-group mmsSendUrlYDiv mmsSendTypeDiv" <#if status == 0 || status == 2>style="display:none"</#if>>
 			                                        <label class="col-xs-2 control-label"></label>
 			                                        <div class="col-xs-7">
 			                                            <input type="text" class="form-control validate[maxSize[100]]"
-			                                                   name="mmsSendUrl" id="mmsSendUrl" placeholder="请输入彩信发送状态报告URL">
+			                                                   name="mmsSendUrl" id="mmsSendUrl" value="${url!''}" placeholder="请输入彩信发送状态报告URL">
 			                                        </div>
 			                                    </div>
 			
@@ -504,7 +512,7 @@
 			                                        <label class="col-xs-2 control-label">彩信上行状态报告URL</label>
 			                                        <div class="col-xs-7">
 			                                            <input type="text" class="form-control validate[maxSize[100]]"
-			                                                   name="mmsUpUrl" id="mmsUpUrl" placeholder="请输入彩信上行状态报告URL">
+			                                                   name="mmsUpUrl" id="mmsUpUrl" placeholder="请输入彩信上行状态报告URL" value="${(configMap['config_6'])!''}">
 			                                        </div>
 			                                    </div>
 			                                    <div class="form-group">
@@ -513,7 +521,7 @@
 			                                            <select class="form-control" name="userMmsConfig.mmsReturnRule">
 			                                            <#if smsReturnRules??>
 			                                                <#list smsReturnRules as a>
-			                                                    <option value="${a.value!''}">${a.title!''}</option>
+			                                                    <option value="${a.value!''}" <#if userMmsConfig??><#if userMmsConfig.mmsReturnRule==a.value>selected</#if></#if>>${a.title!''}</option>
 			                                                </#list>
 			                                            </#if>
 			                                            </select>
@@ -522,7 +530,7 @@
 			                                        <div class="col-xs-3">
 			                                            <input type="text"
 			                                                   class="form-control validate[maxSize[10],custom[number]]"
-			                                                   name="userMmsConfig.extNumber" id="extNumber" placeholder="接入号（数字）">
+			                                                   name="userMmsConfig.extNumber" id="extNumber" placeholder="接入号（数字）"  value="${(userMmsConfig.extNumber)!}">
 			                                        </div>
 			                                    </div>
 			                                    <div class="form-group">
@@ -531,7 +539,7 @@
 			                                            <select class="form-control" name="userMmsConfig.messagePass">
 			                                            <#if smsMessagePass??>
 			                                                <#list smsMessagePass as a>
-			                                                    <option value="${a.value!''}" selected>${a.title!''}</option>
+			                                                    <option value="${a.value!''}" <#if userMmsConfig??><#if userMmsConfig.messagePass==true && a.value==1>selected</#if></#if>>${a.title!''}</option>
 			                                                </#list>
 			                                            </#if>
 			                                            </select>
@@ -541,7 +549,7 @@
 			                                            <input type="text"
 			                                                   class="form-control validate[required,maxSize[100],custom[number],min[0]]"
 			                                                   name="userMmsConfig.mmsTimeout" id="mmsTimeout" value="5000"
-			                                                   placeholder="彩信超时时间（毫秒）">
+			                                                   placeholder="彩信超时时间（毫秒）" value="${(userMmsConfig.mmsTimeout)!}">
 			                                        </div>
 			                                    </div>
 			                                    <div class="form-group">
@@ -550,35 +558,34 @@
 			                                        	<input type="text"
 			                                                   class="form-control validate[maxSize[10],custom[number],min[0]]"
 			                                                   name="userMmsConfig.submitInterval" id="submitInterval" value="30"
-			                                                   placeholder="提交时间间隔（秒）">
+			                                                   placeholder="提交时间间隔（秒）" value="${(userMmsConfig.submitInterval)!}">
 			                                        </div>
 			                                        <label class="col-xs-2 control-label">提交次数上限</label>
 			                                        <div class="col-xs-3">
 			                                            <input type="text"
 			                                                   class="form-control validate[maxSize[10],custom[number],min[0]]"
 			                                                   name="userMmsConfig.limitTimes" id="limitTimes" value="10"
-			                                                   placeholder="提交次数上限（次）">
+			                                                   placeholder="提交次数上限（次）" value="${(userMmsConfig.limitTimes)!}">
 			                                        </div>
 			                                    </div>
 			                                    
 			                                    <div class="form-group">
 			                                        <label class="col-xs-2 control-label">付费方式</label>
 			                                        <div class="col-xs-3">
-			
-			                                            <label class="form-radio form-icon"><input type="radio" id="smsPayType1"
-			                                                                                       name="mmsPayType" checked value="1">
-			                                                预付</label>
-			                                            <label class="form-radio form-icon"><input type="radio" id="smsPayType2"
-			                                                                                       name="mmsPayType" value="2">
-			                                                后付</label>
+		                                                <label class="form-radio form-icon"><input type="radio" id="mmsPayType"
+                                                                                                  name="mmsPayType" <#if payTypeMap['payType_4'] == 1> checked</#if> value="1">
+                                                           	预付</label>
+                                                       <label class="form-radio form-icon"><input type="radio" id="mmsPayType2"
+                                                                                                      name="mmsPayType" <#if payTypeMap['payType_4'] == 2> checked</#if> value="2">
+			                                                                                                                              后付</label>
+			                                                
 			                                        </div>
 			                                        
 			                                        <label class="col-xs-2 control-label"></label>
 			                                        <div class="col-xs-3"></div>
-			
 			                                    </div>
-			                                    
 			                                </div>
+			                                </form>
 			                            </div>
 	                                    
 	                                    <div class="panel panel-info" style="margin-top:10px;display:none;">
@@ -712,6 +719,26 @@
                     $('.sendTypeDiv').hide();
                 }
             });
+            
+        	$('input[name=mmsSendUrlFlag]').click(function(){
+	           var $this = $(this);
+	            if($this.val() == 1){
+	                $('.mmsSendUrlYDiv').show();
+	            }else{
+	                $('#mmsSendUrlType1').click();
+	                $('.mmsSendUrlYDiv').hide();
+	            }
+	        });
+	
+	        
+	        $('input[name=mmsSendUrlType]').click(function(){
+	            var $this = $(this);
+	            if($this.val() == 1){
+	                $('.mmsSendTypeDiv').show();
+	            }else{
+	                $('.mmsSendTypeDiv').hide();
+	            }
+	        });
 		});
 		
 		function userFormSubmit(){
@@ -810,6 +837,32 @@
 	  				}
 	  			},error:function(data){
                     Boss.alert('修改短信设置异常!');
+	  			}
+	  		});
+		}
+		
+		function mmsFormSubmit(){
+			var allCheck = $('#mmsForm').validationEngine('validate');
+			if(!allCheck){
+				return;
+			}
+			
+			$.ajax({
+	  			url:'${BASE_PATH}/base/customer/updateMms',
+	  			dataType:'json',
+	  			data:$('#mmsForm').serialize(),
+	  			type:'post',
+	  			success:function(data){
+	  				if(data.result){
+                        Boss.alertToCallback('修改彩信设置成功！',function(){
+                            location.reload();
+                        });
+
+	  				}else{
+                        Boss.alert(data.message);
+	  				}
+	  			},error:function(data){
+                    Boss.alert('修改彩信设置异常!');
 	  			}
 	  		});
 		}

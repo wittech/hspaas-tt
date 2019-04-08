@@ -18,28 +18,24 @@
    
         <div class="admin-main">
             <form class="layui-form" action="">
-            <blockquote class="layui-elem-quote">
-                <a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-sm" id="export">检索条件
-                </a>
-                <div style="float:right;">
-                    <div class="layui-form-search" style="margin:0;">
-                        <div class="layui-input-inline">
-                            <input type="text" id="content" name="content" placeholder="请输入模板内容" autocomplete="off" class="layui-input">
-                        </div>
-                        <div class="layui-input-inline">
-                            <select name="status" lay-filter="status">
-                                <option value="" selected>请选择审批状态</option>
-                                <#if approveStatus??>
-                                <#list approveStatus as a>
-                                <option value="${(a.value)!}">${(a.title)!}</option>
-                                </#list>
-                                </#if>
-                            </select>
-                        </div>
-                        <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
-                    </div>
-                </div>
-            </blockquote>
+	            <div style="margin: 6px 0px 6px 3px;">
+	                <div class="layui-form-search">
+	                    <div class="layui-input-inline">
+	                        <input type="text" id="title" name="title" placeholder="请输入模板标题" autocomplete="off" class="layui-input">
+	                    </div>
+	                    <div class="layui-input-inline">
+	                        <select name="status" lay-filter="status">
+	                            <option value="" selected>请选择审批状态</option>
+	                            <#if approveStatus??>
+	                            <#list approveStatus as a>
+	                            <option value="${(a.value)!}">${(a.title)!}</option>
+	                            </#list>
+	                            </#if>
+	                        </select>
+	                    </div>
+	                    <button lay-filter="search" class="layui-btn" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
+	                </div>
+	            </div>
             </form>
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">
@@ -55,6 +51,8 @@
 					     {{# if(d.status == 0){ }}
 						     <a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
 						     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="remove"><i class="layui-icon layui-icon-delete"></i>删除</a>
+					     {{# } else if(d.status == 2){ }}
+					     	 <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="send">发送彩信</a>
 					     {{# } }}
 					</script>
                 </div>
@@ -92,7 +90,7 @@
 	    var loadTableData = function() {
 	    	searchObj.currentPage = currpage;
 	    	searchObj.status = $.trim($("#status").val());
-	    	searchObj.content = $.trim($("#content").val());
+	    	searchObj.title = $.trim($("#title").val());
 	    	
 	        table.render({
 	            id:tableId
@@ -101,7 +99,8 @@
 	            ,toolbar: '#table-template-toolbar'
 	            ,cols: [[
 	                  {type: 'checkbox', fixed: 'left'}
-		              ,{field: 'content', title: '模板标题'}
+	                  ,{field: 'modelId', title: '模板Id'}
+		              ,{field: 'title', title: '模板标题'}
 		              ,{field: 'status', title: '审批状态', width: 160, sort: true}
 		              ,{field: 'createTime', title: '提交时间', width: 180, templet: '#date_format'}
 		              ,{fixed: 'right', title:'操作', toolbar: '#table-template-operation', width:210}
@@ -123,8 +122,10 @@
 						if($(this).text()=='0'){
 						   $(this).text("待审核")
 						}else if($(this).text()=='1'){
-						   $(this).text("审核通过")
+						   $(this).text("平台处理中")
 						}else if($(this).text()=='2'){
+						   $(this).text("审核通过")
+						}else if($(this).text()=='3'){
 						   $(this).text("审核失败")
 						}
 	            	});
@@ -143,26 +144,10 @@
 	        var checkStatus = table.checkStatus(obj.config.id);
 	        switch(obj.event){
 	            case 'add':
-	                modal.open('新增彩信模板', server_domain+'/mms/template/add', 600, 300, {
-	                    action: server_domain+'/mms/template/save',
-	                    method: 'post',
-	                    beforeSend : function() {
-	                    	l_index = layer.load(1);
-	                    },
-	                    callback: function (data) {
-	                    	layer.close(l_index);
-	                    	modal.msgSuccess("保存成功");
-	                    	table.reload(tableId);
-	                    	/**
-	                    	if(data.success == true) {
-	                    		modal.msgSuccess("保存成功");
-	                    		table.reload(tableId);
-	                    	} else {
-	                    		modal.msgError("保存失败");
-	                    	}
-	                    	*/
-	                    }
-	                });
+		            parent.tab.tabAdd({
+				         url: server_domain + 'mms/template/add',
+				         title: '新增彩信模板'
+				     });
 	                break;
 	            case 'removeAll':
 	                var data = checkStatus.data;
@@ -231,23 +216,29 @@
 	            });
 	
 	        } else if(obj.event === 'edit'){
-	            modal.open('编辑模板信息', server_domain+'/mms/template/edit/?id='+pdata.id, 600, 300, {
-	                action: server_domain+'/mms/template/update',
+	        	parent.tab.tabAdd({
+			         url: server_domain + 'mms/template/edit?id='+pdata.id,
+			         icon: 'fa-user',
+			         title: '编辑彩信模板'
+			     });
+	        } else if(obj.event === 'send'){
+	            modal.open('发送模板彩信', server_domain+'/mms/template/sendMms/?id='+pdata.id, 600, 300, {
+	                action: server_domain+'/mms/send/byModel',
 	                method: 'post',
 	                beforeSend : function() {
                     	l_index = layer.load(1);
                     },
 	                callback: function (data) {
 	                	layer.close(l_index);
-	                	modal.msgSuccess("修改成功");
+	                	modal.msgSuccess("发送成功");
                     	table.reload(tableId);
                     	
                     	/**
 	                	if(data.success == true) {
-                    		modal.msgSuccess("修改成功");
+                    		modal.msgSuccess("发送成功");
                     		table.reload(tableId);
                     	} else {
-                    		modal.msgError("修改失败");
+                    		modal.msgError("发送失败");
                     	}*/
 	                }
 	            });

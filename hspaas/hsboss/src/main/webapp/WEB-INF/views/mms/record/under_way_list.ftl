@@ -131,15 +131,6 @@
                         	<#if macro.doOper("10003001001")>
                             	<a href="javascript:void(0);" class="btn btn-success" onclick="batchPass();">审核通过</a>
                             </#if>
-                            
-                            &nbsp;
-	                            <a href="javascript:void(0);" class="btn btn-mint" onclick="batchPassWithSameContent();">测试</a>
-                            <#-- 
-                            <#if macro.doOper("10003001002")>
-	                            &nbsp;
-	                            <a href="javascript:void(0);" class="btn btn-mint" onclick="batchPassWithSameContent();">同内容批放</a>
-                            </#if>
-                            -->
                             <#if macro.doOper("10003001003")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuse();">驳回</a>
@@ -190,8 +181,6 @@
                             </thead>
                             <tbody>
                             <#assign childTaskCheck = macro.doOper("10003001008") />
-							<#assign isTemplateErrorCheck = macro.doOper("10003001009") />
-							<#assign sensitiveWordsCheck = macro.doOper("10003001010") />
                             <#list page.list as pl>
                             <tr onclick="choose(this);">
                                 <td rowspan="2"
@@ -278,29 +267,9 @@
 	                                    <a href="${BASE_PATH}/mms/record/child_task?sid=${pl.sid}"
 	                                       class="btn btn-info btn-xs">子任务</a>
                                     </#if>
-                                     
-                                    <#if pl.submitType != 1 && pl.submitType != 2>
-                                    	<#if isTemplateErrorCheck>
-                                    		<a href="${BASE_PATH }/mms/message_template/create?sid=${pl.sid}" class="btn btn-primary btn-xs"><#if pl.isTemplateError()>模板报备<#else>模板叠加</#if></a>
-	                                    </#if>
-	                                    <#if sensitiveWordsCheck>
-		                                    <#if pl.isWordError()>
-		                                    	<#if pl.messageTemplateId?? && pl.messageTemplateId gt 0>
-				                                    <a  href="${BASE_PATH }/mms/message_template/edit?id=${pl.messageTemplateId}&sid=${pl.sid}"
-				                                       class="btn btn-default btn-xs">敏感词导白</a>
-				                                <#else>
-				                                	<a href="${BASE_PATH }/mms/message_template/create?sid=${pl.sid}" class="btn btn-default btn-xs">敏感词导白</a>
-				                                </#if>
-		                                    </#if>
-	                                    </#if>
-                                    </#if>
-                                   <#--
-                                    &nbsp;
-                                    <a href="javascript:void(0);" onclick="editContent(${pl.sid},this);"
-                                       class="btn btn-warning btn-xs">修改内容</a>
-                                       -->
-                                    <#--&nbsp;-->
-                                    <#--<a href="${BASE_PATH}/mms/record/send_record_list?sid=${pl.sid}" class="btn btn-success btn-xs">发送记录</a>-->
+                                    <a href="javascript:preview('${(pl.modelId)!}', '${(pl.title)!}', '${(pl.body)!}');"
+	                                       class="btn btn-success btn-xs">预览</a>
+                                    
                                 </td>
                             </tr>
                             <tr>
@@ -323,144 +292,23 @@
         <#include "/WEB-INF/views/main/left.ftl">
         </div>
 
-        <div class="modal fade" id="myModal">
-            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" onclick="closeModal();"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">手机号</h4>
-                    </div>
-                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
-                         id="myModelBody">
-                        <textarea id="all_mobile" class="form-control" rows="6"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div>
-
-        <div class="modal fade" id="contentModal">
-            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" onclick="closeModal();"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">修改内容</h4>
-                    </div>
-                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
-                         id="myModelBody">
-                        <textarea id="edit_content" class="form-control" rows="6"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success" onclick="saveContent();">保存</button>
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="modal fade" id="contentPassModal">
-            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
-                <div class="modal-content">
-                	<div class="col-md-6 col-lg-4">
-
-
-                            <!--Default Accordion-->
-                            <!--===================================================-->
-                            <div class="panel-group accordion" id="accordion">
-                                <div class="panel">
-
-                                    <!--Accordion title-->
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-											<a data-parent="#accordion" data-toggle="collapse" href="#collapseOne" aria-expanded="false" class="collapsed">Collapsible Group Item #1</a>
-										</h4>
-                                    </div>
-
-                                    <!--Accordion content-->
-                                    <div class="panel-collapse collapse" id="collapseOne" aria-expanded="false" style="height: 0px;">
-                                        <div class="panel-body">
-                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven\'t heard of them accusamus labore sustainable VHS.
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="panel">
-
-                                    <!--Accordion title-->
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-											<a data-parent="#accordion" data-toggle="collapse" href="#collapseTwo" class="collapsed" aria-expanded="false">Collapsible Group Item #2</a>
-										</h4>
-                                    </div>
-
-                                    <!--Accordion content-->
-                                    <div class="panel-collapse collapse" id="collapseTwo" aria-expanded="false" style="height: 0px;">
-                                        <div class="panel-body">
-                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven\'t heard of them accusamus labore sustainable VHS.
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="panel">
-
-                                    <!--Accordion title-->
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-											<a data-parent="#accordion" data-toggle="collapse" href="#collapseThree" class="" aria-expanded="true">Collapsible Group Item #3</a>
-										</h4>
-                                    </div>
-
-                                    <!--Accordion content-->
-                                    <div class="panel-collapse collapse in" id="collapseThree" aria-expanded="true" style="">
-                                        <div class="panel-body">
-                                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven\'t heard of them accusamus labore sustainable VHS.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--===================================================-->
-                            <!--End Default Accordion-->
-
-                        </div>
-                
-                	
-                    <div class="modal-header">
-                        <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">彩信内容</h4>
-                    </div>
-                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000" id="myModelBody">
-                        <textarea id="sms_content" class="form-control" rows="6"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                    	<input type="checkbox" id="content_like"><span onclick="chooseLike();">内容是否模糊匹配</span>&nbsp;&nbsp;
-                        <button type="button" class="btn btn-success" onclick="sameContentPass();">确定</button>
-                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div>
-
-        <div class="modal fade" id="contentRefuseModal">
+        <div class="modal fade" id="previewModal">
             <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title">彩信内容</h4>
                     </div>
-                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000" id="myModelBody">
-                        <textarea id="sms_refuse_content" class="form-control" rows="6"></textarea>
+                    <div class="modal-body" data-scrollbar="true" data-height="700" data-scrollcolor="#000" id="myPreviewModelBody">
+                        
                     </div>
                     <div class="modal-footer">
-                        <input type="checkbox" id="content_refuse_like"><span onclick="chooseRefuseLike();">内容是否模糊匹配</span>&nbsp;&nbsp;
-                        <button type="button" class="btn btn-success" onclick="sameContentRefuse();">确定</button>
                         <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
                     </div>
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
         </div>
+
 
         <div class="modal fade" id="passageModal">
             <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
@@ -587,8 +435,20 @@
         });
     }
     
-    function batchPassWithSameContent() {
-        $('#contentPassModal').modal('show');
+    function preview(modelId, title, resource) {
+    	$.ajax({
+            url:'${BASE_PATH}/mms/message_template/preview',
+            data:{modelId : modelId, title:title, resource:resource},
+            dataType:'html',
+            type:'post',
+            success:function(data){
+                $("#myPreviewModelBody").html(data);
+            },error:function(data){
+                Boss.alert('请求失败！');
+            }
+        });
+    
+        $('#previewModal').modal('show');
     }
 
     // 同内容批量驳回
@@ -708,11 +568,8 @@
 
     function closeModal() {
         $('#myModal').modal('hide');
-        $('#contentModal').modal('hide');
-        $('#userModal').modal('hide');
         $('#passageModal').modal('hide');
-        $('#contentPassModal').modal('hide');
-        $('#contentRefuseModal').modal('hide');
+        $('#previewModal').modal('hide');
     }
 
     function editContent(sid) {

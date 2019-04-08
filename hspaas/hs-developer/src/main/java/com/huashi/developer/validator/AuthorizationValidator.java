@@ -15,10 +15,10 @@ import com.huashi.common.util.SecurityUtil;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.constant.PassportConstant;
 import com.huashi.developer.exception.ValidateException;
-import com.huashi.developer.model.PassportModel;
+import com.huashi.developer.request.AuthorizationRequest;
 
 @Component
-public class PassportValidator extends Validator {
+public class AuthorizationValidator extends Validator {
 
     @Reference
     private IUserService          userService;
@@ -35,7 +35,7 @@ public class PassportValidator extends Validator {
      * @return
      * @throws ValidateException
      */
-    public PassportModel validate(Map<String, String[]> paramMap, String ip) throws ValidateException {
+    public AuthorizationRequest validate(Map<String, String[]> paramMap, String ip) throws ValidateException {
         return validate(paramMap, ip, null);
     }
 
@@ -48,8 +48,8 @@ public class PassportValidator extends Validator {
      * @return
      * @throws ValidateException
      */
-    public PassportModel validate(Map<String, String[]> paramMap, String ip, String mobile) throws ValidateException {
-        PassportModel passportModel = new PassportModel();
+    public AuthorizationRequest validate(Map<String, String[]> paramMap, String ip, String mobile) throws ValidateException {
+        AuthorizationRequest passportModel = new AuthorizationRequest();
         validateAndParseFields(passportModel, paramMap);
 
         // 校验时间戳是否失效
@@ -70,7 +70,7 @@ public class PassportValidator extends Validator {
      * 
      * @throws ValidateException
      */
-    private void checkIdentityValidity(PassportModel model, String ip, String mobile) throws ValidateException {
+    private void checkIdentityValidity(AuthorizationRequest model, String ip, String mobile) throws ValidateException {
 
         // 判断开发者是否存在
         UserDeveloper developer = userDeveloperService.getByAppkey(model.getAppkey());
@@ -96,8 +96,6 @@ public class PassportValidator extends Validator {
 
         model.setUserId(developer.getUserId());
         
-        // 数据库密钥（加盐）
-        model.setDbAppSecret(developer.getAppSecret());
         model.setIp(ip);
     }
 

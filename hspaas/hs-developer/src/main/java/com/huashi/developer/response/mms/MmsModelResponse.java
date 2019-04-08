@@ -1,5 +1,8 @@
 package com.huashi.developer.response.mms;
 
+import com.alibaba.fastjson.JSONObject;
+import com.huashi.constants.OpenApiCode.CommonApiCode;
+
 /**
  * TODO 彩信模版报备回执
  *
@@ -47,4 +50,33 @@ public class MmsModelResponse {
     public void setModelId(String modelId) {
         this.modelId = modelId;
     }
+
+    public MmsModelResponse(String code, String message, String modelId) {
+        super();
+        this.code = code;
+        this.message = message;
+        this.modelId = modelId;
+    }
+
+    public MmsModelResponse() {
+        super();
+    }
+
+    public MmsModelResponse(String code, String message) {
+        super();
+        this.code = code;
+        this.message = message;
+    }
+    
+    public MmsModelResponse(JSONObject jsonObject) {
+        super();
+        try {
+            this.code = jsonObject.getString("code");
+            this.message = jsonObject.getString("message");
+        } catch (Exception e) {
+            this.code = CommonApiCode.COMMON_SERVER_EXCEPTION.getCode();
+            this.message = CommonApiCode.COMMON_SERVER_EXCEPTION.getMessage();
+        }
+    }
+
 }

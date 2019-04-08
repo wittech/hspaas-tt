@@ -412,14 +412,14 @@
             type: 'post',
             success: function (data) {
                 if (data.result) {
-                    Boss.alertToCallback('新增短信通道成功！',function(){
+                    Boss.alertToCallback('新增彩信通道成功！',function(){
                         location.href = "${BASE_PATH}/mms/passage";
                     });
                 } else {
                     Boss.alert(data.message);
                 }
             }, error: function (data) {
-                Boss.alert('新增短信通道失败!');
+                Boss.alert('新增彩信通道失败!');
             }
         });
     }

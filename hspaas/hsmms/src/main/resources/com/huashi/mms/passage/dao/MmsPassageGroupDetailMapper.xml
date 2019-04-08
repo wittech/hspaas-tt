@@ -11,6 +11,18 @@
 		<result column="route_type" property="routeType" jdbcType="TINYINT" />
 		<result column="priority" property="priority" jdbcType="INTEGER" />
 		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
+		<association property="mmsPassage" column="passage_id"
+			javaType="com.huashi.mms.passage.domain.MmsPassage">
+			<id column="passage_id" property="id" />
+			<result column="name" property="name" />
+			<result column="passage_cmcp" property="cmcp" />
+			<result column="status" property="status" />
+			<result column="access_code" property="accessCode" />
+			<result column="mobile_size" property="mobileSize" />
+			<result column="packets_size" property="packetsSize" />
+			<result column="code" property="code" />
+		</association>
+		
 	</resultMap>
 	<sql id="Base_Column_List">
 		id, group_id, passage_id, province_code, route_type,
@@ -131,9 +143,9 @@
 
 	<select id="findPassageByGroupId" resultMap="BaseResultMap">
 		select d.*,s.cmcp
-		passage_cmcp,s.name,s.status, s.type, s.access_code,
+		passage_cmcp,s.name,s.status, s.access_code,
 		s.mobile_size,
-		s.packets_size, s.code, s.sign_mode, s.status
+		s.packets_size, s.code, s.status
 		from
 		mms_passage_group_detail d,mms_passage s where d.passage_id = s.id
 		and

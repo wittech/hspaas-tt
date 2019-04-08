@@ -94,7 +94,6 @@
 		<okhttp.version>3.6.0</okhttp.version>
 		<jackson.version>2.8.3</jackson.version>
 		<ehcache.version>2.10.2</ehcache.version>
-		<jdom.version>2.0.2</jdom.version>
 		<pinyin4j.version>2.5.0</pinyin4j.version>
 		<zookeeper.version>3.4.9</zookeeper.version>
 		<zkclient.version>0.2</zkclient.version>
@@ -622,13 +621,6 @@
 				<groupId>de.svenkubiak</groupId>
 				<artifactId>jBCrypt</artifactId>
 				<version>0.4</version>
-			</dependency>
-
-			<!-- JDOM xml操作 -->
-			<dependency>
-				<groupId>org.jdom</groupId>
-				<artifactId>jdom</artifactId>
-				<version>${jdom.version}</version>
 			</dependency>
 
 			<!-- 中文拼音 -->

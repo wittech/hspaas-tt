@@ -4,8 +4,10 @@
 	<resultMap id="BaseResultMap"
 		type="com.huashi.mms.template.domain.MmsMessageTemplate">
 		<id column="id" property="id" jdbcType="BIGINT" />
-		<result column="model_id" property="modelId" jdbcType="BIGINT" />
+		<result column="model_id" property="modelId" jdbcType="VARCHAR" />
 		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
 		<result column="status" property="status" jdbcType="INTEGER" />
 		<result column="is_running" property="isRunning" jdbcType="TINYINT" />
 		<result column="app_type" property="appType" jdbcType="INTEGER" />
@@ -25,10 +27,12 @@
 		<result column="remark" property="remark" jdbcType="VARCHAR" />
 	</resultMap>
 	<sql id="Base_Column_List">
-		id, model_id, user_id, status, is_running, app_type,
+		id, model_id, user_id, name, title, status, is_running,
+		app_type,
 		notice_mode, mobile,
 		submit_interval,
-		limit_times, route_type, priority,
+		limit_times, route_type,
+		priority,
 		ext_number, create_time, update_time,
 		approve_time,
 		approve_user,
@@ -51,7 +55,8 @@
 			order="AFTER">
 			SELECT LAST_INSERT_ID()
 		</selectKey>
-		insert into mms_message_template (model_id, user_id, status,
+		insert into mms_message_template (model_id, user_id, name, title,
+		status,
 		is_running, app_type, notice_mode,
 		mobile, submit_interval,
 		limit_times,
@@ -61,7 +66,8 @@
 		approve_user, approve_desc, remark
 		)
 		values
-		(#{modelId,jdbcType=BIGINT}, #{userId,jdbcType=INTEGER},
+		(#{modelId,jdbcType=VARCHAR},
+		#{userId,jdbcType=INTEGER},#{name,jdbcType=VARCHAR},#{title,jdbcType=VARCHAR},
 		#{status,jdbcType=INTEGER},
 		#{isRunning,jdbcType=TINYINT},
 		#{appType,jdbcType=INTEGER}, #{noticeMode,jdbcType=INTEGER},
@@ -87,6 +93,12 @@
 			</if>
 			<if test="userId != null">
 				user_id,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="title != null">
+				title,
 			</if>
 			<if test="status != null">
 				status,
@@ -139,10 +151,16 @@
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="modelId != null">
-				#{modelId,jdbcType=BIGINT},
+				#{modelId,jdbcType=VARCHAR},
 			</if>
 			<if test="userId != null">
 				#{userId,jdbcType=INTEGER},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
 			</if>
 			<if test="status != null">
 				#{status,jdbcType=INTEGER},
@@ -198,10 +216,16 @@
 		update mms_message_template
 		<set>
 			<if test="modelId != null">
-				model_id = #{modelId,jdbcType=BIGINT},
+				model_id = #{modelId,jdbcType=VARCHAR},
 			</if>
 			<if test="userId != null">
 				user_id = #{userId,jdbcType=INTEGER},
+			</if>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				title = #{title,jdbcType=VARCHAR},
 			</if>
 			<if test="status != null">
 				status = #{status,jdbcType=INTEGER},
@@ -257,10 +281,13 @@
 	<update id="updateByPrimaryKey" parameterType="com.huashi.mms.template.domain.MmsMessageTemplate">
 		update
 		mms_message_template
-		set model_id = #{modelId,jdbcType=BIGINT},
+		set model_id = #{modelId,jdbcType=VARCHAR},
 		user_id
 		= #{userId,jdbcType=INTEGER},
-		status = #{status,jdbcType=INTEGER},
+		name = #{name,jdbcType=VARCHAR},
+		title = #{title,jdbcType=VARCHAR},
+		status =
+		#{status,jdbcType=INTEGER},
 		is_running = #{isRunning,jdbcType=TINYINT},
 		app_type =
 		#{appType,jdbcType=INTEGER},

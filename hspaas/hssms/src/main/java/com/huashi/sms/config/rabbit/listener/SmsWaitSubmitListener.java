@@ -30,9 +30,9 @@ import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.context.UserBalanceConstant;
 import com.huashi.common.user.domain.UserSmsConfig;
 import com.huashi.common.user.service.IUserSmsConfigService;
-import com.huashi.constants.OpenApiCode;
 import com.huashi.constants.CommonContext.CMCP;
-import com.huashi.constants.CommonContext.PlatformType;
+import com.huashi.constants.CommonContext.CallbackUrlType;
+import com.huashi.constants.OpenApiCode;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.exchanger.domain.ProviderSendResponse;
 import com.huashi.exchanger.service.ISmsProviderService;
@@ -109,10 +109,9 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
         }
 
         // 查询推送地址信息
-        PushConfig pushConfig = pushConfigService.getPushUrl(packets.getUserId(),
-                                                             PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+        PushConfig pushConfig = pushConfigService.getPushUrl(packets.getUserId(), CallbackUrlType.SMS_STATUS.getCode(),
                                                              packets.getCallback());
-        
+
         try {
             // 组装最终发送短信的扩展号码
             String extNumber = getUserExtNumber(packets.getUserId(), packets.getTemplateExtNumber(),
@@ -126,22 +125,21 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
 
             // 根据网关分包数要求对手机号码进行拆分，分批提交
             List<String> groupMobiles = regroupMobileByPacketsSize(packets.getMobile(), smsPassage);
-            
+
             // add by zhengying 20179610 加入签名自动前置后置等逻辑
             packets.setContent(changeMessageContentBySignMode(packets.getContent(), packets.getPassageSignMode()));
 
             for (String groupMobile : groupMobiles) {
-                if(StringUtils.isEmpty(groupMobile)) {
+                if (StringUtils.isEmpty(groupMobile)) {
                     continue;
                 }
-                
+
                 // 调用网关通道处理器，提交短信信息，并接收回执
                 List<ProviderSendResponse> responses = smsProviderService.sendSms(getPassageParameter(packets,
-                                                                                                          smsPassage),
-                                                                                                          groupMobile,
-                                                                                      packets.getContent(),
-                                                                                      packets.getSingleFee(), extNumber);
-                
+                                                                                                      smsPassage),
+                                                                                  groupMobile, packets.getContent(),
+                                                                                  packets.getSingleFee(), extNumber);
+
                 // ProviderSendResponse response = list.iterator().next();
                 List<SmsMtMessageSubmit> list = makeSubmitReport(packets, groupMobile, responses, extNumber, pushConfig);
                 if (CollectionUtils.isEmpty(list)) {
@@ -397,7 +395,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
             submit.setMobile(mobile);
             submit.setCmcp(mobileProvinceLocals.get(mobile).getCmcp());
             submit.setProvinceCode(mobileProvinceLocals.get(mobile).getProvinceCode());
-            
+
             fillSubmitFromResponse(submit, responses, packets.getSid());
 
             // 如果提交数据失败，则需要制造伪造包补推送
@@ -469,18 +467,18 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
 
             submit.setStatus(response.isSuccess() ? MessageSubmitStatus.SUCCESS.getCode() : MessageSubmitStatus.FAILED.getCode());
             // 如果通道发送失败，则设置伪造包状态码S0013 add by 20180908
-            if(!response.isSuccess()) {
+            if (!response.isSuccess()) {
                 submit.setPushErrorCode(OpenApiCode.SmsPushCode.SMS_PASSAGE_AUTH_NOT_MATCHED.getCode());
             }
-            
+
             submit.setRemark(response.getRemark());
             submit.setMsgId(StringUtils.isNotEmpty(response.getSid()) ? response.getSid() : sid + "");
-            
-            effect ++;
+
+            effect++;
         }
-        
+
         // 如果最终一条都未匹配上，则任务调用错误，理论上不会发生，除非上家通道提交回执错乱
-        if(effect == 0) {
+        if (effect == 0) {
             submit.setStatus(MessageSubmitStatus.FAILED.getCode());
             submit.setPushErrorCode(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
             submit.setRemark(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
@@ -496,9 +494,9 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
      * @param pushConfig
      */
     private void sendMqueueIfFailed(SmsMtTaskPackets packets, String mobileReport, PushConfig pushConfig) {
-        
+
         SmsMtMessageSubmit submitTemplate = makeMessageSubmitTemplate(packets, pushConfig, null);
-        
+
         submitTemplate.setStatus(MessageSubmitStatus.FAILED.getCode());
         submitTemplate.setRemark(SmsPushCode.SMS_SUBMIT_PASSAGE_FAILED.getCode());
         submitTemplate.setMsgId(packets.getSid() + "");
@@ -523,9 +521,9 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
      */
     @Override
     public void onMessage(Message message, Channel channel) throws Exception {
-        
+
         checkIsStartingConsumeMessage();
-        
+
         try {
             Object object = messageConverter.fromMessage(message);
 

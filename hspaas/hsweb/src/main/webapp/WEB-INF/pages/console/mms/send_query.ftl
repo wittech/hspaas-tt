@@ -18,33 +18,23 @@
    
         <div class="admin-main">
             <form class="layui-form" action="">
-            <blockquote class="layui-elem-quote">
-            	
-                <a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-sm" id="export">
-                <#--
-                    <i class="fa fa-file-excel-o fa-pr5" aria-hidden="true"></i>
-                     -->
-                </a>
-                
-                <div style="float:right;">
-                    <div class="layui-form-search" style="margin:0;">
-                    	<label class="layui-search-label">检索条件</label>
-                        <div class="layui-input-inline">
-                            <input type="text" id="sid" name="sid" placeholder="消息ID" autocomplete="off" class="layui-input-search">
+            	<div style="margin: 6px 0px 6px 3px;">
+	                <div class="layui-form-search">
+	                    <div class="layui-input-inline">
+	                        <input type="text" id="sid" name="sid" placeholder="消息ID" autocomplete="off" class="layui-input">
+	                    </div>
+	                    <div class="layui-input-inline">
+                            <input type="text" id="mobile" name="mobile" placeholder="手机号码" autocomplete="off" class="layui-input">
                         </div>
                         <div class="layui-input-inline">
-                            <input type="text" id="mobile" name="mobile" placeholder="手机号码" autocomplete="off" class="layui-input-search">
+                            <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input" lay-verify="date" value="${(startDate)!}">
                         </div>
                         <div class="layui-input-inline">
-                            <input type="text" id="startDate" name="startDate" autocomplete="off" class="layui-input-search" lay-verify="date" value="${(startDate)!}">
+                            <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input" lay-verify="date" value="${(endDate)!}">
                         </div>
-                        <div class="layui-input-inline">
-                            <input type="text" id="endDate" name="endDate" autocomplete="off" class="layui-input-search" lay-verify="date" value="${(endDate)!}">
-                        </div>
-                        <button lay-filter="search" class="layui-btn layui-btn-sm" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
-                    </div>
-                </div>
-            </blockquote>
+	                    <button lay-filter="search" class="layui-btn" lay-submit><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
+	                </div>
+	            </div>
             </form>
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">

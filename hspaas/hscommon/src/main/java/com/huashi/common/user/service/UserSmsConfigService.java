@@ -132,9 +132,13 @@ public class UserSmsConfigService implements IUserSmsConfigService {
     @Transactional
     public boolean update(UserSmsConfig config) {
         config.setUpdateTime(new Date());
-        pushToRedis(config);
-
-        return userSmsConfigMapper.updateByPrimaryKey(config) > 0;
+        int result =  userSmsConfigMapper.updateByPrimaryKeySelective(config);
+        if(result > 0) {
+            pushToRedis(config);
+            return true;
+        }
+        
+        return false;
     }
 
     /**

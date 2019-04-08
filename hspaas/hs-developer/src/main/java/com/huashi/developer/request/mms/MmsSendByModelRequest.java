@@ -1,18 +1,18 @@
-package com.huashi.developer.model.mms;
+package com.huashi.developer.request.mms;
 
-import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.validator.annotation.ValidateField;
+import com.huashi.developer.annotation.ValidateField;
+import com.huashi.developer.request.AuthorizationRequest;
 
 /**
- * 彩信数据模型
+ * TODO 彩信模板发送请求
  * 
  * @author zhengying
  * @version V1.0
  * @date 2019年3月11日 下午11:03:24
  */
-public class MmsCustomContentSendRequest extends PassportModel {
+public class MmsSendByModelRequest extends AuthorizationRequest {
 
-    private static final long serialVersionUID = 443695756826614380L;
+    private static final long serialVersionUID = -7341804898737200123L;
 
     /**
      * 手机号码
@@ -21,16 +21,10 @@ public class MmsCustomContentSendRequest extends PassportModel {
     private String            mobile;
 
     /**
-     * 彩信标题
+     * 模板ID
      */
-    @ValidateField(value = "title", required = true)
-    private String            title;
-
-    /**
-     * 彩信报文（数组模式 如：[{mediaName:”test.jpg”, mediaType:”image”,content:”=bS39888993#jajierj*...”}]）
-     */
-    @ValidateField(value = "body", required = true)
-    private String            body;
+    @ValidateField(value = "modelId", required = true)
+    private String            modelId;
 
     /**
      * 扩展码号
@@ -50,17 +44,20 @@ public class MmsCustomContentSendRequest extends PassportModel {
     @ValidateField(value = "callback")
     private String            callback;
 
-    /**
-     * 转义BODY生成的报文数据
-     */
-    private transient String  context;
-
     public String getMobile() {
         return mobile;
     }
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 
     public String getAttach() {
@@ -85,30 +82,6 @@ public class MmsCustomContentSendRequest extends PassportModel {
 
     public void setCallback(String callback) {
         this.callback = callback;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
-
-    public String getContext() {
-        return context;
-    }
-
-    public void setContext(String context) {
-        this.context = context;
     }
 
 }

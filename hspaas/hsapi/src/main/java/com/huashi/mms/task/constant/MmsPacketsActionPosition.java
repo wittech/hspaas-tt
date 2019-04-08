@@ -2,7 +2,8 @@ package com.huashi.mms.task.constant;
 
 public enum MmsPacketsActionPosition {
 
-    TEMPLATE_MISSED(0, "彩信模板未报备"), TEMPLATE_BLOCKED(1, "彩信模板状态不可用"), PASSAGE_NOT_AVAIABLE(2, "通道不可用");
+    TEMPLATE_MISSED(0, "彩信模板未报备"), TEMPLATE_BLOCKED(1, "彩信模板状态不可用"), PASSAGE_NOT_AVAIABLE(2, "通道不可用"),
+    CUSTOM_TEXT_SEND(3, "彩信自定义发送审核");
 
     private int    position;
     private String title;

@@ -1,9 +1,11 @@
 package com.huashi.mms.template.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.huashi.common.vo.FileResponse;
 import com.huashi.mms.template.domain.MmsMessageTemplateBody;
+import com.huashi.mms.template.exception.BodyCheckException;
 
 /**
  * 彩信模板结构体数据服务
@@ -49,10 +51,32 @@ public interface IMmsTemplateBodyService {
     boolean delete(Long templateId);
 
     /**
+     * 判断BODY内容是否有效
+     * 
+     * @param body
+     * @return
+     */
+    Map<String, List<MmsMessageTemplateBody>> translateBody(String body) throws BodyCheckException;
+
+    /**
      * TODO 根据文件名称获取报文信息
      * 
      * @param resourceName
      * @return
      */
     List<MmsMessageTemplateBody> getBodies(String resourceName);
+    
+    /**
+     * 
+       * 根据模板主键获取报文信息
+       * 
+       * @param templateId
+       * @return
+     */
+    List<MmsMessageTemplateBody> getBodiesByTemplateId(long templateId);
+
+    /**
+     * 默认文本文件扩展名
+     */
+    String defaultTextSuffixName = "txt";
 }

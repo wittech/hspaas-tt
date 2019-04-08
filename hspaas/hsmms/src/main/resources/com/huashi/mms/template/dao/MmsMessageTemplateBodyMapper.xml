@@ -159,7 +159,7 @@
 	</delete>
 
 	<insert id="batchInsert" parameterType="List">
-		insert into mms_mt_task (template_id, media_name, media_type, content,
+		insert into mms_message_template_body (template_id, media_name, media_type, content,
 		sort)
 		values
 

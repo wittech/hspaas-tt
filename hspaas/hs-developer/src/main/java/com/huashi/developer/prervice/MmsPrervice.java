@@ -1,19 +1,10 @@
 package com.huashi.developer.prervice;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.huashi.common.user.domain.UserBalance;
-import com.huashi.common.user.service.IUserBalanceService;
-import com.huashi.common.util.IdGenerator;
-import com.huashi.constants.CommonContext.PlatformType;
-import com.huashi.constants.OpenApiCode.CommonApiCode;
-import com.huashi.developer.constant.RabbitConstant;
-import com.huashi.developer.model.mms.MmsCustomContentSendRequest;
-import com.huashi.developer.model.mms.MmsModelSendRequest;
-import com.huashi.developer.response.mms.MmsBalanceResponse;
-import com.huashi.developer.response.mms.MmsSendResponse;
-import com.huashi.mms.task.domain.MmsMtTask;
-import com.huashi.mms.template.service.IMmsTemplateService;
-import com.huashi.sms.task.exception.QueueProcessException;
+import java.util.Date;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -22,8 +13,25 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.Date;
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.huashi.common.user.domain.UserBalance;
+import com.huashi.common.user.service.IUserBalanceService;
+import com.huashi.common.util.IdGenerator;
+import com.huashi.constants.CommonContext.PlatformType;
+import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.constants.OpenApiCode.MmsApiCode;
+import com.huashi.developer.constant.RabbitConstant;
+import com.huashi.developer.request.mms.MmsModelApplyRequest;
+import com.huashi.developer.request.mms.MmsSendByModelRequest;
+import com.huashi.developer.request.mms.MmsSendRequest;
+import com.huashi.developer.response.mms.MmsBalanceResponse;
+import com.huashi.developer.response.mms.MmsModelResponse;
+import com.huashi.developer.response.mms.MmsSendResponse;
+import com.huashi.mms.task.domain.MmsMtTask;
+import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.exception.ModelApplyException;
+import com.huashi.mms.template.service.IMmsTemplateService;
+import com.huashi.sms.task.exception.QueueProcessException;
 
 /**
  * TODO 彩信前置服务
@@ -39,12 +47,12 @@ public class MmsPrervice {
 
     @Autowired
     private IdGenerator         idGenerator;
-    @Resource(name = "mmsRabbitTemplate")
-    private RabbitTemplate      mmsRabbitTemplate;
     @Reference
     private IUserBalanceService userBalanceService;
     @Reference
     private IMmsTemplateService mmsTemplateService;
+    @Resource(name = "mmsRabbitTemplate")
+    private RabbitTemplate      mmsRabbitTemplate;
 
     /**
      * 单条默认计费值
@@ -57,21 +65,21 @@ public class MmsPrervice {
      * @param smsSendRequest
      * @return
      */
-    public MmsSendResponse sendMessage(MmsModelSendRequest smsSendRequest) {
+    public MmsSendResponse sendMessageByModel(MmsSendByModelRequest mmsSendByModelRequest) {
         MmsMtTask task = new MmsMtTask();
 
-        BeanUtils.copyProperties(smsSendRequest, task);
-        task.setAppType(smsSendRequest.getAppType());
+        BeanUtils.copyProperties(mmsSendByModelRequest, task);
+        task.setAppType(mmsSendByModelRequest.getAppType());
         task.setIsModelSend(true);
 
         try {
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new MmsSendResponse(smsSendRequest.getTotalFee(), sid);
+                return new MmsSendResponse(mmsSendByModelRequest.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {
-            logger.error("发送短信至队列错误， {}", e);
+            logger.error("发送彩信至队列错误， {}", e);
         }
 
         return new MmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
@@ -80,24 +88,24 @@ public class MmsPrervice {
     /**
      * TODO 自定义内容发送
      *
-     * @param mmsCustomContentSendRequest
+     * @param mmsSendByModelRequest
      * @return
      */
-    public MmsSendResponse sendMessage(MmsCustomContentSendRequest mmsCustomContentSendRequest) {
+    public MmsSendResponse sendMessage(MmsSendRequest msSendRequest) {
         MmsMtTask task = new MmsMtTask();
 
-        BeanUtils.copyProperties(mmsCustomContentSendRequest, task);
-        task.setAppType(mmsCustomContentSendRequest.getAppType());
+        BeanUtils.copyProperties(msSendRequest, task);
+        task.setAppType(msSendRequest.getAppType());
 
         // body中最终存的是OSS的相关关联结构体
-        task.setBody(mmsCustomContentSendRequest.getContext());
+
         task.setIsModelSend(false);
 
         try {
 
             long sid = joinTask2Queue(task);
             if (sid != 0L) {
-                return new MmsSendResponse(mmsCustomContentSendRequest.getTotalFee(), sid);
+                return new MmsSendResponse(msSendRequest.getTotalFee(), sid);
             }
 
         } catch (QueueProcessException e) {
@@ -105,6 +113,37 @@ public class MmsPrervice {
         }
 
         return new MmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+    }
+
+    /**
+     * TODO 模板报备
+     * 
+     * @param mmsModelApplyRequest
+     * @return
+     */
+    public MmsModelResponse applyModel(MmsModelApplyRequest mmsModelApplyRequest) {
+        try {
+            MmsMessageTemplate template = new MmsMessageTemplate();
+
+            BeanUtils.copyProperties(mmsModelApplyRequest, template);
+            template.setAppType(mmsModelApplyRequest.getAppType());
+            template.setBodies(mmsModelApplyRequest.getMmsMessageTemplateBodies());
+
+            String modelId = mmsTemplateService.save(template);
+            if (StringUtils.isBlank(modelId)) {
+                return new MmsModelResponse(MmsApiCode.MMS_MODEL_APPLY_FAILED.getCode(),
+                                            MmsApiCode.MMS_MODEL_APPLY_FAILED.getMessage());
+            }
+
+            return new MmsModelResponse(CommonApiCode.COMMON_SUCCESS.getCode(),
+                                        CommonApiCode.COMMON_SUCCESS.getMessage(), modelId);
+
+        } catch (ModelApplyException e) {
+            logger.error("报备模板失败， {}", e);
+            return new MmsModelResponse(MmsApiCode.MMS_MODEL_APPLY_FAILED.getCode(),
+                                        MmsApiCode.MMS_MODEL_APPLY_FAILED.getMessage());
+        }
+
     }
 
     /**

@@ -81,12 +81,14 @@
 						<div class="panel">
                         <div class="panel-heading">
                             <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
+                            	<#--
                             	<#if macro.doOper("10002001")>
                                 	<button class="btn btn-primary" onclick="loadingRedis();">重载redis</button>
                                 </#if>
                                 <#if macro.doOper("10002002")>
                                 	<a class="btn btn-success" href="${BASE_PATH}/mms/message_template/create">添加模板</a>
                             	</#if>
+                            	 -->
                             </div>
                             <h3 class="panel-title">
                             <span>模板列表</span>
@@ -127,6 +129,7 @@
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td><#if pl.approveTime??>${pl.approveTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
                                         <td>
+                                        	 <a href="javascript:preview('${(pl.id)!}');" class="btn btn-success btn-xs">预览</a>
                                         	<#if pl.status==0>
                                         		<#if auditCheck>
 	                                        		<a class="btn btn-default btn-xs" href="${BASE_PATH}/mms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批 </a>
@@ -135,14 +138,11 @@
                                         	<#if editCheck>
 												<a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
 											</#if>
-											<#if editCheck>
-												<a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
-											</#if>
-											<a href="javascript:apply(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;报备</a>
+											<a href="${BASE_PATH}/mms/message_template/apply?id=${pl.id}" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;报备</a>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8" align="right"><b>标题：</b>${(pl.title)!}</td>
+                                        <td colspan="10" align="right"><b>标题：</b>${(pl.title)!}</td>
                                     </tr>
                                     </#list>
                                     </#if>
@@ -157,6 +157,26 @@
 				<#include "/WEB-INF/views/main/left.ftl">
 			</div>
 		</div>
+		
+		
+		<div class="modal fade" id="previewModal">
+            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">彩信内容</h4>
+                    </div>
+                    <div class="modal-body" data-scrollbar="true" data-height="700" data-scrollcolor="#000" id="myPreviewModelBody">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div>
+		
+		
 		<script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
 				<script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
 		<script src="${BASE_PATH}/resources/js/bootstrap/bootstrap.min.js"></script>
@@ -211,5 +231,26 @@
 	            });
 	        });
     	}
+    	
+    	function preview(templateId) {
+	    	$.ajax({
+	            url:'${BASE_PATH}/mms/message_template/preview',
+	            data:{templateId : templateId},
+	            dataType:'html',
+	            type:'post',
+	            success:function(data){
+	                $("#myPreviewModelBody").html(data);
+	            },error:function(data){
+	                Boss.alert('请求失败！');
+	            }
+	        });
+	    
+	        $('#previewModal').modal('show');
+	    }
+	    
+	    
+	    function closeModal() {
+	        $('#previewModal').modal('hide');
+	    }
 	</script>
 </html>

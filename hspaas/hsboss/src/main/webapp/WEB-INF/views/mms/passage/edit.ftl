@@ -502,7 +502,7 @@
             type:'post',
             success:function(data){
                 if(data.result){
-                    Boss.alertToCallback('修改短信通道成功！',function(){
+                    Boss.alertToCallback('修改彩信通道成功！',function(){
                         location.href = "${BASE_PATH}/mms/passage"
                     });
 
@@ -510,7 +510,7 @@
                     Boss.alert(data.message);
                 }
             },error:function(data){
-                Boss.alert('修改短信通道异常!');
+                Boss.alert('修改彩信通道异常!');
             }
         });
     }

@@ -432,8 +432,8 @@ public class UserService implements IUserService {
 
             return true;
         } catch (Exception e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             logger.error("更新用户  [" + userId + "] 彩信配置失败", e);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
     }

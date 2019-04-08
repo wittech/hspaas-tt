@@ -30,7 +30,7 @@ import com.huashi.common.third.service.IMobileLocalService;
 import com.huashi.common.user.domain.UserMmsConfig;
 import com.huashi.common.user.service.IUserMmsConfigService;
 import com.huashi.constants.CommonContext.CMCP;
-import com.huashi.constants.CommonContext.PlatformType;
+import com.huashi.constants.CommonContext.CallbackUrlType;
 import com.huashi.constants.OpenApiCode;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.exchanger.domain.ProviderSendResponse;
@@ -129,8 +129,7 @@ public class MmsWaitSubmitListener extends AbstartRabbitListener {
         }
 
         // 查询推送地址信息
-        PushConfig pushConfig = pushConfigService.getPushUrl(packets.getUserId(),
-                                                             PlatformType.MULTIMEDIA_MESSAGE_SERVICE.getCode(),
+        PushConfig pushConfig = pushConfigService.getPushUrl(packets.getUserId(), CallbackUrlType.MMS_STATUS.getCode(),
                                                              packets.getCallback());
 
         try {

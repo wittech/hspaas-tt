@@ -35,4 +35,9 @@ public class MmsPassageParameterService implements IMmsPassageParameterService {
         return mmsPassageParameterMapper.getByTypeAndUrl(callType.getCode(), passageCode);
     }
 
+    @Override
+    public MmsPassageParameter getByPassageIdAndType(int passageId, PassageCallType callType) {
+        return mmsPassageParameterMapper.selectByPassageIdAndType(passageId, callType.getCode());
+    }
+
 }

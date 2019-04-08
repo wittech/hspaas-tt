@@ -37,7 +37,7 @@
 			jdbcType="VARCHAR" />
 	</resultMap>
 	<sql id="Base_Column_List">
-		id, user_id, sid, app_type, send_type, modelId, title,
+		id, user_id, sid, app_type, send_type, model_id, title,
 		body, ext_number,
 		attach, callback,
 		fee, return_fee,

@@ -162,13 +162,18 @@
 		<include refid="Base_Column_List" />
 		from mms_passage_message_template
 		where template_id = #{templateId} and
-		passage_id = #{passageId} order by pmt.id desc limit 1
+		passage_id = #{passageId} order by id desc limit 1
 	</select>
 
 	<select id="selectByMmsModelIdAndPassageId" resultMap="BaseResultMap">
 		select
-		<include refid="Base_Column_List" />
-		from mms_message_template mmt join mms_passage_message_template pmt on
+		pmt.id, pmt.template_id, pmt.passage_id, pmt.passage_model_id,
+		pmt.status,
+		pmt.create_time,
+		pmt.update_time,
+		pmt.remark
+		from
+		mms_message_template mmt join mms_passage_message_template pmt on
 		mmt.id = pmt.template_id
 		where mmt.model_id = #{modelId} and
 		pmt.passage_id = #{passageId} order by pmt.id desc limit 1

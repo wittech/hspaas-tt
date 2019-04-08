@@ -410,17 +410,17 @@
 	<select id="selectBySid" resultMap="BaseResultMap">
 		SELECT
 		<include refid="Base_Column_List" />
-		FROM sms_mt_task_packets WHERE sid = #{sid}
+		FROM mms_mt_task_packets WHERE sid = #{sid}
 	</select>
 
 	<update id="updatebody">
-		update sms_mt_task_packets set body = #{body}
+		update mms_mt_task_packets set body = #{body}
 		where
 		sid = #{sid}
 	</update>
 
 	<insert id="batchInsert" parameterType="List">
-		insert into sms_mt_task_packets (sid, mobile, province_code, cmcp,
+		insert into mms_mt_task_packets (sid, mobile, province_code, cmcp,
 		model_id, title,
 		body, mobile_size, passage_id,
 		final_passage_id,
@@ -461,17 +461,17 @@
 	</insert>
 
 	<update id="updateStatusBySid">
-		update sms_mt_task_packets set status = #{status}
+		update mms_mt_task_packets set status = #{status}
 		where sid = #{sid} and status = 0
 	</update>
 
 	<update id="updateStatusById">
-		update sms_mt_task_packets set status = #{status}
+		update mms_mt_task_packets set status = #{status}
 		where id = #{id}
 	</update>
 
 	<update id="updateStatusByMultiIds" parameterType="java.util.List">
-		update sms_mt_task_packets set status = #{status} where 1=1
+		update mms_mt_task_packets set status = #{status} where 1=1
 		<foreach collection="ids" item="item" open="and id in ("
 			separator="," close=")">
 			#{item}
@@ -479,17 +479,17 @@
 	</update>
 
 	<delete id="deleteBySid">
-		delete from sms_mt_task_packets where sid = #{sid}
+		delete from mms_mt_task_packets where sid = #{sid}
 	</delete>
 
 	<select id="selectPassageErrorCount" resultType="java.lang.Integer">
 		select count(*)
-		from sms_mt_task_packets where sid = #{sid} and final_passage_id is
+		from mms_mt_task_packets where sid = #{sid} and final_passage_id is
 		null
 	</select>
 
 	<select id="selectWaitingCount" resultType="java.lang.Integer">
 		select count(*) from
-		sms_mt_task_packets where sid = #{sid} and status = 0
+		mms_mt_task_packets where sid = #{sid} and status = 0
 	</select>
 </mapper>

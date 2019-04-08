@@ -1,7 +1,7 @@
-package com.huashi.developer.model.sms;
+package com.huashi.developer.request.sms;
 
-import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.validator.annotation.ValidateField;
+import com.huashi.developer.annotation.ValidateField;
+import com.huashi.developer.request.AuthorizationRequest;
 
 /**
  * 
@@ -11,7 +11,7 @@ import com.huashi.developer.validator.annotation.ValidateField;
   * @version V1.0.0   
   * @date 2017年3月31日 下午9:39:53
  */
-public class SmsSendRequest extends PassportModel {
+public class SmsSendRequest extends AuthorizationRequest {
 
 	private static final long serialVersionUID = 2029866580659952586L;
 

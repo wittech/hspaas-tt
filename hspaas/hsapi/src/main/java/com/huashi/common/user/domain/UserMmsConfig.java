@@ -43,12 +43,20 @@ public class UserMmsConfig implements Serializable {
         this.userId = userId;
     }
 
-    public Integer getSmsReturnRule() {
+    public Integer getMmsReturnRule() {
         return mmsReturnRule;
     }
 
-    public void setSmsReturnRule(Integer mmsReturnRule) {
+    public void setMmsReturnRule(Integer mmsReturnRule) {
         this.mmsReturnRule = mmsReturnRule;
+    }
+
+    public Long getMmsTimeout() {
+        return mmsTimeout;
+    }
+
+    public void setMmsTimeout(Long mmsTimeout) {
+        this.mmsTimeout = mmsTimeout;
     }
 
     public Long getSmsTimeout() {

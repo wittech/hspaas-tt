@@ -20,11 +20,11 @@ public class SmsSendPrervice {
 
     private static final String CONTENT_TYPE_TXT   = "txt";
     private static final String CONTENT_TYPE_EXCEL = "excel";
-    
+
     /**
      * 多个手机号码分隔符号
      */
-    public static final String COMMA_SEPERATOR = ",";
+    public static final String  COMMA_SEPERATOR    = ",";
 
     /**
      * 内存上限大小（10M），多余10M采用云文件模式
@@ -68,12 +68,11 @@ public class SmsSendPrervice {
     }
 
     /**
+     * TODO 获取文件数据
      * 
-       * TODO 获取文件数据
-       * 
-       * @param multipartFile
-       * @return
-       * @throws IOException
+     * @param multipartFile
+     * @return
+     * @throws IOException
      */
     private byte[] getFile(MultipartFile multipartFile) throws IOException {
         if (multipartFile.getSize() <= CACHE_LIMIT_SIZE) {
@@ -90,5 +89,5 @@ public class SmsSendPrervice {
             throw new RuntimeException("文件上传失败");
         }
     }
-    
+
 }

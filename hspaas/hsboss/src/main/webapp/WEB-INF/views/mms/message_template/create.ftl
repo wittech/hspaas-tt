@@ -316,43 +316,6 @@
         $('#frameModal').modal('show');
     }
     
-    $("input[type=file]").on("change",function(){
-        var file = $(this)[0].files[0];
-        var form = new FormData();  
-        form.append("media_type", $("#mediaType").val());
-        form.append("file_original_name", file.name);                       
-        form.append("file", file);
-
-        $.ajax({
-            url: '${BASE_PATH}/upload',
-            type: 'POST', 
-            data: form,
-            processData: false,
-            contentType: false,
-            xhr: function() {
-                var xhr = $.ajaxSettings.xhr();  
-                if (xhr.upload) {
-                    // 上传进度操作
-                    xhr.upload.addEventListener('progress', function(e) {
-                        var percentCount = ((e.loaded/e.total)*100).toFixed(0);
-                        $('#loadingBar').css({"width":percentCount+"%"}); 
-                        if(percentCount==100){
-                           $("#percentBar").html("已完成");
-                        }else{
-                           $("#percentBar").html(percentCount+"%");
-                        }
-                    }, false);  
-                }  
-                return xhr;
-            }
-        }).done(function(res){
-            console.log("上传成功");
-            $("div#linkPreviewPDF").find("a").attr("href","http://192.168.217.12"+res.returnObj.url).end().show();
-        }).fail(function(err){
-            console.log("上传失败");
-        });
-    })
-    
     $(function () {
         $('#myform').validationEngine('attach', {promptPosition: "topRight"});
 

@@ -40,8 +40,8 @@ import com.huashi.web.filter.XssFilter;
 
 import freemarker.template.utility.XmlEscape;
 
-//@Configuration
-//@EnableWebMvc
+@Configuration
+@EnableWebMvc
 public class WebConfiguration extends WebMvcConfigurerAdapter {
 
 	@Autowired

@@ -22,17 +22,7 @@ public interface IMmsPassageTemplateService {
     boolean save(MmsPassageMessageTemplate template);
 
     /**
-     * 修改状态
-     * 
-     * @param id
-     * @param status
-     * @param remark
-     * @return
-     */
-    boolean updateStatus(long id, int status, String remark);
-
-    /**
-     * TODO 更新模板内容
+     * 修改数据
      * 
      * @param template
      * @return

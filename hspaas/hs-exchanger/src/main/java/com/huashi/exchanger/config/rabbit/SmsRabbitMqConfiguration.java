@@ -45,18 +45,18 @@ public class SmsRabbitMqConfiguration {
     private String             mqVhost;
 
     @Bean("smsConnectionFactory")
-    public ConnectionFactory connectionFactory() {
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        connectionFactory.setHost(mqHost);
-        connectionFactory.setPort(mqPort);
-        connectionFactory.setUsername(mqUsername);
-        connectionFactory.setPassword(mqPassword);
-        connectionFactory.setVirtualHost(mqVhost);
-        connectionFactory.setPublisherReturns(true);
+    public ConnectionFactory smsConnectionFactory() {
+        CachingConnectionFactory smsConnectionFactory = new CachingConnectionFactory();
+        smsConnectionFactory.setHost(mqHost);
+        smsConnectionFactory.setPort(mqPort);
+        smsConnectionFactory.setUsername(mqUsername);
+        smsConnectionFactory.setPassword(mqPassword);
+        smsConnectionFactory.setVirtualHost(mqVhost);
+        smsConnectionFactory.setPublisherReturns(true);
         // 显性设置后才能进行回调函数设置
-        connectionFactory.setPublisherConfirms(true);
+        smsConnectionFactory.setPublisherConfirms(true);
 
-        return connectionFactory;
+        return smsConnectionFactory;
     }
 
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

@@ -5,9 +5,6 @@
             	<#if pl.status?? && pl.status == 0>
                 <option value="${pl.id}">
                     ${pl.name}
-                    <#if pl.type == 1>
-                        &nbsp;[独]
-                    </#if>
                     <#if pl.cmcp == 4>
                         &nbsp;[全]
                     </#if>

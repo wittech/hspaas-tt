@@ -1,5 +1,6 @@
 package com.huashi.mms.template.service;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,20 +76,43 @@ public class MmsMediaFileService {
     public String generateFileName(String dir, String secondDir) {
         StringBuilder filename = new StringBuilder();
         if (StringUtils.isNotBlank(dir)) {
-            filename.append(MediaFileDirectory.DIR_SEPERATOR).append(dir);
+            filename.append(dir).append(MediaFileDirectory.DIR_SEPERATOR);
         }
 
         if (StringUtils.isNotBlank(secondDir)) {
-            filename.append(MediaFileDirectory.DIR_SEPERATOR).append(secondDir);
+            filename.append(secondDir).append(MediaFileDirectory.DIR_SEPERATOR);
         }
 
-        filename.append(MediaFileDirectory.DIR_SEPERATOR).append(IdGenerator.generatex());
+        filename.append(IdGenerator.generatex());
 
         return filename.toString();
     }
 
     public byte[] readFile(String filename) {
         return aliyunOssStorage.queryFile(filename);
+    }
+
+    public String readFileBase64(String filename) {
+        byte[] file = readFile(filename);
+        if (file == null) {
+            return "";
+        }
+
+        return Base64.encodeBase64String(file);
+    }
+
+    /**
+     * 获取最终的URL
+     * 
+     * @param path
+     * @return
+     */
+    public String getWebUrl(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
+
+        return aliyunOssStorage.getUrl(name);
     }
 
 }

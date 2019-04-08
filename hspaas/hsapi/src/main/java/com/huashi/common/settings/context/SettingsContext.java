@@ -137,44 +137,6 @@ public class SettingsContext {
     }
 
     /**
-     * TODO 推送回执配置类型
-     *
-     * @author zhengying
-     * @version V1.0.0
-     * @date 2016年7月3日 上午12:03:44
-     */
-    public enum PushConfigType {
-        // 短信状态报告(下行)
-        SMS_STATUS_REPORT(1),
-
-        // 短信上行回执报告
-        SMS_MO_REPORT(2),
-
-        // 流量充值报告
-        FS_CHARGE_REPORT(3),
-
-        // 语音发送报告
-        VS_SEND_REPORT(4),
-        
-        // 彩信状态报告(下行)
-        MMS_STATUS_REPORT(5),
-
-        // 彩信上行回执报告
-        MMS_MO_REPORT(6);
-
-        private int code;
-
-        public int getCode() {
-            return code;
-        }
-
-        private PushConfigType(int code) {
-            this.code = code;
-        }
-
-    }
-
-    /**
      * TODO 推送配置状态
      *
      * @author zhengying

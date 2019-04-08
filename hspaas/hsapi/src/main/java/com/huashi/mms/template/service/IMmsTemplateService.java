@@ -3,7 +3,6 @@ package com.huashi.mms.template.service;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
-import com.huashi.mms.template.exception.BodyCheckException;
 import com.huashi.mms.template.exception.ModelApplyException;
 
 /**
@@ -50,7 +49,7 @@ public interface IMmsTemplateService {
      * @param template
      * @return
      */
-    boolean update(MmsMessageTemplate template);
+    boolean update(MmsMessageTemplate template) throws ModelApplyException;
 
     /**
      * 删除模板
@@ -89,22 +88,6 @@ public interface IMmsTemplateService {
     BossPaginationVo<MmsMessageTemplate> findPageBoos(int pageNum, String keyword, String status, String userId);
 
     /**
-     * 根据用户ID和短信内容查询模板信息（优先级排序）
-     * 
-     * @param userId
-     * @param content
-     * @return
-     */
-    MmsMessageTemplate getByContent(int userId, String content);
-
-    /**
-     * 将模板数据加载到REDIS
-     * 
-     * @return
-     */
-    boolean reloadToRedis();
-
-    /**
      * 根据用户ID判断并获取彩信模版
      * 
      * @param id
@@ -129,22 +112,5 @@ public interface IMmsTemplateService {
      * @return
      */
     boolean isModelIdAvaiable(String modelId, int userId);
-
-    /**
-     * 判断BODY内容是否有效
-     * 
-     * @param body
-     * @return
-     */
-    String checkBodyRuleIsRight(String body) throws BodyCheckException;
-
-    /**
-     * 参数报文结构体转换
-     * 
-     * @param body
-     * @return
-     */
-    String bodyToContext(String body);
-
-
+    
 }

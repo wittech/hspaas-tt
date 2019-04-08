@@ -42,7 +42,7 @@ import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
  * @date 2019年3月24日 下午7:38:53
  */
 @Component
-public class MaiyuanPassageResolver extends AbstractMmsPassageResolver {
+public class MmsMaiyuanPassageResolver extends AbstractMmsPassageResolver {
 
     /**
      * 参数分隔符

@@ -99,4 +99,40 @@ public class MmsTemplateContext {
         }
     }
 
+    /**
+     * 通道模板状态
+     * 
+     * @author zhengying
+     * @version V1.0
+     * @date 2019年4月1日 下午2:53:57
+     */
+    public enum PassageTemplateStatus {
+        WAITING(0, "报备已提交，待审批"), SUCCESS(1, "审批通过"), FAIL(2, "审批失败");
+
+        private int    value;
+        private String title;
+
+        private PassageTemplateStatus(int value, String title) {
+            this.value = value;
+            this.title = title;
+        }
+
+        public static PassageTemplateStatus parse(int value) {
+            for (PassageTemplateStatus as : PassageTemplateStatus.values()) {
+                if (as.getValue() == value) {
+                    return as;
+                }
+            }
+            return null;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+    }
+
 }

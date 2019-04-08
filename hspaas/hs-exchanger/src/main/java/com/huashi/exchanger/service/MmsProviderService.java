@@ -56,7 +56,7 @@ public class MmsProviderService implements IMmsProviderService {
     }
 
     @Override
-    public List<ProviderSendResponse> sendMms(MmsPassageParameter parameter, String extNumber, String mobile,
+    public List<ProviderSendResponse> sendMms(MmsPassageParameter parameter, String mobile, String extNumber,
                                               String modelId) throws ExchangeProcessException {
 
         validate(parameter);

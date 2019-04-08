@@ -1,41 +1,46 @@
 package com.huashi.developer.api;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.huashi.constants.OpenApiCode.CommonApiCode;
-import com.huashi.developer.exception.ValidateException;
-import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.model.mms.MmsCustomContentSendRequest;
-import com.huashi.developer.model.mms.MmsModelSendRequest;
-import com.huashi.developer.prervice.MmsPrervice;
-import com.huashi.developer.response.mms.MmsBalanceResponse;
-import com.huashi.developer.response.mms.MmsSendResponse;
-import com.huashi.developer.validator.mms.MmsCustomContentSendValidator;
-import com.huashi.developer.validator.mms.MmsModelSendValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.huashi.constants.OpenApiCode.CommonApiCode;
+import com.huashi.developer.exception.ValidateException;
+import com.huashi.developer.prervice.MmsPrervice;
+import com.huashi.developer.request.AuthorizationRequest;
+import com.huashi.developer.request.mms.MmsModelApplyRequest;
+import com.huashi.developer.request.mms.MmsSendByModelRequest;
+import com.huashi.developer.request.mms.MmsSendRequest;
+import com.huashi.developer.response.mms.MmsBalanceResponse;
+import com.huashi.developer.response.mms.MmsModelResponse;
+import com.huashi.developer.response.mms.MmsSendResponse;
+import com.huashi.developer.validator.mms.MmsModelApplyValidator;
+import com.huashi.developer.validator.mms.MmsSendByModelValidator;
+import com.huashi.developer.validator.mms.MmsSendValidator;
 
 @RestController
 @RequestMapping(value = "/mms")
 public class MmsApi extends BasicApiSupport {
 
     @Autowired
-    private MmsPrervice                   mmsPrervice;
+    private MmsPrervice             mmsPrervice;
     @Autowired
-    private MmsModelSendValidator         mmsModelSendValidator;
+    private MmsSendValidator        mmsSendValidator;
     @Autowired
-    private MmsCustomContentSendValidator mmsCustomContentSendValidator;
+    private MmsSendByModelValidator mmsSendByModelValidator;
+    @Autowired
+    private MmsModelApplyValidator  mmsModelApplyValidator;
 
     @RequestMapping(value = "/send")
     public MmsSendResponse send() {
         try {
-            MmsCustomContentSendRequest mmsCustomContentSendRequest = mmsCustomContentSendValidator.validate(request.getParameterMap(),
-                                                                                                             getClientIp());
-            mmsCustomContentSendRequest.setAppType(getAppType());
+            MmsSendRequest mmsSendRequest = mmsSendValidator.validate(request.getParameterMap(), getClientIp());
+            mmsSendRequest.setAppType(getAppType());
 
-            return mmsPrervice.sendMessage(mmsCustomContentSendRequest);
+            return mmsPrervice.sendMessage(mmsSendRequest);
 
         } catch (ValidateException e) {
             return new MmsSendResponse(JSON.parseObject(e.getMessage()));
@@ -53,11 +58,11 @@ public class MmsApi extends BasicApiSupport {
     @RequestMapping(value = "/sendByModel", method = { RequestMethod.POST, RequestMethod.GET })
     public MmsSendResponse sendByModelId() {
         try {
-            MmsModelSendRequest mmsModelSendRequest = mmsModelSendValidator.validate(request.getParameterMap(),
-                                                                                     getClientIp());
-            mmsModelSendRequest.setAppType(getAppType());
+            MmsSendByModelRequest mmsSendByModelRequest = mmsSendByModelValidator.validate(request.getParameterMap(),
+                                                                                           getClientIp());
+            mmsSendByModelRequest.setAppType(getAppType());
 
-            return mmsPrervice.sendMessage(mmsModelSendRequest);
+            return mmsPrervice.sendMessageByModel(mmsSendByModelRequest);
 
         } catch (ValidateException e) {
             return new MmsSendResponse(JSON.parseObject(e.getMessage()));
@@ -75,7 +80,7 @@ public class MmsApi extends BasicApiSupport {
     @RequestMapping(value = "/balance", method = { RequestMethod.POST, RequestMethod.GET })
     public MmsBalanceResponse getBalance() {
         try {
-            PassportModel model = passportValidator.validate(request.getParameterMap(), getClientIp());
+            AuthorizationRequest model = passportValidator.validate(request.getParameterMap(), getClientIp());
             model.setAppType(getAppType());
 
             return mmsPrervice.getBalance(model.getUserId());
@@ -91,19 +96,20 @@ public class MmsApi extends BasicApiSupport {
     }
 
     @RequestMapping(value = "/applyModel")
-    public MmsSendResponse applyModel() {
+    public MmsModelResponse applyModel() {
         try {
-            MmsCustomContentSendRequest mmsCustomContentSendRequest = mmsCustomContentSendValidator.validate(request.getParameterMap(),
-                    getClientIp());
-            mmsCustomContentSendRequest.setAppType(getAppType());
+            MmsModelApplyRequest mmsModelApplyRequest = mmsModelApplyValidator.validate(request.getParameterMap(),
+                                                                                        getClientIp());
+            mmsModelApplyRequest.setAppType(getAppType());
 
-            return mmsPrervice.sendMessage(mmsCustomContentSendRequest);
+            return mmsPrervice.applyModel(mmsModelApplyRequest);
 
         } catch (ValidateException e) {
-            return new MmsSendResponse(JSON.parseObject(e.getMessage()));
+            return new MmsModelResponse(JSON.parseObject(e.getMessage()));
         } catch (Exception e) {
-            logger.error("用户自定义彩信发送失败", e);
-            return new MmsSendResponse(CommonApiCode.COMMON_SERVER_EXCEPTION);
+            logger.error("用户彩信模板报备失败", e);
+            return new MmsModelResponse(CommonApiCode.COMMON_SERVER_EXCEPTION.getCode(),
+                                        CommonApiCode.COMMON_SERVER_EXCEPTION.getMessage());
         }
     }
 

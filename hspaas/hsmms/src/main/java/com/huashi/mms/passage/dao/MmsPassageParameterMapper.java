@@ -23,7 +23,7 @@ public interface MmsPassageParameterMapper {
     int deleteByPassageId(@Param("passageId") int passageId);
 
     /**
-     * TODO 根据通道ID查询通道所有模板信息
+     * 根据通道ID查询通道所有模板信息
      * 
      * @param passageId
      * @return
@@ -31,7 +31,7 @@ public interface MmsPassageParameterMapper {
     List<MmsPassageParameter> findByPassageId(@Param("passageId") int passageId);
 
     /**
-     * TODO 根据通道代码和调用类型获取通道参数信息
+     * 根据通道代码和调用类型获取通道参数信息
      * 
      * @param callType
      * @param url
@@ -40,7 +40,7 @@ public interface MmsPassageParameterMapper {
     MmsPassageParameter getByTypeAndUrl(@Param("callType") int callType, @Param("url") String url);
 
     /**
-     * TODO 根据通道ID获取 发送协议类型
+     * 根据通道ID获取 发送协议类型
      * 
      * @param passageId
      * @return
@@ -48,7 +48,16 @@ public interface MmsPassageParameterMapper {
     MmsPassageParameter selectSendProtocol(@Param("passageId") int passageId);
 
     /**
-     * TODO 批量插入信息
+     * 根据通道ID和调用类型获取 参数信息
+     * 
+     * @param passageId
+     * @param callType
+     * @return
+     */
+    MmsPassageParameter selectByPassageIdAndType(@Param("passageId") int passageId, @Param("callType") int callType);
+
+    /**
+     * 批量插入信息
      * 
      * @param list
      * @return

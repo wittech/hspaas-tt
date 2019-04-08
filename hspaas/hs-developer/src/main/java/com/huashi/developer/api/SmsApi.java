@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.exception.ValidateException;
-import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.model.sms.SmsP2PSendRequest;
-import com.huashi.developer.model.sms.SmsP2PTemplateSendRequest;
-import com.huashi.developer.model.sms.SmsSendRequest;
 import com.huashi.developer.prervice.SmsPrervice;
+import com.huashi.developer.request.AuthorizationRequest;
+import com.huashi.developer.request.sms.SmsP2PSendRequest;
+import com.huashi.developer.request.sms.SmsP2PTemplateSendRequest;
+import com.huashi.developer.request.sms.SmsSendRequest;
 import com.huashi.developer.response.sms.SmsBalanceResponse;
 import com.huashi.developer.response.sms.SmsSendResponse;
 import com.huashi.developer.validator.sms.SmsP2PTemplateValidator;
@@ -118,10 +118,10 @@ public class SmsApi extends BasicApiSupport {
     @RequestMapping(value = "/p2p_template")
     public SmsSendResponse p2pTemplateSend() {
         try {
-            SmsP2PTemplateSendRequest model = smsP2PTemplateValidator.validate(request.getParameterMap(), getClientIp());
-            model.setAppType(getAppType());
+            SmsP2PTemplateSendRequest smsP2PTemplateSendRequest = smsP2PTemplateValidator.validate(request.getParameterMap(), getClientIp());
+            smsP2PTemplateSendRequest.setAppType(getAppType());
 
-            return smsPrervice.sendP2PTemplateMessage(model);
+            return smsPrervice.sendP2PTemplateMessage(smsP2PTemplateSendRequest);
 
         } catch (Exception e) {
             logger.error("用户模板点对点短信发送失败", e);
@@ -142,7 +142,7 @@ public class SmsApi extends BasicApiSupport {
     @RequestMapping(value = "/balance", method = { RequestMethod.POST, RequestMethod.GET })
     public SmsBalanceResponse getBalance() {
         try {
-            PassportModel model = passportValidator.validate(request.getParameterMap(), getClientIp());
+            AuthorizationRequest model = passportValidator.validate(request.getParameterMap(), getClientIp());
             model.setAppType(getAppType());
 
             return smsPrervice.getBalance(model.getUserId());

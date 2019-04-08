@@ -1,8 +1,8 @@
 package com.huashi.mms.template.exception;
 
+public class ModelApplyException extends Exception {
 
-public class ModelApplyException extends Exception{
-
+    private static final long serialVersionUID = -1482795193599188515L;
 
     public ModelApplyException() {
         super();

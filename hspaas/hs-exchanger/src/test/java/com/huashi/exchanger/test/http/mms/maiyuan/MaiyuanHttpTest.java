@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.exchanger.domain.ProviderSendResponse;
-import com.huashi.exchanger.resolver.mms.http.maiyuan.MaiyuanPassageResolver;
+import com.huashi.exchanger.resolver.mms.http.maiyuan.MmsMaiyuanPassageResolver;
 import com.huashi.mms.passage.domain.MmsPassageParameter;
 import com.huashi.mms.template.constant.MmsTemplateContext.MediaType;
 import com.huashi.mms.template.domain.MmsMessageTemplateBody;
@@ -25,7 +25,7 @@ public class MaiyuanHttpTest {
 
     private Logger               logger    = LoggerFactory.getLogger(getClass());
 
-    MaiyuanPassageResolver       resolver  = null;
+    MmsMaiyuanPassageResolver       resolver  = null;
     MmsPassageParameter          parameter = null;
     String                       mobile    = null;
     String                       title     = null;
@@ -35,7 +35,7 @@ public class MaiyuanHttpTest {
 
     @Before
     public void init() throws IOException {
-        resolver = new MaiyuanPassageResolver();
+        resolver = new MmsMaiyuanPassageResolver();
         parameter = new MmsPassageParameter();
 
         JSONObject pam = new JSONObject();

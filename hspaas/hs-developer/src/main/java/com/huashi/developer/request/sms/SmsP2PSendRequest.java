@@ -1,10 +1,10 @@
-package com.huashi.developer.model.sms;
+package com.huashi.developer.request.sms;
 
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
-import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.validator.annotation.ValidateField;
+import com.huashi.developer.annotation.ValidateField;
+import com.huashi.developer.request.AuthorizationRequest;
 
 /**
  * TODO 普通点对点短信MODEL
@@ -13,7 +13,7 @@ import com.huashi.developer.validator.annotation.ValidateField;
  * @version V1.0.0
  * @date 2017年3月31日 下午9:39:29
  */
-public class SmsP2PSendRequest extends PassportModel {
+public class SmsP2PSendRequest extends AuthorizationRequest {
 
     private static final long serialVersionUID = -6582377105792655104L;
 

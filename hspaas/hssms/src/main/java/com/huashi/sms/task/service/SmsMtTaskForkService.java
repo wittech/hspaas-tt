@@ -26,10 +26,10 @@ import com.huashi.common.settings.domain.Province;
 import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.settings.service.IPushConfigService;
 import com.huashi.common.util.MobileNumberCatagoryUtil;
-import com.huashi.constants.ResponseMessage;
 import com.huashi.constants.CommonContext.CMCP;
-import com.huashi.constants.CommonContext.PlatformType;
+import com.huashi.constants.CommonContext.CallbackUrlType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
+import com.huashi.constants.ResponseMessage;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.domain.SmsPassage;
@@ -47,12 +47,11 @@ import com.huashi.sms.template.domain.MessageTemplate;
 import com.huashi.sms.template.service.ISmsTemplateService;
 
 /**
+ * TODO 任务并行分发服务（主要针对任务批量审批和批量驳回）
  * 
-  * TODO 任务并行分发服务（主要针对任务批量审批和批量驳回）
-  * 
-  * @author zhengying
-  * @version V1.0   
-  * @date 2018年5月1日 下午11:57:08
+ * @author zhengying
+ * @version V1.0
+ * @date 2018年5月1日 下午11:57:08
  */
 @Service
 public class SmsMtTaskForkService {
@@ -71,28 +70,24 @@ public class SmsMtTaskForkService {
     private IPushConfigService     pushConfigService;
     @Resource
     private RabbitTemplate         rabbitTemplate;
-    
-    private Logger                 logger                             = LoggerFactory.getLogger(getClass());
+
+    private Logger                 logger = LoggerFactory.getLogger(getClass());
 
     @Value("${distribute.task.threshold.approve:50}")
-    private int approveDistributeThreshold;
+    private int                    approveDistributeThreshold;
     @Value("${distribute.task.threshold.reject:100}")
-    private int rejectDistributeThreshold;
+    private int                    rejectDistributeThreshold;
 
-   /**
-    * 
-      * TODO 将大任务按照指定阈值进行重新分组，从而进行任务分发/并发执行
-      * 
-      * @param tasks
-      *     总任务（一般比较大）
-      * @param status
-      *     状态：HANDLING_COMPLETE/REJECT
-      *     
-      * @return
-    */
+    /**
+     * TODO 将大任务按照指定阈值进行重新分组，从而进行任务分发/并发执行
+     * 
+     * @param tasks 总任务（一般比较大）
+     * @param status 状态：HANDLING_COMPLETE/REJECT
+     * @return
+     */
     public List<List<SmsMtTask>> distributeTasks(List<SmsMtTask> tasks, PacketsApproveStatus status) {
-        return distributeTasks(tasks, PacketsApproveStatus.HANDLING_COMPLETE == status ?
-            approveDistributeThreshold : rejectDistributeThreshold);
+        return distributeTasks(tasks,
+                               PacketsApproveStatus.HANDLING_COMPLETE == status ? approveDistributeThreshold : rejectDistributeThreshold);
     }
 
     /**
@@ -168,13 +163,12 @@ public class SmsMtTaskForkService {
             return new AsyncResult<>(new ResponseMessage(ResponseMessage.ERROR_CODE, "并行任务审批失败", false));
         }
     }
-    
+
     /**
+     * TODO 根据SID查询是否包含子任务错误信息
      * 
-       * TODO 根据SID查询是否包含子任务错误信息
-       * 
-       * @param sid
-       * @return
+     * @param sid
+     * @return
      */
     private boolean isTaskChildrenHasPassageError(Long sid) {
         return taskPacketsMapper.selectPassageErrorCount(sid) > 0;
@@ -268,7 +262,8 @@ public class SmsMtTaskForkService {
                 return new ResponseMessage(successCounter, "操作成功", true);
             }
 
-            return new ResponseMessage(successCounter, "主任务共 : [" + tasks.size() + "], 本次处理 : [" + successCounter + "]", true);
+            return new ResponseMessage(successCounter,
+                                       "主任务共 : [" + tasks.size() + "], 本次处理 : [" + successCounter + "]", true);
         }
 
         return new ResponseMessage(successCounter, StringUtils.isEmpty(errorReport) ? "处理失败" : errorReport.toString(),
@@ -380,7 +375,7 @@ public class SmsMtTaskForkService {
         // 更新主任务状态“手动通过”
         return taskMapper.updateApproveStatusBySid(sid, PacketsApproveStatus.HANDLING_COMPLETE.getCode()) > 0;
     }
-    
+
     /**
      * TODO 并发执行主任务集合驳回逻辑
      * 
@@ -389,10 +384,10 @@ public class SmsMtTaskForkService {
      */
     @Async("asyncTaskExecutor")
     public Future<ResponseMessage> parallelTaskRejected(List<SmsMtTask> tasks) {
-        if(CollectionUtils.isEmpty(tasks)) {
+        if (CollectionUtils.isEmpty(tasks)) {
             return new AsyncResult<>(new ResponseMessage(ResponseMessage.ERROR_CODE, "并行驳回任务数据为空", false));
         }
-        
+
         try {
             int successCounter = 0;
             for (SmsMtTask task : tasks) {
@@ -405,30 +400,30 @@ public class SmsMtTaskForkService {
                     if (pt.getStatus() == PacketsApproveStatus.REJECT.getCode()) {
                         continue;
                     }
-                    
+
                     copyUserCustomProperties(task, pt);
-                    
+
                     // 制作网关伪造包并发送至相关队列
                     this.sendRejectPackageQueue(pt);
                 }
-                
+
                 // 更新任务状态为“驳回”
-                if(updateTaskAndPacketsRejected(task.getSid())) {
-                    successCounter ++; 
+                if (updateTaskAndPacketsRejected(task.getSid())) {
+                    successCounter++;
                 }
             }
-            
-            if(successCounter > 0) {
+
+            if (successCounter > 0) {
                 return new AsyncResult<>(new ResponseMessage(successCounter, "并行任务驳回成功", true));
             }
-            
+
             return new AsyncResult<>(new ResponseMessage(ResponseMessage.ERROR_CODE, "并行任务驳回失败", false));
         } catch (Exception e) {
             logger.error("并行任务驳回失败", e);
             return new AsyncResult<>(new ResponseMessage(ResponseMessage.ERROR_CODE, "并行任务驳回失败", false));
         }
     }
-    
+
     /**
      * TODO 制作短信驳回伪造包并发送至相关队列（）
      *
@@ -460,7 +455,7 @@ public class SmsMtTaskForkService {
             submit.setProvinceCode(Province.PROVINCE_CODE_ALLOVER_COUNTRY);
 
             PushConfig pushConfig = pushConfigService.getPushUrl(packets.getUserId(),
-                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                                 CallbackUrlType.SMS_STATUS.getCode(),
                                                                  packets.getCallback());
 
             // 推送信息为固定地址或者每次传递地址才需要推送
@@ -473,8 +468,7 @@ public class SmsMtTaskForkService {
                                           submit);
         }
     }
-    
-    
+
     /**
      * TODO 根据SID同时更新主任务和子任务状态为“驳回”
      * 

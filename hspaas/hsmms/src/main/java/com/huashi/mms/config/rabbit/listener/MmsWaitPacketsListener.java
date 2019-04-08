@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,10 +17,10 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.google.common.collect.Lists;
 import com.huashi.bill.pay.constant.PayContext.PaySource;
 import com.huashi.bill.pay.constant.PayContext.PayType;
 import com.huashi.common.settings.context.SettingsContext;
@@ -36,6 +35,7 @@ import com.huashi.common.user.service.IUserMmsConfigService;
 import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.constants.CommonContext.CMCP;
+import com.huashi.constants.CommonContext.CallbackUrlType;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.mms.config.rabbit.AbstartRabbitListener;
@@ -143,7 +143,6 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
 
     /**
      * TODO 针对异常情况，提交子任务
-     *
      */
     private void asyncSendTask() {
         mmsMtTaskLocal.get().setPackets(null);
@@ -451,6 +450,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
 
     /**
      * 拼接可操作动作代码
+     * 
      * @param index
      * @param forceActions
      */
@@ -582,11 +582,8 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * @return
      */
     private boolean isMessageByModelSend() {
-        if (mmsMtTaskLocal.get().getIsModelSend() == true) {
+        if (mmsMtTaskLocal.get().getIsModelSend() == true || StringUtils.isNotEmpty(mmsMtTaskLocal.get().getModelId())) {
             return true;
-        } else if (mmsMtTaskLocal.get().getIsModelSend() == null
-                   && StringUtils.isNotEmpty(mmsMtTaskLocal.get().getModelId())) {
-            return StringUtils.isNotEmpty(mmsMtTaskLocal.get().getModelId());
         }
 
         return false;
@@ -616,6 +613,8 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             }
 
             messageTemplateLocal.set(template);
+        } else {
+            mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("自定义彩信发送审核"));
         }
 
         return true;
@@ -766,7 +765,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
 
         } else {
             PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(),
-                                                                 PlatformType.MULTIMEDIA_MESSAGE_SERVICE.getCode(),
+                                                                 CallbackUrlType.MMS_STATUS.getCode(),
                                                                  task.getCallback());
 
             // 推送信息为固定地址或者每次传递地址才需要推送

@@ -32,89 +32,116 @@
                 </div>
             </div>
             <div id="page-content">
-                <div class="panel">
-                    <!-- Panel heading -->
-                    <div class="panel-heading">
-                        <h3 class="panel-title">模板报备</h3>
-                    </div>
-                    <!-- Panel body -->
-                    <form id="myform" class="form-horizontal">
-                        <input type="hidden" name="id" value="${(messageTemplate.id)!}" />
-                        <div class="panel-body">
-                            <div class="form-group batchContent">
-                                <label class="col-xs-2 control-label">模板内容</label>
-                                <div class="col-xs-5">
-                                    <textarea class="form-control validate[required,maxSize[1000]]" id="content"  rows="8">
-                                        <#if messageTemplate??>${messageTemplate.content!''}</#if></textarea>
-                                </div>
-                            </div>
-                            <div class="form-group batchContent">
-                                <label class="col-xs-2 control-label">模板测试</label>
-                                <div class="col-xs-5">
-                                    <textarea class="form-control validate[required,maxSize[1000]]"
-                                             name="content" id="testContent" rows="8"></textarea>
-                                </div>
-                            </div>
-                            <div class="form-group" id="div_matching_result" style="display:none;">
-                                <label class="col-xs-2 control-label">匹配结果</label>
-                                <div class="col-xs-4">
-                                	<label id="matching_result" style="color:red;width:80px" class="col-xs-2 control-label"></label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-xs-9 col-xs-offset-3">
-                                    <button type="button" onclick="formSubmit();" class="btn btn-primary"
-                                            name="buttonSubmit">提交
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+						
+				<div class="panel">
+					<div class="panel-body">
+						<form id="myform" method="post">
+						    <div class="row" style="margin-top:5px">
+						    	<div class="col-md-3">
+						    		<div class="input-group">
+						    			<span class="input-group-addon">通道名称</span>
+						    			<input type="hidden" name="mmsPassageMessageTemplate.templateId" value="${(messageTemplate.id)!}" />
+						    			<select class="form-control selectpicker show-tick" id="passageId" name="mmsPassageMessageTemplate.passageId" data-live-search="true">
+			                        		<option value="">请选择通道名称</option>
+				                        	<#if passageList??>
+						    					<#list passageList?sort_by("name") as p>
+						    						<#if p.status?? && p.status == 0>
+						    						<option value="${p.id!''}">${p.name!''}</option>
+						    						</#if>
+						    					</#list>
+								    		</#if>
+				                        </select>
+						    		</div>
+					    		</div>
+						    	<div class="col-md-2">
+						    		<a class="btn btn-primary" onclick="formSubmit();">报&nbsp;&nbsp;&nbsp;备</a>
+						    	</div>
+						    </div>
+					    </form>
+					</div>
+				</div>
 
+				<div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                    <span>已提交/报备完成通道模板列表</span>
+                    </h3>
+                   
+                </div>
+                <div class="panel-body">
                     <table id="demo-dt-basic" class="table table-striped table-bordered" cellspacing="0" width="100%">
                         <thead>
-                        <tr>
-                            <th>通道</th>
-                            <th>模版ID</th>
-                            <th>状态</th>
-                            <th>备注</th>
-                            <th>创建时间</th>
-                            <th>修改时间</th>
-                            <th>操作</th>
-                        </tr>
+                            <tr>
+                                <th>通道</th>
+	                            <th>模版ID</th>
+	                            <th>状态</th>
+	                            <th>创建时间</th>
+	                            <th>修改时间</th>
+	                            <th>备注</th>
+	                            <th>操作</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            <#if templates??>
+                        	<#if templates??>
                             <#list templates as t>
                                 <tr>
                                     <td>${(t.passageName)!}</td>
-                                    <td><#if pl.status==0>待审核<#elseif pl.status==1>审核成功<#elseif pl.status==2>审核失败</#if></td>
-                                    <td><#if pl.createTime??>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
-                                    <td><#if pl.updateTime??>${pl.updateTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
+                                    <td>${(t.passageModelId)!}
+                                    	<input type="hidden" id="passageModelId${(t.id)!}" value="${(t.passageModelId)!}">
+                                    	<input type="hidden" id="id${(t.id)!}" value="${(t.id)!}">
+                                    </td>
+                                    <td>${(t.statusText)!}
+                                    	<input type="hidden" id="status${(t.id)!}" value="${(t.status)!}">
+                                    </td>
+                                    <td><#if t.createTime??>${t.createTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
+                                    <td><#if t.updateTime??>${t.updateTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
+                                    <td>${(t.remark)!}
+                                    	<input type="hidden" id="remark${(t.id)!}" value="${(t.remark)!}">
+                                    </td>
                                     <td>
-                                        <#if pl.status==0>
-                                            <#if auditCheck>
-                                                <a class="btn btn-default btn-xs" href="${BASE_PATH}/mms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批</a>
-                                            </#if>
-                                        </#if>
-                                        <#if editCheck>
-                                            <a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑</a>
-                                        </#if>
-                                        <#if editCheck>
-                                            <a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp;编辑</a>
-                                        </#if>
-                                        <a href="javascript:apply(${pl.id});" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;报备</a>
+                                        <a href="javascript:edit(${t.id});" class="btn btn-info btn-xs">&nbsp;修改</a>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td colspan="8" align="right"><b>标题：</b>${(pl.title)!}</td>
-                                </tr>
                             </#list>
-                        </#if>
+                        	</#if>
                         </tbody>
                     </table>
-
-
+                </div>
+            </div>
+		</div>
+		
+		
+		<div class="modal fade" id="myModal">
+            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeModal();"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">修改</h4>
+                    </div>
+                    <form id="editform" method="post">
+                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000" id="myModelBody">
+                    	<input type="hidden" name="mmsPassageMessageTemplate.id" id="id" >
+                    	<input type="text" class="form-control validate[required]" name="mmsPassageMessageTemplate.passageModelId" id="passageModelId"
+			                                           placeholder="请输入模板ID">
+			                                           
+			            <br/>
+			            <input type="text" class="form-control" name="mmsPassageMessageTemplate.remark" id="remark" placeholder="请输入备注">
+			            <br/>
+			            <select class="form-control" id="status" name="mmsPassageMessageTemplate.status">
+                            <#if passageTemplateStatus??>
+				    		<#list passageTemplateStatus as a>
+				    			<option value="${a.getValue()!''}">${a.getTitle()!''}</option>
+				    		</#list>
+				    		</#if>
+                        </select>
+                    </div>
+                    </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" onclick="update();">保存</button>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -133,26 +160,66 @@
     });
 
     function formSubmit() {
-        var allCheck = $('#myform').validationEngine('validate');
-        if (!allCheck) {
-            return;
-        }
+    	if($("#passageId").val() == "") {
+    		Boss.alert('请选择通道名称！')
+    		return;
+    	}
+    
         $.ajax({
-            url: '${BASE_PATH}/mms/message_template/matchingSubmit',
+            url: '${BASE_PATH}/mms/message_template/passage_model',
             dataType: 'json',
             data: $('#myform').serialize(),
             type: 'post',
             success: function (data) {
-            	$("#div_matching_result").show();
                 if (data.result) {
-                	$("#matching_result").html("<span class='label label-success'>匹配成功</span>");
+                	Boss.alertToCallback('通道彩信模板报备已提交！',function(){
+                        location.href = "${BASE_PATH}/mms/message_template/apply";
+                    });
+                
                 } else {
-                	$("#matching_result").html("<span class='label label-danger'>匹配失败</span>");
+                	Boss.alert('通道彩信模板报备失败！');
                 }
             }, error: function (data) {
                 Boss.alert('系统异常!请稍后重试！');
             }
         });
     }
+    
+    function edit(id){
+    	$('#id').val($("#id"+id).val());
+        $('#passageModelId').val($("#passageModelId"+id).val());
+        $('#remark').val($("#remark"+id).val());
+        $('#status').val($("#status"+id).val());
+        $('#myModal').modal('show');
+    }
+    
+    function closeModal() {
+        $('#myModal').modal('hide');
+    }
+    
+    function update() {
+        var allCheck = $('#editform').validationEngine('validate');
+        if (!allCheck) {
+            return;
+        }
+        
+        $.ajax({
+            url: '${BASE_PATH}/mms/message_template/update_passage_model',
+            data: $('#editform').serialize(),
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+                Boss.alertToCallback(data.message,function(){
+                    if (data.result) {
+                        location.reload();
+                    }
+                });
+
+            }, error: function (data) {
+                Boss.alert('修改失败!');
+            }
+        });
+    }
+    
 </script>
 </html>

@@ -81,7 +81,6 @@
                                 	<#assign editCheck = macro.doOper("10001001002") />
                                 	<#assign deleteCheck = macro.doOper("10001001003") />
 									<#assign disabledCheck = macro.doOper("10001001004") />
-									<#assign killCheck = macro.doOper("10001001005") />
 									<#assign testPassageCheck = macro.doOper("10001001006") />
                                 	<#list page.list as pl>
                                     <tr>
@@ -125,13 +124,7 @@
 	                                                <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="disabled(${pl.id},'0');"><i class="fa fa-unlock-alt"></i>&nbsp;启用 </a>
 	                                            </#if>
                                             </#if>
-                                            <#if killCheck>
-                                            	<a class="btn btn-warning btn-xs" href="javascript:void(0);" onclick="kill(${pl.id});"><i class="fa fa-refresh"></i>&nbsp;断连接</a>
-                                            </#if>
                                             &nbsp;
-                                            <#if testPassageCheck>
-                                            	<a class="btn btn-info btn-xs" href="javascript:void(0);" onclick="testPassage(${pl.id}, '${pl.name}');"><i class="fa fa-bug"></i>&nbsp;测试通道 </a>
-                                        	</#if>
                                         </td>
                                     </tr>
                                     </#list>
@@ -145,31 +138,6 @@
 				</div>
 				<#include "/WEB-INF/views/main/left.ftl">
 			</div>
-
-
-
-            <div class="modal fade" id="testPassageModal">
-                <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" onclick="closeModal();"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="test_passage_title">测试通道</h4>
-                        </div>
-                        <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
-                             id="myModelBody">
-                            <b>手机号码：</b><textarea id="testMobile" class="form-control" rows="5" cols="20"></textarea>
-                            <b>短信内容：</b><textarea id="testContent" class="form-control" rows="6" cols="20"></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
-                            &nbsp;
-                            <button type="button" class="btn btn-success" onclick="sendTestmms();">发送</button>
-                        </div>
-                    </div><!-- /.modal-content -->
-                </div><!-- /.modal-dialog -->
-            </div>
-
 
 		</div>
 		<script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
@@ -229,45 +197,11 @@
             });
         }
         
-        function kill(id){
-            Boss.confirm('确定要断开该通道连接吗？',function(){
-                $.ajax({
-                    url:'${BASE_PATH}/mms/passage/kill',
-                    type:'post',
-                    dataType:'json',
-                    data:{id:id},
-                    success:function(data){
-                        Boss.alertToCallback(data.message,function(){
-                            if(data.result){
-                                location.reload();
-                            }
-                        });
-                    },error:function(data){
-                        Boss.alert("断开通道连接失败！");
-                    }
-                });
-            });
-        }
-
         function closeModal(){
             $('#testPassageModal').modal('hide');
         }
 
         var testPassageId = -1;
-
-        function testPassage(id, name){
-            testPassageId = id;
-            
-            var cookieTestMobile = $.cookie('hspaas_test_mobiles');
-            if(cookieTestMobile != null && cookieTestMobile != "") {
-            	$('#testMobile').val(cookieTestMobile);
-            }
-            
-            $("#test_passage_title").html("测试["+name+"]通道");
-            var code = Math.floor(Math.random() * 1000000);
-            $('#testContent').val("【华时科技】您的验证码为"+code+"，请尽快完成后续操作。");
-            $('#testPassageModal').modal('show');
-		}
 
 		function sendTestmms(){
             if(testPassageId == -1){

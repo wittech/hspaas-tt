@@ -21,16 +21,6 @@ public class MmsMessageTemplateBody {
     private Date    updateTime;
 
     /**
-     * OSS 资源URL信息
-     */
-    private String  url;
-
-    /**
-     * HTML
-     */
-    private String  html;
-
-    /**
      * 二进制数据
      */
     private byte[]  data;
@@ -97,22 +87,6 @@ public class MmsMessageTemplateBody {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getHtml() {
-        return html;
-    }
-
-    public void setHtml(String html) {
-        this.html = html;
     }
 
     public byte[] getData() {

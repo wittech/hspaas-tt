@@ -8,63 +8,66 @@ import com.huashi.common.user.model.UserModel;
 
 public class MmsMessageTemplate {
 
-    private Long                               id;
+    private Long                         id;
 
-    private String                             modelId;
+    private String                       modelId;
 
-    private Integer                            userId;
+    private String                       name;
+    private String                       title;
 
-    private Integer                            status;
+    private Integer                      userId;
 
-    private Byte                               isRunning;
+    private Integer                      status;
 
-    private Integer                            appType;
+    private Byte                         isRunning;
 
-    private Integer                            noticeMode;
+    private Integer                      appType;
 
-    private String                             mobile;
+    private Integer                      noticeMode;
 
-    private Integer                            submitInterval;
+    private String                       mobile;
 
-    private Integer                            limitTimes;
+    private Integer                      submitInterval;
 
-    private Integer                            routeType;
+    private Integer                      limitTimes;
 
-    private Integer                            priority;
+    private Integer                      routeType;
 
-    private String                             extNumber;
+    private Integer                      priority;
 
-    private Date                               createTime;
+    private String                       extNumber;
 
-    private Date                               updateTime;
+    private Date                         createTime;
 
-    private Date                               approveTime;
+    private Date                         updateTime;
 
-    private String                             approveUser;
+    private Date                         approveTime;
 
-    private String                             approveDesc;
+    private String                       approveUser;
 
-    private String                             remark;
+    private String                       approveDesc;
+
+    private String                       remark;
 
     /**
      * 用户信息
      */
-    private UserModel                          userModel;
+    private UserModel                    userModel;
 
     /**
      * 路由类型名称
      */
-    private String                             routeTypeText;
+    private String                       routeTypeText;
 
     /**
      * 平台类型名称
      */
-    private String                             apptypeText;
+    private String                       apptypeText;
 
     /**
      * 模板报文数据集合
      */
-    private final List<MmsMessageTemplateBody> bodies = new ArrayList<>();
+    private List<MmsMessageTemplateBody> bodies = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -244,6 +247,26 @@ public class MmsMessageTemplate {
 
     public List<MmsMessageTemplateBody> getBodies() {
         return bodies;
+    }
+
+    public void setBodies(List<MmsMessageTemplateBody> bodies) {
+        this.bodies = bodies;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
 }

@@ -19,16 +19,16 @@ import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.constants.OpenApiCode.SmsApiCode;
 import com.huashi.developer.exception.ValidateException;
-import com.huashi.developer.model.PassportModel;
-import com.huashi.developer.model.sms.SmsP2PTemplateSendRequest;
-import com.huashi.developer.validator.PassportValidator;
+import com.huashi.developer.request.AuthorizationRequest;
+import com.huashi.developer.request.sms.SmsP2PTemplateSendRequest;
+import com.huashi.developer.validator.AuthorizationValidator;
 import com.huashi.developer.validator.Validator;
 
 @Component
 public class SmsP2PTemplateValidator extends Validator {
 
     @Autowired
-    private PassportValidator   passportValidator;
+    private AuthorizationValidator   passportValidator;
     @Reference
     private IUserBalanceService userBalanceService;
 
@@ -46,7 +46,7 @@ public class SmsP2PTemplateValidator extends Validator {
         super.validateAndParseFields(smsP2PTemplateSendRequest, paramMap);
 
         // 获取授权通行证实体
-        PassportModel passportModel = passportValidator.validate(paramMap, ip);
+        AuthorizationRequest passportModel = passportValidator.validate(paramMap, ip);
 
         smsP2PTemplateSendRequest.setIp(ip);
         smsP2PTemplateSendRequest.setUserId(passportModel.getUserId());

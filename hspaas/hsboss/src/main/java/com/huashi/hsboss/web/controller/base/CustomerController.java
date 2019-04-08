@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.huashi.bill.pay.constant.PayContext;
 import com.huashi.common.passage.context.TemplateEnum;
-import com.huashi.common.settings.context.SettingsContext.PushConfigType;
 import com.huashi.common.settings.context.SettingsContext.SystemConfigType;
 import com.huashi.common.settings.domain.PushConfig;
 import com.huashi.common.settings.domain.SystemConfig;
@@ -43,6 +42,7 @@ import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.user.service.IUserSmsConfigService;
 import com.huashi.common.vo.BossPaginationVo;
+import com.huashi.constants.CommonContext.CallbackUrlType;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.fs.passage.domain.FluxPassageGroup;
 import com.huashi.fs.passage.service.IFsPassageGroupService;
@@ -54,7 +54,6 @@ import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
-import com.huashi.mms.passage.domain.MmsPassageGroup;
 import com.huashi.mms.passage.service.IMmsPassageGroupService;
 import com.huashi.sms.passage.domain.SmsPassageGroup;
 import com.huashi.sms.passage.service.ISmsPassageGroupService;
@@ -124,9 +123,8 @@ public class CustomerController extends BaseController {
     @AuthCode(code = { OperCode.OPER_CODE_1001001001 })
     @ActionMode
     public void add() {
-        setAttr("defaultGroupList",
-                iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_FLUX_DISCOUNT.name()));
-        setAttr("fluxConfigList", iSystemConfigService.findByType(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name()));
+        setAttr("defaultGroupList", iSystemConfigService.findByType(SystemConfigType.USER_DEFAULT_PASSAGE_GROUP.name()));
+        setAttr("fluxConfigList", iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_FLUX_DISCOUNT.name()));
 
         setUserBalance();
 
@@ -152,12 +150,12 @@ public class CustomerController extends BaseController {
      */
     private void setSmsConfigAttr() {
         try {
-            setAttr("smsPassageGroupList", iSmsPassageGroupService.findAll());
             setAttr("smsReturnRules", SmsReturnRule.values());
             setAttr("smsMessagePass", SmsMessagePass.values());
             setAttr("smsNeedTemplates", SmsNeedTemplate.values());
             setAttr("smsPickupTemplates", SmsPickupTemplate.values());
             setAttr("smsSignatureSources", SmsSignatureSource.values());
+            setAttr("smsPassageGroupList", iSmsPassageGroupService.findAll());
         } catch (Exception e) {
             logger.error("Call setSmsConfigAttr failed msg is '" + e.getMessage() + "'");
         }
@@ -175,8 +173,7 @@ public class CustomerController extends BaseController {
     }
 
     /**
-     * 
-       * TODO 保存
+     * TODO 保存
      */
     @AuthCode(code = { OperCode.OPER_CODE_1001001001 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -292,34 +289,34 @@ public class CustomerController extends BaseController {
         PushConfig smsConfig = new PushConfig();
         smsConfig.setUrl(smsSendUrl);
         smsConfig.setStatus(sendUrlFlag);
-        smsConfig.setType(PushConfigType.SMS_STATUS_REPORT.getCode());
+        smsConfig.setType(CallbackUrlType.SMS_STATUS.getCode());
         configList.add(smsConfig);
 
         PushConfig smsUpConfig = new PushConfig();
         smsUpConfig.setUrl(smsUpUrl);
-        smsUpConfig.setType(PushConfigType.SMS_MO_REPORT.getCode());
+        smsUpConfig.setType(CallbackUrlType.SMS_MO.getCode());
         configList.add(smsUpConfig);
 
         PushConfig fsConfig = new PushConfig();
         fsConfig.setUrl(fluxUrl);
-        fsConfig.setType(PushConfigType.FS_CHARGE_REPORT.getCode());
+        fsConfig.setType(CallbackUrlType.FLUX_CHARGE_RESULT.getCode());
         configList.add(fsConfig);
 
         PushConfig vsConfig = new PushConfig();
         vsConfig.setUrl(voiceUrl);
-        vsConfig.setType(PushConfigType.VS_SEND_REPORT.getCode());
+        vsConfig.setType(CallbackUrlType.VOICE_SEND_STATUS.getCode());
         configList.add(vsConfig);
 
         // add by zhengying 20190317 增加彩信推送信息
         PushConfig mmsConfig = new PushConfig();
         mmsConfig.setUrl(mmsSendUrl);
         mmsConfig.setStatus(mmsSendUrlFlag);
-        mmsConfig.setType(PushConfigType.MMS_STATUS_REPORT.getCode());
+        mmsConfig.setType(CallbackUrlType.MMS_STATUS.getCode());
         configList.add(mmsConfig);
 
         PushConfig mmsUpConfig = new PushConfig();
         mmsUpConfig.setUrl(mmsUpUrl);
-        mmsUpConfig.setType(PushConfigType.MMS_MO_REPORT.getCode());
+        mmsUpConfig.setType(CallbackUrlType.MMS_MO.getCode());
         configList.add(mmsUpConfig);
 
         RegisterModel registerModel = new RegisterModel(Source.BOSS_INPUT, user);
@@ -329,6 +326,7 @@ public class CustomerController extends BaseController {
         registerModel.setPushConfigs(configList);
         registerModel.setSendEmail(getParaToInt("sendEmailFlag", 0) == 1);
         registerModel.setUserSmsConfig(getModel(UserSmsConfig.class, "userSmsConfig"));
+        registerModel.setUserMmsConfig(getModel(UserMmsConfig.class, "userMmsConfig"));
         registerModel.setPassageList(passageList);
 
         boolean result = iRegisterService.register(registerModel);
@@ -347,18 +345,16 @@ public class CustomerController extends BaseController {
         for (PushConfig config : configList) {
             configMap.put("config_" + config.getType(), config.getUrl());
         }
-        setAttr("config_constants", PushConfigType.values());
+        setAttr("config_constants", CallbackUrlType.values());
         setAttr("configMap", configMap);
         setAttr("configList", configList);
 
-        List<SystemConfig> fluxConfigList = iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_FLUX_DISCOUNT.name());
-        setAttr("fluxConfigList", fluxConfigList);
+        setAttr("fluxConfigList", iSystemConfigService.findByType(SystemConfigType.USER_REGISTER_FLUX_DISCOUNT.name()));
 
         UserFluxDiscount fluxDiscount = iUserFluxDiscountService.getByUserId(userId);
         Map<String, Object> fluxMap = new LinkedHashMap<String, Object>();
         String[] discountProperty = { "localCmOff", "localCtOff", "localCuOff", "globalCmOff", "globalCtOff",
                 "globalCuOff" };
-        String[] discountName = { "省内移动折扣", "省内电信折扣", "省内联通折扣", "全国移动折扣", "全国电信折扣", "全国联通折扣" };
         for (String property : discountProperty) {
             String firstLetter = property.substring(0, 1).toUpperCase();
             String getter = "get" + firstLetter + property.substring(1);
@@ -367,15 +363,12 @@ public class CustomerController extends BaseController {
             fluxMap.put(property, value);
         }
 
-        List<UserPassage> passageList = iUserPassageService.findByUserId(userId);
-        setAttr("passageList", passageList);
-        List<SmsPassageGroup> smsPassageGroupList = iSmsPassageGroupService.findAll();
-        setAttr("smsPassageGroupList", smsPassageGroupList);
+        setAttr("passageList", iUserPassageService.findByUserId(userId));
+        setAttr("smsPassageGroupList", iSmsPassageGroupService.findAll());
 
-        List<MmsPassageGroup> mmsPassageGroupList = iMmsPassageGroupService.findAll();
-        setAttr("mmsPassageGroupList", mmsPassageGroupList);
+        setAttr("mmsPassageGroupList", iMmsPassageGroupService.findAll());
 
-        setAttr("discountName", discountName);
+        setAttr("discountName", new String[] { "省内移动折扣", "省内电信折扣", "省内联通折扣", "全国移动折扣", "全国电信折扣", "全国联通折扣" });
         setAttr("discountProperty", discountProperty);
         setAttr("fluxMap", fluxMap);
 
@@ -477,13 +470,13 @@ public class CustomerController extends BaseController {
         PushConfig smsConfig = new PushConfig();
         smsConfig.setUrl(smsSendUrl);
         smsConfig.setStatus(sendUrlFlag);
-        smsConfig.setType(PushConfigType.SMS_STATUS_REPORT.getCode());
+        smsConfig.setType(CallbackUrlType.SMS_STATUS.getCode());
         smsConfig.setUserId(userId);
         configList.add(smsConfig);
 
         PushConfig smsUpConfig = new PushConfig();
         smsUpConfig.setUrl(getPara("smsUpUrl"));
-        smsUpConfig.setType(PushConfigType.SMS_MO_REPORT.getCode());
+        smsUpConfig.setType(CallbackUrlType.SMS_MO.getCode());
         smsUpConfig.setUserId(userId);
         configList.add(smsUpConfig);
 
@@ -505,13 +498,13 @@ public class CustomerController extends BaseController {
         PushConfig mmsConfig = new PushConfig();
         mmsConfig.setUrl(mmsSendUrl);
         mmsConfig.setStatus(sendUrlFlag);
-        mmsConfig.setType(PushConfigType.MMS_STATUS_REPORT.getCode());
+        mmsConfig.setType(CallbackUrlType.MMS_STATUS.getCode());
         mmsConfig.setUserId(userId);
         configList.add(mmsConfig);
 
         PushConfig mmsUpConfig = new PushConfig();
         mmsUpConfig.setUrl(getPara("mmsUpUrl"));
-        mmsUpConfig.setType(PushConfigType.MMS_MO_REPORT.getCode());
+        mmsUpConfig.setType(CallbackUrlType.MMS_MO.getCode());
         mmsUpConfig.setUserId(userId);
         configList.add(mmsUpConfig);
 
@@ -526,7 +519,7 @@ public class CustomerController extends BaseController {
 
         PushConfig pushConfig = new PushConfig();
         pushConfig.setUrl(fluxUrl);
-        pushConfig.setType(PushConfigType.FS_CHARGE_REPORT.getCode());
+        pushConfig.setType(CallbackUrlType.FLUX_CHARGE_RESULT.getCode());
 
         UserFluxDiscount discount = getModel(UserFluxDiscount.class, "userFluxDiscount");
 
@@ -543,7 +536,7 @@ public class CustomerController extends BaseController {
 
         PushConfig pushConfig = new PushConfig();
         pushConfig.setUrl(voiceUrl);
-        pushConfig.setType(PushConfigType.VS_SEND_REPORT.getCode());
+        pushConfig.setType(CallbackUrlType.VOICE_SEND_STATUS.getCode());
 
         renderResultJson(iUserService.updateVs(userId, balance, getParaToInt("vsPayType"), pushConfig,
                                                getParaToInt("vsGroupId")));

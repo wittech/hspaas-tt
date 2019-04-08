@@ -2,8 +2,6 @@ package com.huashi.hsboss.web.controller.mms;
 
 import java.util.Date;
 
-import com.huashi.mms.template.constant.MmsTemplateContext;
-import com.huashi.sms.task.domain.SmsMtTask;
 import org.apache.commons.lang.StringUtils;
 
 import com.huashi.common.user.service.IUserService;
@@ -16,11 +14,18 @@ import com.huashi.hsboss.constant.EnumConstant;
 import com.huashi.hsboss.constant.MenuCode;
 import com.huashi.hsboss.constant.OperCode;
 import com.huashi.hsboss.web.controller.common.BaseController;
+import com.huashi.mms.passage.service.IMmsPassageService;
 import com.huashi.mms.task.service.IMmsMtTaskService;
+import com.huashi.mms.template.constant.MmsTemplateContext;
+import com.huashi.mms.template.constant.MmsTemplateContext.ApproveStatus;
+import com.huashi.mms.template.constant.MmsTemplateContext.PassageTemplateStatus;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.domain.MmsPassageMessageTemplate;
+import com.huashi.mms.template.exception.ModelApplyException;
+import com.huashi.mms.template.service.IMmsPassageTemplateService;
+import com.huashi.mms.template.service.IMmsTemplateBodyService;
 import com.huashi.mms.template.service.IMmsTemplateService;
 import com.huashi.sms.passage.context.PassageContext;
-import com.huashi.sms.template.context.SmsTemplateContext.ApproveStatus;
 import com.huashi.sms.template.context.SmsTemplateContext.ModeOperation;
 import com.jfinal.ext.route.ControllerBind;
 
@@ -36,14 +41,20 @@ import com.jfinal.ext.route.ControllerBind;
 public class MmsMessageTemplateController extends BaseController {
 
     @BY_NAME
-    private IUserService iUserService;
+    private IUserService               iUserService;
     @BY_NAME
-    private IMmsTemplateService iMmsTemplateService;
+    private IMmsMtTaskService          iMmsMtTaskService;
     @BY_NAME
-    private IMmsMtTaskService iMmsMtTaskService;
+    private IMmsTemplateService        iMmsTemplateService;
+    @BY_NAME
+    private IMmsPassageService         iMmsPassageService;
+    @BY_NAME
+    private IMmsPassageTemplateService iMmsPassageTemplateService;
+    @BY_NAME
+    private IMmsTemplateBodyService    iMmsTemplateBodyService;
 
-    @AuthCode(code = {OperCode.OPER_CODE_10002001, OperCode.OPER_CODE_10002002, OperCode.OPER_CODE_10002003,
-            OperCode.OPER_CODE_10002004, OperCode.OPER_CODE_10002005, OperCode.OPER_CODE_10002006})
+    @AuthCode(code = { OperCode.OPER_CODE_10002001, OperCode.OPER_CODE_10002002, OperCode.OPER_CODE_10002003,
+            OperCode.OPER_CODE_10002004, OperCode.OPER_CODE_10002005, OperCode.OPER_CODE_10002006 })
     @ActionMode
     public void index() {
         String userId = getPara("userId");
@@ -73,18 +84,22 @@ public class MmsMessageTemplateController extends BaseController {
     @AuthCode(code = OperCode.OPER_CODE_10002002)
     @ActionMode
     public void add() {
-        MmsMessageTemplate messageTemplate = getModel(MmsMessageTemplate.class);
-        messageTemplate.setApproveUser(getLoginName());
-        messageTemplate.setAppType(ModeOperation.OPERATIONSUPPORT.getValue());
-        messageTemplate.setApproveTime(new Date());
-        messageTemplate.setStatus(ApproveStatus.SUCCESS.getValue());
+        try {
+            MmsMessageTemplate messageTemplate = getModel(MmsMessageTemplate.class);
+            messageTemplate.setApproveUser(getLoginName());
+            messageTemplate.setAppType(ModeOperation.OPERATIONSUPPORT.getValue());
+            messageTemplate.setApproveTime(new Date());
+            messageTemplate.setStatus(ApproveStatus.SUCCESS.getValue());
 
-        boolean result = iMmsTemplateService.save(messageTemplate);
-        renderResultJson(result);
+            String modelId = iMmsTemplateService.save(messageTemplate);
+            renderResultJson(StringUtils.isNotEmpty(modelId));
+        } catch (Exception e) {
+        }
+
     }
 
     /**
-     * TODO 编辑（跳转到修改页面）
+     * 编辑（跳转到修改页面）
      */
     @AuthCode(code = OperCode.OPER_CODE_10002003)
     @ActionMode
@@ -103,8 +118,13 @@ public class MmsMessageTemplateController extends BaseController {
         template.setApproveUser(getLoginName());
         template.setAppType(ModeOperation.OPERATIONSUPPORT.getValue());
         template.setApproveTime(new Date());
-        boolean result = iMmsTemplateService.update(template);
-        renderResultJson(result);
+        try {
+            renderResultJson(iMmsTemplateService.update(template));
+        } catch (ModelApplyException e) {
+            logger.error("修改彩信模板失败", e);
+            renderResultJson(false);
+        }
+
     }
 
     @AuthCode(code = OperCode.OPER_CODE_10002006)
@@ -119,7 +139,7 @@ public class MmsMessageTemplateController extends BaseController {
     public void approve() {
         boolean result = iMmsTemplateService.approve(getParaToLong("id"), getParaToInt("status"), getPara("remark"));
         logger.info("账号: [" + getLoginName() + "] 审批模板:[" + getParaToLong("id") + "], 状态: [" + getParaToInt("status")
-                + "], 备注:[" + getParaToInt("status") + "], 审批结果：[" + result + "]");
+                    + "], 备注:[" + getParaToInt("status") + "], 审批结果：[" + result + "]");
         renderResultJson(result);
     }
 
@@ -131,9 +151,58 @@ public class MmsMessageTemplateController extends BaseController {
         renderResultJson(result);
     }
 
-    @AuthCode(code = OperCode.OPER_CODE_10002001)
-    @ActionMode(type = EnumConstant.ActionType.JSON)
-    public void loadingRedis() {
-        renderResultJson(iMmsTemplateService.reloadToRedis());
+    /**
+     * 跳转通道模板报备页面
+     */
+    public void apply() {
+        setAttr("messageTemplate", iMmsTemplateService.get(getParaToInt("id")));
+        setAttr("passageList", iMmsPassageService.findAll());
+        setAttr("templates", iMmsPassageTemplateService.getByMmsTemplateId(getParaToInt("id")));
+        setAttr("passageTemplateStatus", PassageTemplateStatus.values());
+    }
+
+    /**
+     * 通道模板报备
+     */
+    public void passage_model() {
+        renderResultJson(iMmsPassageTemplateService.save(getModel(MmsPassageMessageTemplate.class,
+                                                                  "mmsPassageMessageTemplate")));
+    }
+
+    /**
+     * 修改模板信息
+     */
+    public void update_passage_model() {
+        renderResultJson(iMmsPassageTemplateService.update(getModel(MmsPassageMessageTemplate.class,
+                                                                    "mmsPassageMessageTemplate")));
+    }
+
+    /**
+     * 彩信预览
+     */
+    public void preview() {
+        try {
+            if (StringUtils.isNotEmpty(getPara("title"))) {
+                setAttr("title", getPara("title"));
+                setAttr("bodies", iMmsTemplateBodyService.getBodies(getPara("resource")));
+            } else {
+                MmsMessageTemplate template = null;
+                if (StringUtils.isNotBlank(getPara("modelId"))) {
+                    template = iMmsTemplateService.getByModelId(getPara("modelId"));
+                } else if (StringUtils.isNotBlank(getPara("templateId"))) {
+                    template = iMmsTemplateService.get(getParaToInt("templateId"));
+                }
+
+                if (template == null) {
+                    return;
+                }
+
+                setAttr("title", template.getTitle());
+                setAttr("bodies", iMmsTemplateBodyService.getBodiesByTemplateId(template.getId()));
+            }
+        } catch (Exception e) {
+            logger.error("预览失败", e);
+        }
+
     }
 }

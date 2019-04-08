@@ -39,6 +39,7 @@ import com.huashi.common.user.service.IUserSmsConfigService;
 import com.huashi.common.util.PatternUtil;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.constants.CommonContext.CMCP;
+import com.huashi.constants.CommonContext.CallbackUrlType;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.SmsPushCode;
 import com.huashi.sms.config.rabbit.AbstartRabbitListener;
@@ -872,7 +873,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
 
         } else {
             PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(),
-                                                                 PlatformType.SEND_MESSAGE_SERVICE.getCode(),
+                                                                 CallbackUrlType.SMS_STATUS.getCode(),
                                                                  task.getCallback());
 
             // 推送信息为固定地址或者每次传递地址才需要推送
