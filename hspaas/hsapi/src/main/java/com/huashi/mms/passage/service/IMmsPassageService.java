@@ -131,16 +131,6 @@ public interface IMmsPassageService {
     List<MmsPassage> getByProvinceAndCmcp(Integer provinceCode, int cmcp);
 
     /**
-     * 测试通道
-     * 
-     * @param passageId 当前测试通道ID
-     * @param mobile 测试手机号码（支持多个）
-     * @param content 短信内容
-     * @return
-     */
-    boolean doTestPassage(Integer passageId, String mobile, String content);
-
-    /**
      * TODO 查询所有有效的通道代码信息
      * 
      * @return

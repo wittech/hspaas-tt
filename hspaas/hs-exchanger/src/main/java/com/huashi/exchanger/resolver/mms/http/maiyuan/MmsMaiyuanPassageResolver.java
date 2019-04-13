@@ -60,6 +60,11 @@ public class MmsMaiyuanPassageResolver extends AbstractMmsPassageResolver {
     private static final String ACTION_SEND_MMS               = "send";
 
     /**
+     * 彩信状态查询方法名
+     */
+    private static final String ACTION_MMS_STATUS             = "query";
+
+    /**
      * 彩信延迟播放时间
      */
     private static final String DELAY_START_TIME              = "3";
@@ -346,7 +351,7 @@ public class MmsMaiyuanPassageResolver extends AbstractMmsPassageResolver {
         params.put("userid", tparameter.getString("userid"));
         params.put("account", tparameter.getString("account"));
         params.put("password", tparameter.getString("password"));
-        params.put("action", tparameter.getString("action"));
+        params.put("action", ACTION_MMS_STATUS);
         params.put("statusNum", 1000);
 
         return params;

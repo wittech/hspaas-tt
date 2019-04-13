@@ -1,6 +1,5 @@
 package com.huashi.mms.config.rabbit.constant;
 
-
 /**
  * TODO 消息队列常量定义
  *
@@ -53,6 +52,11 @@ public class RabbitConstant {
      * 需人工处理队列信息
      */
     public static final String MQ_MMS_MANUAL_HANDING       = "mq_mms_manual_handling";
+
+    /**
+     * 彩信模板报备回执数据
+     */
+    public static final String MQ_MMS_MODEL_RECEIVE        = "mq_mms_model_receive";
 
     /**
      * TODO 待处理队列状态信息

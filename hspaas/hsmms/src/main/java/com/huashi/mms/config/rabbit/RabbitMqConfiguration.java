@@ -31,12 +31,11 @@ import com.huashi.mms.config.converter.FastJsonMessageConverter;
 import com.huashi.mms.config.rabbit.constant.RabbitConstant;
 
 /**
+ * TODO RabbitMQ消息队列配置
  * 
-  * TODO RabbitMQ消息队列配置
-  * 
-  * @author zhengying
-  * @version V1.0   
-  * @date 2019年1月12日 下午3:52:17
+ * @author zhengying
+ * @version V1.0
+ * @date 2019年1月12日 下午3:52:17
  */
 @Configuration
 @EnableRabbit
@@ -44,38 +43,38 @@ import com.huashi.mms.config.rabbit.constant.RabbitConstant;
 public class RabbitMqConfiguration {
 
     @Value("${mq.rabbit.host}")
-    private String mqHost;
+    private String  mqHost;
     @Value("${mq.rabbit.port}")
     private Integer mqPort;
     @Value("${mq.rabbit.username}")
-    private String mqUsername;
+    private String  mqUsername;
     @Value("${mq.rabbit.password}")
-    private String mqPassword;
+    private String  mqPassword;
     @Value("${mq.rabbit.vhost}")
-    private String mqVhost;
+    private String  mqVhost;
 
     /**
      * 初始化消费者数量
      */
     @Value("${mq.rabbit.consumers}")
-    private int concurrentConsumers;
-    
+    private int     concurrentConsumers;
+
     /**
      * 消费者最大数量（当队列堆积过量，则会自动增加消费者，直至达到最大）
      */
     @Value("${mq.rabbit.maxconsumers}")
-    private int maxConcurrentConsumers;
+    private int     maxConcurrentConsumers;
 
     /**
      * 每次队列中取数据个数，如果为1则保证消费者间平均消费
      */
     @Value("${mq.rabbit.prefetch:1}")
-    private int rabbitPrefetchCount;
+    private int     rabbitPrefetchCount;
 
     /**
+     * TODO 消息ID生成器（全局单例）
      * 
-       * TODO 消息ID生成器（全局单例）
-       * @return
+     * @return
      */
     @Bean
     public IdGenerator idGenerator() {
@@ -83,9 +82,9 @@ public class RabbitMqConfiguration {
     }
 
     /**
+     * TODO 队列数据序列化，采用jackson2
      * 
-       * TODO 队列数据序列化，采用jackson2
-       * @return
+     * @return
      */
     @Bean(name = "messageConverter")
     public Jackson2JsonMessageConverter messageConverter() {
@@ -93,9 +92,9 @@ public class RabbitMqConfiguration {
     }
 
     /**
+     * TODO 消息序列化，fastjson(暂未使用)
      * 
-       * TODO 消息序列化，fastjson(暂未使用)
-       * @return
+     * @return
      */
     @Bean
     public FastJsonMessageConverter fastjsonMessageConverter() {
@@ -103,10 +102,9 @@ public class RabbitMqConfiguration {
     }
 
     /**
+     * TODO rabbitmq连接配置
      * 
-       * TODO rabbitmq连接配置
-       * 
-       * @return
+     * @return
      */
     @Bean(name = "rabbitConnectionFactory")
     public ConnectionFactory rabbitConnectionFactory() {
@@ -124,7 +122,7 @@ public class RabbitMqConfiguration {
 
         // 默认 connectionFactory.setCacheMode(CacheMode.CHANNEL), ConnectionCacheSize无法设置
         connectionFactory.setChannelCacheSize(100);
-//		connectionFactory.setConnectionCacheSize(5);
+        // connectionFactory.setConnectionCacheSize(5);
 
         connectionFactory.setRequestedHeartBeat(60);
 
@@ -132,7 +130,7 @@ public class RabbitMqConfiguration {
         connectionFactory.setConnectionTimeout(15000);
 
         // 断开重连接，保证数据无丢失,默认为true
-//		connectionFactory.setAutomaticRecoveryEnabled(true);
+        // connectionFactory.setAutomaticRecoveryEnabled(true);
 
         return connectionFactory;
     }
@@ -144,15 +142,16 @@ public class RabbitMqConfiguration {
         rabbitAdmin.declareExchange(exchange);
         rabbitAdmin.setAutoStartup(true);
 
-
         // 待分包处理队列
-        Queue mmsWaitProcessQueue = new Queue(RabbitConstant.MQ_MMS_MT_WAIT_PROCESS, true, false, false, setQueueFeatures());
+        Queue mmsWaitProcessQueue = new Queue(RabbitConstant.MQ_MMS_MT_WAIT_PROCESS, true, false, false,
+                                              setQueueFeatures());
         Binding smsWaitProcessBinding = BindingBuilder.bind(mmsWaitProcessQueue).to(exchange).with(RabbitConstant.MQ_MMS_MT_WAIT_PROCESS);
         rabbitAdmin.declareQueue(mmsWaitProcessQueue);
         rabbitAdmin.declareBinding(smsWaitProcessBinding);
 
         // 网关回执数据，带解析回执数据并推送
-        Queue mmsWaitReceiptQueue = new Queue(RabbitConstant.MQ_MMS_MT_WAIT_RECEIPT, true, false, false, setQueueFeatures());
+        Queue mmsWaitReceiptQueue = new Queue(RabbitConstant.MQ_MMS_MT_WAIT_RECEIPT, true, false, false,
+                                              setQueueFeatures());
         Binding smsWaitReceiptBinding = BindingBuilder.bind(mmsWaitReceiptQueue).to(exchange).with(RabbitConstant.MQ_MMS_MT_WAIT_RECEIPT);
         rabbitAdmin.declareQueue(mmsWaitReceiptQueue);
         rabbitAdmin.declareBinding(smsWaitReceiptBinding);
@@ -170,10 +169,17 @@ public class RabbitMqConfiguration {
         rabbitAdmin.declareBinding(moWaitPushBinding);
 
         // 下行分包异常，如黑名单数据
-        Queue packetsExceptionQueue = new Queue(RabbitConstant.MQ_MMS_MT_PACKETS_EXCEPTION, true, false, false, setQueueFeatures());
+        Queue packetsExceptionQueue = new Queue(RabbitConstant.MQ_MMS_MT_PACKETS_EXCEPTION, true, false, false,
+                                                setQueueFeatures());
         Binding packetsExceptionBinding = BindingBuilder.bind(packetsExceptionQueue).to(exchange).with(RabbitConstant.MQ_MMS_MT_PACKETS_EXCEPTION);
         rabbitAdmin.declareQueue(packetsExceptionQueue);
         rabbitAdmin.declareBinding(packetsExceptionBinding);
+
+        // 模板报备回执
+        Queue modelReceiveQueue = new Queue(RabbitConstant.MQ_MMS_MODEL_RECEIVE, true, false, false, setQueueFeatures());
+        Binding modelReceiveBinding = BindingBuilder.bind(modelReceiveQueue).to(exchange).with(RabbitConstant.MQ_MMS_MODEL_RECEIVE);
+        rabbitAdmin.declareQueue(modelReceiveQueue);
+        rabbitAdmin.declareBinding(modelReceiveBinding);
 
         return rabbitAdmin;
     }
@@ -220,9 +226,9 @@ public class RabbitMqConfiguration {
         // 最大优先级定义
         args.put("x-max-priority", 10);
         // 过期时间，单位毫秒
-//		args .put("x-message-ttl", 60000);
+        // args .put("x-message-ttl", 60000);
         // 30分钟，单位毫秒
-//		args.put("x-expires", 1800000); 
+        // args.put("x-expires", 1800000);
         // 集群高可用，数据复制
         args.put("x-ha-policy", "all");
         return args;
@@ -241,19 +247,18 @@ public class RabbitMqConfiguration {
         factory.setMaxConcurrentConsumers(maxConcurrentConsumers);
         // 消息失败重试后 设置 RabbitMQ把消息分发给有空的cumsuer，同 channel.basicQos(1);
         factory.setPrefetchCount(rabbitPrefetchCount);
-//		factory.setConsumerTagStrategy(consumerTagStrategy);
-
+        // factory.setConsumerTagStrategy(consumerTagStrategy);
 
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setMessageConverter(messageConverter());
 
-//		factory.setMissingQueuesFatal(missingQueuesFatal);
+        // factory.setMissingQueuesFatal(missingQueuesFatal);
 
-//		ExecutorService service = Executors.newFixedThreadPool(500);
-//		factory.setTaskExecutor(service);
-        
+        // ExecutorService service = Executors.newFixedThreadPool(500);
+        // factory.setTaskExecutor(service);
+
         factory.setAutoStartup(true);
-        
+
         return factory;
     }
 

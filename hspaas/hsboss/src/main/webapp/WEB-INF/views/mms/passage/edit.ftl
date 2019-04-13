@@ -365,7 +365,7 @@
         <#-- var callTypeCn = ['','发送模板','状态回执推送','状态回执自取','上行推送','上行自取'];-->
         var callTypeCn = [];
 		<#list passageTemplateDetailTypes as t>
-			callTypeCn[${(t_index)!}] = "${(t.getName())!}";
+			callTypeCn[${(t_index + 1)!}] = "${(t.getName())!}";
         </#list>
         
         var html = '';

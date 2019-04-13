@@ -16,8 +16,13 @@
 			<#assign topMenuList = session.menuList>
 			<#list topMenuList as tl>
                 <li <#if tl.id == session.leftMenu.id>class="open"</#if>>
+                
                     <a href="${BASE_PATH}/main/top/${tl.id}">
-                        <i class="fa fa-dashboard"></i>
+                    	<#if tl.icon?? && tl.icon != "">
+                    		<i class="fa ${(tl.icon)!}"></i>
+                    	<#else>
+                    		<i class="fa fa-dashboard"></i>
+                    	</#if>
                         <span>${tl.menuName}</span>
                     </a>
                 </li>

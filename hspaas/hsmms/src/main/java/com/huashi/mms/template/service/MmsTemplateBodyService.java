@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -22,6 +21,7 @@ import com.huashi.common.vo.FileResponse;
 import com.huashi.mms.template.constant.MediaFileDirectory;
 import com.huashi.mms.template.constant.MmsTemplateContext.MediaType;
 import com.huashi.mms.template.dao.MmsMessageTemplateBodyMapper;
+import com.huashi.mms.template.domain.MmsMessageTemplate;
 import com.huashi.mms.template.domain.MmsMessageTemplateBody;
 import com.huashi.mms.template.exception.BodyCheckException;
 
@@ -30,12 +30,10 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
 
     @Autowired
     private MmsMediaFileService          mmsMediaFileService;
-
     @Autowired
     private MmsMessageTemplateBodyMapper mmsMessageTemplateBodyMapper;
-
-    @Value("${aliyun.oss.url}")
-    private String                       ossUrl;
+    @Autowired
+    private IMmsTemplateService          mmsTemplateService;
 
     /**
      * 多媒体类型
@@ -133,7 +131,7 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
                 return new FileResponse(false, "File gerenate failed");
             }
 
-            return new FileResponse(true, "success", ossUrl + fileName);
+            return new FileResponse(true, "success", fileName);
 
         } catch (Exception e) {
             logger.error("上传writeOssFile失败", e);
@@ -263,6 +261,30 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
             return bodies;
         } catch (Exception e) {
             logger.error("getBodiesByTemplateId [" + templateId + "] failed", e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<MmsMessageTemplateBody> getBodiesByModelId(String modelId) {
+        try {
+
+            MmsMessageTemplate template = mmsTemplateService.getByModelId(modelId);
+            if (template == null) {
+                logger.error("getBodiesByModelId [" + modelId + "] find template is null");
+                return null;
+            }
+
+            List<MmsMessageTemplateBody> bodies = find(template.getId());
+            if (CollectionUtils.isEmpty(bodies)) {
+                return null;
+            }
+
+            fillResource(bodies);
+
+            return bodies;
+        } catch (Exception e) {
+            logger.error("getBodiesByModelId [" + modelId + "] failed", e);
             return null;
         }
     }

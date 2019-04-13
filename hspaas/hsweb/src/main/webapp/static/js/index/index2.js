@@ -89,9 +89,11 @@ layui.config({
 	     });
 	});
 	
+	/*
 	$(".layui-logo").on('click', function() {
 		location.href = server_domain + "/";
 	});
+	*/
 	
 //	$('#myAccount').on('click', function() {
 //		 parent.tab.tabAdd({

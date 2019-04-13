@@ -2,7 +2,7 @@
 <!DOCTYPE configuration>
 <configuration>
 
-	<property name="appName" value="hssms" />
+	<property name="appName" value="hsmms" />
 	<property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss} |-%-5level [%thread] in %logger{50} - %msg%n" />
 
 	<contextName>${appName}</contextName>

@@ -65,15 +65,22 @@ public interface IMmsTemplateBodyService {
      * @return
      */
     List<MmsMessageTemplateBody> getBodies(String resourceName);
-    
+
     /**
+     * 根据模板主键获取报文信息
      * 
-       * 根据模板主键获取报文信息
-       * 
-       * @param templateId
-       * @return
+     * @param templateId
+     * @return
      */
     List<MmsMessageTemplateBody> getBodiesByTemplateId(long templateId);
+
+    /**
+     * 根据modelId获取报文信息
+     * 
+     * @param modelId
+     * @return
+     */
+    List<MmsMessageTemplateBody> getBodiesByModelId(String modelId);
 
     /**
      * 默认文本文件扩展名

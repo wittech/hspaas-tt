@@ -42,6 +42,7 @@
 	                </dd>
 	            </dl>
 	        </li>
+	        <#--
 	        <li class="layui-nav-item">
 	            <a href="javascript:;"><i class="fa fa-list" aria-hidden="true"></i><span> 报表统计</span></a>
 	            <dl class="layui-nav-child">
@@ -50,6 +51,7 @@
 	                </a>
 	            </dl>
 	        </li>
+	         -->
 	        <li class="layui-nav-item">
 	            <a href="javascript:;"><i class="fa fa-address-book" aria-hidden="true"></i><span> 用户基础信息</span></a>
 	            <dl class="layui-nav-child">

@@ -37,4 +37,9 @@ public class RabbitConstant {
      */
     public static final String MQ_MMS_MO_RECEIVE      = "mq_mms_mo_receive";
 
+    /**
+     * 彩信模板报备回执数据
+     */
+    public static final String MQ_MMS_MODEL_RECEIVE   = "mq_mms_model_receive";
+
 }

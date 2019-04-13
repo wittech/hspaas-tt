@@ -95,7 +95,7 @@ public interface IMmsTemplateService {
      * @return
      */
     MmsMessageTemplate getWithUserId(Long id, int userId);
-
+    
     /**
      * 根据对外模板ID查询模板详情
      * 

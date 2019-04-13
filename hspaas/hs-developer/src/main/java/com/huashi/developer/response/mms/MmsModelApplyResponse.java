@@ -10,7 +10,7 @@ import com.huashi.constants.OpenApiCode.CommonApiCode;
  * @version V1.0
  * @date 2019年3月28日 下午5:20:45
  */
-public class MmsModelResponse {
+public class MmsModelApplyResponse {
 
     /**
      * 状态码 #com.huashi.constants.OpenApiCode
@@ -51,24 +51,24 @@ public class MmsModelResponse {
         this.modelId = modelId;
     }
 
-    public MmsModelResponse(String code, String message, String modelId) {
+    public MmsModelApplyResponse(String code, String message, String modelId) {
         super();
         this.code = code;
         this.message = message;
         this.modelId = modelId;
     }
 
-    public MmsModelResponse() {
+    public MmsModelApplyResponse() {
         super();
     }
 
-    public MmsModelResponse(String code, String message) {
+    public MmsModelApplyResponse(String code, String message) {
         super();
         this.code = code;
         this.message = message;
     }
     
-    public MmsModelResponse(JSONObject jsonObject) {
+    public MmsModelApplyResponse(JSONObject jsonObject) {
         super();
         try {
             this.code = jsonObject.getString("code");

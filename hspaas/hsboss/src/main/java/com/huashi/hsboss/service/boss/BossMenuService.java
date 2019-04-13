@@ -41,6 +41,7 @@ public class BossMenuService extends BaseService {
             firstMenu.setMenuName(top.getStr("menu_name"));
             firstMenu.setMenuCode(top.getStr("menu_code"));
             firstMenu.setMenuUrl(top.getStr("menu_url"));
+            firstMenu.setIcon(top.getStr("icon"));
             menuList.add(firstMenu);
         }
 
@@ -54,6 +55,7 @@ public class BossMenuService extends BaseService {
             childMenu.setMenuCode(child.getStr("menu_code"));
             childMenu.setMenuUrl(child.getStr("menu_url"));
             childMenu.setParentId(child.getInt("parent_id"));
+            childMenu.setIcon(child.getStr("icon"));
             for (UserMenu thirdMenu : menuChildList) {
                 if (thirdMenu.getId() == child.getInt("parent_id")) {
                     thirdMenu.getChildList().add(childMenu);
@@ -82,6 +84,7 @@ public class BossMenuService extends BaseService {
             userMenu.setMenuName(menu.getStr("menu_name"));
             userMenu.setMenuUrl(menu.getStr("menu_url"));
             userMenu.setMenuCode(menu.getStr("menu_code"));
+            userMenu.setIcon(menu.getStr("icon"));
 
             List<BossMenu> childList = findChild(menu.getInt("id"));
             List<UserMenu> childMenuList = new ArrayList<UserMenu>();
@@ -91,6 +94,7 @@ public class BossMenuService extends BaseService {
                 userChildMenu.setMenuName(childMenu.getStr("menu_name"));
                 userChildMenu.setMenuUrl(childMenu.getStr("menu_url"));
                 userChildMenu.setMenuCode(childMenu.getStr("menu_code"));
+                userChildMenu.setIcon(childMenu.getStr("icon"));
                 childMenuList.add(userChildMenu);
 
                 List<UserMenu> thirdMenuList = new ArrayList<UserMenu>();
@@ -101,6 +105,7 @@ public class BossMenuService extends BaseService {
                     thirdChildMenu.setMenuName(thirdMenu.getStr("menu_name"));
                     thirdChildMenu.setMenuUrl(thirdMenu.getStr("menu_url"));
                     thirdChildMenu.setMenuCode(thirdMenu.getStr("menu_code"));
+                    thirdChildMenu.setIcon(thirdMenu.getStr("icon"));
                     thirdMenuList.add(thirdChildMenu);
                 }
                 userChildMenu.getChildList().addAll(thirdMenuList);
@@ -124,6 +129,7 @@ public class BossMenuService extends BaseService {
             userMenu.setMenuUrl(menu.getStr("menu_url"));
             userMenu.setMenuCode(menu.getStr("menu_code"));
             userMenu.setParentId(menu.getInt("parent_id"));
+            userMenu.setIcon(menu.getStr("icon"));
             menuMap.put("menu_" + menu.getInt("id"), userMenu);
         }
 

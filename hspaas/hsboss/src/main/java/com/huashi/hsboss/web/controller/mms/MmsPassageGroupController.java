@@ -36,7 +36,7 @@ import com.jfinal.ext.route.ControllerBind;
  * @created_at 2016年8月25日下午4:17:02
  */
 @ControllerBind(controllerKey = "/mms/passage_group")
-@ViewMenu(code = MenuCode.MENU_CODE_10001002)
+@ViewMenu(code = MenuCode.MENU_CODE_10003002)
 public class MmsPassageGroupController extends BaseController {
 
     @BY_NAME
@@ -48,7 +48,7 @@ public class MmsPassageGroupController extends BaseController {
     @BY_NAME
     private IMmsPassageAccessService iMmsPassageAccessService;
 
-    @AuthCode(code = { OperCode.OPER_CODE_10001002001, OperCode.OPER_CODE_10001002002 })
+    @AuthCode(code = { OperCode.OPER_CODE_10003002001, OperCode.OPER_CODE_10003002002 })
     @ActionMode
     public void index() {
         String keyword = getPara("keyword");
@@ -57,7 +57,7 @@ public class MmsPassageGroupController extends BaseController {
         setAttr("keyword", keyword);
     }
 
-    @AuthCode(code = OperCode.OPER_CODE_10001002001)
+    @AuthCode(code = OperCode.OPER_CODE_10003002001)
     @ActionMode
     public void add() {
         List<Province> provinceList = iProvinceService.findAvaiable();
@@ -91,7 +91,7 @@ public class MmsPassageGroupController extends BaseController {
         setAttr("passageList", passageList);
     }
 
-    @AuthCode(code = OperCode.OPER_CODE_10001002001)
+    @AuthCode(code = OperCode.OPER_CODE_10003002001)
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void create() {
         MmsPassageGroup group = getModel(MmsPassageGroup.class, "group");
@@ -152,7 +152,7 @@ public class MmsPassageGroupController extends BaseController {
         setAttr("group", group);
     }
 
-    @AuthCode(code = OperCode.OPER_CODE_10001002002)
+    @AuthCode(code = OperCode.OPER_CODE_10003002002)
     @ActionMode
     public void edit() {
         MmsPassageGroup group = iMmsPassageGroupService.findById(getParaToInt("id"));
@@ -213,7 +213,7 @@ public class MmsPassageGroupController extends BaseController {
     /**
      * TODO 修改通道组
      */
-    @AuthCode(code = OperCode.OPER_CODE_10001002002)
+    @AuthCode(code = OperCode.OPER_CODE_10003002002)
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void update() {
         MmsPassageGroup group = getModel(MmsPassageGroup.class, "group");

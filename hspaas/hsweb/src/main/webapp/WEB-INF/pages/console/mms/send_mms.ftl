@@ -21,12 +21,9 @@
 		
 		.layui-footer {
 		    position: fixed;
-		    left: 200px;
-		    right: 0;
 		    bottom: 0;
 		    height: 44px;
 		    line-height: 44px;
-		    padding: 0 15px;
 		}
 		
 		.layui-textarea-con {
@@ -40,14 +37,15 @@
 			min-height: 150px;
 		    resize: vertical;
     		height : 300px;
+    		margin-top:5px;
 		}
 		
 		.file {
 		  opacity:0;
 		  filter:alpha(opacity=0);
-		  font-size:15px;
 		  position:absolute;
-		  right:0;
+		  left:0;
+    	  top:0;
 		}
     	
     </style>
@@ -91,15 +89,14 @@
             </div>
           </div>
         </div>
-	  	<div id="mms_content">
-	  	</div>
+	  	<div id="mms_content"></div>
 	  	
         <div class="layui-form-item">
           <div class="layui-input-block">
             <div class="layui-footer">
                <a href="javascript:addText();" class="layui-btn layui-btn-primary layui-btn-radius">+文本数据</a>
                <a href="javascript:addImage();" class="layui-btn layui-btn-radius">+图片数据</a>
-               <a class="layui-btn layui-btn-warm layui-btn-radius" lay-submit="" lay-filter="sendMms">发送彩信</a>
+               <a class="layui-btn layui-btn-warm layui-btn-radius" lay-submit="" lay-filter="sendMms"><i class="layui-icon layui-icon-release"></i>发送彩信</a>
             </div>
           </div>
         </div>
@@ -139,7 +136,7 @@
 				}
 	        },
 	    	mediaContent: function(value){
-	    		var size = $("#mms_content .mms_c").size();
+	    		var size = $("#mms_content .layui-form-item").size();
 	    		if(size == 0) {
 	    			return "请点击按钮添加彩信内容";
 	    		}
@@ -231,15 +228,13 @@
 	        });
 	        return false;
 	    });
-	    
-	    
 	});
 	
 	function remove(id) {
 		$("#frame_"+ id).remove();
 	};
 	
-	function bindFile(fileId, containerId){
+	function bindFile(btnId, fileId, containerId){
 	     var inputJ = $("#"+fileId),
 		 input  = inputJ[0],
 		 con    = $("#"+containerId);
@@ -258,7 +253,9 @@
 			 	   con.html($("<img class='img_pre' src='"+e.target.result+"'>"));
 			 	}
 			 }
-	 	});    
+	 	});
+	 	
+	 	$("#"+fileId).css("width", $("#"+btnId).css("width")).css("height", $("#"+btnId).css("height"));
 	
 	};
 	
@@ -272,17 +269,11 @@
 		if(type == "image") {
 			title = "选择图片（支持jpg/gif/png/bmp）";
 			accept = "image/*";
-		} else if(type == "audio") {
-			title = "选择音频（支持amr/mpeg/mp3/aac）";
-			accept = "audio/*";
-		} else if(type == "video") {
-			title = "选择视频（支持mp4/3gp）";
-			accept = "video/*";
 		} else {
 			return "";
 		}
 		
-		return "<a class='layui-btn layui-btn-primary layui-btn-sm'>" +
+		return "<a class='layui-btn layui-btn-primary layui-btn-sm' id='btn_"+id+"'>" +
 				    	"<i class='layui-icon'>&#xe67c;</i>" + title +
 				        "<input name='files' lay-verify='required' type='file' id='file_"+id+"' class='file' accept='"+accept+"'>"+
 					"</a>";
@@ -292,20 +283,17 @@
 		var id = Math.random().toString().replace(".", "");
 		var header = getFileDes(type, id);
 		
-		$("#mms_content").append($("<div class='mms_c' id='frame_"+id+"'><div class='layui-card'>" +
-	        "<div class='layui-card-header'>"+
-	            "<a class='layui-btn layui-btn-sm layui-btn-danger' href=javascript:remove('"+id+"')><i class='layui-icon'></i> 移除</a>"+
-	        	 header +
+		$("#mms_content").append($("<div class='layui-form-item' id='frame_"+id+"'>" +
+	        "<label class='layui-form-label'><a class='layui-btn layui-btn-sm layui-btn-danger' href=javascript:remove('"+id+"')><i class='layui-icon'></i> 移除</a></label>"+
 	        	 "<input type='hidden' name='mediaTypes' value='"+type+"'>"+
-	        "</div>"+
-	        "<div class='layui-card-body' id='container_"+id+"'>"+
+	        "<div class='layui-input-block'>"+
+	        	header + "<div id='container_"+id+"'></div>" +
 	        	element +
 	        "</div>"+
-	      "</div>"+
 	    "</div>"));
 	    
 	    if(header != "") {
-			bindFile("file_" +id, "container_" + id);
+			bindFile("btn_"+id, "file_" +id, "container_" + id);
 		}
 	};
 	

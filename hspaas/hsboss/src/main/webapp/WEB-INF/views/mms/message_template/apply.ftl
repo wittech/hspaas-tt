@@ -173,7 +173,7 @@
             success: function (data) {
                 if (data.result) {
                 	Boss.alertToCallback('通道彩信模板报备已提交！',function(){
-                        location.href = "${BASE_PATH}/mms/message_template/apply";
+                        location.reload();
                     });
                 
                 } else {

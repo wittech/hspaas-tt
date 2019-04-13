@@ -612,6 +612,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
                 return false;
             }
 
+            mmsMtTaskLocal.get().setTitle(template.getTitle());
             messageTemplateLocal.set(template);
         } else {
             mmsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("自定义彩信发送审核"));

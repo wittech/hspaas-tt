@@ -63,7 +63,7 @@ public class MmsTemplateService implements IMmsTemplateService {
             params.put("status", status);
         }
         if (StringUtils.isNotEmpty(title)) {
-            params.put("content", title);
+            params.put("title", title);
         }
 
         int totalRecord = mmsMessageTemplateMapper.getCountByUserId(params);
@@ -241,7 +241,19 @@ public class MmsTemplateService implements IMmsTemplateService {
 
     @Override
     public MmsMessageTemplate getWithUserId(Long id, int userId) {
-        return null;
+        try {
+            MmsMessageTemplate template = isAllowAccess(userId, id);
+            if (template == null) {
+                return null;
+            }
+
+            template.setBodies(mmsTemplateBodyService.getBodiesByTemplateId(id));
+
+            return template;
+        } catch (Exception e) {
+            logger.error("模板[" + id + "] 用户ID:[" + userId + "] 获取模板数据失败 ", e);
+            return null;
+        }
     }
 
     @Override
@@ -295,15 +307,15 @@ public class MmsTemplateService implements IMmsTemplateService {
             // if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
             // pushToRedis(template.getUserId(), template);
             // }
-            
+
             template.setModelId(idGenerator.generateStr());
             boolean isOk = mmsMessageTemplateMapper.insertSelective(template) > 0;
             if (!isOk) {
                 logger.error("模板数据[" + JSON.toJSONString(template) + "]插入失败");
                 throw new ModelApplyException();
             }
-            
-            for(MmsMessageTemplateBody body : template.getBodies()) {
+
+            for (MmsMessageTemplateBody body : template.getBodies()) {
                 body.setTemplateId(template.getId());
             }
 
@@ -321,4 +333,5 @@ public class MmsTemplateService implements IMmsTemplateService {
         }
 
     }
+    
 }

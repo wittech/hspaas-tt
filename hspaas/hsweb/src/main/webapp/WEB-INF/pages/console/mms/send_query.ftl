@@ -38,12 +38,22 @@
             </form>
             <fieldset class="layui-elem-field">
                 <div class="layui-field-box layui-form">
-                    <table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
+                    <table class="layui-hide" id="send-data-table" lay-filter="dataTable"></table>
                     <script type="text/html" id="table-send-query-toolbar"></script>
+                    
+                    <script type="text/html" id="table-preview-operation">
+						 <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="preview"><i class="layui-icon layui-icon-cellphone-fine"></i>预览</a>
+						 {{# if(d.title != null){ }}
+						 	{{d.title}}
+						  {{# } }}
+					</script>
+                    
                 </div>
             </fieldset>
         </div>
     </div>
+    
+    <div id="content-preview" style="display: none;"></div>
 
 <script type="text/javascript" src="${rc.contextPath}/static/js/date_format.js"></script>
 
@@ -52,115 +62,153 @@
 </script>
 
 <script type="text/html" id="send_status_des">
-	{{#  if(d.status === 0){ }}
-	    <span class="background-color: #5FB878;">{{ "发送成功" }}</span>
+	{{#  if(d.status == 0){ }}
+	    <span class="layui-badge layui-bg-green">{{ "发送成功" }}</span>
 	  {{#  } else { }}
-	    <span style="background-color: #FF5722; color: #fff;">{{ "发送失败" }}</span>
+	    <span class="layui-badge">{{ "发送失败" }}</span>
 	  {{#  } }}
 </script>
 
 <script type="text/html" id="deliver_status_des">
 	 {{# if(d.messageDeliver == undefined){ }}
-	    {{ "待回执" }}
+	    <span class="layui-badge layui-bg-orange">{{ "待回执" }}</span>
 	  {{# } else if(d.messageDeliver.status == 0){ }}
-	    <span class="background-color: #5FB878;">{{ "回执成功" }}</span>
+	    <span class="layui-badge layui-bg-green">{{ "回执成功" }}</span>
 	  {{# } else { }}
-	    <span style="background-color: #FF5722; color: #fff;">{{ "回执失败" }}</span>
+	    <span class="layui-badge">{{ "回执失败" }}</span>
 	  {{# } }}
 </script>
 
 <script type="text/javascript" src="${rc.contextPath}/static/js/custom_defines.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/static/plugins/layui2/layui.js"></script>
 <script type="text/javascript">
-	layui.use(['element', 'table', 'form', 'laydate'], function() {
-    var table = layui.table
-        ,layerTips = parent.layer === undefined ? layui.layer : parent.layer
-        ,layer = layui.layer
-        ,form = layui.form
-        ,element = layui.element
-        ,laydate = layui.laydate
-        ,$ = layui.$;
 
-    //日期
-    laydate.render({
-        elem: '#startDate'
-    });
-    laydate.render({
-        elem: '#endDate'
-    });
-    
-    //预定义参数
-    var searchObj = new Object();
-    var currpage = 1;
+	layui.config({
+	    base: '${rc.contextPath}/static/plugins/layui2/lay/modules/'
+	}).use(['element', 'table', 'form', 'laydate', 'modal'], function() {
+	    var table = layui.table
+	        ,layerTips = parent.layer === undefined ? layui.layer : parent.layer
+	        ,layer = layui.layer
+	        ,form = layui.form
+	        ,element = layui.element
+	        ,laydate = layui.laydate
+	        ,modal = layui.modal
+	        ,$ = layui.$;
+	
+	    //日期
+	    laydate.render({
+	        elem: '#startDate'
+	    });
+	    laydate.render({
+	        elem: '#endDate'
+	    });
+	    
+	    //预定义参数
+	    var searchObj = new Object();
+	    var currpage = 1;
+	    
+	    var tableId = "send-data-table";
+	
+	    var loadTableData = function() {
+	    	searchObj.currentPage = currpage;
+	    	searchObj.sid = $.trim($("#sid").val());
+	    	searchObj.mobile = $.trim($("#mobile").val());
+	    	searchObj.startDate = $.trim($("#startDate").val());
+	    	searchObj.endDate = $.trim($("#endDate").val());
+	    	
+	        table.render({
+	            id:tableId
+	            ,elem: '#'+tableId
+	            ,cellMinWidth: 50
+	            ,toolbar: '#table-send-query-toolbar'
+	            , cols: [[
+	                  {type:'numbers'}
+		              , {field: 'sid', title: 'sid'}
+		              , {field: 'mobile', title: '手机号码'}
+		              , {field: 'createTime', title: '发送时间', width:200, templet: '#date_format', sort: true}
+		              , {field: 'status', title: '发送状态', templet: '#send_status_des', sort: true}
+		              , {field: 'receiveStatus', title: '回执状态', sort: true, templet: '#deliver_status_des'}
+		              , {field: 'title', title: '彩信标题', width : 400, toolbar: '#table-preview-operation'}
+		          ]]
+	            ,url: server_domain + "/mms/send/page"
+	            ,loading: true
+	            ,where: searchObj
+	            ,method: 'GET'
+	            ,page: {
+		            layout: ['count', 'prev', 'page', 'next', 'skip']
+		            ,groups: 5
+		            ,first: '1'
+		            ,last: '尾页'
+		         }
+		        ,limit:20
+	            ,even: true
+	            ,done: function(res, curr, count){
+	                currpage = curr;
+	            }
+	        });
+	    };
+	    
+	    loadTableData();
+	    
+	    function preview(sid) {
+	    	alert("sss");
+	    	$("#content-preview").html("");
+	    	$.ajax({
+	            url: server_domain+'/mms/template/previewBySid'
+	            ,type: 'get'
+	            ,dataType:'html'
+	            ,data: {
+	                "sid": sid
+	            }
+	            ,beforeSend : function() {
+	            	l_index = layer.load(1);
+	            }
+	            ,success: function(data){
+	            	layer.close(l_index);
+	            	$("#content-preview").html(data);
+	    			modal.popupRight('内容预览', 'content-preview', 360);
+	            },error : function() {
+	            	layer.close(l_index);
+	            	modal.msgError("服务请求异常");
+	            }
+	        });
+	    };
+	    
+	    //监听行工具事件
+	    table.on('tool('+tableId+')', function(obj){
+	        var pdata=obj?obj.data:null;
+	        if(obj.event === 'preview'){
+	        	preview(pdata.sid);
+	        }
+	        
+	    });
+	
+	    var reloadList = function() {
+	    	searchObj.currentPage = currpage;
+	    	
+	        if(searchObj.status){
+	            searchObj.status = searchObj.status=='0'?"":searchObj.status;
+	        }
+	        table.reload('dataTable', {
+	            where: searchObj
+	            ,page: {
+	                curr: currpage
+	            }
+	        });
+	    };
+	
+	    $('#openSearch').bind('click',function(){
+	        $('.layui-advance-search').toggle(300);
+	    });
+	
+	    form.on('submit(search)', function(data) {
+	        searchObj = data.field;
+	        currpage = 1;
+	        reloadList();
+	        return false;
+	    });
 
-    var loadTableData = function() {
-    	searchObj.currentPage = currpage;
-    	searchObj.sid = $.trim($("#sid").val());
-    	searchObj.mobile = $.trim($("#mobile").val());
-    	searchObj.startDate = $.trim($("#startDate").val());
-    	searchObj.endDate = $.trim($("#endDate").val());
-    	
-        table.render({
-            id:'dataTable'
-            ,elem: '#dataTable'
-            ,cellMinWidth: 50
-            ,toolbar: '#table-send-query-toolbar'
-            , cols: [[
-                  {type:'numbers'}
-	              , {field: 'sid', title: 'sid'}
-	              , {field: 'mobile', title: '手机号码'}
-	              , {field: 'createTime', title: '发送时间', width:200, templet: '#date_format', sort: true}
-	              , {field: 'status', title: '发送状态', templet: '#send_status_des', sort: true}
-	              , {field: 'receiveStatus', title: '回执状态', sort: true, templet: '#deliver_status_des'}
-	              , {field: 'title', title: '彩信标题', width : 400}
-	          ]]
-            ,url: server_domain + "/mms/send/page"
-            ,loading: true
-            ,where: searchObj
-            ,method: 'GET'
-            ,page: {
-	            layout: ['count', 'prev', 'page', 'next', 'skip']
-	            ,groups: 5
-	            ,first: '1'
-	            ,last: '尾页'
-	         }
-	        ,limit:20
-            ,even: true
-            ,done: function(res, curr, count){
-                currpage = curr;
-            }
-        });
-    };
-
-    var reloadList = function() {
-    	searchObj.currentPage = currpage;
-    	
-        if(searchObj.status){
-            searchObj.status = searchObj.status=='0'?"":searchObj.status;
-        }
-        table.reload('dataTable', {
-            where: searchObj
-            ,page: {
-                curr: currpage
-            }
-        });
-    };
-
-
-    loadTableData();
-
-    $('#openSearch').bind('click',function(){
-        $('.layui-advance-search').toggle(300);
-    });
-
-    form.on('submit(search)', function(data) {
-        searchObj = data.field;
-        currpage = 1;
-        reloadList();
-        return false;
-    });
-
-});
+	});
 </script>
 </body>
 

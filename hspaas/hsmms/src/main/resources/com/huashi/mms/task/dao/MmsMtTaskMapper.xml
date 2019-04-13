@@ -130,7 +130,7 @@
 				send_type,
 			</if>
 			<if test="modelId != null">
-				body,
+				model_id,
 			</if>
 			<if test="title != null">
 				title,

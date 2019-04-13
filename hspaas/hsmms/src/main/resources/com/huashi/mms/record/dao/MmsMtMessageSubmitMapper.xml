@@ -25,6 +25,35 @@
 		<result column="status" property="status" jdbcType="INTEGER" />
 		<result column="remark" property="remark" jdbcType="VARCHAR" />
 		<result column="msg_id" property="msgId" jdbcType="VARCHAR" />
+		
+		<association property="messageDeliver" column="deliver_id"
+			javaType="com.huashi.mms.record.domain.MmsMtMessageDeliver">
+			<id column="deliver_id" property="id" jdbcType="BIGINT" />
+			<result column="deliver_mobile" property="mobile" jdbcType="VARCHAR" />
+			<result column="deliver_status_code" property="statusCode"
+				jdbcType="VARCHAR" />
+			<result column="deliver_status" property="status" jdbcType="INTEGER" />
+			<result column="deliver_time" property="deliverTime" jdbcType="VARCHAR" />
+			<result column="deliver_create_time" property="createTime"
+				jdbcType="TIMESTAMP" />
+			<result column="deliver_remark" property="remark" jdbcType="VARCHAR" />
+		</association>
+		<association property="messagePush" column="push_id"
+			javaType="com.huashi.mms.record.domain.MmsMtMessagePush">
+			<id column="push_id" property="id" jdbcType="BIGINT" />
+			<result column="push_mobile" property="mobile" jdbcType="VARCHAR" />
+			<result column="push_content" property="content" jdbcType="VARCHAR" />
+			<result column="push_status" property="status" jdbcType="INTEGER" />
+			<result column="push_retry_times" property="retryTimes"
+				jdbcType="INTEGER" />
+			<result column="push_response_milliseconds" property="responseMilliseconds"
+				jdbcType="BIGINT" />
+			<result column="push_response_content" property="responseContent"
+				jdbcType="VARCHAR" />
+			<result column="push_create_time" property="createTime"
+				jdbcType="TIMESTAMP" />
+		</association>
+		
 	</resultMap>
 	<sql id="Base_Column_List">
 		id, user_id, sid, mobile, province_code, cmcp, template_id,
@@ -293,6 +322,7 @@
 	<select id="findList" resultMap="BaseResultMap">
 		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp,
 		s.title,
+		s.template_id,
 		s.content,
 		s.attach, s.passage_id,
 		s.need_push,
@@ -397,6 +427,7 @@
 
 	<select id="findListByUser" resultMap="BaseResultMap">
 		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp,
+		s.template_id,
 		s.title,
 		s.content,
 		s.attach, s.passage_id,

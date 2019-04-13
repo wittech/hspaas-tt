@@ -36,6 +36,8 @@ import com.huashi.mms.record.domain.MmsMtMessageDeliver;
 import com.huashi.mms.record.domain.MmsMtMessagePush;
 import com.huashi.mms.record.domain.MmsMtMessageSubmit;
 import com.huashi.mms.task.domain.MmsMtTaskPackets;
+import com.huashi.mms.template.domain.MmsMessageTemplate;
+import com.huashi.mms.template.service.IMmsTemplateBodyService;
 import com.huashi.sms.passage.context.PassageContext;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
 
@@ -71,6 +73,8 @@ public class MmsMtSubmitService implements IMmsMtSubmitService {
     private MmsWaitSubmitListener     mmsWaitSubmitListener;
     @Autowired
     private RabbitMessageQueueManager rabbitMessageQueueManager;
+    @Reference
+    private IMmsTemplateBodyService   mmsTemplateBodyService;
     private final Logger              logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -453,6 +457,32 @@ public class MmsMtSubmitService implements IMmsMtSubmitService {
         }
 
         return mmsMtMessageSubmitMapper.selectCmcpReport(startTime, endTime);
+    }
+
+    @Override
+    public MmsMessageTemplate getWithUserId(long sid, int userId) {
+        List<MmsMtMessageSubmit> list = findBySid(sid);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+
+        MmsMtMessageSubmit submit = list.iterator().next();
+        if (submit.getUserId() != userId) {
+            logger.error("下行数据用户ID[" + submit.getUserId() + "]与参数usreId:[" + userId + "]不匹配");
+            return null;
+        }
+
+        MmsMessageTemplate template = new MmsMessageTemplate();
+        template.setTitle(submit.getTitle());
+
+        // 如果模板ID不为空，则按照模板ID填充
+        if (StringUtils.isNotBlank(template.getModelId())) {
+            template.setBodies(mmsTemplateBodyService.getBodiesByModelId(template.getModelId()));
+        } else if (StringUtils.isNotEmpty(submit.getContent())) {
+            template.setBodies(mmsTemplateBodyService.getBodies(submit.getContent()));
+        }
+
+        return template;
     }
 
 }

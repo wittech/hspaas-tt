@@ -100,10 +100,10 @@
                                 <thead>
                                     <tr>
                                         <th>序</th>
-                                        <th>用户信息</th>
+                                        <th>用户</th>
                                         <th>优先级</th>
-                                        <th>操作类型</th>
-                                        <th>路由类型</th>
+                                        <th>来源</th>
+                                        <th>路由</th>
                                         <th>状态</th>
                                         <th>提交时间</th>
                                         <th>通过时间</th>
@@ -123,7 +123,15 @@
                                         <td>${(pl.priority)!}</td>
                                         <td>${(pl.apptypeText)!}</td>
                                         <td>${(pl.routeTypeText)!}</td>
-                                        <td><#if pl.status==0>待审核<#elseif pl.status==1>审核成功<#elseif pl.status==2>审核失败</#if></td>
+                                        <td>
+                                        	<#if pl.status==0>
+                                        		<span class="label label-default">待审核</span>
+                                        	<#elseif pl.status==1>
+                                        		<span class="label label-success">审核成功</span>
+                                        	<#elseif pl.status==2>
+                                        		<span class="label label-danger">审核失败</span>
+                                        	</#if>
+                                        </td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td><#if pl.approveTime??>${pl.approveTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
                                         <td>

@@ -7,6 +7,7 @@ import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.mms.record.domain.MmsMtMessageSubmit;
 import com.huashi.mms.task.domain.MmsMtTaskPackets;
+import com.huashi.mms.template.domain.MmsMessageTemplate;
 
 /**
  * TODO 下行彩信提交服务
@@ -197,4 +198,13 @@ public interface IMmsMtSubmitService {
      * @param submits
      */
     void setPushConfigurationIfNecessary(List<MmsMtMessageSubmit> submits);
+
+    /**
+     * 根据用户ID和SID获取彩信内容
+     * 
+     * @param sid
+     * @param userId
+     * @return
+     */
+    MmsMessageTemplate getWithUserId(long sid, int userId);
 }

@@ -322,7 +322,7 @@
 			and status = #{status}
 		</if>
 		<if test="title != null">
-			and content like CONCAT('%',#{title},'%')
+			and title like CONCAT('%',#{title},'%')
 		</if>
 		<if test="appType != null">
 			and app_type = #{appType}

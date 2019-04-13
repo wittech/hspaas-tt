@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.common.notice.vo.BaseResponse;
+import com.huashi.mms.record.service.IMmsMtSubmitService;
 import com.huashi.mms.template.constant.MmsTemplateContext.ApproveStatus;
 import com.huashi.mms.template.service.IMmsTemplateService;
 import com.huashi.web.context.HttpResponse;
@@ -27,6 +28,8 @@ public class MmsMessageTemplateController extends BaseController {
     private IMmsTemplateService mmsMessageTemplateService;
     @Autowired
     private MmsSendPrervice     mmsSendPrervice;
+    @Reference
+    private IMmsMtSubmitService mmsMtSubmitService;
 
     private final Logger        logger = LoggerFactory.getLogger(getClass());
 
@@ -119,10 +122,22 @@ public class MmsMessageTemplateController extends BaseController {
 
         return true;
     }
-    
+
     @RequestMapping(value = "/sendMms", method = RequestMethod.GET)
     public String sendMms(Long id, Model model) {
         model.addAttribute("template", mmsMessageTemplateService.get(id));
         return moduleInConsole("/mms/template/send_mms");
+    }
+
+    @RequestMapping(value = "/preview", method = RequestMethod.GET)
+    public String preview(Long id, Model model) {
+        model.addAttribute("template", mmsMessageTemplateService.getWithUserId(id, getCurrentUserId()));
+        return moduleInConsole("/mms/template/preview");
+    }
+
+    @RequestMapping(value = "/previewBySid", method = RequestMethod.GET)
+    public String previewBySid(Long sid, Model model) {
+        model.addAttribute("template", mmsMtSubmitService.getWithUserId(sid, getCurrentUserId()));
+        return moduleInConsole("/mms/template/preview");
     }
 }

@@ -163,7 +163,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
 				<configuration>
-					<mainClass>com.huashi.sms.HsSmsApplication</mainClass>
+					<mainClass>com.huashi.mms.HsMmsApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>

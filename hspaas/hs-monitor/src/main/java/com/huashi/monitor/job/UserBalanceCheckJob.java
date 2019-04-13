@@ -25,7 +25,7 @@ import com.huashi.sms.passage.service.ISmsPassageService;
  * @date 2017年8月16日 下午7:01:25
  */
 @Service("userBalanceCheckJob")
-public class UserBalanceCheckJob extends AbtractJob {
+public class UserBalanceCheckJob extends AbstractJob {
 
     @Reference
     private IUserService        userService;
@@ -34,7 +34,7 @@ public class UserBalanceCheckJob extends AbtractJob {
     @Reference
     private ISmsPassageService  smsPassageService;
 
-    private Logger              logger                   = LoggerFactory.getLogger(getClass());
+    private final Logger        logger                   = LoggerFactory.getLogger(getClass());
 
     private static final String WARNING_MESSAGE_TEMPLATE = "【华时科技】[%s][%s]余额到达告警阈值，当前余额为%d，请关注";
 
@@ -48,7 +48,8 @@ public class UserBalanceCheckJob extends AbtractJob {
             return;
         }
 
-//        logger.info("Users " + JSON.toJSONString(list,new SimplePropertyPreFilter("userId,balance")) + " balance checking");
+        // logger.info("Users " + JSON.toJSONString(list,new SimplePropertyPreFilter("userId,balance")) +
+        // " balance checking");
 
         for (UserBalance ub : list) {
             if (!isNeedAndReachWarning(ub)) {

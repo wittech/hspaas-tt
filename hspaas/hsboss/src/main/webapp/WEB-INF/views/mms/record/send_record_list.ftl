@@ -223,6 +223,8 @@
                             </tr>
                             <tr>
                                 <td colspan="12" align="right" style="word-break:break-all;">
+                                    <a href="javascript:preview('${(pl.templateId)!}', '${(pl.title)!}', '${(pl.content)!}');"
+	                                       class="btn btn-pink btn-xs"><i class="fa fa-video-camera"></i>&nbsp;预览</a>
                                     ${pl.title!''}
                                 </td>
                             </tr>
@@ -297,6 +299,23 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" onclick="closePushModal();">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div>
+        
+        <div class="modal fade" id="previewModal">
+            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">彩信内容</h4>
+                    </div>
+                    <div class="modal-body" data-scrollbar="true" data-height="700" data-scrollcolor="#000" id="myPreviewModelBody">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
                     </div>
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
@@ -383,6 +402,22 @@
         $('#pushShowTime').modal('hide');
     }
     
+    function preview(templateId, title, resource) {
+    	$.ajax({
+            url:'${BASE_PATH}/mms/message_template/preview',
+            data:{templateId : templateId, title:title, resource:resource},
+            dataType:'html',
+            type:'post',
+            success:function(data){
+                $("#myPreviewModelBody").html(data);
+            },error:function(data){
+                Boss.alert('请求失败！');
+            }
+        });
+    
+        $('#previewModal').modal('show');
+    }
+    
 
     function showAllMobile(mobile) {
         $('#all_mobile').val(mobile);
@@ -393,6 +428,7 @@
         $('#myModal').modal('hide');
         $('#deliverModal').modal('hide');
         $('#submitRemarkModal').modal('hide');
+        $('#previewModal').modal('hide');
     }
 
     function showSubmitList(obj, id) {

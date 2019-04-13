@@ -25,7 +25,7 @@ import com.huashi.developer.request.mms.MmsModelApplyRequest;
 import com.huashi.developer.request.mms.MmsSendByModelRequest;
 import com.huashi.developer.request.mms.MmsSendRequest;
 import com.huashi.developer.response.mms.MmsBalanceResponse;
-import com.huashi.developer.response.mms.MmsModelResponse;
+import com.huashi.developer.response.mms.MmsModelApplyResponse;
 import com.huashi.developer.response.mms.MmsSendResponse;
 import com.huashi.mms.task.domain.MmsMtTask;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
@@ -121,7 +121,7 @@ public class MmsPrervice {
      * @param mmsModelApplyRequest
      * @return
      */
-    public MmsModelResponse applyModel(MmsModelApplyRequest mmsModelApplyRequest) {
+    public MmsModelApplyResponse applyModel(MmsModelApplyRequest mmsModelApplyRequest) {
         try {
             MmsMessageTemplate template = new MmsMessageTemplate();
 
@@ -131,16 +131,16 @@ public class MmsPrervice {
 
             String modelId = mmsTemplateService.save(template);
             if (StringUtils.isBlank(modelId)) {
-                return new MmsModelResponse(MmsApiCode.MMS_MODEL_APPLY_FAILED.getCode(),
+                return new MmsModelApplyResponse(MmsApiCode.MMS_MODEL_APPLY_FAILED.getCode(),
                                             MmsApiCode.MMS_MODEL_APPLY_FAILED.getMessage());
             }
 
-            return new MmsModelResponse(CommonApiCode.COMMON_SUCCESS.getCode(),
+            return new MmsModelApplyResponse(CommonApiCode.COMMON_SUCCESS.getCode(),
                                         CommonApiCode.COMMON_SUCCESS.getMessage(), modelId);
 
         } catch (ModelApplyException e) {
             logger.error("报备模板失败， {}", e);
-            return new MmsModelResponse(MmsApiCode.MMS_MODEL_APPLY_FAILED.getCode(),
+            return new MmsModelApplyResponse(MmsApiCode.MMS_MODEL_APPLY_FAILED.getCode(),
                                         MmsApiCode.MMS_MODEL_APPLY_FAILED.getMessage());
         }
 

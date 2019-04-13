@@ -11,6 +11,16 @@
     <link rel="stylesheet" href="${rc.contextPath}/static/plugins/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="${rc.contextPath}/static/css/table.css" />
     <link rel="stylesheet" href="${rc.contextPath}/static/build/css/themes/default.css" media="all" id="skin" kit-skin />
+    
+    <style>
+    	
+		.img_pre {
+		    resize: vertical;
+    		height : 100px;
+		}
+    	
+    </style>
+    
 </head>
 
 <body>
@@ -48,17 +58,20 @@
 					</script>
 					
 					<script type="text/html" id="table-template-operation">
+						 <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="preview"><i class="layui-icon layui-icon-cellphone-fine"></i>预览</a>
 					     {{# if(d.status == 0){ }}
-						     <a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
 						     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="remove"><i class="layui-icon layui-icon-delete"></i>删除</a>
 					     {{# } else if(d.status == 2){ }}
-					     	 <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="send">发送彩信</a>
+					     	 <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="send"><i class="layui-icon layui-icon-release"></i>发送彩信</a>
 					     {{# } }}
 					</script>
                 </div>
             </fieldset>
         </div>
     </div>
+    
+    <div id="content-preview" style="display: none;">
+	</div>
 
 <script type="text/javascript" src="/static/js/date_format.js"></script>
 
@@ -101,7 +114,7 @@
 	                  {type: 'checkbox', fixed: 'left'}
 	                  ,{field: 'modelId', title: '模板Id'}
 		              ,{field: 'title', title: '模板标题'}
-		              ,{field: 'status', title: '审批状态', width: 160, sort: true}
+		              ,{field: 'status', title: '审批状态', width: 160}
 		              ,{field: 'createTime', title: '提交时间', width: 180, templet: '#date_format'}
 		              ,{fixed: 'right', title:'操作', toolbar: '#table-template-operation', width:210}
 		         ]]
@@ -120,13 +133,13 @@
 	            ,done: function(res, curr, count){
 	            	$("[data-field='status']").children().each(function(){
 						if($(this).text()=='0'){
-						   $(this).text("待审核")
+						   $(this).html("<a class='layui-btn layui-btn-primary layui-btn-xs'>待审核</a> ")
 						}else if($(this).text()=='1'){
-						   $(this).text("平台处理中")
+						   $(this).html("<a class='layui-btn layui-btn-warm layui-btn-xs'>平台处理中</a>")
 						}else if($(this).text()=='2'){
-						   $(this).text("审核通过")
+						   $(this).html("<a class='layui-btn layui-btn-success layui-btn-xs'>审核通过</a>")
 						}else if($(this).text()=='3'){
-						   $(this).text("审核失败")
+						   $(this).html("<a class='layui-btn layui-btn-danger layui-btn-xs'>审核失败</a>")
 						}
 	            	});
 	            	
@@ -189,6 +202,29 @@
 	                break;
 	        };
 	    });
+	    
+	    function preview(id) {
+	    	$("#content-preview").html("");
+	    	$.ajax({
+                url: server_domain+'/mms/template/preview'
+                ,type: 'get'
+                ,dataType:'html'
+                ,data: {
+                    "id": id
+                }
+                ,beforeSend : function() {
+                	l_index = layer.load(1);
+                }
+                ,success: function(data){
+                	layer.close(l_index);
+                	$("#content-preview").html(data);
+	    			modal.popupRight('内容预览', 'content-preview', 360);
+                },error : function() {
+                	layer.close(l_index);
+                	modal.msgError("服务请求异常");
+                }
+            });
+	    }
 	
 	    //监听行工具事件
 	    table.on('tool('+tableId+')', function(obj){
@@ -242,7 +278,10 @@
                     	}*/
 	                }
 	            });
+	        } else if(obj.event === 'preview'){
+	        	preview(pdata.id);
 	        }
+	        
 	    });
 	    
 	    var reloadList = function() {

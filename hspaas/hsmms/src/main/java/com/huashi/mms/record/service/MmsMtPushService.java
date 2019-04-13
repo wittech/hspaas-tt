@@ -408,6 +408,8 @@ public class MmsMtPushService implements IMmsMtPushService {
                                            pushThreadName(userId, i));
                 thread.start();
             }
+
+            logger.info("用户[" + userId + "]推送队列[" + getUserPushQueueName(userId) + "]开始监听..");
             return true;
         } catch (Exception e) {
             logger.error("用户加入彩信状态报告回执推送监听失败, 用户ID：{}", userId, e);

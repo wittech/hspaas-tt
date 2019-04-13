@@ -145,17 +145,16 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <#assign complateChildTaskCheck = macro.doOper("10003003001") />
-							<#assign sendRecordListCheck = macro.doOper("10003003002") />
-							<#assign tempCheck = macro.doOper("10003003003") />
+                            <#assign complateChildTaskCheck = macro.doOper("10001003001") />
+							<#assign sendRecordListCheck = macro.doOper("10001003002") />
                             <#list page.list as pl>
                             <tr>
                                <td rowspan="2" style="background: #fff;text-align: center;">${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>
                                 <td>${(pl.sid)!''}</td>
                                 <td>
                                 	<button type="button" class="btn btn-info btn-xs">
-                                		<#if pl.modelId?? && p.modelId != ''>
-                                       	 模<#else>定
+                                		<#if pl.modelId?? && pl.modelId != ''>
+                                       	 模<#else>普
 	                                    </#if>
                                 	</button>
                                 </td>
@@ -221,9 +220,10 @@
                                     	<a href="${BASE_PATH}/mms/record/complate_child_task?sid=${pl.sid}" class="btn btn-info btn-xs">子任务</a>
                                     </#if>
                                     <#if sendRecordListCheck>
-                                    	|
                                     	<a href="${BASE_PATH}/mms/record/send_record_list?sid=${pl.sid}" class="btn btn-success btn-xs">发送记录</a>
                                     </#if>
+                                    <a href="javascript:preview('${(pl.modelId)!}', '${(pl.title)!}', '${(pl.body)!}');"
+	                                       class="btn btn-pink btn-xs"><i class="fa fa-video-camera"></i>&nbsp;预览</a>
                                 </td>
                             </tr>
                             <tr>
@@ -255,6 +255,23 @@
                     </div>
                     <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000" id="myModelBody">
                         <textarea id="all_mobile" class="form-control" rows="6"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div>
+        
+        <div class="modal fade" id="previewModal">
+            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeModal();"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">彩信内容</h4>
+                    </div>
+                    <div class="modal-body" data-scrollbar="true" data-height="700" data-scrollcolor="#000" id="myPreviewModelBody">
+                        
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
@@ -303,6 +320,22 @@
         });
         
     });
+    
+    function preview(modelId, title, resource) {
+    	$.ajax({
+            url:'${BASE_PATH}/mms/message_template/preview',
+            data:{modelId : modelId, title:title, resource:resource},
+            dataType:'html',
+            type:'post',
+            success:function(data){
+                $("#myPreviewModelBody").html(data);
+            },error:function(data){
+                Boss.alert('请求失败！');
+            }
+        });
+    
+        $('#previewModal').modal('show');
+    }
 
     function jumpPage(p){
         $('#pn').val(p);
@@ -317,6 +350,7 @@
 
     function closeModal(){
         $('#myModal').modal('hide');
+        $('#previewModal').modal('hide');
     }
 
     function openUserList() {

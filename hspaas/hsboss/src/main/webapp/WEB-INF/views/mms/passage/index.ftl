@@ -54,7 +54,7 @@
 
 						<div class="panel">
                         <div class="panel-heading">
-                        	<#if macro.doOper("10001001001")>
+                        	<#if macro.doOper("10003001001")>
 	                            <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
 	                                <a class="btn btn-success" href="${BASE_PATH}/mms/passage/add">添加通道</a>
 	                            </div>
@@ -78,10 +78,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                	<#assign editCheck = macro.doOper("10001001002") />
-                                	<#assign deleteCheck = macro.doOper("10001001003") />
-									<#assign disabledCheck = macro.doOper("10001001004") />
-									<#assign testPassageCheck = macro.doOper("10001001006") />
+                                	<#assign editCheck = macro.doOper("10003001002") />
+                                	<#assign deleteCheck = macro.doOper("10003001003") />
+									<#assign disabledCheck = macro.doOper("10003001004") />
                                 	<#list page.list as pl>
                                     <tr>
                                         <td>${(page.currentPage - 1) * page.pageSize + (pl_index+1)}</td>

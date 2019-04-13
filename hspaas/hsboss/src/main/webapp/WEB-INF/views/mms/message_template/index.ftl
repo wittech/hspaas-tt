@@ -100,11 +100,11 @@
                                 <thead>
                                     <tr>
                                         <th>序</th>
-                                        <th>用户信息</th>
-										<th>模版名称</th>
+                                        <th>用户</th>
+										<th>名称</th>
                                         <th>优先级</th>
-                                        <th>操作类型</th>
-                                        <th>路由类型</th>
+                                        <th>来源</th>
+                                        <th>路由</th>
                                         <th>状态</th>
                                         <th>提交时间</th>
                                         <th>通过时间</th>
@@ -112,10 +112,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                	<#assign auditCheck = macro.doOper("10002006") />
-									<#assign editCheck = macro.doOper("10002003") />
-									<#assign deleteCheck = macro.doOper("10002004") />
-									<#assign matchingCheck = macro.doOper("10002005") />
+									<#assign editCheck = macro.doOper("10002001") />
+                                	<#assign auditCheck = macro.doOper("10002002") />
+									<#assign previewCheck = macro.doOper("10002003") />
+									<#assign applyModelCheck = macro.doOper("10002004") />
+									<#-- <#assign deleteCheck = macro.doOper("10002005") /> -->
                                 	<#if page?? && page.list??>
                                 	<#list page.list as pl>
                                     <tr>
@@ -125,20 +126,34 @@
                                         <td>${(pl.priority)!}</td>
                                         <td>${(pl.apptypeText)!}</td>
                                         <td>${(pl.routeTypeText)!}</td>
-                                        <td><#if pl.status==0>待审核<#elseif pl.status==1>审核成功<#elseif pl.status==2>审核失败</#if></td>
+                                        <td>
+                                        	<#if pl.status==0>
+                                        		<span class="label label-default">待审核</span>
+                                        	<#elseif pl.status==1>
+                                        		<span class="label label-mint">平台处理中</span>
+                                        	<#elseif pl.status==2>
+                                        		<span class="label label-success">审核成功</span>
+                                        	<#elseif pl.status==3>
+                                        		<span class="label label-danger">审核失败</span>
+                                        	</#if>
+                                        </td>
                                         <td>${pl.createTime?string('yyyy-MM-dd HH:mm:ss')}</td>
                                         <td><#if pl.approveTime??>${pl.approveTime?string('yyyy-MM-dd HH:mm:ss')}</#if></td>
                                         <td>
-                                        	 <a href="javascript:preview('${(pl.id)!}');" class="btn btn-success btn-xs">预览</a>
+                                        	<#if previewCheck>
+                                        	    <a href="javascript:preview('${(pl.id)!}', '${(pl.title)!}');" class="btn btn-pink btn-xs"><i class="fa fa-video-camera"></i>&nbsp;预览</a>
+                                        	</#if>
                                         	<#if pl.status==0>
                                         		<#if auditCheck>
-	                                        		<a class="btn btn-default btn-xs" href="${BASE_PATH}/mms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批 </a>
+	                                        		<a class="btn btn-mint btn-xs" href="${BASE_PATH}/mms/message_template/audit?id=${pl.id}"><i class="fa fa-lock"></i>&nbsp;审批 </a>
                                         		</#if>
                                         	</#if>
                                         	<#if editCheck>
-												<a class="btn btn-primary btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
+												<a class="btn btn-info btn-xs" href="${BASE_PATH}/mms/message_template/edit?id=${pl.id}"><i class="fa fa-edit"></i>&nbsp编辑</a>
 											</#if>
-											<a href="${BASE_PATH}/mms/message_template/apply?id=${pl.id}" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;报备</a>
+											<#if applyModelCheck>
+												<a href="${BASE_PATH}/mms/message_template/apply?id=${pl.id}" class="btn btn-warning btn-xs"><i class="fa fa-star"></i>&nbsp;报备</a>
+                                        	</#if>
                                         </td>
                                     </tr>
                                     <tr>
@@ -172,10 +187,9 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
                     </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
+                </div>
+            </div>
         </div>
-		
 		
 		<script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>
 				<script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
@@ -232,10 +246,10 @@
 	        });
     	}
     	
-    	function preview(templateId) {
+    	function preview(templateId, title) {
 	    	$.ajax({
 	            url:'${BASE_PATH}/mms/message_template/preview',
-	            data:{templateId : templateId},
+	            data:{templateId : templateId, title: title},
 	            dataType:'html',
 	            type:'post',
 	            success:function(data){

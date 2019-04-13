@@ -239,11 +239,11 @@ public class SmsPassageService implements ISmsPassageService {
                 return response(false, e.getMessage());
             }
 
+            release(passage, isQueueCreateFinished, isRedisPushFinished);
+            
             logger.error("添加短信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return response(false, "添加失败");
-        } finally {
-            release(passage, isQueueCreateFinished, isRedisPushFinished);
         }
     }
 

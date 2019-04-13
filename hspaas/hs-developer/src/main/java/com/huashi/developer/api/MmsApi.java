@@ -15,7 +15,7 @@ import com.huashi.developer.request.mms.MmsModelApplyRequest;
 import com.huashi.developer.request.mms.MmsSendByModelRequest;
 import com.huashi.developer.request.mms.MmsSendRequest;
 import com.huashi.developer.response.mms.MmsBalanceResponse;
-import com.huashi.developer.response.mms.MmsModelResponse;
+import com.huashi.developer.response.mms.MmsModelApplyResponse;
 import com.huashi.developer.response.mms.MmsSendResponse;
 import com.huashi.developer.validator.mms.MmsModelApplyValidator;
 import com.huashi.developer.validator.mms.MmsSendByModelValidator;
@@ -96,7 +96,7 @@ public class MmsApi extends BasicApiSupport {
     }
 
     @RequestMapping(value = "/applyModel")
-    public MmsModelResponse applyModel() {
+    public MmsModelApplyResponse applyModel() {
         try {
             MmsModelApplyRequest mmsModelApplyRequest = mmsModelApplyValidator.validate(request.getParameterMap(),
                                                                                         getClientIp());
@@ -105,10 +105,10 @@ public class MmsApi extends BasicApiSupport {
             return mmsPrervice.applyModel(mmsModelApplyRequest);
 
         } catch (ValidateException e) {
-            return new MmsModelResponse(JSON.parseObject(e.getMessage()));
+            return new MmsModelApplyResponse(JSON.parseObject(e.getMessage()));
         } catch (Exception e) {
             logger.error("用户彩信模板报备失败", e);
-            return new MmsModelResponse(CommonApiCode.COMMON_SERVER_EXCEPTION.getCode(),
+            return new MmsModelApplyResponse(CommonApiCode.COMMON_SERVER_EXCEPTION.getCode(),
                                         CommonApiCode.COMMON_SERVER_EXCEPTION.getMessage());
         }
     }

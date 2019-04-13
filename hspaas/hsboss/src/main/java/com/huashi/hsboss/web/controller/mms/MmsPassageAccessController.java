@@ -26,7 +26,7 @@ import com.jfinal.ext.route.ControllerBind;
  * @author Administrator
  */
 @ControllerBind(controllerKey = "/mms/passage_access")
-@ViewMenu(code = MenuCode.MENU_CODE_10001003)
+@ViewMenu(code = MenuCode.MENU_CODE_10003003)
 public class MmsPassageAccessController extends BaseController {
 
     @BY_NAME
@@ -36,7 +36,7 @@ public class MmsPassageAccessController extends BaseController {
     @BY_NAME
     private IUserService             iUserService;
 
-    @AuthCode(code = { OperCode.OPER_CODE_10001003001, OperCode.OPER_CODE_10001003002 })
+    @AuthCode(code = { OperCode.OPER_CODE_10003003001, OperCode.OPER_CODE_10003003002 })
     @ActionMode
     public void index() {
         String keyword = getPara("keyword");
@@ -62,7 +62,7 @@ public class MmsPassageAccessController extends BaseController {
                                                                      getParaToInt("routeType")));
         long id = getParaToLong("id");
         MmsPassageAccess access = iMmsPassageAccessService.get((int) id);
-        setAttr("smsPassageAccess", access);
+        setAttr("mmsPassageAccess", access);
     }
 
     @AuthCode(code = OperCode.OPER_CODE_10001003002)

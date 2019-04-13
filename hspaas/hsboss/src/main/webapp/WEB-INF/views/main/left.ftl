@@ -15,7 +15,11 @@
 							<#if lc.hasChildMenu>
 								<li <#if secondMenuId == lc.id>class="active"</#if>>
 									<a href="javascript:;">
-										<i class="fa fa-th"></i>
+										<#if lc.icon?? && lc.icon != "">
+				                    		<i class="fa ${(lc.icon)!}"></i>
+				                    	<#else>
+				                    		<i class="fa fa-th"></i>
+				                    	</#if>
 										<span class="menu-title">${lc.menuName}</span>
 										<i class="arrow"></i>
 									</a>
@@ -28,7 +32,12 @@
 							<#else>
 								<li <#if secondMenuId == lc.id>class="active"</#if>>
 									<a href="${BASE_PATH}${lc.menuUrl?if_exists}">
-										<i class="fa fa-square"></i>
+										<#if lc.icon?? && lc.icon != "">
+				                    		<i class="fa ${(lc.icon)!}"></i>
+				                    	<#else>
+				                    		<i class="fa fa-square"></i>
+				                    	</#if>
+										
 										<span class="menu-title">
 										<strong>${lc.menuName}</strong>
 									</span>

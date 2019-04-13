@@ -1,9 +1,10 @@
-package com.huashi.monitor.job;
+package com.huashi.monitor.job.sms;
 
 import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.dangdang.ddframe.job.api.ShardingContext;
+import com.huashi.monitor.job.AbstractJob;
 import com.huashi.sms.report.service.ISmsSubmitHourReportService;
 
 /**
@@ -14,7 +15,7 @@ import com.huashi.sms.report.service.ISmsSubmitHourReportService;
  * @date 2018年11月13日 下午5:57:20
  */
 @Service("smsSubmitReportBornJob")
-public class SmsSubmitReportBornJob extends AbtractJob {
+public class SmsSubmitReportBornJob extends AbstractJob {
 
     @Reference
     private ISmsSubmitHourReportService smsSubmitHourReportService;

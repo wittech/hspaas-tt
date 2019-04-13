@@ -52,20 +52,20 @@
 </script>
 
 <script type="text/html" id="send_status_des">
-	{{#  if(d.status === 0){ }}
-	    <span class="background-color: #5FB878;">{{ "发送成功" }}</span>
+	{{#  if(d.status == 0){ }}
+	    <span class="layui-badge layui-bg-green">{{ "发送成功" }}</span>
 	  {{#  } else { }}
-	    <span style="background-color: #FF5722; color: #fff;">{{ "发送失败" }}</span>
+	    <span class="layui-badge">{{ "发送失败" }}</span>
 	  {{#  } }}
 </script>
 
 <script type="text/html" id="deliver_status_des">
 	 {{# if(d.messageDeliver == undefined){ }}
-	    {{ "待回执" }}
+	    <span class="layui-badge layui-bg-orange">{{ "待回执" }}</span>
 	  {{# } else if(d.messageDeliver.status == 0){ }}
-	    <span class="background-color: #5FB878;">{{ "回执成功" }}</span>
+	    <span class="layui-badge layui-bg-green">{{ "回执成功" }}</span>
 	  {{# } else { }}
-	    <span style="background-color: #FF5722; color: #fff;">{{ "回执失败" }}</span>
+	    <span class="layui-badge">{{ "回执失败" }}</span>
 	  {{# } }}
 </script>
 

@@ -10,6 +10,7 @@ public class OperCode {
 
     /* 通用权限 */
     public static final String   OPER_CODE_COMMON        = "0000000000";
+
     /** 所有关联 */
     public Map<String, String[]> OPER_CODE_MAP           = new HashMap<String, String[]>();
     /** 客户基础信息_新增客户 */
@@ -118,7 +119,7 @@ public class OperCode {
     public static final String   OPER_CODE_2002005       = "2002005";
     /** 模板管理_审批 */
     public static final String   OPER_CODE_2002006       = "2002006";
-    /** 通道管理_添加模板 */
+    /** 通道管理_添加 */
     public static final String   OPER_CODE_2003001001    = "2003001001";
     /** 通道管理_编辑 */
     public static final String   OPER_CODE_2003001002    = "2003001002";
@@ -128,7 +129,7 @@ public class OperCode {
     public static final String   OPER_CODE_2003001004    = "2003001004";
     /** 通道管理_断连接 */
     public static final String   OPER_CODE_2003001005    = "2003001005";
-    /** 通道管理_测试通道 */
+    /** 通道管理_测试 */
     public static final String   OPER_CODE_2003001006    = "2003001006";
     /** 通道组管理_添加通道组 */
     public static final String   OPER_CODE_2003002001    = "2003002001";
@@ -216,8 +217,6 @@ public class OperCode {
     public static final String   OPER_CODE_4003001001    = "4003001001";
     /** 已完成的记录_已完成的记录操作 */
     public static final String   OPER_CODE_4003002001    = "4003002001";
-    /** 流量包管理_流量包管理操作 */
-    public static final String   OPER_CODE_4004001       = "4004001";
     /** 客户通道发送统计_图表 */
     public static final String   OPER_CODE_5001001001    = "5001001001";
     /** 客户发送统计_图表 */
@@ -278,76 +277,53 @@ public class OperCode {
     public static final String   OPER_CODE_8003002       = "8003002";
     /** 短信通道监控设置_启用|停用 */
     public static final String   OPER_CODE_8003003       = "8003003";
-    
-    /** 彩信-通道管理_添加模板 */
-    public static final String   OPER_CODE_10001001001    = "10001001001";
-    /** 彩信-通道管理_编辑 */
-    public static final String   OPER_CODE_10001001002    = "10001001002";
-    /** 彩信-通道管理_删除 */
-    public static final String   OPER_CODE_10001001003    = "10001001003";
-    /** 彩信-通道管理_禁用 */
-    public static final String   OPER_CODE_10001001004    = "10001001004";
-    /** 彩信-通道管理_断连接 */
-    public static final String   OPER_CODE_10001001005    = "10001001005";
-    /** 彩信-通道管理_测试通道 */
-    public static final String   OPER_CODE_10001001006    = "10001001006";
-    
-    /** 彩信-通道组管理_添加通道组 */
-    public static final String   OPER_CODE_10001002001    = "10001002001";
-    /** 彩信-通道组管理_编辑 */
-    public static final String   OPER_CODE_10001002002    = "10001002002";
-    
-    /** 彩信-用户运行中通道管理_重载redis */
-    public static final String   OPER_CODE_10001003001    = "10001003001";
-    /** 彩信-用户运行中通道管理_编辑 */
-    public static final String   OPER_CODE_10001003002    = "10001003002";
-    
-    /** 彩信-模板管理_重载redis */
-    public static final String   OPER_CODE_10002001       = "10002001";
-    /** 彩信-模板管理_添加模板 */
-    public static final String   OPER_CODE_10002002       = "10002002";
-    /** 彩信-模板管理_编辑 */
-    public static final String   OPER_CODE_10002003       = "10002003";
-    /** 彩信-模板管理_删除 */
-    public static final String   OPER_CODE_10002004       = "10002004";
-    /** 彩信-模板管理_测试 */
-    public static final String   OPER_CODE_10002005       = "10002005";
-    /** 彩信-模板管理_审批 */
-    public static final String   OPER_CODE_10002006       = "10002006";
-    
-    /** 彩信-待处理短信任务_审核通过 */
-    public static final String   OPER_CODE_10003001001    = "10003001001";
-    /** 彩信-待处理短信任务_同内容批放 */
-    public static final String   OPER_CODE_10003001002    = "10003001002";
-    /** 彩信-待处理短信任务_驳回 */
-    public static final String   OPER_CODE_10003001003    = "10003001003";
-    /** 彩信-待处理短信任务_同内容驳回 */
-    public static final String   OPER_CODE_10003001004    = "10003001004";
-    /** 彩信-待处理短信任务_切换通道 */
-    public static final String   OPER_CODE_10003001005    = "10003001005";
-    /** 彩信-待处理短信任务_重新分包 */
-    public static final String   OPER_CODE_10003001006    = "10003001006";
-    /** 彩信-待处理短信任务_修改内容 */
-    public static final String   OPER_CODE_10003001007    = "10003001007";
-    /** 彩信-待处理短信任务_子任务 */
-    public static final String   OPER_CODE_10003001008    = "10003001008";
-    /** 彩信-待处理短信任务_模板报备 */
-    public static final String   OPER_CODE_10003001009    = "10003001009";
-    /** 彩信-待处理短信任务_敏感词导白 */
-    public static final String   OPER_CODE_10003001010    = "10003001010";
-    /** 彩信-短信发送记录_短信发送记录 */
-    public static final String   OPER_CODE_10003002001    = "10003002001";
-    /** 彩信-已完成短信任务_子任务 */
-    public static final String   OPER_CODE_10003003001    = "10003003001";
-    /** 彩信-已完成短信任务_发送记录 */
-    public static final String   OPER_CODE_10003003002    = "10003003002";
-    /** 彩信-已完成短信任务_模板 */
-    public static final String   OPER_CODE_10003003003    = "10003003003";
-    /** 彩信-短信上行接收记录_短信发送记录 */
-    public static final String   OPER_CODE_10003004001    = "10003004001";
-    /** 彩信-短信调用失败记录_短信调用失败记录 */
-    public static final String   OPER_CODE_10003005001    = "10003005001";
-    /** 彩信-短信处理失败记录_短信调用失败记录 */
-    public static final String   OPER_CODE_10003006001    = "10003006001";
+    /** 待处理彩信任务_审核通过 */
+    public static final String   OPER_CODE_10001001001   = "10001001001";
+    /** 待处理彩信任务_同内容批放 */
+    public static final String   OPER_CODE_10001001002   = "10001001002";
+    /** 待处理彩信任务_驳回 */
+    public static final String   OPER_CODE_10001001003   = "10001001003";
+    /** 待处理彩信任务_同内容驳回 */
+    public static final String   OPER_CODE_10001001004   = "10001001004";
+    /** 待处理彩信任务_切换通道 */
+    public static final String   OPER_CODE_10001001005   = "10001001005";
+    /** 待处理彩信任务_重新分包 */
+    public static final String   OPER_CODE_10001001006   = "10001001006";
+    /** 待处理彩信任务_修改内容 */
+    public static final String   OPER_CODE_10001001007   = "10001001007";
+    /** 待处理彩信任务_子任务 */
+    public static final String   OPER_CODE_10001001008   = "10001001008";
+    /** 彩信发送记录_彩信发送记录 */
+    public static final String   OPER_CODE_10001002001   = "10001002001";
+    /** 已完成彩信任务_子任务 */
+    public static final String   OPER_CODE_10001003001   = "10001003001";
+    /** 已完成彩信任务_发送记录 */
+    public static final String   OPER_CODE_10001003002   = "10001003002";
+    /** 彩信上行接收记录_彩信发送记录 */
+    public static final String   OPER_CODE_10001004001   = "10001004001";
+    /** 彩信模板管理_编辑 */
+    public static final String   OPER_CODE_10002001      = "10002001";
+    /** 彩信模板管理_审批 */
+    public static final String   OPER_CODE_10002002      = "10002002";
+    /** 彩信模板管理_预览 */
+    public static final String   OPER_CODE_10002003      = "10002003";
+    /** 彩信模板管理_报备 */
+    public static final String   OPER_CODE_10002004      = "10002004";
+    /** 通道管理_添加 */
+    public static final String   OPER_CODE_10003001001   = "10003001001";
+    /** 通道管理_编辑 */
+    public static final String   OPER_CODE_10003001002   = "10003001002";
+    /** 通道管理_删除 */
+    public static final String   OPER_CODE_10003001003   = "10003001003";
+    /** 通道管理_禁用 */
+    public static final String   OPER_CODE_10003001004   = "10003001004";
+    /** 通道组管理_添加通道组 */
+    public static final String   OPER_CODE_10003002001   = "10003002001";
+    /** 通道组管理_编辑 */
+    public static final String   OPER_CODE_10003002002   = "10003002002";
+    /** 用户运行中通道管理_重载redis */
+    public static final String   OPER_CODE_10003003001   = "10003003001";
+    /** 用户运行中通道管理_编辑 */
+    public static final String   OPER_CODE_10003003002   = "10003003002";
 
 }

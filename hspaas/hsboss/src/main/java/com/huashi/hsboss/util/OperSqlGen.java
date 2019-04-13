@@ -21,6 +21,7 @@ public class OperSqlGen {
 		long parentId;
 		String url;
 		long position;
+		String icon;
 	}
 	
 	
@@ -50,7 +51,7 @@ public class OperSqlGen {
 				if(e.elements() != null && !e.elements().isEmpty()) {
 					long priorParentId = parentId;
 					//System.out.println("menu code=" + e.attributeValue("code") + ", parentId=" + (parentId == 0 ? null : parentId) + ", id=" + (parentId = menuSequence++));
-					addMenu(e.attributeValue("code"), e.attributeValue("name"), parentId, (parentId = menuSequence++), e.attributeValue("url"), ++position);
+					addMenu(e.attributeValue("code"), e.attributeValue("name"), parentId, (parentId = menuSequence++), e.attributeValue("url"), e.attributeValue("icon"), ++position);
 			    	init(e);
 			    	parentId = priorParentId;
 				} else {
@@ -62,12 +63,13 @@ public class OperSqlGen {
 		} 
 	}
 	
-	private void addMenu(String code, String name, long parentId, long id, String url, long position) {
+	private void addMenu(String code, String name, long parentId, long id, String url, String icon, long position) {
 		Menu menu = new Menu();
 		menu.code = code;
 		menu.menuName = name;
 		menu.id = id;
 		menu.url = url;
+        menu.icon = icon;
 		menu.position = position;
 		menu.parentId = parentId;
 		
@@ -130,7 +132,7 @@ public class OperSqlGen {
 		StringBuffer sqlBuffer = new StringBuffer();
 		for(Menu e : menuList) {
 			StringBuilder sb = new StringBuilder();
-			sb.append("insert into "+tablePrefix+"_menu (id, menu_name, menu_code, parent_id, menu_url, menu_position) values (");
+			sb.append("insert into "+tablePrefix+"_menu (id, menu_name, menu_code, parent_id, menu_url, menu_position, icon) values (");
 			sb.append(e.id);
 			sb.append(", ");
 			sb.append("'" + e.menuName + "'");
@@ -149,7 +151,14 @@ public class OperSqlGen {
 			}
 			
 			sb.append(", ");
-			sb.append(e.position + ");");
+			sb.append(e.position);
+			
+			if(e.icon == null) {
+                sb.append(", " + null );
+            } else {
+                sb.append(", '" + e.icon + "'");
+            }
+			sb.append(");");
 			
 			System.out.println(sb.toString());
 			sqlBuffer.append(sb+"\r\n");
@@ -195,7 +204,7 @@ public class OperSqlGen {
 		OperSqlGen gen = new OperSqlGen();
 		String operFile = "C:\\Users\\tenx\\git\\hspaas\\hspaas\\hsboss\\src\\main\\resources\\oper\\oper_list_20180904.xml";
 //		gen.genSql(operFile,"hsboss");
-		System.out.println(gen.genMenuConstant(operFile));
-//		System.out.println(gen.genConstant(operFile));
+//		System.out.println(gen.genMenuConstant(operFile));
+		System.out.println(gen.genConstant(operFile));
 	}
 }

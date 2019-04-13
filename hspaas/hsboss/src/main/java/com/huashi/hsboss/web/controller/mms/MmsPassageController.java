@@ -39,7 +39,7 @@ import com.huashi.mms.passage.service.IMmsPassageService;
 import com.jfinal.ext.route.ControllerBind;
 
 @ControllerBind(controllerKey = "/mms/passage")
-@ViewMenu(code = MenuCode.MENU_CODE_10001001)
+@ViewMenu(code = MenuCode.MENU_CODE_10003001)
 public class MmsPassageController extends BaseController {
 
     @BY_NAME
@@ -60,8 +60,8 @@ public class MmsPassageController extends BaseController {
     /**
      * TODO 列表页面
      */
-    @AuthCode(code = { OperCode.OPER_CODE_10001001001, OperCode.OPER_CODE_10001001002, OperCode.OPER_CODE_10001001003,
-            OperCode.OPER_CODE_10001001004, OperCode.OPER_CODE_10001001005, OperCode.OPER_CODE_10001001006 })
+    @AuthCode(code = { OperCode.OPER_CODE_10003001001, OperCode.OPER_CODE_10003001002, OperCode.OPER_CODE_10003001003,
+            OperCode.OPER_CODE_10003001004 })
     @ActionMode
     public void index() {
         String keyword = getPara("keyword");
@@ -73,7 +73,7 @@ public class MmsPassageController extends BaseController {
     /**
      * TODO 跳转添加页面
      */
-    @AuthCode(code = OperCode.OPER_CODE_10001001001)
+    @AuthCode(code = OperCode.OPER_CODE_10003001001)
     @ActionMode
     public void add() {
         setAttr("templateList", iPassageTemplateService.findListByType(PassageTemplateType.MMS.getValue()));
@@ -85,7 +85,7 @@ public class MmsPassageController extends BaseController {
     /**
      * TODO 添加
      */
-    @AuthCode(code = OperCode.OPER_CODE_10001001002)
+    @AuthCode(code = OperCode.OPER_CODE_10003001002)
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void create() {
         MmsPassage passage = getModel(MmsPassage.class, "passage");
@@ -134,7 +134,7 @@ public class MmsPassageController extends BaseController {
     /**
      * TODO 跳转修改页面
      */
-    @AuthCode(code = OperCode.OPER_CODE_10001001002)
+    @AuthCode(code = OperCode.OPER_CODE_10003001002)
     @ActionMode
     public void edit() {
         MmsPassage passage = iMmsPassageService.findById(getParaToInt("id"));
@@ -161,7 +161,7 @@ public class MmsPassageController extends BaseController {
 
     }
 
-    @AuthCode(code = OperCode.OPER_CODE_10001001002)
+    @AuthCode(code = OperCode.OPER_CODE_10003001002)
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void update() {
         MmsPassage passage = getModel(MmsPassage.class, "passage");
@@ -198,7 +198,7 @@ public class MmsPassageController extends BaseController {
         renderJson(iMmsPassageService.update(passage, getPara("provinceCodes")));
     }
 
-    @AuthCode(code = OperCode.OPER_CODE_10001001003)
+    @AuthCode(code = OperCode.OPER_CODE_10003001003)
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void delete() {
         renderResultJson(iMmsPassageService.deleteById(getParaToInt("id")));
@@ -207,7 +207,7 @@ public class MmsPassageController extends BaseController {
     /**
      * TODO 禁用激活
      */
-    @AuthCode(code = OperCode.OPER_CODE_10001001004)
+    @AuthCode(code = OperCode.OPER_CODE_10003001004)
     @ActionMode(type = EnumConstant.ActionType.JSON)
     public void disabled() {
         try {
@@ -233,19 +233,6 @@ public class MmsPassageController extends BaseController {
         setAttr("state", state);
         setAttr("page", page);
         setAttr("userId", getParaToInt("userId", -1));
-    }
-
-    /**
-     * 通道测试
-     */
-    @AuthCode(code = OperCode.OPER_CODE_10001001006)
-    @ActionMode(type = EnumConstant.ActionType.JSON)
-    public void test() {
-        Integer passageId = getParaToInt("passageId");
-        String mobile = getPara("mobile");
-        String content = getPara("content");
-
-        renderResultJson(iMmsPassageService.doTestPassage(passageId, mobile, content));
     }
 
     public void passage_json() {

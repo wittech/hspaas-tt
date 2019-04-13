@@ -13,9 +13,9 @@ import com.dangdang.ddframe.job.api.simple.SimpleJob;
  * @version V1.0
  * @date 2018年11月13日 下午5:58:20
  */
-public abstract class AbtractJob implements SimpleJob {
+public abstract class AbstractJob implements SimpleJob {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger      logger       = LoggerFactory.getLogger(getClass());
 
     @Override
     public final void execute(ShardingContext context) {
@@ -37,5 +37,9 @@ public abstract class AbtractJob implements SimpleJob {
 
     }
 
-    public abstract void run(ShardingContext shardingContext);
+    protected String getJobDes(ShardingContext context) {
+        return getClass().getSimpleName() + ":" + context.getShardingTotalCount();
+    }
+
+    public abstract void run(ShardingContext context);
 }

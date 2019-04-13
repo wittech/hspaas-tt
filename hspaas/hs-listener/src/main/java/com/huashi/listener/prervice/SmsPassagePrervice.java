@@ -1,10 +1,7 @@
 package com.huashi.listener.prervice;
 
-import java.util.List;
-
 import javax.annotation.Resource;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
-import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;
 import com.huashi.listener.constant.RabbitConstant;
-import com.huashi.listener.task.sms.SmsPassageMoReportPullTask;
-import com.huashi.listener.task.sms.SmsPassageStatusReportPullTask;
-import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 import com.huashi.sms.record.service.ISmsMtDeliverService;
@@ -103,42 +96,6 @@ public class SmsPassagePrervice {
 
         // 发送异步消息
         rabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MO_RECEIVE, jsonObject);
-    }
-
-    /**
-     * TODO 通道下行状态扫描
-     */
-    public void doPassageStatusPulling() {
-        List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET);
-        if (CollectionUtils.isEmpty(list)) {
-            logger.warn("未检索到通道下行状态报告回执");
-            return;
-        }
-
-        Thread thread = null;
-        for (SmsPassageAccess access : list) {
-            thread = new Thread(new SmsPassageStatusReportPullTask(access, smsMtDeliverService, smsProviderService));
-            thread.start();
-            logger.info("通道状态回执URL：{}，类型：{} 已监听", access.getUrl(), access.getCallType());
-        }
-    }
-
-    /**
-     * TODO 通道上行回执数据扫描
-     */
-    public void doPassageMoPulling() {
-        List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.MO_REPORT_WITH_SELF_GET);
-        if (CollectionUtils.isEmpty(list)) {
-            logger.warn("未检索到通道上行报告回执");
-            return;
-        }
-
-        Thread thread = null;
-        for (SmsPassageAccess access : list) {
-            thread = new Thread(new SmsPassageMoReportPullTask(access, smsMoMessageService, smsProviderService));
-            thread.start();
-            logger.info("通道上行回执URL：{}，类型：{} 已监听", access.getUrl(), access.getCallType());
-        }
     }
 
 }

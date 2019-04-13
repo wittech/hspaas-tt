@@ -12,6 +12,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -19,60 +21,71 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.huashi.constants.CommonContext.PassageCallType;
-import com.huashi.exchanger.service.ISmsProviderService;
+import com.huashi.mms.passage.domain.MmsPassageAccess;
+import com.huashi.mms.passage.service.IMmsPassageAccessService;
 import com.huashi.monitor.config.redis.MonitorRedisConstant;
 import com.huashi.monitor.constant.MonitorConstant;
-import com.huashi.monitor.constant.MonitorPassageContext.PassagePullRunnintStatus;
+import com.huashi.monitor.job.ElasticJobManager;
+import com.huashi.monitor.job.mms.MmsPassageMoReportPullJob;
+import com.huashi.monitor.job.mms.MmsPassageMtReportPullJob;
+import com.huashi.monitor.job.sms.SmsPassageMoReportPullJob;
+import com.huashi.monitor.job.sms.SmsPassageMtReportPullJob;
+import com.huashi.monitor.job.sms.SmsPassageReachRateReportJob;
 import com.huashi.monitor.passage.model.PassagePullReport;
 import com.huashi.monitor.passage.model.PassageReachRateReport;
-import com.huashi.monitor.passage.thread.BaseThread;
-import com.huashi.monitor.passage.thread.PassageMoReportPullThread;
-import com.huashi.monitor.passage.thread.PassageMtReportPullThread;
-import com.huashi.monitor.passage.thread.PassageReachRateReportPullThread;
-import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.domain.SmsPassageReachrateSettings;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.passage.service.ISmsPassageReachrateSettingsService;
-import com.huashi.sms.passage.service.ISmsPassageService;
-import com.huashi.sms.record.service.ISmsMoMessageService;
-import com.huashi.sms.record.service.ISmsMtDeliverService;
-import com.huashi.sms.record.service.ISmsMtSubmitService;
 
 @Service
 public class PassageMonitorService implements IPassageMonitorService {
 
-    // @Reference(mock="return null", check = false)
-    @Reference
-    private ISmsProviderService                 smsProviderService;
-    @Reference
-    private ISmsMtDeliverService                smsMtDeliverService;
-    @Reference
-    private ISmsMoMessageService                smsMoMessageService;
-    @Reference(mock = "return null")
-    private ISmsPassageAccessService            smsPassageAccessService;
-    @Reference
-    private ISmsPassageService                  smsPassageService;
-    @Reference
-    private ISmsMtSubmitService                 smsMtSubmitService;
-    @Reference
-    private ISmsPassageReachrateSettingsService smsPassageReachrateSettingsService;
-
     @Resource
     private StringRedisTemplate                 stringRedisTemplate;
 
-    private Logger                              logger = LoggerFactory.getLogger(PassageMonitorService.class);
+    @Autowired
+    private ElasticJobManager                   elasticJobManager;
+
+    @Value("${elasticJob.item.commonLevelPull.cron}")
+    private String                              commonLevelPullCron;
+    @Value("${elasticJob.item.commonLevelPull.shardingCount:1}")
+    private int                                 commonLevelPullShardingCount;
+    @Value("${elasticJob.item.commonLevelPull.shardingItemParameters}")
+    private String                              commonLevelPullShardingItemParameters;
+
+    @Value("${elasticJob.item.lowLevelPull.cron}")
+    private String                              lowLevelPullCron;
+    @Value("${elasticJob.item.lowLevelPull.shardingCount:1}")
+    private int                                 lowLevelPullShardingCount;
+    @Value("${elasticJob.item.lowLevelPull.shardingItemParameters}")
+    private String                              lowLevelPullShardingItemParameters;
 
     /**
-     * TODO 获取通道线程名称
-     * 
-     * @param passageId
-     * @param callType
-     * @return
+     * 每秒钟间隔单位值
      */
-    private String getPassageThreadName(Integer passageId, Integer callType) {
-        return String.format("%s-sms-%d-%d", BaseThread.PASSAGE_PULL_THREAD_PREFIX, passageId, callType);
-    }
+    private static final int                    TIME_UNIT = 60;
+
+    @Autowired
+    private SmsPassageMtReportPullJob           smsPassageMtReportPullJob;
+    @Autowired
+    private SmsPassageMoReportPullJob           smsPassageMoReportPullJob;
+    @Autowired
+    private SmsPassageReachRateReportJob        smsPassageReachRateReportJob;
+
+    @Autowired
+    private MmsPassageMtReportPullJob           mmsPassageMtReportPullJob;
+    @Autowired
+    private MmsPassageMoReportPullJob           mmsPassageMoReportPullJob;
+
+    @Reference(mock = "return null")
+    private ISmsPassageAccessService            smsPassageAccessService;
+    @Reference(mock = "return null")
+    private IMmsPassageAccessService            mmsPassageAccessService;
+    @Reference
+    private ISmsPassageReachrateSettingsService smsPassageReachrateSettingsService;
+
+    private final Logger                        logger    = LoggerFactory.getLogger(getClass());
 
     /**
      * TODO 通道下行状态扫描
@@ -80,12 +93,14 @@ public class PassageMonitorService implements IPassageMonitorService {
     private void doSmsPassageStatusPulling() {
         List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET);
         if (CollectionUtils.isEmpty(list)) {
-            logger.warn("未检索到通道下行状态报告回执");
+            logger.warn("未检索到短信通道下行状态报告回执");
             return;
         }
 
         for (SmsPassageAccess access : list) {
-            joinPassageThread(getPassageThreadName(access.getPassageId(), access.getCallType()), access);
+            elasticJobManager.addJobScheduler(smsPassageMtReportPullJob, commonLevelPullCron,
+                                              commonLevelPullShardingCount, commonLevelPullShardingItemParameters,
+                                              JSON.toJSONString(access));
         }
     }
 
@@ -95,12 +110,46 @@ public class PassageMonitorService implements IPassageMonitorService {
     private void doSmsPassageMoPulling() {
         List<SmsPassageAccess> list = smsPassageAccessService.findWaitPulling(PassageCallType.MO_REPORT_WITH_SELF_GET);
         if (CollectionUtils.isEmpty(list)) {
-            logger.warn("未检索到通道上行报告回执");
+            logger.warn("未检索到短信通道上行报告回执");
             return;
         }
 
         for (SmsPassageAccess access : list) {
-            joinPassageThread(getPassageThreadName(access.getPassageId(), access.getCallType()), access);
+            elasticJobManager.addJobScheduler(smsPassageMoReportPullJob, lowLevelPullCron, lowLevelPullShardingCount,
+                                              lowLevelPullShardingItemParameters, JSON.toJSONString(access));
+        }
+    }
+
+    /**
+     * 彩信通道下行状态扫描
+     */
+    private void doMmsPassageStatusPulling() {
+        List<MmsPassageAccess> list = mmsPassageAccessService.findWaitPulling(PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET);
+        if (CollectionUtils.isEmpty(list)) {
+            logger.warn("未检索到彩信通道下行状态报告回执");
+            return;
+        }
+
+        for (MmsPassageAccess access : list) {
+            elasticJobManager.addJobScheduler(mmsPassageMtReportPullJob, commonLevelPullCron,
+                                              commonLevelPullShardingCount, commonLevelPullShardingItemParameters,
+                                              JSON.toJSONString(access));
+        }
+    }
+
+    /**
+     * TODO 彩信通道上行回执数据扫描
+     */
+    private void doMmsPassageMoPulling() {
+        List<MmsPassageAccess> list = mmsPassageAccessService.findWaitPulling(PassageCallType.MO_REPORT_WITH_SELF_GET);
+        if (CollectionUtils.isEmpty(list)) {
+            logger.warn("未检索到短信通道上行报告回执");
+            return;
+        }
+
+        for (MmsPassageAccess access : list) {
+            elasticJobManager.addJobScheduler(mmsPassageMoReportPullJob, lowLevelPullCron, lowLevelPullShardingCount,
+                                              lowLevelPullShardingItemParameters, JSON.toJSONString(access));
         }
     }
 
@@ -109,16 +158,9 @@ public class PassageMonitorService implements IPassageMonitorService {
             StringBuilder passage = new StringBuilder();
             List<SmsPassageReachrateSettings> list = smsPassageReachrateSettingsService.getByUseable();
             for (SmsPassageReachrateSettings model : list) {
-                String threadName = String.format("%s-sms-passage-monitor-%d", BaseThread.PASSAGE_PULL_THREAD_PREFIX,
-                                                  model.getId());
-                Thread thread = new Thread(
-                                           new PassageReachRateReportPullThread(model, smsMtSubmitService,
-                                                                                smsPassageReachrateSettingsService,
-                                                                                smsPassageService, stringRedisTemplate),
-                                           threadName);
-                thread.start();
-
-                passage.append("通道:").append(model.getPassageId()).append(";");
+                elasticJobManager.addJobScheduler(smsPassageReachRateReportJob, secondsToCron(model.getInterval()),
+                                                  lowLevelPullShardingCount, lowLevelPullShardingItemParameters,
+                                                  model.getId().toString());
             }
 
             logger.info("通道回执率监控已开启：{}", passage.toString());
@@ -173,6 +215,10 @@ public class PassageMonitorService implements IPassageMonitorService {
 
             doSmsPassageMonitorPulling();
 
+            doMmsPassageStatusPulling();
+
+            doMmsPassageMoPulling();
+
             return true;
         } catch (Exception e) {
             logger.error("开启通道轮训总开关失败", e);
@@ -180,80 +226,17 @@ public class PassageMonitorService implements IPassageMonitorService {
         }
     }
 
-    /**
-     * TODO 加入线程至监管中
-     * 
-     * @param threadName
-     * @param access
-     */
-    private void joinPassageThread(String threadName, SmsPassageAccess access) {
-        try {
-            Thread thread = null;
-            PassageCallType callType = PassageCallType.parse(access.getCallType());
-
-            switch (callType) {
-                case MT_STATUS_RECEIPT_WITH_SELF_GET:
-                    thread = new Thread(new PassageMtReportPullThread(access, smsMtDeliverService, smsProviderService,
-                                                                      this), threadName);
-                    break;
-
-                case MO_REPORT_WITH_SELF_GET:
-                    thread = new Thread(new PassageMoReportPullThread(access, smsMoMessageService, smsProviderService,
-                                                                      this), threadName);
-                    break;
-
-                default:
-                    break;
-            }
-
-            if (thread == null) {
-                logger.warn("通道调用类型(PassageCallType)无法解析到具体的业务：{}，无法启动监听", access.getCallType());
-                return;
-            }
-
-            thread.start();
-
-            BaseThread.PASSAGES_IN_RUNNING.put(threadName, true);
-
-            logger.info("{} 通道轮训线程：{} 已开启监听", callType.getName(), threadName);
-
-            PassagePullReport report = new PassagePullReport();
-            report.setPassageId(access.getPassageId());
-            report.setCallType(access.getCallType());
-            report.setPassageCode(access.getPassageCode());
-            report.setStatus(PassagePullRunnintStatus.YES.getCode());
-
-            // 根据通道ID获取通道信息，查询账号信息（方便区分 一个通道给我放开多个通道进行友好辨认）
-            SmsPassage smsPassage = smsPassageService.findById(access.getPassageId());
-            if (smsPassage != null) {
-                report.setAccount(smsPassage.getAccount());
-                report.setPassageCode(smsPassage.getCode());
-            }
-
-            stringRedisTemplate.opsForHash().put(MonitorConstant.RD_PASSAGE_PULL_THREAD_GROUP,
-                                                 threadName,
-                                                 JSON.toJSONString(report, SerializerFeature.WriteMapNullValue,
-                                                                   SerializerFeature.WriteNullStringAsEmpty));
-
-        } catch (Exception e) {
-            logger.error("线程名称：{} 加入到监管中心失败", threadName);
-        }
-
-    }
-
     @Override
     public boolean addPassagePull(SmsPassageAccess access) {
         String key = null;
         try {
-            key = getPassageThreadName(access.getPassageId(), access.getCallType());
-
-            // 如果运行中通道已经有此通道信息了，则不需要再启动一个线程
-            if (BaseThread.PASSAGES_IN_RUNNING.containsKey(key) && BaseThread.PASSAGES_IN_RUNNING.get(key)) {
-                logger.info("当前线程组中已经存在此通道：{}信息，无需重新开启", key);
-                return true;
-            }
-
-            joinPassageThread(key, access);
+            // key = getPassageThreadName(access.getPassageId(), access.getCallType());
+            //
+            // // 如果运行中通道已经有此通道信息了，则不需要再启动一个线程
+            // if (BaseThread.PASSAGES_IN_RUNNING.containsKey(key) && BaseThread.PASSAGES_IN_RUNNING.get(key)) {
+            // logger.info("当前线程组中已经存在此通道：{}信息，无需重新开启", key);
+            // return true;
+            // }
 
             logger.info("运行中轮训通道：{} 增加通道完成");
 
@@ -267,31 +250,30 @@ public class PassageMonitorService implements IPassageMonitorService {
 
     @Override
     public boolean removePasagePull(SmsPassageAccess access) {
-        String key = null;
         try {
-            key = getPassageThreadName(access.getPassageId(), access.getCallType());
-
-            BaseThread.PASSAGES_IN_RUNNING.put(key, false);
-
-            Object obj = stringRedisTemplate.opsForHash().get(MonitorConstant.RD_PASSAGE_PULL_THREAD_GROUP, key);
-            if (obj == null) {
-                logger.warn("REDIS 移除轮训通道：{} 失败，数据为空（已被移除或从未生效）");
-                return true;
-            }
-
-            PassagePullReport report = JSON.parseObject(obj.toString(), PassagePullReport.class);
-            report.setStatus(PassagePullRunnintStatus.NO.getCode());
-
-            stringRedisTemplate.opsForHash().put(MonitorConstant.RD_PASSAGE_PULL_THREAD_GROUP,
-                                                 key,
-                                                 JSON.toJSONString(report, SerializerFeature.WriteMapNullValue,
-                                                                   SerializerFeature.WriteNullStringAsEmpty));
-
-            logger.info("运行中轮训通道：{} 终止操作完成", key);
+            // key = getPassageThreadName(access.getPassageId(), access.getCallType());
+            //
+            // BaseThread.PASSAGES_IN_RUNNING.put(key, false);
+            //
+            // Object obj = stringRedisTemplate.opsForHash().get(MonitorConstant.RD_PASSAGE_PULL_THREAD_GROUP, key);
+            // if (obj == null) {
+            // logger.warn("REDIS 移除轮训通道：{} 失败，数据为空（已被移除或从未生效）");
+            // return true;
+            // }
+            //
+            // PassagePullReport report = JSON.parseObject(obj.toString(), PassagePullReport.class);
+            // report.setStatus(PassagePullRunnintStatus.NO.getCode());
+            //
+            // stringRedisTemplate.opsForHash().put(MonitorConstant.RD_PASSAGE_PULL_THREAD_GROUP,
+            // key,
+            // JSON.toJSONString(report, SerializerFeature.WriteMapNullValue,
+            // SerializerFeature.WriteNullStringAsEmpty));
+            //
+            // logger.info("运行中轮训通道：{} 终止操作完成", key);
 
             return true;
         } catch (Exception e) {
-            logger.info("运行中轮训通道：{} 终止操作失败", key, e);
+            logger.info("运行中轮训通道：{} 终止操作失败", e);
         }
 
         return false;
@@ -334,13 +316,9 @@ public class PassageMonitorService implements IPassageMonitorService {
     @Override
     public boolean addSmsPassageMonitor(SmsPassageReachrateSettings model) {
         try {
-            String threadName = String.format("%s-sms-passage-monitor-%d", BaseThread.PASSAGE_PULL_THREAD_PREFIX,
-                                              model.getId());
-            Thread thread = new Thread(new PassageReachRateReportPullThread(model, smsMtSubmitService,
-                                                                            smsPassageReachrateSettingsService,
-                                                                            smsPassageService, stringRedisTemplate),
-                                       threadName);
-            thread.start();
+            elasticJobManager.addJobScheduler(smsPassageReachRateReportJob, secondsToCron(model.getInterval()),
+                                              lowLevelPullShardingCount, lowLevelPullShardingItemParameters,
+                                              model.getId().toString());
 
             return true;
         } catch (Exception e) {
@@ -426,6 +404,27 @@ public class PassageMonitorService implements IPassageMonitorService {
             logger.error("REDIS key : {} 获取通道到达率报告失败", e);
             return null;
         }
+    }
+
+    /**
+     * 秒值转CRON表达式
+     */
+    private String secondsToCron(long senconds) {
+        if (senconds == 0) {
+            return lowLevelPullCron;
+        }
+
+        // 目前页面配置的均为分钟且不超过60分钟
+        return minuteCron(senconds / TIME_UNIT);
+    }
+
+    private static String minuteCron(long minutes) {
+
+        if (minutes / TIME_UNIT > (TIME_UNIT)) {
+            return String.format("* * */%d * * ?", minutes);
+        }
+
+        return String.format("* */%d * * * ?", minutes);
     }
 
 }

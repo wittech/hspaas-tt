@@ -11,6 +11,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+import com.huashi.mms.record.service.IMmsMtPushService;
 import com.huashi.mms.record.service.IMmsMtSubmitService;
 
 /**
@@ -26,6 +27,8 @@ public class MmsInitializeRunner implements CommandLineRunner {
 
     @Autowired
     private IMmsMtSubmitService    mmsMtSubmitService;
+    @Autowired
+    private IMmsMtPushService      mmsMtPushService;
 
     public static final Lock       LOCK                   = new ReentrantLock();
     public static final Condition  CONDITION              = LOCK.newCondition();
@@ -41,15 +44,31 @@ public class MmsInitializeRunner implements CommandLineRunner {
     public void run(String... arg0) throws Exception {
         logger.info("=======================数据初始化MQ=======================");
         initMessageQueues();
+        initUserMtReportPushConfigQueue();
         initSignal();
         logger.info("=======================数据初始化MQ完成=======================");
     }
-    
+
     /**
      * TODO 初始化待提交消息队列信息
      */
     private boolean initMessageQueues() {
         return mmsMtSubmitService.declareWaitSubmitMessageQueues();
+    }
+
+    /**
+     * TODO 初始化所有用户下行状态推送队列数据
+     * 
+     * @return
+     */
+    private boolean initUserMtReportPushConfigQueue() {
+        boolean isSuccess = mmsMtPushService.doListenerAllUser();
+        if (isSuccess) {
+            logger.info("用户下行状态报告推送队列初始化完成");
+        } else {
+            logger.info("用户下行状态报告推送队列初始化失败");
+        }
+        return isSuccess;
     }
 
     /**

@@ -24,7 +24,6 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.notice.service.IMessageSendService;
 import com.huashi.common.notice.vo.SmsResponse;
-import com.huashi.common.settings.context.SettingsContext;
 import com.huashi.common.settings.context.SettingsContext.SystemConfigType;
 import com.huashi.common.settings.domain.SystemConfig;
 import com.huashi.common.settings.service.ISystemConfigService;
@@ -33,7 +32,6 @@ import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.vo.BossPaginationVo;
-import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.CommonContext.ProtocolType;
 import com.huashi.constants.OpenApiCode;
 import com.huashi.mms.config.cache.redis.constant.MmsRedisConstant;
@@ -231,12 +229,12 @@ public class MmsPassageService implements IMmsPassageService {
             if (e instanceof IllegalArgumentException) {
                 return response(false, e.getMessage());
             }
-
-            logger.error("添加短信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
+            
+            release(passage, isQueueCreateFinished, isRedisPushFinished);
+            
+            logger.error("添加彩信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return response(false, "添加失败");
-        } finally {
-            release(passage, isQueueCreateFinished, isRedisPushFinished);
         }
     }
 
@@ -289,7 +287,7 @@ public class MmsPassageService implements IMmsPassageService {
                 return response(false, e.getMessage());
             }
 
-            logger.error("修改短信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
+            logger.error("修改彩信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return response(false, "修改失败");
         }
@@ -483,7 +481,7 @@ public class MmsPassageService implements IMmsPassageService {
     public boolean reloadToRedis() {
         List<MmsPassage> list = mmsPassageMapper.findAll();
         if (CollectionUtils.isEmpty(list)) {
-            logger.warn("短信通道数据为空");
+            logger.warn("彩信通道数据为空");
             return false;
         }
 
@@ -513,7 +511,7 @@ public class MmsPassageService implements IMmsPassageService {
                                                  JSON.toJSONString(smsPassage));
             return true;
         } catch (Exception e) {
-            logger.warn("REDIS 加载短信通道[" + JSON.toJSONString(smsPassage) + "]数据失败", e);
+            logger.warn("REDIS 加载彩信通道[" + JSON.toJSONString(smsPassage) + "]数据失败", e);
             return false;
         }
     }
@@ -523,7 +521,7 @@ public class MmsPassageService implements IMmsPassageService {
             stringRedisTemplate.opsForHash().delete(MmsRedisConstant.RED_MMS_PASSAGE, passageId + "");
             return true;
         } catch (Exception e) {
-            logger.warn("REDIS 删除短信通道[" + passageId + "]数据失败", e);
+            logger.warn("REDIS 删除彩信通道[" + passageId + "]数据失败", e);
             return false;
         }
     }
@@ -552,11 +550,11 @@ public class MmsPassageService implements IMmsPassageService {
                 return true;
             }
 
-            logger.error("REDIS 更新短信通道数据失败");
+            logger.error("REDIS 更新彩信通道数据失败");
             return false;
 
         } catch (Exception e) {
-            logger.warn("REDIS 加载短信通道数据失败", e);
+            logger.warn("REDIS 加载彩信通道数据失败", e);
             return false;
         }
     }
@@ -591,67 +589,12 @@ public class MmsPassageService implements IMmsPassageService {
                 return false;
             }
 
-            // 调用发送短信接口
+            // 调用发送彩信接口
             SmsResponse response = messageSendService.sendCustomMessage(developer.getAppKey(),
                                                                         developer.getAppSecret(), mobile, content);
             return OpenApiCode.SUCCESS.equals(response.getCode());
         } catch (Exception e) {
             logger.error("通道告警逻辑失败", e);
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return false;
-        }
-    }
-
-    @Override
-    @Transactional
-    public boolean doTestPassage(Integer passageId, String mobile, String content) {
-        SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.PASSAGE_TEST_USER.name(),
-                                                                         SettingsContext.USER_ID_KEY_NAME);
-        if (systemConfig == null) {
-            logger.error("通道测试用户未配置，请于系统配置表进行配置");
-            return false;
-        }
-
-        String userId = systemConfig.getAttrValue();
-        if (StringUtils.isEmpty(userId)) {
-            logger.error("通道测试用户数据为空，请配置");
-            return false;
-        }
-
-        try {
-            Integer passageGroupId = userPassageService.getByUserIdAndType(Integer.parseInt(userId),
-                                                                           PlatformType.SEND_MESSAGE_SERVICE.getCode());
-            if (passageGroupId == null) {
-                logger.error("通道测试用户未配置短信通道组信息");
-                return false;
-            }
-
-            boolean result = passageGroupService.doChangeGroupPassage(passageGroupId, passageId);
-            if (!result) {
-                logger.error("通道组ID：{}，切换通道ID：{} 失败", passageGroupId, passageId);
-                return false;
-            }
-
-            // 更新通道组下 的可用通道相关
-            result = mmsPassageAccessService.updateByModifyPassageGroup(passageGroupId);
-            if (!result) {
-                logger.error("通道组ID：{}，切换可用通道失败", passageGroupId);
-                return false;
-            }
-
-            // 根据用户ID获取开发者相关信息
-            UserDeveloper developer = userDeveloperService.getByUserId(Integer.parseInt(userId));
-            if (developer == null) {
-                logger.error("用户ID：{}，开发者信息为空", userId);
-                return false;
-            }
-
-            // 调用发送短信接口
-            SmsResponse response = messageSendService.sendCustomMessage(developer.getAppKey(),
-                                                                        developer.getAppSecret(), mobile, content);
-            return OpenApiCode.SUCCESS.equals(response.getCode());
-        } catch (Exception e) {
-            logger.error("通道测试逻辑失败", e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }

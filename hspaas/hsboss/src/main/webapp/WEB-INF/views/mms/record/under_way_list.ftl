@@ -128,29 +128,35 @@
                 <div class="panel">
                     <div class="panel-heading">
                         <div class="pull-right" style="margin-top: 10px;margin-right: 20px;">
-                        	<#if macro.doOper("10003001001")>
+                        	<#if macro.doOper("10001001001")>
                             	<a href="javascript:void(0);" class="btn btn-success" onclick="batchPass();">审核通过</a>
                             </#if>
-                            <#if macro.doOper("10003001003")>
+                            <#-- 
+                            <#if macro.doOper("10001001002")>
+	                            &nbsp;
+	                            <a href="javascript:void(0);" class="btn btn-mint" onclick="batchPassWithSameContent();">同内容批放</a>
+                            </#if>
+                            -->
+                            <#if macro.doOper("10001001003")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuse();">驳回</a>
                             </#if>
                             <#-- 
-                            <#if macro.doOper("10003001004")>
+                            <#if macro.doOper("10001001004")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-danger" onclick="batchRefuseWithSameContent();">同内容驳回</a>
                             </#if>
                             -->
-                            <#if macro.doOper("10003001005")>
+                            <#if macro.doOper("10001001005")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-warning" onclick="openSwitchPassage();">切换通道</a>
                             </#if>
                             <#-- 
-                            <#if macro.doOper("10003001006")>
+                            <#if macro.doOper("10001001006")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-info" onclick="repeatTask();">重新分包</a>
                             </#if>
-                            <#if macro.doOper("10003001007")>
+                            <#if macro.doOper("10001001007")>
 	                            &nbsp;
 	                            <a href="javascript:void(0);" class="btn btn-default" onclick="batchEditContent();">修改内容</a>
                         	</#if>
@@ -180,7 +186,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <#assign childTaskCheck = macro.doOper("10003001008") />
+                            <#assign childTaskCheck = macro.doOper("10001001008") />
                             <#list page.list as pl>
                             <tr onclick="choose(this);">
                                 <td rowspan="2"
@@ -191,8 +197,8 @@
                                 <td>${(pl.sid)!''}</td>
                                 <td>
                                 	<button type="button" class="btn btn-info btn-xs">
-                                		<#if pl.modelId?? && p.modelId != ''>
-                                       	 模<#else>定
+                                		<#if pl.modelId?? && pl.modelId != ''>
+                                       	 模<#else>普
 	                                    </#if>
                                 	</button>
                                 </td>
@@ -268,7 +274,7 @@
 	                                       class="btn btn-info btn-xs">子任务</a>
                                     </#if>
                                     <a href="javascript:preview('${(pl.modelId)!}', '${(pl.title)!}', '${(pl.body)!}');"
-	                                       class="btn btn-success btn-xs">预览</a>
+	                                       class="btn btn-pink btn-xs"><i class="fa fa-video-camera"></i>&nbsp;预览</a>
                                     
                                 </td>
                             </tr>

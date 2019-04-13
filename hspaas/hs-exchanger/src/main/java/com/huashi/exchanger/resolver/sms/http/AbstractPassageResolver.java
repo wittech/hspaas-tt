@@ -73,7 +73,7 @@ public abstract class AbstractPassageResolver implements SmsHttpPassageResolver 
         }
 
         try {
-            CODE_REFRENCE_BEANS.put(code(), this);
+            CODE_REFRENCE_BEANS.put(getCode(), this);
             logger.info("Loading http passage's code[" + getCode() + "]-ref[" + this + "] succeed");
         } catch (Exception e) {
             logger.error("Loading http passage's code[" + getCode() + "]-ref[" + this + "] failed", e);

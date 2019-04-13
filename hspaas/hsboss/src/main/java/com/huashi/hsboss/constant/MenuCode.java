@@ -108,8 +108,6 @@ public class MenuCode {
     public static final String MENU_CODE_4003001    = "4003001";
     /** 已完成的记录 */
     public static final String MENU_CODE_4003002    = "4003002";
-    /** 流量包管理 */
-    public static final String MENU_CODE_4004       = "4004";
     /** 报表 */
     public static final String MENU_CODE_5000       = "5000";
     /** 短信统计 */
@@ -162,35 +160,27 @@ public class MenuCode {
     public static final String MENU_CODE_8002001    = "8002001";
     /** 短信通道监控设置 */
     public static final String MENU_CODE_8003       = "8003";
-    
     /** 彩信 */
-    public static final String MENU_CODE_10000       = "10000";
-    /** 彩信-通道管理 */
-    public static final String MENU_CODE_10001       = "10001";
-    /** 彩信-通道管理 */
-    public static final String MENU_CODE_10001001    = "10001001";
-    /** 彩信-通道组管理 */
-    public static final String MENU_CODE_10001002    = "10001002";
-    /** 彩信-用户运行中通道管理 */
-    public static final String MENU_CODE_10001003    = "10001003";
-    
-    /** 彩信-模板管理 */
-    public static final String MENU_CODE_10002       = "10002";
-    
-    /** 彩信-短信记录查询 */
-    public static final String MENU_CODE_10003       = "10003";
-    /** 彩信-待处理短信任务 */
-    public static final String MENU_CODE_10003001    = "10003001";
-    /** 彩信-短信发送记录 */
-    public static final String MENU_CODE_10003002    = "10003002";
-    /** 彩信-已完成短信任务 */
-    public static final String MENU_CODE_10003003    = "10003003";
-    /** 彩信-短信上行接收记录 */
-    public static final String MENU_CODE_10003004    = "10003004";
-    /** 彩信-短信调用失败记录 */
-    public static final String MENU_CODE_10003005    = "10003005";
-    /** 彩信-短信处理失败记录 */
-    public static final String MENU_CODE_10003006    = "10003006";
-    
+    public static final String MENU_CODE_10000      = "10000";
+    /** 彩信记录查询 */
+    public static final String MENU_CODE_10001      = "10001";
+    /** 待处理彩信任务 */
+    public static final String MENU_CODE_10001001   = "10001001";
+    /** 彩信发送记录 */
+    public static final String MENU_CODE_10001002   = "10001002";
+    /** 已完成彩信任务 */
+    public static final String MENU_CODE_10001003   = "10001003";
+    /** 彩信上行接收记录 */
+    public static final String MENU_CODE_10001004   = "10001004";
+    /** 彩信模板管理 */
+    public static final String MENU_CODE_10002      = "10002";
+    /** 通道管理 */
+    public static final String MENU_CODE_10003      = "10003";
+    /** 通道管理 */
+    public static final String MENU_CODE_10003001   = "10003001";
+    /** 通道组管理 */
+    public static final String MENU_CODE_10003002   = "10003002";
+    /** 用户运行中通道管理 */
+    public static final String MENU_CODE_10003003   = "10003003";
 
 }

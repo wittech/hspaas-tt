@@ -5,83 +5,92 @@ import java.util.List;
 
 public class UserMenu {
 
-	
-	private int id;
-	
-	private String menuName;
-	
-	private String menuCode;
-	
-	private String menuUrl;
-	
-	private int parentId;
-	
-	private List<UserMenu> childList = new ArrayList<UserMenu>();
-	
-	private List<UserOper> operList = new ArrayList<UserOper>();
+    private int            id;
 
-	public int getId() {
-		return id;
-	}
+    private String         menuName;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    private String         menuCode;
 
-	public String getMenuName() {
-		return menuName;
-	}
+    private String         menuUrl;
 
-	public void setMenuName(String menuName) {
-		this.menuName = menuName;
-	}
+    private int            parentId;
 
-	public String getMenuCode() {
-		return menuCode;
-	}
+    private String         icon;
 
-	public void setMenuCode(String menuCode) {
-		this.menuCode = menuCode;
-	}
+    private List<UserMenu> childList = new ArrayList<UserMenu>();
 
-	public String getMenuUrl() {
-		return menuUrl;
-	}
+    private List<UserOper> operList  = new ArrayList<UserOper>();
 
-	public void setMenuUrl(String menuUrl) {
-		this.menuUrl = menuUrl;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public List<UserMenu> getChildList() {
-		return childList;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setChildList(List<UserMenu> childList) {
-		this.childList = childList;
-	}
+    public String getMenuName() {
+        return menuName;
+    }
 
-	public List<UserOper> getOperList() {
-		return operList;
-	}
+    public void setMenuName(String menuName) {
+        this.menuName = menuName;
+    }
 
-	public void setOperList(List<UserOper> operList) {
-		this.operList = operList;
-	}
-	
-	public boolean getHasChildMenu(){
-		return !childList.isEmpty();
-	}
-	
-	public boolean hasChild(){
-		return !childList.isEmpty();
-	}
+    public String getMenuCode() {
+        return menuCode;
+    }
 
-	public int getParentId() {
-		return parentId;
-	}
+    public void setMenuCode(String menuCode) {
+        this.menuCode = menuCode;
+    }
 
-	public void setParentId(int parentId) {
-		this.parentId = parentId;
-	}
-	
+    public String getMenuUrl() {
+        return menuUrl;
+    }
+
+    public void setMenuUrl(String menuUrl) {
+        this.menuUrl = menuUrl;
+    }
+
+    public List<UserMenu> getChildList() {
+        return childList;
+    }
+
+    public void setChildList(List<UserMenu> childList) {
+        this.childList = childList;
+    }
+
+    public List<UserOper> getOperList() {
+        return operList;
+    }
+
+    public void setOperList(List<UserOper> operList) {
+        this.operList = operList;
+    }
+
+    public boolean getHasChildMenu() {
+        return !childList.isEmpty();
+    }
+
+    public boolean hasChild() {
+        return !childList.isEmpty();
+    }
+
+    public int getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(int parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
 }

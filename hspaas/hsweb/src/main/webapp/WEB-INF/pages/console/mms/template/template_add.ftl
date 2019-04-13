@@ -39,19 +39,21 @@
 		.img_pre {
 			min-height: 150px;
 		    resize: vertical;
-		    height: 100%;
-    		width: 100%;
+    		height : 300px;
+    		margin-top:5px;
+		}
+		
+		.audio_pre {
+    		margin-top:5px;
 		}
 		
 		.file {
 		  opacity:0;
 		  filter:alpha(opacity=0);
-		  font-size:15px;
 		  position:absolute;
-		  right:0;
+		  left:0;
+    	  top:0;
 		}
-    
-    	#LAY-component-grid-stack .layui-card-body{ text-align: center; height: 160px;}
     	
     </style>
 </head>
@@ -83,10 +85,8 @@
             </div>
           </div>
         </div>
-        <div class="layui-fluid" id="LAY-component-grid-stack">
-  			<div class="layui-row layui-col-space10" id="mms_content">
-  			</div>
-  		</div>
+        <div id="mms_content"></div>
+	  	
         <div class="layui-form-item">
           <div class="layui-input-block">
             <div class="layui-footer">
@@ -119,7 +119,7 @@
 	    //自定义验证规则
 	    form.verify({
 	    	mediaContent: function(value){
-	    		var size = $("#mms_content .layui-col-md4").size();
+	    		var size = $("#mms_content .layui-form-item").size();
 	    		if(size == 0) {
 	    			return "请点击按钮添加彩信内容";
 	    		}
@@ -136,7 +136,6 @@
 	            beforeSend : function() {
 	            	l_index = layer.load(1);
 	            },
-	            
 	            type: "POST",
 	            async: false,
 	            success: function (result) {
@@ -162,7 +161,7 @@
 		$("#frame_"+ id).remove();
 	};
 	
-	function bindFile(fileId, containerId){
+	function bindFile(btnId, fileId, containerId){
 	     var inputJ = $("#"+fileId),
 		 input  = inputJ[0],
 		 con    = $("#"+containerId);
@@ -182,10 +181,12 @@
 			 	} else if(thisType.indexOf("video") != -1 ) {
 			 	   con.html($("<video class='img_pre' controls><source src='"+e.target.result+"' type='"+thisType+"'>您的浏览器不支持 audio播放</video>"));
 			 	} else if(thisType.indexOf("audio") != -1 ) {
-			 	   con.html($("<audio class='img_pre' controls><source src='"+e.target.result+"' type='"+thisType+"'>您的浏览器不支持 video播放</audio>"));
+			 	   con.html($("<audio class='audio_pre' controls><source src='"+e.target.result+"' type='"+thisType+"'>您的浏览器不支持 video播放</audio>"));
 			 	}
 			 }
-	 	});    
+	 	});
+	 	
+	 	$("#"+fileId).css("width", $("#"+btnId).css("width")).css("height", $("#"+btnId).css("height"));
 	
 	};
 	
@@ -209,7 +210,7 @@
 			return "";
 		}
 		
-		return "<a class='layui-btn layui-btn-primary layui-btn-sm'>" +
+		return "<a class='layui-btn layui-btn-primary layui-btn-sm' id='btn_"+id+"'>" +
 				    	"<i class='layui-icon'>&#xe67c;</i>" + title +
 				        "<input name='files' lay-verify='required' type='file' id='file_"+id+"' class='file' accept='"+accept+"'>"+
 					"</a>";
@@ -219,20 +220,17 @@
 		var id = Math.random().toString().replace(".", "");
 		var header = getFileDes(type, id);
 		
-		$("#mms_content").append($("<div class='layui-col-md4' id='frame_"+id+"'><div class='layui-card'>" +
-	        "<div class='layui-card-header'>"+
-	            "<a class='layui-btn layui-btn-sm layui-btn-danger' href=javascript:remove('"+id+"')><i class='layui-icon'></i> 移除</a>"+
-	        	 header +
+		$("#mms_content").append($("<div class='layui-form-item' id='frame_"+id+"'>" +
+	        "<label class='layui-form-label'><a class='layui-btn layui-btn-sm layui-btn-danger' href=javascript:remove('"+id+"')><i class='layui-icon'></i> 移除</a></label>"+
 	        	 "<input type='hidden' name='mediaTypes' value='"+type+"'>"+
-	        "</div>"+
-	        "<div class='layui-card-body' id='container_"+id+"'>"+
+	        "<div class='layui-input-block'>"+
+	        	header + "<div id='container_"+id+"'></div>" +
 	        	element +
 	        "</div>"+
-	      "</div>"+
 	    "</div>"));
 	    
 	    if(header != "") {
-			bindFile("file_" +id, "container_" + id);
+			bindFile("btn_"+id, "file_" +id, "container_" + id);
 		}
 	};
 	
