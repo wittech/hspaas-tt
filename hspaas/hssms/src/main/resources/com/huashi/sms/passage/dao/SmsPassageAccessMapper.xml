@@ -409,7 +409,7 @@
 	<select id="selectByType" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
-		from sms_passage_access where call_type = #{type}
+		from sms_passage_access where call_type = #{type} order by user_id
 	</select>
 
 	<select id="selectByUserIdAndCmcp" resultMap="BaseResultMap">

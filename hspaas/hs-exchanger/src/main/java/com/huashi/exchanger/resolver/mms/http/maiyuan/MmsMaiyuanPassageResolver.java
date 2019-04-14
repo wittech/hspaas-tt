@@ -116,7 +116,7 @@ public class MmsMaiyuanPassageResolver extends AbstractMmsPassageResolver {
 
         Map<String, Object> params = new HashMap<>();
         params.put("action", ACTION_SEND_MMS);
-        params.put("userid", tparameter.getString("userId"));
+        params.put("userid", tparameter.getString("userid"));
         params.put("account", tparameter.getString("account"));
         params.put("password", tparameter.getString("password"));
         params.put("mobile", mobile);

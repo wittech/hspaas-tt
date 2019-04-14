@@ -50,7 +50,7 @@
                            <div class="form-group">
                                 <label class="col-xs-3 control-label">类型</label>
                                 <div class="col-xs-5">
-                                	<input type="text" readonly = "readonly" class="form-control" value="<#if userBalance??><#if userBalance.type==1>短信<#elseif userBalance.type==2>流量 <#elseif userBalance.type==3>语音<#else>未知</#if></#if>">
+                                	<input type="text" readonly = "readonly" class="form-control" value="<#if userBalance??><#if userBalance.type==1>短信<#elseif userBalance.type==2>流量 <#elseif userBalance.type==3>语音<#elseif userBalance.type==4>彩信<#else>未知</#if></#if>">
                                 </div>
                             </div>
 							<div class="form-group">

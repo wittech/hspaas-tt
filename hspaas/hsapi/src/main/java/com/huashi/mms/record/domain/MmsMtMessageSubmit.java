@@ -28,7 +28,7 @@ public class MmsMtMessageSubmit {
 
     private Integer             passageId;
 
-    private Boolean             needPush;
+    private Boolean             needPush = false;
 
     private String              pushUrl;
 

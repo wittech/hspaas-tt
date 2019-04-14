@@ -254,6 +254,14 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
         }
         return list;
     }
+    
+    public static void main(String[] args) {
+        TriolyPassageResolver r = new TriolyPassageResolver();
+        System.out.println(r.mtDeliver("{\"sign\":\"ac2c8f270e5a426304583db9512b8739\",\"report\":[{\"sendId\":155519638616792840,\"mobile\":\"18368031231\",\"reportStatus\":\"DELIVRD\",\"status\":2,\"sendTime\":\"2019-04-14 06:59:56\"}]}", "0"));
+        
+        
+        
+    }
 
     @Override
     public List<MmsMtMessageDeliver> mtDeliver(String report, String successCode) {
@@ -263,9 +271,22 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
             if (StringUtils.isEmpty(report)) {
                 return null;
             }
+            
+            report = report.replace("\"[", "[").replace("]\"", "]");
+            
+            JSONObject jsonData = JSON.parseObject(report);
+            if(MapUtils.isEmpty(jsonData)) {
+                return null;
+            }
+            
+            Object reportData = jsonData.get("report");
+            if(reportData == null) {
+                return null;
+            }
+            
 
             List<MmsMtMessageDeliver> list = new ArrayList<>();
-            List<JSONObject> result = JSONObject.parseObject(report, new TypeReference<List<JSONObject>>() {
+            List<JSONObject> result = JSONObject.parseObject(reportData.toString(), new TypeReference<List<JSONObject>>() {
             });
             for (JSONObject jsonobj : result) {
                 String msgId = jsonobj.getString("sendId");
@@ -302,9 +323,21 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
             if (StringUtils.isEmpty(report)) {
                 return null;
             }
+            
+            report = report.replace("\"[", "[").replace("]\"", "]");
+            
+            JSONObject jsonData = JSON.parseObject(report);
+            if(MapUtils.isEmpty(jsonData)) {
+                return null;
+            }
+            
+            Object reportData = jsonData.get("report");
+            if(reportData == null) {
+                return null;
+            }
 
             List<MmsMoMessageReceive> list = new ArrayList<>();
-            List<JSONObject> result = JSONObject.parseObject(report, new TypeReference<List<JSONObject>>() {
+            List<JSONObject> result = JSONObject.parseObject(reportData.toString(), new TypeReference<List<JSONObject>>() {
             });
             for (JSONObject jsonobj : result) {
                 MmsMoMessageReceive response = new MmsMoMessageReceive();

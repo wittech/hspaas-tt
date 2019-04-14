@@ -1,31 +1,38 @@
 /**************************************************************************
- * Copyright (c) 2015-2016 HangZhou Huashi, Inc.
- * All rights reserved.
- *
- * 项目名称：华时短信平台
- * 版权说明：本软件属杭州华时科技有限公司所有，在未获得杭州华时科技有限公司正式授权
- *           情况下，任何企业和个人，不能获取、阅读、安装、传播本软件涉及的任何受知
- *           识产权保护的内容。                            
+ * Copyright (c) 2015-2016 HangZhou Huashi, Inc. All rights reserved. 项目名称：华时短信平台
+ * 版权说明：本软件属杭州华时科技有限公司所有，在未获得杭州华时科技有限公司正式授权 情况下，任何企业和个人，不能获取、阅读、安装、传播本软件涉及的任何受知 识产权保护的内容。
  ***************************************************************************/
 package com.huashi.sms.settings.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.settings.dao.SmsMobileWhiteListMapper;
 import com.huashi.sms.settings.domain.SmsMobileWhiteList;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import javax.annotation.Resource;
-import java.util.*;
 
 /**
  * TODO 白名单服务接口实现类
@@ -38,13 +45,13 @@ import java.util.*;
 public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 
     @Reference
-    private IUserService userService;
+    private IUserService             userService;
     @Autowired
     private SmsMobileWhiteListMapper smsMobileWhiteListMapper;
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate      stringRedisTemplate;
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger                   logger = LoggerFactory.getLogger(getClass());
 
     private static Map<String, Object> response(String code, String msg) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -91,7 +98,6 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
                 }
             }
 
-
             return response("success", "成功！");
         } catch (Exception e) {
             logger.info("添加白名单失败", e);
@@ -105,7 +111,8 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
     }
 
     @Override
-    public PaginationVo<SmsMobileWhiteList> findPage(int userId, String phoneNumber, String startDate, String endDate, String currentPage) {
+    public PaginationVo<SmsMobileWhiteList> findPage(int userId, String phoneNumber, String startDate, String endDate,
+                                                     String currentPage) {
         int _currentPage = PaginationVo.parse(currentPage);
 
         Map<String, Object> params = new HashMap<>();
@@ -176,10 +183,24 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
         }
         try {
             stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_MOBILE_WHITELIST + "*"));
-            for (SmsMobileWhiteList mwl : list) {
-                pushToRedis(mwl);
-            }
-            return true;
+
+            List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+
+                @Override
+                public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                    RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                    connection.openPipeline();
+                    for (SmsMobileWhiteList mwl : list) {
+                        byte[] key = serializer.serialize(getKey(mwl.getUserId()));
+                        connection.sAdd(key, serializer.serialize(JSON.toJSONString(mwl)));
+                    }
+
+                    return connection.closePipeline();
+                }
+
+            }, false, true);
+
+            return CollectionUtils.isNotEmpty(con);
         } catch (Exception e) {
             logger.warn("REDIS重载手机白名单数据失败", e);
             return false;
@@ -188,6 +209,7 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
 
     /**
      * TODO 添加到REDIS 数据中
+     * 
      * @param mwl
      */
     private void pushToRedis(SmsMobileWhiteList mwl) {

@@ -4,15 +4,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.common.notice.vo.BaseResponse;
 import com.huashi.common.user.domain.UserDeveloper;
+import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.util.SecurityUtil;
-import com.huashi.util.HttpClientUtil;
 
 @Component
 public class SmsClient extends BaseClient {
+
+    @Value("${hspaas.api.url}")
+    private String                rootApiUrl;
+
+    @Reference
+    private IUserDeveloperService userDeveloperService;
+
+    /**
+     * 根据用户ID获取开发者信息
+     * 
+     * @param userId
+     * @return
+     */
+    private UserDeveloper getByUserId(int userId) {
+        try {
+            if (userId == 0) {
+                return null;
+            }
+
+            return userDeveloperService.getByUserId(userId);
+        } catch (Exception e) {
+            logger.error("getByUserId[" + userId + "] failed", e);
+            return null;
+        }
+
+    }
 
     /**
      * 短信路径路由

@@ -8,6 +8,9 @@
       http://www.springframework.org/schema/mvc    
       http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
+	<!-- dubbo 消费者 -->
+	<import resource="spring-dubbo-consumer.xml" />
+
 	<context:property-placeholder location="classpath:application.properties" />
 
 	<context:component-scan base-package="com.huashi.web">

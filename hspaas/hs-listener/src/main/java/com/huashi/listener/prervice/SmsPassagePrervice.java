@@ -20,8 +20,8 @@ import com.huashi.sms.record.service.ISmsMtDeliverService;
 @Service
 public class SmsPassagePrervice {
 
-    @Resource
-    private RabbitTemplate           rabbitTemplate;
+    @Resource(name = "smsRabbitTemplate")
+    private RabbitTemplate           smsRabbitTemplate;
     @Reference
     private ISmsProviderService      smsProviderService;
     @Reference
@@ -75,7 +75,7 @@ public class SmsPassagePrervice {
         jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
         // 发送异步消息
-        rabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT, jsonObject);
+        smsRabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MT_WAIT_RECEIPT, jsonObject);
     }
 
     /**
@@ -95,7 +95,7 @@ public class SmsPassagePrervice {
         jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
         // 发送异步消息
-        rabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MO_RECEIVE, jsonObject);
+        smsRabbitTemplate.convertAndSend(RabbitConstant.MQ_SMS_MO_RECEIVE, jsonObject);
     }
 
 }

@@ -20,8 +20,8 @@ import com.huashi.mms.record.service.IMmsMtDeliverService;
 @Service
 public class MmsPassagePrervice {
 
-    @Resource
-    private RabbitTemplate           rabbitTemplate;
+    @Resource(name = "mmsRabbitTemplate")
+    private RabbitTemplate           mmsRabbitTemplate;
     @Reference
     private IMmsProviderService      mmsProviderService;
     @Reference
@@ -50,7 +50,7 @@ public class MmsPassagePrervice {
         jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
         // 发送异步消息
-        rabbitTemplate.convertAndSend(RabbitConstant.MQ_MMS_MT_WAIT_RECEIPT, jsonObject);
+        mmsRabbitTemplate.convertAndSend(RabbitConstant.MQ_MMS_MT_WAIT_RECEIPT, jsonObject);
     }
 
     /**
@@ -70,9 +70,9 @@ public class MmsPassagePrervice {
         jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
         // 发送异步消息
-        rabbitTemplate.convertAndSend(RabbitConstant.MQ_MMS_MO_RECEIVE, jsonObject);
+        mmsRabbitTemplate.convertAndSend(RabbitConstant.MQ_MMS_MO_RECEIVE, jsonObject);
     }
-    
+
     public void doTemplateModelReport(String provider, JSONObject jsonObject) {
         if (StringUtils.isEmpty(provider) || jsonObject == null) {
             logger.warn("回执数据无效: [Provider: {}, ParametersMap : {}]", provider, jsonObject.toJSONString());
@@ -84,7 +84,7 @@ public class MmsPassagePrervice {
         jsonObject.put(ParameterFilterContext.PASSAGE_PROVIDER_CODE_NODE, provider);
 
         // 发送异步消息
-        rabbitTemplate.convertAndSend(RabbitConstant.MQ_MMS_MO_RECEIVE, jsonObject);
+        mmsRabbitTemplate.convertAndSend(RabbitConstant.MQ_MMS_MODEL_RECEIVE, jsonObject);
     }
 
 }

@@ -183,6 +183,7 @@
 	                        ,data: { "ids": ids }
 	                        ,success: function(data){
 	                        	layer.close(l_index);
+	            				var result=eval("("+data+")");
 	                        	modal.msgSuccess("删除成功");
 		                    	table.reload(tableId);
 		                    	
@@ -262,20 +263,17 @@
 	                action: server_domain+'/mms/send/byModel',
 	                method: 'post',
 	                beforeSend : function() {
-                    	l_index = layer.load(1);
+                    	l_index = layer.load();
                     },
 	                callback: function (data) {
 	                	layer.close(l_index);
-	                	modal.msgSuccess("发送成功");
-                    	table.reload(tableId);
-                    	
-                    	/**
-	                	if(data.success == true) {
+	            		var result=eval("("+data+")");
+	                	if(result.success) {
                     		modal.msgSuccess("发送成功");
                     		table.reload(tableId);
                     	} else {
                     		modal.msgError("发送失败");
-                    	}*/
+                    	}
 	                }
 	            });
 	        } else if(obj.event === 'preview'){

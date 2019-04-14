@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.common.notice.vo.BaseResponse;
 import com.huashi.common.user.domain.UserDeveloper;
+import com.huashi.common.user.service.IUserDeveloperService;
 import com.huashi.common.util.SecurityUtil;
-import com.huashi.util.HttpClientUtil;
 
 @Component
 public class MmsClient extends BaseClient {
@@ -17,22 +19,48 @@ public class MmsClient extends BaseClient {
     /**
      * 彩信路径路由
      */
-    private static final String MMS_ROUTER               = "/mms";
+    private static final String   MMS_ROUTER               = "/mms";
 
     /**
      * 发送自定义内容彩信方法
      */
-    private static final String SEND_MMS_ACTION          = "/send";
+    private static final String   SEND_MMS_ACTION          = "/send";
 
     /**
      * 发送模板彩信方法
      */
-    private static final String SEND_MMS_BY_MODEL_ACTION = "/sendByModel";
+    private static final String   SEND_MMS_BY_MODEL_ACTION = "/sendByModel";
 
     /**
      * 申请彩信模板方法
      */
-    private static final String APPLY_MODEL_ACTION       = "/applyModel";
+    private static final String   APPLY_MODEL_ACTION       = "/applyModel";
+
+    @Value("${hspaas.api.url}")
+    private String                rootApiUrl;
+
+    @Reference
+    private IUserDeveloperService userDeveloperService;
+
+    /**
+     * 根据用户ID获取开发者信息
+     * 
+     * @param userId
+     * @return
+     */
+    private UserDeveloper getByUserId(int userId) {
+        try {
+            if (userId == 0) {
+                return null;
+            }
+
+            return userDeveloperService.getByUserId(userId);
+        } catch (Exception e) {
+            logger.error("getByUserId[" + userId + "] failed", e);
+            return null;
+        }
+
+    }
 
     private String getMmsUrl(String action) {
         if (StringUtils.isEmpty(rootApiUrl)) {

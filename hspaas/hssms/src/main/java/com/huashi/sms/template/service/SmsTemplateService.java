@@ -16,7 +16,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -208,9 +212,9 @@ public class SmsTemplateService implements ISmsTemplateService {
             throw new IllegalArgumentException("用户模板[" + templateId + "]数据不匹配，原模板用户ID:[" + template.getUserId()
                                                + "] , 本次用户ID:[" + userId + "]");
         }
-        
+
         if (AppType.WEB.getCode() == template.getAppType() && template.getStatus() != ApproveStatus.WAITING.getValue()) {
-            throw new IllegalArgumentException("用户模板[" + templateId + "]模板状态为非待审核状态["+template.getStatus()+"]不能修改");
+            throw new IllegalArgumentException("用户模板[" + templateId + "]模板状态为非待审核状态[" + template.getStatus() + "]不能修改");
         }
 
         return template;
@@ -482,19 +486,25 @@ public class SmsTemplateService implements ISmsTemplateService {
         }
 
         stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_USER_MESSAGE_TEMPLATE + "*"));
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-        for (MessageTemplate template : list) {
-            try {
-                stringRedisTemplate.opsForZSet().add(getKey(template.getUserId()), JSON.toJSONString(template),
-                                                     template.getPriority().doubleValue());
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (MessageTemplate template : list) {
+                    byte[] key = serializer.serialize(getKey(template.getUserId()));
 
-            } catch (Exception e) {
-                logger.warn("REDIS 短信模板设置失败", e);
-                return false;
+                    connection.zAdd(key, template.getPriority().doubleValue(),
+                                    serializer.serialize(JSON.toJSONString(template)));
+                }
+
+                return connection.closePipeline();
             }
-        }
 
-        return true;
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
     }
 
     @Override

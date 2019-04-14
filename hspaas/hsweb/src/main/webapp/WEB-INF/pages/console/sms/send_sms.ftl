@@ -104,8 +104,9 @@ layui.use(['form', 'element', 'laydate', 'upload'], function(){
             },
             type: "POST",
             async: false,
-            success: function (result) {
+            success: function (data) {
             	layer.close(l_index);
+            	var result=eval("("+data+")");
             	if(result.success) {
             		layer.msg('发送成功');
             	} else {

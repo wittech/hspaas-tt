@@ -14,7 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -77,7 +81,7 @@ public class SmsPassageService implements ISmsPassageService {
     @Autowired
     private ISmsMtSubmitService       smsMtSubmitService;
     @Reference
-    private ISmsProxyManager    smsProxyManageService;
+    private ISmsProxyManager          smsProxyManageService;
     @Reference
     private IPassageMonitorService    passageMonitorService;
 
@@ -240,7 +244,7 @@ public class SmsPassageService implements ISmsPassageService {
             }
 
             release(passage, isQueueCreateFinished, isRedisPushFinished);
-            
+
             logger.error("添加短信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return response(false, "添加失败");
@@ -526,14 +530,25 @@ public class SmsPassageService implements ISmsPassageService {
             return false;
         }
 
-        for (SmsPassage smsPassage : list) {
-            List<SmsPassageParameter> paramList = parameterMapper.findByPassageId(smsPassage.getId());
-            smsPassage.getParameterList().addAll(paramList);
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-            pushToRedis(smsPassage);
-        }
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (SmsPassage smsPassage : list) {
+                    byte[] mainKey = serializer.serialize(SmsRedisConstant.RED_SMS_PASSAGE);
+                    byte[] assistKey = serializer.serialize(smsPassage.getId().toString());
 
-        return true;
+                    connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(smsPassage)));
+                }
+
+                return connection.closePipeline();
+            }
+
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
     }
 
     @Override

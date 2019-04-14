@@ -134,11 +134,13 @@
 	        $("#myform").ajaxSubmit({
 	            url: server_domain + "/mms/template/save",
 	            beforeSend : function() {
-	            	l_index = layer.load(1);
+	            	l_index = layer.load();
 	            },
 	            type: "POST",
 	            async: false,
-	            success: function (result) {
+	            success: function (data) {
+	            	layer.close(l_index);
+	            	var result=eval("("+data+")");
 	            	layer.close(l_index);
 	            	if(result.success) {
 	            		layer.msg('保存成功');

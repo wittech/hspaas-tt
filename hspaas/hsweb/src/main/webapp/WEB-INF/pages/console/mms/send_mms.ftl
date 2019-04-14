@@ -207,13 +207,14 @@
 	        $("#myform").ajaxSubmit({
 	            url: server_domain + "/mms/send/submit",
 	            beforeSend : function() {
-	            	l_index = layer.load(1);
+	            	l_index = layer.load();
 	            },
 	            
 	            type: "POST",
 	            async: false,
-	            success: function (result) {
+	            success: function (data) {
 	            	layer.close(l_index);
+	            	var result=eval("("+data+")");
 	            	if(result.success) {
 	            		layer.msg('发送成功');
 	            	} else {

@@ -387,6 +387,6 @@
 	<select id="findAll" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
-		from sms_message_template where status = 1
+		from sms_message_template where status = 1 order by user_id
 	</select>
 </mapper>

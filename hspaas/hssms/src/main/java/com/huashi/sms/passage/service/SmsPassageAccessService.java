@@ -17,7 +17,11 @@ import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -115,9 +119,8 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
         // Set<String> keys = stringRedisTemplate.keys(SmsRedisConstant.RED_USER_PASSAGE_ACCESS + "*");
         // stringRedisTemplate.delete(keys);
 
-        for (SmsPassageAccess access : list) {
-            loadToRedis(access);
-        }
+        batchLoadToRedis(list);
+
         return true;
     }
 
@@ -579,7 +582,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
             if (result == 0) {
                 throw new RuntimeException("更新可用通道持久化异常");
             }
-            
+
             for (SmsPassageAccess access : list) {
                 // 如果状态一致，则无需修改REDIS缓存数据
                 if (access.getStatus() != null && Objects.equals(access.getStatus(), status)) {
@@ -603,11 +606,10 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
+     * TODO 更新监控应用相关自定义线程信息
      * 
-       * TODO 更新监控应用相关自定义线程信息
-       * 
-       * @param access
-       * @param status
+     * @param access
+     * @param status
      */
     private void monitorThreadNotice(SmsPassageAccess access, Integer status) {
         try {
@@ -621,7 +623,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
                 }
             }
         } catch (Exception e) {
-            logger.warn("更新监听服务线程失败 [" + e.getMessage() +"]");
+            logger.warn("更新监听服务线程失败 [" + e.getMessage() + "]");
         }
     }
 
@@ -782,4 +784,30 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
         }
     }
 
+    private void batchLoadToRedis(List<SmsPassageAccess> list) {
+        try {
+            stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+
+                @Override
+                public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                    RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                    connection.openPipeline();
+                    for (SmsPassageAccess access : list) {
+                        byte[] mainKey = serializer.serialize(getMainKey(access.getUserId(), access.getCallType()));
+                        byte[] assistKey = serializer.serialize(getAssistKey(access.getRouteType(), access.getCmcp(),
+                                                                             access.getProvinceCode()));
+
+                        connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(access)));
+                    }
+
+                    return connection.closePipeline();
+                }
+
+            }, false, true);
+
+            publishToRedis();
+        } catch (Exception e) {
+            logger.warn("Redis 用户可用通道信息加载到REDIS失败", e);
+        }
+    }
 }

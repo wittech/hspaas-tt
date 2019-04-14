@@ -85,7 +85,9 @@
                                     <#elseif pl.type == 2>
                                         流量
                                     <#elseif pl.type == 3>
-                                        语音
+                                        语音					
+                                    <#elseif pl.type == 4>
+                                        彩信
                                    	<#elseif pl.type == 0>
                                         默认
                                     </#if>

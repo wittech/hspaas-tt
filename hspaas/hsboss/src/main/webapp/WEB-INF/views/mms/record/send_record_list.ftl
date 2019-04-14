@@ -203,7 +203,7 @@
                                     </#if>
                                 </td>
                                 <td>
-                                    <#if pl.needPush>
+                                    <#if pl.needPush?? && pl.needPush>
                                         <#if pl.messagePush??>
                                             <a href="javascript:void(0);" data-placement="left" data-html="true" class="btn btn-<#if pl.messagePush.status == 0>success<#else>danger</#if> btn-xs" data-toggle="popover"  onclick="showMessagePush('${pl.messagePush.createTime?string('yyyy-MM-dd HH:mm:ss')}',this);" data='${pl.messagePush.content!''}' responseContent='${pl.messagePush.responseContent!''}' title="推送信息"
 		                                               data-content="

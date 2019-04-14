@@ -61,6 +61,7 @@
                                     <label class="form-radio form-icon"><input type="radio" id="type_1" name="type" value="1" onclick="changeType('1');" <#if userBalance??><#if userBalance.type==1>checked  <#else>disabled</#if></#if>>短信</label>&nbsp;&nbsp;
                                     <label class="form-radio form-icon"><input type="radio" id="type_2" name="type" value="2" onclick="changeType('2');"  <#if userBalance??><#if userBalance.type==2>checked <#else>disabled</#if></#if>>流量</label>&nbsp;&nbsp;
                                     <label class="form-radio form-icon"><input type="radio" id="type_3" name="type" value="3" onclick="changeType('3');"  <#if userBalance??><#if userBalance.type==3>checked <#else>disabled</#if></#if>>语音</label>&nbsp;&nbsp;
+                                	<label class="form-radio form-icon"><input type="radio" id="type_4" name="type" value="4" onclick="changeType('4');"  <#if userBalance??><#if userBalance.type==4>checked <#else>disabled</#if></#if>>彩信</label>&nbsp;&nbsp;
                                 </div>
                                 <input type="hidden" name="userBalance.type" value ='${userBalance.type!'1'}' id="type">
                             </div>
