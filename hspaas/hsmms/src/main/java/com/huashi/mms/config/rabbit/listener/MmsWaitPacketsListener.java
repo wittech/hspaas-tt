@@ -1,11 +1,6 @@
 package com.huashi.mms.config.rabbit.listener;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
@@ -66,7 +61,7 @@ import com.huashi.sms.template.context.SmsTemplateContext;
 import com.rabbitmq.client.Channel;
 
 /**
- * TODO 待消息分包处理
+ *  待消息分包处理
  *
  * @author zhengying
  * @version V1.0.0
@@ -122,10 +117,10 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     private final AtomicInteger                   errorNo              = new AtomicInteger();
 
     /**
-     * TODO 正常任务处理
+     *  正常任务处理
      *
-     * @param mobileCatagory
-     * @param routePassage
+     * @param mobileCatagory 手机号码包
+     * @param routePassage 路由通道
      */
     private void doPassagePacketsFinished(MobileCatagory mobileCatagory, MmsRoutePassage routePassage) {
         try {
@@ -142,7 +137,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 针对异常情况，提交子任务
+     *  针对异常情况，提交子任务
      */
     private void asyncSendTask() {
         mmsMtTaskLocal.get().setPackets(null);
@@ -150,10 +145,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 正常任务执行
+     *  正常任务执行
      *
-     * @param mobileCatagory
-     * @return
+     * @param mobileCatagory 手机号码包
      */
     private void asyncSendTask(MobileCatagory mobileCatagory) {
         MmsMtTask task = mmsMtTaskLocal.get();
@@ -199,17 +193,18 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 当任务中包含错号/重号 返还相应余额给用户
+     *  当任务中包含错号/重号 返还相应余额给用户
      *
-     * @param task
-     * @param mobileCatagory
+     * @param task 主任务
+     * @param mobileCatagory 手机号码包
      */
     private void returnFeeToUser(MmsMtTask task, MobileCatagory mobileCatagory) {
         if (task.getReturnFee() != null && task.getReturnFee() != 0 && mobileCatagory != null) {
             logger.info("用户ID：{} 发送彩信 存在错号：{}个，重复号码：{}个，单条计费：{}条，共扣费：{}条，共需返还{}条", task.getUserId(),
                         mobileCatagory.getFilterSize(), mobileCatagory.getRepeatSize(), task.getFee(),
                         (task.getMobiles().length - mobileCatagory.getFilterSize() - mobileCatagory.getRepeatSize())
-                                * task.getFee(), task.getReturnFee());
+                                                                                                       * task.getFee(),
+                        task.getReturnFee());
             try {
                 userBalanceService.updateBalance(task.getUserId(), task.getReturnFee(),
                                                  PlatformType.MULTIMEDIA_MESSAGE_SERVICE.getCode(),
@@ -222,20 +217,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据短信模板配置判断是否忽略手机黑名单
-     * 
-     * @return
-     */
-    private boolean isIgnoreBlacklist() {
-        return false;
-        // return messageTemplateLocal.get() != null
-        // && IgnoreBlacklist.YES.getValue() == messageTemplateLocal.get().getIgnoreBlacklist();
-    }
-
-    /**
-     * TODO 手机号码处理逻辑，黑名单判断/无效手机号码过滤/运营商分流
+     *  手机号码处理逻辑，黑名单判断/无效手机号码过滤/运营商分流
      *
-     * @return
+     * @return 手机号码包
      */
     private MobileCatagory findOutMatchedMobiles() {
         // 转换手机号码数组
@@ -247,7 +231,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         }
 
         // 黑名单手机号码
-        List<String> blackMobiles = mobileBlackListService.filterBlacklistMobile(mobiles, isIgnoreBlacklist());
+        List<String> blackMobiles = mobileBlackListService.filterBlacklistMobile(mobiles,false);
         if (CollectionUtils.isNotEmpty(blackMobiles)) {
             // 移除需要执行的手机号码
             mmsMtTaskLocal.get().setMobile(StringUtils.join(mobiles, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
@@ -281,10 +265,10 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 校验数据
+     *  校验数据
      * 
-     * @param message
-     * @return
+     * @param message 队列消息
+     * @return 校验结果
      */
     private boolean validate(Message message) {
         if (message == null) {
@@ -317,7 +301,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             UserMmsConfig mmsConfig = getMmsConfig();
 
             // 检查彩信发送模式下的模板信息
-            if (!checkMmsModelOrBody(mmsConfig)) {
+            if (!checkMmsModelOrBody()) {
                 asyncSendTask();
                 return;
             }
@@ -345,16 +329,23 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
         } finally {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            // 清除ThreadLocal对象，加速GC，减小内存压力
-            mmsMtTaskLocal.remove();
-            messageTemplateLocal.remove();
-            // 置分包异常提示计数器清零
-            errorNo.set(0);
+            release();
         }
     }
 
     /**
-     * TODO 验证数据有效性并返回用户短信配置信息
+     * 释放资源
+     */
+    private void release() {
+        // 清除ThreadLocal对象，加速GC，减小内存压力
+        mmsMtTaskLocal.remove();
+        messageTemplateLocal.remove();
+        // 置分包异常提示计数器清零
+        errorNo.set(0);
+    }
+
+    /**
+     *  验证数据有效性并返回用户短信配置信息
      */
     private UserMmsConfig getMmsConfig() {
         if (StringUtils.isEmpty(mmsMtTaskLocal.get().getMobile())) {
@@ -375,7 +366,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 保存子任务
+     *  保存子任务
      *
      * @param mobile 手机号码
      * @param passageAccess 可用通道信息
@@ -442,7 +433,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 追加错误信息
+     *  追加错误信息
      */
     private String formatMessage(String message) {
         return String.format("%d)%s;", errorNo.incrementAndGet(), message);
@@ -451,8 +442,8 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     /**
      * 拼接可操作动作代码
      * 
-     * @param index
-     * @param forceActions
+     * @param index 错误码下标
+     * @param forceActions 错误码信息
      */
     private void refillForceActions(int index, StringBuilder forceActions) {
         // 异常分包情况下允许的操作，如000,010，第一位:未报备模板，第二位：敏感词，第三位：通道不可用
@@ -465,9 +456,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取短信路由类型 如果路由类型未确定，则按默认路由进行
+     *  获取短信路由类型 如果路由类型未确定，则按默认路由进行
      *
-     * @return
+     * @return 路由类型
      */
     private Integer getMessageRouteType() {
         if (messageTemplateLocal.get() == null || messageTemplateLocal.get().getRouteType() == null) {
@@ -478,13 +469,13 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取运营商手机号码信息（手机号码分省分流）
+     *  获取运营商手机号码信息（手机号码分省分流）
      *
-     * @param cmcp
-     * @param mobileCatagory
-     * @return
+     * @param cmcp 运营商标识
+     * @param mobileCatagory 手机号码包
+     * @return 手机号码映射
      */
-    private static Map<Integer, String> getCmcpMobileNumbers(CMCP cmcp, MobileCatagory mobileCatagory) {
+    private Map<Integer, String> getCmcpMobileNumbers(CMCP cmcp, MobileCatagory mobileCatagory) {
         if (CMCP.CHINA_MOBILE == cmcp) {
             return mobileCatagory.getCmNumbers();
         } else if (CMCP.CHINA_TELECOM == cmcp) {
@@ -505,7 +496,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
      * 根据运营商和路由通道寻找具体的通道信息
      *
      * @param mobileCatagory 分省后手机号码组
-     * @return
+     * @return 路由通道
      */
     private MmsRoutePassage getUserRoutePassage(MobileCatagory mobileCatagory) {
         MmsRoutePassage routePassage = new MmsRoutePassage();
@@ -544,22 +535,22 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取可用通道信息，如果当前分省后的省份通道不可用，则尝试用全国通道，如果均没有，则分包失败
+     *  获取可用通道信息，如果当前分省后的省份通道不可用，则尝试用全国通道，如果均没有，则分包失败
      * 
-     * @param userId
-     * @param routeType
-     * @param cmcp
-     * @param provinceCode
-     * @return
+     * @param userId 用户编号
+     * @param routeType 路由类型
+     * @param cmcp 运营商
+     * @param provinceCode 省份代码
+     * @return 可用通道
      */
     private MmsPassageAccess getPassageAccess(int userId, int routeType, int cmcp, int provinceCode) {
         MmsPassageAccess passageAccess = mmsPassageAccessService.get(userId, routeType, cmcp, provinceCode);
-        if (passageAccess != null && isSmsPassageAccessAvaiable(passageAccess)) {
+        if (isPassageAccessAvaiable(passageAccess)) {
             return passageAccess;
         }
 
         passageAccess = mmsPassageAccessService.get(userId, routeType, cmcp, Province.PROVINCE_CODE_ALLOVER_COUNTRY);
-        if (passageAccess != null && isSmsPassageAccessAvaiable(passageAccess)) {
+        if (isPassageAccessAvaiable(passageAccess)) {
             return passageAccess;
         }
 
@@ -567,35 +558,31 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 验证通道是否可用
+     *  验证通道是否可用
      *
-     * @param access
-     * @return
+     * @param access 可用通道
+     * @return true,false
      */
-    private boolean isSmsPassageAccessAvaiable(MmsPassageAccess access) {
+    private boolean isPassageAccessAvaiable(MmsPassageAccess access) {
         return access != null && access.getStatus() != null && access.getStatus() == PassageStatus.ACTIVE.getValue();
     }
 
     /**
-     * TODO 是否是短信模板发送模式
+     *  是否是模板发送模式
      * 
-     * @return
+     * @return true,false
      */
     private boolean isMessageByModelSend() {
-        if (mmsMtTaskLocal.get().getIsModelSend() == true || StringUtils.isNotEmpty(mmsMtTaskLocal.get().getModelId())) {
-            return true;
-        }
-
-        return false;
+        return mmsMtTaskLocal.get().getIsModelSend() || StringUtils.isNotEmpty(mmsMtTaskLocal.get().getModelId());
     }
 
     /**
-     * TODO 检验发送模式相关
+     *  检验发送模式相关
      * 
-     * @param mmsConfig
+     * @return true,false
      */
-    private boolean checkMmsModelOrBody(UserMmsConfig mmsConfig) {
-        MmsMessageTemplate template = null;
+    private boolean checkMmsModelOrBody() {
+        MmsMessageTemplate template;
         if (isMessageByModelSend()) {
             template = mmsTemplateService.getByModelId(mmsMtTaskLocal.get().getModelId());
             if (template == null) {
@@ -622,24 +609,20 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据短信模板限速/限量值判断是否放行
+     *  根据模板限速/限量值判断是否放行
      * 
-     * @return
+     * @return true,false
      */
     private boolean checkPassedByThreshold() {
         // 如果提交频率为0并且一天内上限大于等于9999则不限制提交任何（也无需记录用户访问轨迹） edit by 20170813
-        if (messageTemplateLocal.get().getSubmitInterval() == 0 && messageTemplateLocal.get().getLimitTimes() >= 9999) {
-            return true;
-        }
-
-        return false;
+        return messageTemplateLocal.get().getSubmitInterval() == 0 && messageTemplateLocal.get().getLimitTimes() >= 9999;
     }
 
     /**
      * 判断用户手机号码是超限/超速
      *
-     * @param mmsConfig
-     * @return
+     * @param mmsConfig 彩信模板
+     * @return true,false
      */
     private boolean isSameMobileOutOfRange(UserMmsConfig mmsConfig) {
         fillTemplateAttributes(mmsConfig);
@@ -653,8 +636,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
         Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(mmsMtTaskLocal.get().getUserId());
 
         // 转换手机号码数组
-        List<String> mobiles = new ArrayList<>(
-                                               Arrays.asList(mmsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+        List<String> mobiles = new ArrayList<>(Arrays.asList(mmsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 
         // 过滤超速集合
         List<String> benyondSpeedList = new ArrayList<>();
@@ -708,9 +690,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 设置用户归属的彩信模板信息
+     *  设置用户归属的彩信模板信息
      *
-     * @param mmsConfig
+     * @param mmsConfig 彩信模板
      */
     private void fillTemplateAttributes(UserMmsConfig mmsConfig) {
         MmsMessageTemplate template = messageTemplateLocal.get();
@@ -732,9 +714,9 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 执行异常结束逻辑(制造状态伪造包，需要判断是否需要状态报告)
+     *  执行异常结束逻辑(制造状态伪造包，需要判断是否需要状态报告)
      *
-     * @param mobiles
+     * @param mobiles 手机号码集合
      * @param remark 备注
      */
     private void doExceptionOverWithReport(List<String> mobiles, String remark) {
@@ -765,8 +747,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
             submit.setNeedPush(false);
 
         } else {
-            PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(),
-                                                                 CallbackUrlType.MMS_STATUS.getCode(),
+            PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(), CallbackUrlType.MMS_STATUS.getCode(),
                                                                  task.getCallback());
 
             // 推送信息为固定地址或者每次传递地址才需要推送
@@ -787,7 +768,7 @@ public class MmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 通道分包逻辑 根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
+     *  通道分包逻辑 根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
      *
      * @param routePassage 用户运营商路由下对应的通道信息
      */

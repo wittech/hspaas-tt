@@ -15,7 +15,7 @@ public class AsyncConfiguration {
     /**
      * 自定义异步线程池
      * 
-     * @return
+     * @return 线程池
      */
     @Bean("asyncTaskExecutor")
     public AsyncTaskExecutor asyncTaskExecutor() {

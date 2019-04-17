@@ -73,7 +73,7 @@ import com.huashi.sms.template.service.ISmsTemplateService;
 import com.rabbitmq.client.Channel;
 
 /**
- * TODO 待消息分包处理
+ * 待消息分包处理
  *
  * @author zhengying
  * @version V1.0.0
@@ -94,6 +94,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     @Autowired
     private ISmsTemplateService                smsTemplateService;
     @Autowired
+
     private IForbiddenWordsService             forbiddenWordsService;
     @Autowired
     private ISmsPassageAccessService           smsPassageAccessService;
@@ -131,10 +132,10 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     private final AtomicInteger                errorNo              = new AtomicInteger();
 
     /**
-     * TODO 正常任务处理
+     * 正常任务处理
      *
-     * @param mobileCatagory
-     * @param routePassage
+     * @param mobileCatagory 手机号码包
+     * @param routePassage 路由通道
      */
     private void doPassagePacketsFinished(MobileCatagory mobileCatagory, SmsRoutePassage routePassage) {
         try {
@@ -151,9 +152,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 针对异常情况，提交子任务
-     *
-     * @param task
+     * 针对异常情况，提交子任务
      */
     private void asyncSendTask() {
         smsMtTaskLocal.get().setPackets(null);
@@ -161,10 +160,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 正常任务执行
+     * 正常任务执行
      *
-     * @param mobileCatagory
-     * @return
+     * @param mobileCatagory 手机号码包
      */
     private void asyncSendTask(MobileCatagory mobileCatagory) {
         SmsMtTask task = smsMtTaskLocal.get();
@@ -195,10 +193,6 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         task.setRemark(task.getErrorMessageReport().toString());
         task.setProcessTime(new Date());
 
-        // 发送异步队列 暂时改成本地数据
-        // stringRedisTemplate.opsForList().rightPush(SmsRedisConstant.RED_DB_MESSAGE_TASK_LIST,
-        // JSON.toJSONString(task));
-
         smsMtTaskService.save(task);
 
         // 分包状态="分包完成"
@@ -215,17 +209,18 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 当任务中包含错号/重号 返还相应余额给用户
+     * 当任务中包含错号/重号 返还相应余额给用户
      *
-     * @param task
-     * @param mobileCatagory
+     * @param task 主任务
+     * @param mobileCatagory 手机号码包
      */
     private void returnFeeToUser(SmsMtTask task, MobileCatagory mobileCatagory) {
         if (task.getReturnFee() != null && task.getReturnFee() != 0 && mobileCatagory != null) {
             logger.info("用户ID：{} 发送短信 存在错号：{}个，重复号码：{}个，单条计费：{}条，共扣费：{}条，共需返还{}条", task.getUserId(),
                         mobileCatagory.getFilterSize(), mobileCatagory.getRepeatSize(), task.getFee(),
                         (task.getMobiles().length - mobileCatagory.getFilterSize() - mobileCatagory.getRepeatSize())
-                                * task.getFee(), task.getReturnFee());
+                                                                                                       * task.getFee(),
+                        task.getReturnFee());
             try {
                 userBalanceService.updateBalance(task.getUserId(), task.getReturnFee(),
                                                  PlatformType.SEND_MESSAGE_SERVICE.getCode(),
@@ -238,9 +233,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据短信模板配置判断是否忽略手机黑名单
+     * 根据短信模板配置判断是否忽略手机黑名单
      * 
-     * @return
+     * @return true:忽略，false:不忽略
      */
     private boolean isIgnoreBlacklist() {
         return messageTemplateLocal.get() != null
@@ -248,9 +243,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据短信模板配置判断是否忽略敏感词信息，强制放行
+     * 根据短信模板配置判断是否忽略敏感词信息，强制放行
      * 
-     * @return
+     * @return true:忽略敏感词检查，false:不忽略敏感词检查
      */
     private boolean isIgnoreForbiddenWords() {
         return messageTemplateLocal.get() != null
@@ -258,14 +253,13 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 手机号码处理逻辑，黑名单判断/无效手机号码过滤/运营商分流
+     * 手机号码处理逻辑，黑名单判断/无效手机号码过滤/运营商分流
      *
-     * @return
+     * @return 最终分析有效的手机号码包数据
      */
     private MobileCatagory findOutMatchedMobiles() {
         // 转换手机号码数组
-        List<String> mobiles = new ArrayList<>(
-                                               Arrays.asList(smsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+        List<String> mobiles = new ArrayList<>(Arrays.asList(smsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 
         // 移除上次 黑名单数据（主要针对重新分包黑名单不要重复产生记录）add by 2017-04-08
         if (StringUtils.isNotEmpty(smsMtTaskLocal.get().getBlackMobiles())) {
@@ -307,10 +301,10 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 校验数据
+     * 校验数据
      * 
-     * @param message
-     * @return
+     * @param message 队列中的消息
+     * @return 校验结果
      */
     private boolean validate(Message message) {
         if (message == null) {
@@ -373,12 +367,19 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
             logger.error("MQ消费任务分包失败： {}", messageConverter.fromMessage(message), e);
         } finally {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            // 清除ThreadLocal对象，加速GC，减小内存压力
-            smsMtTaskLocal.remove();
-            messageTemplateLocal.remove();
-            // 置分包异常提示计数器清零
-            errorNo.set(0);
+            release();
         }
+    }
+
+    /**
+     * 释放资源
+     */
+    private void release() {
+        // 清除ThreadLocal对象，加速GC，减小内存压力
+        smsMtTaskLocal.remove();
+        messageTemplateLocal.remove();
+        // 置分包异常提示计数器清零
+        errorNo.set(0);
     }
 
     // @Override
@@ -402,7 +403,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     // }
 
     /**
-     * TODO 验证数据有效性并返回用户短信配置信息
+     * 验证数据有效性并返回用户短信配置信息
      */
     private UserSmsConfig getSmsConfig() {
         if (StringUtils.isEmpty(smsMtTaskLocal.get().getMobile())) {
@@ -420,7 +421,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 保存子任务
+     * 保存子任务
      *
      * @param mobile 手机号码
      * @param passageAccess 可用通道信息
@@ -495,16 +496,17 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 追加错误信息
+     * 追加错误信息
      */
     private String formatMessage(String message) {
         return String.format("%d)%s;", errorNo.incrementAndGet(), message);
     }
 
     /**
-     * TODO 拼接可操作动作代码
+     * 拼接可操作动作代码
      *
-     * @param index
+     * @param index 错误数据下标
+     * @param forceActions 错误码结果
      */
     private void refillForceActions(int index, StringBuilder forceActions) {
         // 异常分包情况下允许的操作，如000,010，第一位:未报备模板，第二位：敏感词，第三位：通道不可用
@@ -517,9 +519,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 校验短信签名相关内容
+     * 校验短信签名相关内容
      *
-     * @param smsConfig
+     * @param smsConfig 短信配置信息
      */
     private void checkContentSignature(UserSmsConfig smsConfig) {
         // 如果用户不携带签名模式（一客一签模式），模板匹配需要考虑时候将原短信内容基础上加入签名进行匹配
@@ -549,7 +551,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 标记短信是否有敏感词
+     * 标记短信是否有敏感词
      */
     private void markContentHasSensitiveWords() {
         // 判断是否忽略敏感词信息，及时包含敏感词信息也免检查 add by 20180818
@@ -573,7 +575,8 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         }
 
         if (CollectionUtils.isNotEmpty(filterWords)) {
-            smsMtTaskLocal.get().setForbiddenWords(StringUtils.join(filterWords, MobileCatagory.MOBILE_SPLIT_CHARCATOR));
+            smsMtTaskLocal.get().setForbiddenWords(StringUtils.join(filterWords,
+                                                                    MobileCatagory.MOBILE_SPLIT_CHARCATOR));
             smsMtTaskLocal.get().getErrorMessageReport().append(formatMessage("用户短信内容存在敏感词，敏感词为："
                                                                               + filterWords.toString()));
             refillForceActions(PacketsActionPosition.FOBIDDEN_WORDS.getPosition(),
@@ -583,9 +586,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取短信路由类型 如果路由类型未确定，则按默认路由进行
+     * 获取短信路由类型 如果路由类型未确定，则按默认路由进行
      *
-     * @return
+     * @return 路由路类型
      */
     private Integer getMessageRouteType() {
         if (messageTemplateLocal.get() == null || messageTemplateLocal.get().getRouteType() == null) {
@@ -596,13 +599,13 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取运营商手机号码信息（手机号码分省分流）
+     * 获取运营商手机号码信息（手机号码分省分流）
      *
-     * @param cmcp
-     * @param mobileCatagory
-     * @return
+     * @param cmcp 运营商标识
+     * @param mobileCatagory 手机号码包
+     * @return 运营商对应的路由通道映射
      */
-    private static Map<Integer, String> getCmcpMobileNumbers(CMCP cmcp, MobileCatagory mobileCatagory) {
+    private Map<Integer, String> getCmcpMobileNumbers(CMCP cmcp, MobileCatagory mobileCatagory) {
         if (CMCP.CHINA_MOBILE == cmcp) {
             return mobileCatagory.getCmNumbers();
         } else if (CMCP.CHINA_TELECOM == cmcp) {
@@ -623,7 +626,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
      * 根据运营商和路由通道寻找具体的通道信息
      *
      * @param mobileCatagory 分省后手机号码组
-     * @return
+     * @return 短信路由通道
      */
     private SmsRoutePassage getUserRoutePassage(MobileCatagory mobileCatagory) {
         SmsRoutePassage routePassage = new SmsRoutePassage();
@@ -662,22 +665,23 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取可用通道信息，如果当前分省后的省份通道不可用，则尝试用全国通道，如果均没有，则分包失败
+     * 获取可用通道信息，如果当前分省后的省份通道不可用，则尝试用全国通道，如果均没有，则分包失败
      * 
-     * @param userId
-     * @param routeType
-     * @param cmcp
-     * @param provinceCode
-     * @return
+     * @param userId 用户编号
+     * @param routeType 路由类型
+     * @param cmcp 运营商标识
+     * @param provinceCode 省份代码
+     * @return 当前用户-路由-运营航-省份对应的可用通道
      */
     private SmsPassageAccess getPassageAccess(int userId, int routeType, int cmcp, int provinceCode) {
         SmsPassageAccess passageAccess = smsPassageAccessService.get(userId, routeType, cmcp, provinceCode);
-        if (passageAccess != null && isSmsPassageAccessAvaiable(passageAccess)) {
+        if (isSmsPassageAccessAvaiable(passageAccess)) {
             return passageAccess;
         }
 
+        //如果省份代码查不到相关可用通道则按照'全国'的代码查询可用通道
         passageAccess = smsPassageAccessService.get(userId, routeType, cmcp, Province.PROVINCE_CODE_ALLOVER_COUNTRY);
-        if (passageAccess != null && isSmsPassageAccessAvaiable(passageAccess)) {
+        if (isSmsPassageAccessAvaiable(passageAccess)) {
             return passageAccess;
         }
 
@@ -685,19 +689,19 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 验证通道是否可用
+     * 验证通道是否可用
      *
-     * @param access
-     * @return
+     * @param access 可用通道
+     * @return 可用结果：true-可用，false-不可用
      */
     private boolean isSmsPassageAccessAvaiable(SmsPassageAccess access) {
         return access != null && access.getStatus() != null && access.getStatus() == PassageStatus.ACTIVE.getValue();
     }
 
     /**
-     * TODO 获取短信模板数据
+     * 获取短信模板数据
      *
-     * @param smsConfig
+     * @param smsConfig 短信配置信息
      */
     private void loadSmsTemplateByContent(UserSmsConfig smsConfig) {
         // 短信签名判断
@@ -730,24 +734,20 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据短信模板限速/限量值判断是否放行
+     * 根据短信模板限速/限量值判断是否放行
      * 
-     * @return
+     * @return 限速/限量结果
      */
     private boolean checkPassedByThreshold() {
         // 如果提交频率为0并且一天内上限大于等于9999则不限制提交任何（也无需记录用户访问轨迹） edit by 20170813
-        if (messageTemplateLocal.get().getSubmitInterval() == 0 && messageTemplateLocal.get().getLimitTimes() >= 9999) {
-            return true;
-        }
-
-        return false;
+        return messageTemplateLocal.get().getSubmitInterval() == 0 && messageTemplateLocal.get().getLimitTimes() >= 9999;
     }
 
     /**
      * 判断用户手机号码是超限/超速
      *
-     * @param smsConfig
-     * @return
+     * @param smsConfig 短信配置信息
+     * @return 超速结果
      */
     private boolean isSameMobileOutOfRange(UserSmsConfig smsConfig) {
         fillTemplateAttributes(smsConfig);
@@ -761,8 +761,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
         Set<String> whiteMobiles = smsMobileWhiteListService.getByUserId(smsMtTaskLocal.get().getUserId());
 
         // 转换手机号码数组
-        List<String> mobiles = new ArrayList<>(
-                                               Arrays.asList(smsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
+        List<String> mobiles = new ArrayList<>(Arrays.asList(smsMtTaskLocal.get().getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR)));
 
         // 过滤超速集合
         List<String> benyondSpeedList = new ArrayList<>();
@@ -816,9 +815,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 设置用户短息内容归属的模板信息
+     * 设置用户短息内容归属的模板信息
      *
-     * @param smsConfig
+     * @param smsConfig 短信配置信息
      */
     private void fillTemplateAttributes(UserSmsConfig smsConfig) {
         MessageTemplate template = messageTemplateLocal.get();
@@ -841,10 +840,9 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 执行异常结束逻辑(制造状态伪造包，需要判断是否需要状态报告)
+     * 执行异常结束逻辑(制造状态伪造包，需要判断是否需要状态报告)
      *
-     * @param task
-     * @param mobiles
+     * @param mobiles 异常手机号码集合
      * @param remark 备注
      */
     private void doExceptionOverWithReport(List<String> mobiles, String remark) {
@@ -872,8 +870,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
             submit.setNeedPush(false);
 
         } else {
-            PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(),
-                                                                 CallbackUrlType.SMS_STATUS.getCode(),
+            PushConfig pushConfig = pushConfigService.getPushUrl(task.getUserId(), CallbackUrlType.SMS_STATUS.getCode(),
                                                                  task.getCallback());
 
             // 推送信息为固定地址或者每次传递地址才需要推送
@@ -894,7 +891,7 @@ public class SmsWaitPacketsListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 通道分包逻辑 根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
+     * 通道分包逻辑 根据号码分流分省后得出的通道对应手机号码集合对应信息，进行重组子任务
      *
      * @param routePassage 用户运营商路由下对应的通道信息
      */
