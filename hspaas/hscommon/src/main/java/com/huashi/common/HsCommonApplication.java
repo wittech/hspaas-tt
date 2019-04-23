@@ -7,10 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.huashi.common.util.LogUtils;
 
-//@EnableAsync
+@EnableAsync
 //@EnableTransactionManagement
 @SpringBootApplication
 //@EnableDubboConfiguration

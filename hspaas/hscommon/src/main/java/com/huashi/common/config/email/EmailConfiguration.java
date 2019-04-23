@@ -48,7 +48,7 @@ public class EmailConfiguration {
 	 * 
 	 * @return
 	 */
-	@Bean(name = "emailPoolTaskExecutor")
+	@Bean(name = "threadPoolTaskExecutor")
 	ThreadPoolTaskExecutor threadPoolTaskExecutor() {
 
 		ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();

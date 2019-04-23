@@ -465,24 +465,44 @@ public class SmsPassageService implements ISmsPassageService {
 
         return smsPassageMapper.findAll();
     }
-
+    
     @Override
     public SmsPassage findById(int id) {
+        SmsPassage smsPassage = null;
         try {
             Object obj = stringRedisTemplate.opsForHash().get(SmsRedisConstant.RED_SMS_PASSAGE, id + "");
             if (obj != null) {
-                return JSON.parseObject(obj.toString(), SmsPassage.class);
+                smsPassage = JSON.parseObject(obj.toString(), SmsPassage.class);
             }
         } catch (Exception e) {
             logger.warn("REDIS 加载失败，将于DB加载", e);
         }
 
-        SmsPassage passage = smsPassageMapper.selectByPrimaryKey(id);
-        if (passage != null) {
-            List<SmsPassageParameter> parameterList = parameterMapper.findByPassageId(id);
-            passage.getParameterList().addAll(parameterList);
+        if (smsPassage == null) {
+            smsPassage = smsPassageMapper.selectByPrimaryKey(id);
         }
-        return passage;
+
+        setPassageParamsIfEmpty(smsPassage);
+
+        return smsPassage;
+    }
+
+    /**
+     * 设置通道参数集合信息
+     * 
+     * @param smsPassage 通道
+     */
+    private void setPassageParamsIfEmpty(SmsPassage smsPassage) {
+        if (smsPassage == null || smsPassage.getId() == null) {
+            return;
+        }
+
+        if (CollectionUtils.isNotEmpty(smsPassage.getParameterList())) {
+            return;
+        }
+
+        smsPassage.getParameterList().addAll(parameterMapper.findByPassageId(smsPassage.getId()));
+
     }
 
     @Override
@@ -500,10 +520,11 @@ public class SmsPassageService implements ISmsPassageService {
             return null;
         }
 
-        SmsPassage passage = list.iterator().next();
-        passage.setParameterList(parameterMapper.findByPassageId(passage.getId()));
+        SmsPassage smsPassage = list.iterator().next();
+        
+        setPassageParamsIfEmpty(smsPassage);
 
-        return CollectionUtils.isEmpty(list) ? null : passage;
+        return CollectionUtils.isEmpty(list) ? null : smsPassage;
     }
 
     @Override
@@ -529,7 +550,7 @@ public class SmsPassageService implements ISmsPassageService {
             logger.warn("短信通道数据为空");
             return false;
         }
-
+        
         List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
             @Override
@@ -537,6 +558,9 @@ public class SmsPassageService implements ISmsPassageService {
                 RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
                 connection.openPipeline();
                 for (SmsPassage smsPassage : list) {
+                    
+                    
+                    
                     byte[] mainKey = serializer.serialize(SmsRedisConstant.RED_SMS_PASSAGE);
                     byte[] assistKey = serializer.serialize(smsPassage.getId().toString());
 

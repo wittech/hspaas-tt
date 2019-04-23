@@ -11,7 +11,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Service;
@@ -42,9 +46,7 @@ public class UserDeveloperService implements IUserDeveloperService {
     @Override
     public UserDeveloper getByAppkey(String appkey) {
         try {
-            Object d = stringRedisTemplate.opsForValue().get(String.format("%s:%s",
-                                                                           CommonRedisConstant.RED_DEVELOPER_LIST,
-                                                                           appkey));
+            Object d = stringRedisTemplate.opsForValue().get(getKey(appkey));
             if (d != null) {
                 return JSON.parseObject(d.toString(), UserDeveloper.class);
             }
@@ -102,25 +104,32 @@ public class UserDeveloperService implements IUserDeveloperService {
             return false;
         }
 
-        try {
-            stringRedisTemplate.delete(stringRedisTemplate.keys(CommonRedisConstant.RED_DEVELOPER_LIST + "*"));
-        } catch (Exception e) {
-            logger.error("清除REDIS 开发者数据失败", e);
-        }
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-        for (UserDeveloper developer : list) {
-            if (!pushToRedis(developer)) {
-                return false;
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (UserDeveloper developer : list) {
+                    byte[] key = serializer.serialize(getKey(developer.getAppKey()));
+                    connection.set(key, serializer.serialize(JSON.toJSONString(developer)));
+                }
+
+                return connection.closePipeline();
             }
-        }
 
-        return true;
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
+    }
+
+    private String getKey(String appkey) {
+        return String.format("%s:%s", CommonRedisConstant.RED_DEVELOPER_LIST, appkey);
     }
 
     private boolean pushToRedis(UserDeveloper developer) {
         try {
-            stringRedisTemplate.opsForValue().set(String.format("%s:%s", CommonRedisConstant.RED_DEVELOPER_LIST,
-                                                                developer.getAppKey()), JSON.toJSONString(developer));
+            stringRedisTemplate.opsForValue().set(getKey(developer.getAppKey()), JSON.toJSONString(developer));
             return true;
         } catch (Exception e) {
             logger.warn("REDIS 加载用户映射数据失败", e);
@@ -130,7 +139,7 @@ public class UserDeveloperService implements IUserDeveloperService {
 
     private boolean removeRedis(String appkey) {
         try {
-            stringRedisTemplate.delete(String.format("%s:%s", CommonRedisConstant.RED_DEVELOPER_LIST, appkey));
+            stringRedisTemplate.delete(getKey(appkey));
             return true;
         } catch (Exception e) {
             logger.warn("REDIS 移除用户映射数据失败, appkey : {}", appkey, e);
@@ -173,14 +182,14 @@ public class UserDeveloperService implements IUserDeveloperService {
     @Transactional(rollbackFor = Exception.class)
     public boolean updateStatus(int userId, int status) {
         int result = userDeveloperMapper.updateDeveloperStatus(userId, status);
-        if(result > 0) {
+        if (result > 0) {
             UserDeveloper developer = userDeveloperMapper.selectByUserId(userId);
             developer.setStatus(status);
             pushToRedis(developer);
-            
+
             return true;
         }
-        
+
         return false;
     }
 

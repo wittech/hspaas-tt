@@ -49,7 +49,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
             TParameter tparameter = RequestTemplateHandler.parse(parameter.getParams());
 
             // 转换参数，并调用网关接口，接收返回结果s
-            String result = HttpClientManager.get(parameter.getUrl(),
+            String result = HttpClientManager.post(parameter.getUrl(),
                                                   sendRequest(tparameter, modelId, mobile, extNumber));
 
             // 解析返回结果并返回
@@ -88,6 +88,8 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
 
         try {
             sign = URLEncoder.encode(sign, DEFAULT_ENCODING);
+            
+            logger.info("================" + sign);
         } catch (UnsupportedEncodingException e) {
             logger.error("Signature generate failed", e);
         }
@@ -165,7 +167,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
 
         return JSON.toJSONString(params);
     }
-
+    
     /**
      * TODO 模板返回值解析
      * 
@@ -174,6 +176,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
      * @return
      */
     private ProviderModelResponse modelResponse(String result, String successCode) {
+//        {"code":0,"msg":"\u521b\u5efa\u6210\u529f","rets":{"modeId":"1263745"}}
         if (StringUtils.isEmpty(result)) {
             return null;
         }
@@ -259,7 +262,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
         TriolyPassageResolver r = new TriolyPassageResolver();
         System.out.println(r.mtDeliver("{\"sign\":\"ac2c8f270e5a426304583db9512b8739\",\"report\":[{\"sendId\":155519638616792840,\"mobile\":\"18368031231\",\"reportStatus\":\"DELIVRD\",\"status\":2,\"sendTime\":\"2019-04-14 06:59:56\"}]}", "0"));
         
-        
+        r.modelResponse("{\"code\":0,\"msg\":\"\\u521b\\u5efa\\u6210\\u529f\",\"rets\":{\"modeId\":\"1263745\"}}", "0");
         
     }
 

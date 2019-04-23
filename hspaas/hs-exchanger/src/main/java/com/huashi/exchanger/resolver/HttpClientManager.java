@@ -1,5 +1,6 @@
 package com.huashi.exchanger.resolver;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -26,6 +27,7 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -750,11 +752,8 @@ public class HttpClientManager {
             // 设置头信息
             setHttpHeaders(httpPost, headers);
 
-//            BasicHttpEntity httpEntity = new BasicHttpEntity();
-//            httpEntity.setContent(new ByteArrayInputStream(content.getBytes(encoding)));
-//            httpPost.setEntity(httpEntity);
-            
-            StringEntity httpEntity = new StringEntity(content);
+            BasicHttpEntity httpEntity = new BasicHttpEntity();
+            httpEntity.setContent(new ByteArrayInputStream(content.getBytes(encoding)));
             httpPost.setEntity(httpEntity);
 
             // 提交post请求

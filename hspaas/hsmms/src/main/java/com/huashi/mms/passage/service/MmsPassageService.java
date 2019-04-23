@@ -15,7 +15,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -229,9 +233,9 @@ public class MmsPassageService implements IMmsPassageService {
             if (e instanceof IllegalArgumentException) {
                 return response(false, e.getMessage());
             }
-            
+
             release(passage, isQueueCreateFinished, isRedisPushFinished);
-            
+
             logger.error("添加彩信通道[{}], provinceCodes[{}] 失败", JSON.toJSONString(passage), provinceCodes, e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return response(false, "添加失败");
@@ -422,21 +426,41 @@ public class MmsPassageService implements IMmsPassageService {
 
     @Override
     public MmsPassage findById(int id) {
+        MmsPassage mmsPassage = null;
         try {
             Object obj = stringRedisTemplate.opsForHash().get(MmsRedisConstant.RED_MMS_PASSAGE, id + "");
             if (obj != null) {
-                return JSON.parseObject(obj.toString(), MmsPassage.class);
+                mmsPassage = JSON.parseObject(obj.toString(), MmsPassage.class);
             }
         } catch (Exception e) {
             logger.warn("REDIS 加载失败，将于DB加载", e);
         }
 
-        MmsPassage passage = mmsPassageMapper.selectByPrimaryKey(id);
-        if (passage != null) {
-            List<MmsPassageParameter> parameterList = parameterMapper.findByPassageId(id);
-            passage.getParameterList().addAll(parameterList);
+        if (mmsPassage == null) {
+            mmsPassage = mmsPassageMapper.selectByPrimaryKey(id);
         }
-        return passage;
+
+        setPassageParamsIfEmpty(mmsPassage);
+
+        return mmsPassage;
+    }
+
+    /**
+     * 设置通道参数集合信息
+     * 
+     * @param mmsPassage 通道
+     */
+    private void setPassageParamsIfEmpty(MmsPassage mmsPassage) {
+        if (mmsPassage == null || mmsPassage.getId() == null) {
+            return;
+        }
+
+        if (CollectionUtils.isNotEmpty(mmsPassage.getParameterList())) {
+            return;
+        }
+
+        mmsPassage.getParameterList().addAll(parameterMapper.findByPassageId(mmsPassage.getId()));
+
     }
 
     @Override
@@ -454,10 +478,11 @@ public class MmsPassageService implements IMmsPassageService {
             return null;
         }
 
-        MmsPassage passage = list.iterator().next();
-        passage.setParameterList(parameterMapper.findByPassageId(passage.getId()));
+        MmsPassage mmsPassage = list.iterator().next();
+        
+        setPassageParamsIfEmpty(mmsPassage);
 
-        return CollectionUtils.isEmpty(list) ? null : passage;
+        return CollectionUtils.isEmpty(list) ? null : mmsPassage;
     }
 
     @Override
@@ -485,14 +510,25 @@ public class MmsPassageService implements IMmsPassageService {
             return false;
         }
 
-        for (MmsPassage smsPassage : list) {
-            List<MmsPassageParameter> paramList = parameterMapper.findByPassageId(smsPassage.getId());
-            smsPassage.getParameterList().addAll(paramList);
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-            pushToRedis(smsPassage);
-        }
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (MmsPassage mmsPassage : list) {
+                    byte[] mainKey = serializer.serialize(MmsRedisConstant.RED_MMS_PASSAGE);
+                    byte[] assistKey = serializer.serialize(mmsPassage.getId().toString());
 
-        return true;
+                    connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(mmsPassage)));
+                }
+
+                return connection.closePipeline();
+            }
+
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
     }
 
     @Override

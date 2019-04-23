@@ -37,7 +37,7 @@ public class SystemConfigService implements ISystemConfigService {
     private SystemConfigMapper  systemConfigMapper;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-    private Logger              logger = LoggerFactory.getLogger(getClass());
+    private final Logger        logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<SystemConfig> findByType(String type) {

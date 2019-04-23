@@ -25,15 +25,19 @@ public class EmailSendUtil {
     @Autowired
     private JavaMailSender mailSender;
     @Autowired
-    @Qualifier("emailPoolTaskExecutor")
-    private TaskExecutor   emailPoolTaskExecutor;
+    @Qualifier("threadPoolTaskExecutor")
+    private TaskExecutor   threadPoolTaskExecutor;
 
     @Value("${notice.email.username}")
     private String         sendEmailAddress;
-    @Value("${notice.email.knick}")
-    private String         sendEmailKnick;                                       // 邮件昵称，即显示名称（不设置将显示邮箱地址）
 
-    private Logger         logger = LoggerFactory.getLogger(EmailSendUtil.class);
+    /**
+     * 邮件昵称，即显示名称（不设置将显示邮箱地址）
+     */
+    @Value("${notice.email.knick}")
+    private String         sendEmailKnick;
+
+    private final Logger   logger = LoggerFactory.getLogger(getClass());
 
     /**
      * TODO 发送邮件
@@ -116,13 +120,16 @@ public class EmailSendUtil {
             logger.info("收件人邮箱为空");
             throw new SendException("收件人邮箱为空");
         }
+
         if (StringUtils.isEmpty(subject)) {
             logger.info("邮件主题主题为空");
         }
+
         if (StringUtils.isEmpty(content)) {
             logger.info("邮件内容为空");
         }
-        emailPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
+
+        threadPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
     }
 
     public void sendEmail(String to, String subject, String content, String attachment) throws SendException {
@@ -130,17 +137,16 @@ public class EmailSendUtil {
             logger.info("收件人邮箱为空");
             throw new SendException("收件人邮箱为空");
         }
+
         if (StringUtils.isEmpty(subject)) {
-            {
-                logger.info("邮件主题主题为空");
-            }
+            logger.info("邮件主题主题为空");
         }
+
         if (StringUtils.isEmpty(content)) {
-            {
-                logger.info("邮件内容为空");
-            }
+            logger.info("邮件内容为空");
         }
-        emailPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
+
+        threadPoolTaskExecutor.execute(new SendMailThread(to, subject, content));
     }
 
     /**

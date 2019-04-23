@@ -12,7 +12,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -116,13 +120,24 @@ public class PushConfigService implements IPushConfigService {
             logger.warn("用户推送设置数据查询为空");
             return false;
         }
+        
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-        stringRedisTemplate.delete(stringRedisTemplate.keys(CommonRedisConstant.RED_USER_PUSH_CONFIG + "*"));
-        for (PushConfig pc : list) {
-            pushToRedis(pc.getUserId(), pc.getType(), pc);
-        }
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (PushConfig config : list) {
+                    byte[] key = serializer.serialize(getAssistKey(config.getUserId(), config.getType()));
+                    connection.set(key, serializer.serialize(JSON.toJSONString(config)));
+                }
 
-        return true;
+                return connection.closePipeline();
+            }
+
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
     }
 
     @Override

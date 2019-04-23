@@ -38,19 +38,24 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
     /**
      * 多媒体类型
      */
-    private static final String          NODE_MEDIA_TYPE = "mediaType";
+    private static final String          NODE_MEDIA_TYPE          = "mediaType";
 
     /**
      * 多媒体文件名称
      */
-    private static final String          NODE_MEDIA_NAME = "mediaName";
+    private static final String          NODE_MEDIA_NAME          = "mediaName";
 
     /**
      * 多媒体内容
      */
-    private static final String          NODE_CONTENT    = "content";
+    private static final String          NODE_CONTENT             = "content";
 
-    private final Logger                 logger          = LoggerFactory.getLogger(getClass());
+    /**
+     * 报文文件扩展名
+     */
+    private static final String          BODY_FILE_EXTENSION_NAME = "json";
+
+    private final Logger                 logger                   = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<MmsMessageTemplateBody> find(Long templateId) {
@@ -124,14 +129,14 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
     }
 
     @Override
-    public FileResponse writeOssFile(String fileName, byte[] fileData, String mediaType) {
+    public FileResponse writeOssFile(String extensionName, byte[] fileData, String mediaType) {
         try {
-            String filename = mmsMediaFileService.writeFile(mediaType, fileData);
+            String filename = mmsMediaFileService.writeFile(mediaType, fileData, extensionName);
             if (StringUtils.isEmpty(filename)) {
                 return new FileResponse(false, "File gerenate failed");
             }
 
-            return new FileResponse(true, "success", fileName);
+            return new FileResponse(true, "success", filename);
 
         } catch (Exception e) {
             logger.error("上传writeOssFile失败", e);
@@ -181,11 +186,12 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
 
                 sort++;
                 MmsMessageTemplateBody templateBody = new MmsMessageTemplateBody();
-                templateBody.setMediaName(mediaName);
+                templateBody.setMediaName(mediaName.toLowerCase());
                 templateBody.setMediaType(mediaType.toLowerCase());
                 templateBody.setData(data);
                 templateBody.setContent(mmsMediaFileService.generateFileName(MediaFileDirectory.CUSTOM_BODY_FILE_DIR,
-                                                                             templateBody.getMediaType()));
+                                                                             templateBody.getMediaType(),
+                                                                             templateBody.getMediaName()));
                 templateBody.setSort(sort);
 
                 bodyReport.add(templateBody);
@@ -198,7 +204,8 @@ public class MmsTemplateBodyService implements IMmsTemplateBodyService {
 
                 Map<String, List<MmsMessageTemplateBody>> result = new HashMap<>();
                 result.put(mmsMediaFileService.writeFile(MediaFileDirectory.CUSTOM_BODY_DIR,
-                                                         JSON.toJSONString(bodyReport)), bodyReport);
+                                                         JSON.toJSONString(bodyReport), BODY_FILE_EXTENSION_NAME),
+                           bodyReport);
 
                 return result;
             }

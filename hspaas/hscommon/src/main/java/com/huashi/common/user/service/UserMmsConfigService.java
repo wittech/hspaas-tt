@@ -10,7 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -152,12 +156,23 @@ public class UserMmsConfigService implements IUserMmsConfigService {
             return true;
         }
 
-        stringRedisTemplate.delete(stringRedisTemplate.keys(CommonRedisConstant.RED_USER_MMS_CONFIG + "*"));
-        for (UserMmsConfig hwl : list) {
-            pushToRedis(hwl);
-        }
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-        return true;
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (UserMmsConfig config : list) {
+                    byte[] key = serializer.serialize(getKey(config.getUserId()));
+                    connection.set(key, serializer.serialize(JSON.toJSONString(config)));
+                }
+
+                return connection.closePipeline();
+            }
+
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
     }
 
 }

@@ -16,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.huashi.common.config.async.AsyncService;
+import com.huashi.common.config.redis.CommonRedisConstant;
 import com.huashi.common.settings.dao.ProvinceLocalMapper;
 import com.huashi.common.settings.domain.Province;
 import com.huashi.common.settings.domain.ProvinceLocal;
@@ -29,39 +33,27 @@ import com.huashi.constants.CommonContext.CMCP;
 public class MobileLocalService implements IMobileLocalService {
 
     @Autowired
-    private ProvinceLocalMapper               provinceLocalMapper;
+    private ProvinceLocalMapper provinceLocalMapper;
 
     @Resource
-    private StringRedisTemplate               stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private AsyncService        asyncService;
 
-    /**
-     * 全局手机归属号码（与REDIS 同步采用广播模式）
-     */
-    private static Map<String, ProvinceLocal> GLOBAL_MOBILE_LOCATION = new HashMap<>();
-
-    private Logger                            logger                 = LoggerFactory.getLogger(getClass());
+    private final Logger        logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public MobileCatagory doCatagory(String mobileNumber) {
-        if (StringUtils.isEmpty(mobileNumber)) {
+    public MobileCatagory doCatagory(String mobile) {
+        if (StringUtils.isEmpty(mobile)) {
             return null;
         }
 
-        MobileCatagory response = new MobileCatagory();
-        try {
-            String[] numbers = mobileNumber.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
-            if (numbers.length == 0) {
-                return null;
-            }
-
-            return doCatagory(Arrays.asList(numbers));
-        } catch (Exception e) {
-            logger.error("{} 号码分流错误", mobileNumber, e);
-            response.setSuccess(false);
-            response.setMsg("号码分流错误");
+        String[] numbers = mobile.split(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
+        if (numbers.length == 0) {
+            return null;
         }
-        logger.info(response.toString());
-        return response;
+
+        return doCatagory(Arrays.asList(numbers));
     }
 
     @Override
@@ -95,15 +87,13 @@ public class MobileLocalService implements IMobileLocalService {
                     continue;
                 }
 
-                String area = pickupMobileLocal(number);
-                if (area == null) {
+                ProvinceLocal pl = pickupMobileLocal(number);
+                if (pl == null) {
                     // 如果截取 手机号码归属地位失败（手机号码前7位），则放置过滤号码中
                     filterNumbers.append(number).append(MobileCatagory.MOBILE_SPLIT_CHARCATOR);
                     response.setFilterSize(response.getFilterSize() + 1);
                     continue;
                 }
-
-                ProvinceLocal pl = getByMobile(number);
 
                 // 根据CMCP代码获取组装相关运营商信息
                 switch (CMCP.getByCode(pl.getCmcp())) {
@@ -149,10 +139,11 @@ public class MobileLocalService implements IMobileLocalService {
             response.setSuccess(true);
 
         } catch (Exception e) {
-            logger.error("{} 号码分流错误, 信息为: {}", numbers, e.getMessage());
+            logger.error("手机号码[" + numbers + "]分流错误", e);
             response.setSuccess(false);
-            response.setMsg("号码分流错误");
+            response.setMsg("手机号码[" + numbers.size() + "]分流错误");
         }
+
         logger.info(response.toString());
         return response;
     }
@@ -172,20 +163,44 @@ public class MobileLocalService implements IMobileLocalService {
     }
 
     /**
+     * 根据手机号码获取省份-运营归属信息
+     * 
+     * @param mobile 手机号码
+     * @return 省份-运营商归属信息
+     */
+    private ProvinceLocal getProvinceLocalIfNotFound(String mobile) {
+        CMCP cmcp = CMCP.local(mobile);
+
+        if (CMCP.UNRECOGNIZED == cmcp) {
+            logger.warn("手机号码[" + mobile + "]无法匹配任何运营商");
+        } else if (CMCP.GLOBAL == cmcp) {
+            logger.warn("手机号码[" + mobile + "]匹配运营商为'全网'");
+        }
+
+        return new ProvinceLocal(Province.PROVINCE_CODE_ALLOVER_COUNTRY, cmcp.getCode());
+    }
+
+    /**
      * TODO 提取手机号码归属地位（手机号码前7位确定归属地）
      *
-     * @param mobile
-     * @return
+     * @param mobile 手机号码
+     * @return 省份-运营商 归属信息
      */
-    private String pickupMobileLocal(String mobile) {
+    private ProvinceLocal pickupMobileLocal(String mobile) {
         if (StringUtils.isEmpty(mobile)) {
             return null;
         }
 
         try {
-            return mobile.trim().substring(0, 7);
+            // 手机号码前7位确定归属地
+            String area = mobile.trim().substring(0, 7);
+
+            ProvinceLocal pl = CommonRedisConstant.GLOBAL_MOBILES_LOCAL.get(area);
+
+            return pl == null ? getProvinceLocalIfNotFound(mobile) : pl;
+
         } catch (Exception e) {
-            logger.error("手机号码：{}提取归属地失败：{}", mobile, e.getMessage());
+            logger.error("手机号码：{} 提取省份-运营商归属信息失败：{}", mobile, e.getMessage());
             return null;
         }
     }
@@ -226,32 +241,57 @@ public class MobileLocalService implements IMobileLocalService {
         }
 
         if (mobiles.containsKey(provinceCode)) {
-            mobiles.put(provinceCode, String.format("%s%s%s", mobiles.get(provinceCode),
-                                                    MobileCatagory.MOBILE_SPLIT_CHARCATOR, mobile));
+            mobiles.put(provinceCode, mobiles.get(provinceCode) + MobileCatagory.MOBILE_SPLIT_CHARCATOR + mobile);
         } else {
             mobiles.put(provinceCode, mobile);
         }
         return false;
     }
 
+    /**
+     * 将数据加载到内存
+     * 
+     * @param list 省份-运营商数据
+     */
+    private void load2Cache(List<ProvinceLocal> list) {
+        for (ProvinceLocal pl : list) {
+            CommonRedisConstant.GLOBAL_MOBILES_LOCAL.put(pl.getNumberArea(), pl);
+        }
+    }
+
+    private String getKey() {
+        return CommonRedisConstant.RED_PROVINCE_MOBILES_LOCAL;
+    }
+
     @Override
     public boolean reload() {
         try {
+            String value = stringRedisTemplate.opsForValue().get(getKey());
+            if (StringUtils.isNotEmpty(value)) {
+                CommonRedisConstant.GLOBAL_MOBILES_LOCAL = JSON.parseObject(value,
+                                                                            new TypeReference<Map<String, ProvinceLocal>>() {
+                                                                            });
+                return true;
+            }
+
             List<ProvinceLocal> list = provinceLocalMapper.selectAvaiable();
             if (CollectionUtils.isEmpty(list)) {
                 logger.error("省份手机号码归属地数据为空，加载失败");
                 return false;
             }
 
-            for (ProvinceLocal pl : list) {
-                GLOBAL_MOBILE_LOCATION.put(pl.getNumberArea(), pl);
-            }
+            load2Cache(list);
+
+            asyncService.publishMobilesLocalToRedis();
+
             return true;
         } catch (Exception e) {
-            logger.error("省份手机号码归属地加载异常");
+            logger.error("省份手机号码归属地加载异常", e);
+            return false;
+        } finally {
+            logger.info("Global mobiles local data[" + CommonRedisConstant.GLOBAL_MOBILES_LOCAL.size() + "] has loaded");
         }
 
-        return false;
     }
 
     @Override
@@ -260,18 +300,7 @@ public class MobileLocalService implements IMobileLocalService {
             return null;
         }
 
-        // 从手机号码中截取归属地位（前7位识别出归属地）
-        String area = pickupMobileLocal(mobile);
-        if (area == null) {
-            return null;
-        }
-
-        ProvinceLocal pl = GLOBAL_MOBILE_LOCATION.get(area);
-        if (pl == null) {
-            return new ProvinceLocal(Province.PROVINCE_CODE_ALLOVER_COUNTRY, CMCP.local(mobile).getCode());
-        }
-
-        return pl;
+        return pickupMobileLocal(mobile);
     }
 
     @Override

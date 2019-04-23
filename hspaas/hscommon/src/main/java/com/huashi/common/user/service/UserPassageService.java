@@ -10,10 +10,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.huashi.common.config.redis.CommonRedisConstant;
 import com.huashi.common.settings.context.SettingsContext.SystemConfigType;
 import com.huashi.common.settings.context.SettingsContext.UserDefaultPassageGroupKey;
@@ -33,7 +38,7 @@ public class UserPassageService implements IUserPassageService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    private Logger              logger = LoggerFactory.getLogger(getClass());
+    private final Logger        logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public boolean update(int userId, List<UserPassage> passageList) {
@@ -45,6 +50,10 @@ public class UserPassageService implements IUserPassageService {
         return userPassageMapper.findByUserId(userId);
     }
 
+    private String getKey(int userId, int type) {
+        return String.format("%s:%d:%d", CommonRedisConstant.RED_USER_SMS_PASSAGE, userId, type);
+    }
+
     @Override
     public Integer getByUserIdAndType(int userId, int type) {
         if (userId == 0 || type == 0) {
@@ -52,17 +61,15 @@ public class UserPassageService implements IUserPassageService {
         }
 
         try {
-            String passageGroupId = stringRedisTemplate.opsForValue().get(String.format("%s:%d:%d", CommonRedisConstant.RED_USER_SMS_PASSAGE,
-                                                                userId, type));
-            if(StringUtils.isNotBlank(passageGroupId))
-                return Integer.parseInt(passageGroupId);
-            
+            String passageGroupId = stringRedisTemplate.opsForValue().get(getKey(userId, type));
+            if (StringUtils.isNotBlank(passageGroupId)) return Integer.parseInt(passageGroupId);
+
         } catch (Exception e) {
             logger.warn("REDIS中查询用户通道信息失败 ：{}", e.getMessage());
         }
-        
+
         UserPassage userPassage = userPassageMapper.selectByUserIdAndType(userId, type);
-        if(userPassage == null) {
+        if (userPassage == null) {
             return null;
         }
 
@@ -111,7 +118,6 @@ public class UserPassageService implements IUserPassageService {
             }
 
         } catch (Exception e) {
-            removeRedis(userId, type);
             throw new RuntimeException(e);
         }
     }
@@ -193,7 +199,6 @@ public class UserPassageService implements IUserPassageService {
 
             return true;
         } catch (Exception e) {
-            removeRedis(userId, null);
             throw new RuntimeException(e);
         }
     }
@@ -209,32 +214,9 @@ public class UserPassageService implements IUserPassageService {
         return true;
     }
 
-    /**
-     * TODO 移除REDIS数据
-     * 
-     * @param userId
-     * @return
-     */
-    private boolean removeRedis(Integer userId, Integer type) {
-        try {
-            String redisKey = type == null ? String.format("%s:%d*", CommonRedisConstant.RED_USER_SMS_PASSAGE, userId) : String.format("%s:%d:%d",
-                                                                                                                                       CommonRedisConstant.RED_USER_SMS_PASSAGE,
-                                                                                                                                       userId,
-                                                                                                                                       type);
-
-            stringRedisTemplate.delete(stringRedisTemplate.keys(redisKey));
-
-            return true;
-        } catch (Exception e) {
-            logger.warn("REDIS 移除用户通道组配置数据失败", e);
-            return false;
-        }
-    }
-
     private boolean pushToRedis(UserPassage userPassage) {
         try {
-            stringRedisTemplate.opsForValue().set(String.format("%s:%d:%d", CommonRedisConstant.RED_USER_SMS_PASSAGE,
-                                                                userPassage.getUserId(), userPassage.getType()),
+            stringRedisTemplate.opsForValue().set(getKey(userPassage.getUserId(), userPassage.getType()),
                                                   userPassage.getPassageGroupId() + "");
             return true;
         } catch (Exception e) {
@@ -251,14 +233,24 @@ public class UserPassageService implements IUserPassageService {
             return false;
         }
 
-        stringRedisTemplate.delete(stringRedisTemplate.keys(CommonRedisConstant.RED_USER_SMS_PASSAGE + "*"));
-        for (UserPassage userPassage : list) {
-            if (!pushToRedis(userPassage)) {
-                return false;
-            }
-        }
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-        return true;
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (UserPassage userPassage : list) {
+                    byte[] key = serializer.serialize(getKey(userPassage.getUserId(), userPassage.getType()));
+
+                    connection.set(key, serializer.serialize(JSON.toJSONString(userPassage)));
+                }
+
+                return connection.closePipeline();
+            }
+
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
     }
 
 }

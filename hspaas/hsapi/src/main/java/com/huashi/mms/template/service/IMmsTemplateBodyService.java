@@ -19,12 +19,12 @@ public interface IMmsTemplateBodyService {
     /**
      * TODO 写入OSS文件
      * 
-     * @param fileName
-     * @param fileData
-     * @param mediaType
+     * @param extensionName 文件扩展名
+     * @param fileData 文件数据
+     * @param mediaType 文件类型
      * @return
      */
-    FileResponse writeOssFile(String fileName, byte[] fileData, String mediaType);
+    FileResponse writeOssFile(String extensionName, byte[] fileData, String mediaType);
 
     /**
      * TODO 根据模板ID查询全部报文体数据

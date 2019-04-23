@@ -36,8 +36,8 @@ public class TriolyModelHttpTest {
         parameter = new MmsPassageParameter();
 
         mmsMessageTemplate = new MmsMessageTemplate();
-        mmsMessageTemplate.setName("11");
-        mmsMessageTemplate.setTitle("222");
+        mmsMessageTemplate.setName("华时测试444");
+        mmsMessageTemplate.setTitle("华时测试444");
         
         mmsMessageTemplate.setBodies(setBody());
 
@@ -48,6 +48,8 @@ public class TriolyModelHttpTest {
 
         parameter.setUrl("http://op.supermms.cn/api/vsmsMode/addMode");
         parameter.setParams(pam.toJSONString());
+        
+        parameter.setSuccessCode("0");
 
         mobile = "15868193450";
         // content = "【华时科技】您的短息验证码为1234452";
@@ -58,21 +60,21 @@ public class TriolyModelHttpTest {
         MmsMessageTemplateBody body = new MmsMessageTemplateBody();
         body.setMediaName("txt");
         body.setMediaType(MediaType.TEXT.getCode());
-        body.setContent("222222222222222222222");
+        body.setContent("【华时科技】222222222222222222222");
         
         bodies.add(body);
         
         MmsMessageTemplateBody body2 = new MmsMessageTemplateBody();
         body2.setMediaName("jpg");
         body2.setMediaType(MediaType.IMAGE.getCode());
-        body2.setContent("http://huashi-mms.oss-cn-shanghai.aliyuncs.com/custom_body_file/image/aqwe.jpg");
+        body2.setContent("http://huashi-mms.oss-cn-shanghai.aliyuncs.com/custom_body_file%2Fimage%2Faqwe.jpg?OSSAccessKeyId=LTAIPJphi67M4Zmu&Expires=1555417929&Signature=o5jGhykpuoMijqPHNlKyQ7IHf%2F0%3D");
         
         bodies.add(body2);
         
         MmsMessageTemplateBody body3 = new MmsMessageTemplateBody();
         body3.setMediaName("mp4");
         body3.setMediaType(MediaType.VIDEO.getCode());
-        body3.setContent("http://huashi-mms.oss-cn-shanghai.aliyuncs.com/custom_body_file/image/5bfce94e9588d.mp4");
+        body3.setContent("http://huashi-mms.oss-cn-shanghai.aliyuncs.com/custom_body_file%2Fimage%2F5bfce94e9588d.mp4?OSSAccessKeyId=LTAIPJphi67M4Zmu&Expires=1555417974&Signature=HJhK9jW%2BUlY2BQdwnlbnT0aCE9Q%3D");
         
         bodies.add(body3);
         

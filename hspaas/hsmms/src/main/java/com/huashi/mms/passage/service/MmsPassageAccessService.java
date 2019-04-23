@@ -18,7 +18,11 @@ import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -96,7 +100,7 @@ public class MmsPassageAccessService implements IMmsPassageAccessService {
             loadToRedis(access);
 
             // 如果通道调用类型为 自取，需要同步到 监管中心
-//            monitorThreadNotice(access, PassageStatus.ACTIVE.getValue());
+            // monitorThreadNotice(access, PassageStatus.ACTIVE.getValue());
 
         } catch (Exception e) {
             logger.warn("Redis 用户可用通道信息保存失败", e);
@@ -114,9 +118,8 @@ public class MmsPassageAccessService implements IMmsPassageAccessService {
             return false;
         }
 
-        for (MmsPassageAccess access : list) {
-            loadToRedis(access);
-        }
+        batchLoadToRedis(list);
+
         return true;
     }
 
@@ -532,7 +535,7 @@ public class MmsPassageAccessService implements IMmsPassageAccessService {
                 removeFromRedis(access);
 
                 // 如果通道调用类型为 自取，需要同步到 监管中心（停止轮训扫描）
-//                monitorThreadNotice(access, PassageStatus.HANGUP.getValue());
+                // monitorThreadNotice(access, PassageStatus.HANGUP.getValue());
 
                 ids.add(access.getId().toString());
             }
@@ -578,7 +581,7 @@ public class MmsPassageAccessService implements IMmsPassageAccessService {
 
                 loadToRedis(access);
 
-//                monitorThreadNotice(access, status);
+                // monitorThreadNotice(access, status);
             }
 
             logger.info("更新可用通道: {} 状态：{} 成功", passageId, status);
@@ -744,6 +747,33 @@ public class MmsPassageAccessService implements IMmsPassageAccessService {
             stringRedisTemplate.convertAndSend(MmsRedisConstant.BROADCAST_PASSAGE_ACCESS_TOPIC, "clear");
         } catch (Exception e) {
             logger.error("发布清除JVM可用通道失败", e);
+        }
+    }
+
+    private void batchLoadToRedis(List<MmsPassageAccess> list) {
+        try {
+            stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+
+                @Override
+                public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                    RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                    connection.openPipeline();
+                    for (MmsPassageAccess access : list) {
+                        byte[] mainKey = serializer.serialize(getMainKey(access.getUserId(), access.getCallType()));
+                        byte[] assistKey = serializer.serialize(getAssistKey(access.getRouteType(), access.getCmcp(),
+                                                                             access.getProvinceCode()));
+
+                        connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(access)));
+                    }
+
+                    return connection.closePipeline();
+                }
+
+            }, false, true);
+
+            publishToRedis();
+        } catch (Exception e) {
+            logger.warn("Redis 用户可用通道信息加载到REDIS失败", e);
         }
     }
 

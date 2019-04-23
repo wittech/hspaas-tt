@@ -116,9 +116,6 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
             return false;
         }
 
-        // Set<String> keys = stringRedisTemplate.keys(SmsRedisConstant.RED_USER_PASSAGE_ACCESS + "*");
-        // stringRedisTemplate.delete(keys);
-
         batchLoadToRedis(list);
 
         return true;

@@ -15,7 +15,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -511,7 +515,7 @@ public class UserService implements IUserService {
     @Override
     public UserModel getByUserId(int userId) {
         try {
-            Object obj = stringRedisTemplate.opsForHash().get(CommonRedisConstant.RED_USER_LIST, userId + "");
+            Object obj = stringRedisTemplate.opsForValue().get(getKey(userId));
             if (obj != null) {
                 return JSON.parseObject(obj.toString(), UserModel.class);
             }
@@ -535,20 +539,32 @@ public class UserService implements IUserService {
             return false;
         }
 
-        stringRedisTemplate.delete(stringRedisTemplate.keys(CommonRedisConstant.RED_USER_LIST + "*"));
-        for (UserModel userModel : list) {
-            if (!pushToRedis(userModel)) {
-                return false;
-            }
-        }
+        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-        return true;
+            @Override
+            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (UserModel user : list) {
+                    byte[] key = serializer.serialize(getKey(user.getUserId()));
+                    connection.set(key, serializer.serialize(JSON.toJSONString(user)));
+                }
+
+                return connection.closePipeline();
+            }
+
+        }, false, true);
+
+        return CollectionUtils.isNotEmpty(con);
+    }
+
+    private String getKey(int userId) {
+        return String.format("%s:%d", CommonRedisConstant.RED_USER_LIST, userId);
     }
 
     private boolean pushToRedis(UserModel user) {
         try {
-            stringRedisTemplate.opsForValue().set(String.format("%s:%d", CommonRedisConstant.RED_USER_LIST,
-                                                                user.getUserId()), JSON.toJSONString(user));
+            stringRedisTemplate.opsForValue().set(getKey(user.getUserId()), JSON.toJSONString(user));
             return true;
         } catch (Exception e) {
             logger.warn("REDIS 加载用户映射数据失败", e);

@@ -15,14 +15,27 @@ public class MmsMediaFileService {
     /**
      * 默认编码
      */
-    public static final String ENCODING = "UTF-8";
+    public static final String  ENCODING                      = "UTF-8";
+
+    /**
+     * 文件扩展名分隔符
+     */
+    private static final String FILE_EXTENSION_NAME_CHARACTOR = ".";
 
     @Autowired
-    private AliyunOssStorage   aliyunOssStorage;
+    private AliyunOssStorage    aliyunOssStorage;
 
-    public String writeFile(String dir, String data) {
+    /**
+     * 写入OSS
+     * 
+     * @param dir 文件路径
+     * @param data 文件数据
+     * @param extensionName 扩展名
+     * @return
+     */
+    public String writeFile(String dir, String data, String extensionName) {
         try {
-            return writeFile(dir, data.getBytes(ENCODING));
+            return writeFile(dir, data.getBytes(ENCODING), extensionName);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -49,21 +62,17 @@ public class MmsMediaFileService {
     /**
      * TODO 写入OSS文件
      * 
-     * @param originName
-     * @param dir
-     * @param data
+     * @param dir 路径
+     * @param data 文件数据
+     * @param extensionName 扩展名
      * @return
      */
-    public String writeFile(String dir, byte[] data) {
-        return writeFileWithFileName(generateFileName(dir), data);
+    public String writeFile(String dir, byte[] data, String extensionName) {
+        return writeFileWithFileName(generateFileName(dir, extensionName), data);
     }
 
-    public String generateFileName() {
-        return generateFileName(null, null);
-    }
-
-    public String generateFileName(String dir) {
-        return generateFileName(dir, null);
+    private String generateFileName(String dir, String extensionName) {
+        return generateFileName(dir, null, extensionName);
     }
 
     /**
@@ -73,7 +82,7 @@ public class MmsMediaFileService {
      * @param secondDir 二级路径
      * @return
      */
-    public String generateFileName(String dir, String secondDir) {
+    public String generateFileName(String dir, String secondDir, String extensionName) {
         StringBuilder filename = new StringBuilder();
         if (StringUtils.isNotBlank(dir)) {
             filename.append(dir).append(MediaFileDirectory.DIR_SEPERATOR);
@@ -84,6 +93,10 @@ public class MmsMediaFileService {
         }
 
         filename.append(IdGenerator.generatex());
+
+        if (StringUtils.isNotBlank(extensionName)) {
+            filename.append(FILE_EXTENSION_NAME_CHARACTOR).append(extensionName);
+        }
 
         return filename.toString();
     }
