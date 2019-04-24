@@ -21,7 +21,7 @@ import com.huashi.sms.settings.service.ISmsMobileWhiteListService;
 import com.huashi.sms.template.service.ISmsTemplateService;
 
 /**
- * TODO 初始化项目依赖的资源，如REDIS/自定义线程开启等
+ * 初始化项目依赖的资源，如REDIS/自定义线程开启等
  * 
  * @author zhengying
  * @version V1.0
@@ -51,7 +51,7 @@ public class SmsInitializeRunner implements CommandLineRunner {
     public static final Lock           LOCK                   = new ReentrantLock();
     public static final Condition      CONDITION              = LOCK.newCondition();
 
-    private Logger                     logger                 = LoggerFactory.getLogger(getClass());
+    private final Logger               logger                 = LoggerFactory.getLogger(getClass());
 
     /**
      * 自定义初始化资源是否完成（因有些服务强依赖某些资源初始化完成，如 rabbit listener 消费）
@@ -88,9 +88,9 @@ public class SmsInitializeRunner implements CommandLineRunner {
             logger.info("=======================初始化MQ失败=======================", e);
             throw e;
         }
-        
+
         initSignal();
-        
+
     }
 
     private void initPassage() {
@@ -115,7 +115,7 @@ public class SmsInitializeRunner implements CommandLineRunner {
     }
 
     /**
-     * TODO 初始化短信敏感词信息
+     * 初始化短信敏感词信息
      */
     private void initForbiddenWordsList() {
         forbiddenWordsService.reloadRedisForbiddenWords();
@@ -123,7 +123,7 @@ public class SmsInitializeRunner implements CommandLineRunner {
     }
 
     /**
-     * TODO 初始化短信手机号码白名单数据
+     * 初始化短信手机号码白名单数据
      */
     private void initMobileWhiteList() {
         mobileWhiteListService.reloadToRedis();
@@ -131,30 +131,26 @@ public class SmsInitializeRunner implements CommandLineRunner {
     }
 
     /**
-     * TODO 初始化待提交消息队列信息
+     * 初始化待提交消息队列信息
      */
     private boolean initMessageQueues() {
         return smsMtSubmitService.declareWaitSubmitMessageQueues();
     }
 
     /**
-     * TODO 初始化所有用户下行状态推送队列数据
-     * 
-     * @return
+     * 初始化所有用户下行状态推送队列数据
      */
-    private boolean initUserMtReportPushConfigQueue() {
+    private void initUserMtReportPushConfigQueue() {
         boolean isSuccess = smsMtPushService.doListenerAllUser();
         if (isSuccess) {
             logger.info("用户下行状态报告推送队列初始化完成");
         } else {
             logger.info("用户下行状态报告推送队列初始化失败");
         }
-        return isSuccess;
     }
-    
+
     /**
-     * 
-       * TODO 初始化信号源控制
+     * 初始化信号源控制
      */
     private void initSignal() {
         LOCK.lock();

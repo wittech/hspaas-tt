@@ -67,31 +67,34 @@ public class ElasticJobManager {
     }
 
     /**
-     * TODO 任务配置类
+     * 任务配置类
      * 
-     * @param jobClass
-     * @param cron
-     * @param shardingCount
-     * @param shardingItemParameters
-     * @return
+     * @param jobClass job实现类
+     * @param cron 任务扫描表达式
+     * @param shardingCount 分片数量
+     * @param shardingItemParameters 分片项目参数
+     * @param jobParameter 任务参数
+     * @return job配置信息
      */
     private LiteJobConfiguration getLiteJobConfiguration(final Class<? extends SimpleJob> jobClass, final String cron,
                                                          final int shardingCount, final String shardingItemParameters,
                                                          final String jobParameter) {
 
-        JobCoreConfiguration builder = JobCoreConfiguration.newBuilder(jobClass.getName(), cron, shardingCount).shardingItemParameters(shardingItemParameters).jobParameter(jobParameter).build();
+        JobCoreConfiguration builder = JobCoreConfiguration.newBuilder(jobClass.getName(), cron,
+                                                                       shardingCount).shardingItemParameters(shardingItemParameters).jobParameter(jobParameter).build();
 
-        return LiteJobConfiguration.newBuilder(new SimpleJobConfiguration(builder, jobClass.getCanonicalName())).overwrite(true).build();
+        return LiteJobConfiguration.newBuilder(new SimpleJobConfiguration(builder,
+                                                                          jobClass.getCanonicalName())).overwrite(true).build();
 
     }
 
     /**
-     * 添加JOB
-     * 
-     * @param elasticJob
-     * @param cron
-     * @param shardingCount
-     * @param shardingItemParameters
+     * 添加任务处理器
+     *
+     * @param elasticJob job实现类
+     * @param cron 任务扫描表达式
+     * @param shardingCount 分片数量
+     * @param shardingItemParameters 分片项目参数
      */
     public void addJobScheduler(SimpleJob elasticJob, String cron, int shardingCount, String shardingItemParameters) {
         addJobScheduler(elasticJob, cron, shardingCount, shardingItemParameters, null);

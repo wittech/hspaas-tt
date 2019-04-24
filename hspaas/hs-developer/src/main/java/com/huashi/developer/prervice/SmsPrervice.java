@@ -35,7 +35,7 @@ import com.huashi.sms.task.domain.SmsMtTask;
 import com.huashi.sms.task.exception.QueueProcessException;
 
 /**
- * TODO 短信前置服务
+ * 短信前置服务
  *
  * @author zhengying
  * @version V1.0
@@ -56,10 +56,10 @@ public class SmsPrervice {
     private ISmsApiFaildRecordService smsApiFaildRecordService;
 
     /**
-     * TODO 发送短信信息
+     * 发送短信信息
      *
-     * @param smsSendRequest
-     * @return
+     * @param smsSendRequest 发送请求
+     * @return 处理回执
      */
     public SmsSendResponse sendMessage(SmsSendRequest smsSendRequest) {
         SmsMtTask task = new SmsMtTask();
@@ -82,10 +82,10 @@ public class SmsPrervice {
     }
 
     /**
-     * TODO 发送点对点短信信息
+     * 发送点对点短信信息
      *
-     * @param model
-     * @return
+     * @param smsP2PSendRequest 点对点请求
+     * @return 处理回执
      */
     public SmsSendResponse sendP2PMessage(SmsP2PSendRequest smsP2PSendRequest) {
         SmsMtTask task = new SmsMtTask();
@@ -111,10 +111,10 @@ public class SmsPrervice {
     }
 
     /**
-     * TODO 发送模板点对点短信信息
+     * 发送模板点对点短信信息
      *
-     * @param model
-     * @return
+     * @param rqeuest 点对点模板请求
+     * @return 处理结果
      */
     public SmsSendResponse sendP2PTemplateMessage(SmsP2PTemplateSendRequest rqeuest) {
         SmsMtTask task = new SmsMtTask();
@@ -138,7 +138,7 @@ public class SmsPrervice {
     }
 
     /**
-     * TODO 保存错误信息
+     * 保存错误信息
      *
      * @param errorCode 错误代码
      * @param url 调用URL
@@ -173,9 +173,9 @@ public class SmsPrervice {
     }
 
     /**
-     * TODO 获取短余额信息
+     * 获取短余额信息
      *
-     * @return
+     * @return 余额处理回执
      */
     public SmsBalanceResponse getBalance(int userId) {
         UserBalance userBalance = userBalanceService.getByUserId(userId, PlatformType.SEND_MESSAGE_SERVICE);
@@ -189,10 +189,10 @@ public class SmsPrervice {
     }
 
     /**
-     * TODO 提交任务到队列
+     * 提交任务到队列
      *
-     * @param task
-     * @return
+     * @param task 主任务
+     * @return 消息ID
      */
     private long joinTask2Queue(SmsMtTask task) {
         try {

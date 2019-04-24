@@ -54,38 +54,43 @@ import com.huashi.sms.passage.domain.SmsPassageParameter;
 public class SmsPassageAccessService implements ISmsPassageAccessService {
 
     @Reference
-    private IUserService                                  userService;
+    private IUserService                         userService;
     @Autowired
-    private ISmsPassageService                            smsPassageService;
+    private ISmsPassageService                   smsPassageService;
     @Reference
-    private IUserPassageService                           userPassageService;
+    private IUserPassageService                  userPassageService;
     @Autowired
-    private SmsPassageAccessMapper                        smsPassageAccessMapper;
+    private SmsPassageAccessMapper               smsPassageAccessMapper;
     @Autowired
-    private SmsPassageGroupDetailMapper                   smsPassageGroupDetailMapper;
+    private SmsPassageGroupDetailMapper          smsPassageGroupDetailMapper;
     @Autowired
-    private ISmsPassageParameterService                   smsPassageParameterService;
+    private ISmsPassageParameterService          smsPassageParameterService;
     @Resource
-    private StringRedisTemplate                           stringRedisTemplate;
+    private StringRedisTemplate                  stringRedisTemplate;
     @Reference
-    private IPassageMonitorService                        passageMonitorService;
+    private IPassageMonitorService               passageMonitorService;
     @Reference
-    private IProvinceService                              provinceService;
+    private IProvinceService                     provinceService;
 
     /**
      * 全局可用通道缓存
      */
-    public static volatile Map<String, SmsPassageAccess>  GLOBAL_PASSAGE_ACCESS_CONTAINER = new ConcurrentHashMap<>();
+    public static Map<String, SmsPassageAccess>  GLOBAL_PASSAGE_ACCESS_CONTAINER = new ConcurrentHashMap<>();
 
     /**
      * 通道代码+通道类型组装的共享本地数据
      */
-    private static volatile Map<String, SmsPassageAccess> CODE_TYPE_ACCESS_CONTAINER      = new ConcurrentHashMap<>();
+    private static Map<String, SmsPassageAccess> CODE_TYPE_ACCESS_CONTAINER      = new ConcurrentHashMap<>();
+
+    /**
+     * 内存键分隔符
+     */
+    public static final String                   MAP_KEY_SEPERATOR               = "-";
 
     /**
      * 日志输入
      */
-    private final Logger                                  logger                          = LoggerFactory.getLogger(getClass());
+    private final Logger                         logger                          = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<SmsPassageAccess> findPassageAccess() {
@@ -127,11 +132,11 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 获取REDIS通道组合KEY（用于REDIS用户通道组合使用）
+     * 获取REDIS通道组合KEY（用于REDIS用户通道组合使用）
      *
-     * @param routeType
-     * @param cmcp
-     * @return
+     * @param routeType 路由类型
+     * @param cmcp 运营商
+     * @return KEY
      */
     @Override
     public String getAssistKey(Integer routeType, Integer cmcp, Integer provinceCode) {
@@ -139,30 +144,35 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 获取REDIS主KEY
+     * 获取REDIS主KEY
      *
-     * @param userId
-     * @return
+     * @param userId 用户ID
+     * @return KEY
      */
     private String getFullKey(Integer userId, Integer callType, Integer routeType, Integer cmcp, Integer provinceCode) {
-        return getMainKey(userId, callType) + getAssistKey(routeType, cmcp, provinceCode);
+        return getMainKey(userId, callType) + MAP_KEY_SEPERATOR + getAssistKey(routeType, cmcp, provinceCode);
+    }
+
+    private String getFullKey(String mainKey, String fieldKey) {
+        return mainKey + MAP_KEY_SEPERATOR + fieldKey;
     }
 
     /**
-     * TODO 获取REDIS主KEY
+     * 获取REDIS主KEY
      *
-     * @param userId
-     * @return
+     * @param userId 用户ID
+     * @param callType 调用类型
+     * @return KEY
      */
     private static String getMainKey(Integer userId, Integer callType) {
         return String.format("%s:%d:%d", SmsRedisConstant.RED_USER_PASSAGE_ACCESS, userId, callType);
     }
 
     /**
-     * TODO 获取用户模糊查询REDIS KEY
+     * 获取用户模糊查询REDIS KEY
      *
-     * @param userId
-     * @return
+     * @param userId 用户编号
+     * @return 模糊匹配KEY
      */
     private static String getMainLikeKey(Integer userId) {
         return String.format("%s:%d*", SmsRedisConstant.RED_USER_PASSAGE_ACCESS, userId);
@@ -174,24 +184,25 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
             loadToRedis(access);
 
             // 如果通道调用类型为 自取，需要同步到 监管中心
-            if (PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET.getCode() == access.getCallType()
-                || PassageCallType.MO_REPORT_WITH_SELF_GET.getCode() == access.getCallType()) {
-                // 修改暂时不同步 监控中心，需要判断通道参数是否发生变动
+            /*
+             * if (PassageCallType.MT_STATUS_RECEIPT_WITH_SELF_GET.getCode() == access.getCallType() ||
+             * PassageCallType.MO_REPORT_WITH_SELF_GET.getCode() == access.getCallType()) { // 修改暂时不同步
+             * 监控中心，需要判断通道参数是否发生变动 }
+             */
 
-            }
+            return smsPassageAccessMapper.updateByPrimaryKeySelective(access) > 0;
 
         } catch (Exception e) {
-            logger.warn("Redis 用户可用通道信息更新失败, userId : {}, cmcp : {}, routeType :{}", access.getUserId(),
-                        access.getCmcp(), access.getRouteType(), e);
+            logger.error("用户可用通道信息更新失败, userId : {}, cmcp : {}, routeType :{}", access.getUserId(), access.getCmcp(),
+                         access.getRouteType(), e);
+            return false;
         }
-
-        return smsPassageAccessMapper.updateByPrimaryKeySelective(access) > 0;
     }
 
     @Override
     public BossPaginationVo<SmsPassageAccess> findPage(int pageNum, String keyword, int userId) {
-        BossPaginationVo<SmsPassageAccess> page = new BossPaginationVo<SmsPassageAccess>();
-        Map<String, Object> paramMap = new HashMap<String, Object>();
+        BossPaginationVo<SmsPassageAccess> page = new BossPaginationVo<>();
+        Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("passageId", keyword);
         paramMap.put("userId", userId);
         int count = smsPassageAccessMapper.count(paramMap);
@@ -201,7 +212,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
         paramMap.put("end", page.getPageSize());
         List<SmsPassageAccess> list = smsPassageAccessMapper.findList(paramMap);
 
-        Province province = null;
+        Province province;
         Map<Integer, String> passageMap = new HashMap<>();
         Map<Integer, String> provinceMap = new HashMap<>();
         Map<Integer, UserModel> userMap = new HashMap<>();
@@ -244,10 +255,6 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
         }
         page.setList(list);
 
-        province = null;
-        passageMap = null;
-        provinceMap = null;
-        userMap = null;
         return page;
     }
 
@@ -274,10 +281,10 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 根据通道组内的通道数据重新绑定可用通道信息
+     * 根据通道组内的通道数据重新绑定可用通道信息
      * 
-     * @param userId
-     * @param passageGroupId
+     * @param userId 用户ID
+     * @param passageGroupId 通道组ID
      */
     private void rebandPassageAccessInGroup(int userId, int passageGroupId) {
         try {
@@ -315,23 +322,23 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 去重KEY（方便数据判断，去掉重复操作）
+     * 去重KEY（方便数据判断，去掉重复操作）
      *
-     * @param routeType
-     * @param cmcp
-     * @param provinceCode
-     * @return
+     * @param routeType 路由类型
+     * @param cmcp 运营商
+     * @param provinceCode 省份代码
+     * @return KEY
      */
     private static String repeatConditionKey(Integer routeType, Integer cmcp, Integer provinceCode) {
         return String.format("%d:%d:%d", routeType, cmcp, provinceCode);
     }
 
     /**
-     * TODO 判断是否已经处理完成 根据用户ID确定的情况下， 运营商：路由类型：省份代码 确定唯一性处理，如已处理，则本次忽略
+     * 判断是否已经处理完成 根据用户ID确定的情况下， 运营商：路由类型：省份代码 确定唯一性处理，如已处理，则本次忽略
      *
-     * @param distinctAccessKeys
-     * @param detail
-     * @return
+     * @param distinctAccessKeys 去重后的KEYS
+     * @param detail 通道组详细信息
+     * @return 处理结果
      */
     private boolean ignoreIfHasDone(Set<String> distinctAccessKeys, SmsPassageGroupDetail detail) {
         String conditionKey = repeatConditionKey(detail.getRouteType(), detail.getCmcp(), detail.getProvinceCode());
@@ -349,9 +356,9 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 替换本次新的通道信息至可用通道中（access）
+     * 替换本次新的通道信息至可用通道中（access）
      *
-     * @param detail
+     * @param detail 通道组详细信息
      * @param userId 用户ID
      * @param passageGroupId 通道组ID
      */
@@ -360,7 +367,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
 
         try {
             List<SmsPassageParameter> parameterList = smsPassageParameterService.findByPassageId(detail.getPassageId());
-            SmsPassageAccess access = null;
+            SmsPassageAccess access;
             for (SmsPassageParameter parameter : parameterList) {
                 access = new SmsPassageAccess();
                 access.setGroupId(passageGroupId);
@@ -473,11 +480,11 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 配装可用通道KEY
+     * 配装可用通道KEY
      * 
-     * @param callType
-     * @param passageCode
-     * @return
+     * @param callType 调用类型
+     * @param passageCode 通道代码
+     * @return key
      */
     private static String passageAccessKey(PassageCallType callType, String passageCode) {
         return callType.getCode() + ":" + (StringUtils.isEmpty(passageCode) ? "" : passageCode);
@@ -511,10 +518,10 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 从通道参数拷贝属性值给可用通道
+     * 从通道参数拷贝属性值给可用通道
      * 
-     * @param passageParameter
-     * @return
+     * @param passageParameter 通道参数信息
+     * @return 可用通道信息
      */
     private SmsPassageAccess copyProperties(SmsPassageParameter passageParameter) {
         SmsPassageAccess smsPassageAccess = new SmsPassageAccess();
@@ -538,7 +545,7 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
                 throw new RuntimeException("删除可用通道持久化异常");
             }
 
-            List<String> ids = new ArrayList<String>(list.size());
+            List<String> ids = new ArrayList<>(list.size());
             for (SmsPassageAccess access : list) {
 
                 removeFromRedis(access);
@@ -603,10 +610,10 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 更新监控应用相关自定义线程信息
+     * 更新监控应用相关自定义线程信息
      * 
-     * @param access
-     * @param status
+     * @param access 可用通道
+     * @param status 状态
      */
     private void monitorThreadNotice(SmsPassageAccess access, Integer status) {
         try {
@@ -626,12 +633,11 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
 
     @Override
     public Map<String, SmsPassageAccess> getByUserId(int userId) {
-        Map<String, SmsPassageAccess> passages = new HashMap<String, SmsPassageAccess>();
+        Map<String, SmsPassageAccess> passages = new HashMap<>();
         try {
             Map<Object, Object> entries = stringRedisTemplate.opsForHash().entries(getMainKey(userId,
                                                                                               PassageCallType.DATA_SEND.getCode()));
             if (MapUtils.isNotEmpty(entries)) {
-
                 for (Object key : entries.keySet()) {
                     SmsPassageAccess passage = JSON.parseObject(entries.get(key).toString(), SmsPassageAccess.class);
                     passages.put(getAssistKey(passage.getRouteType(), passage.getCmcp(), passage.getProvinceCode()),
@@ -674,21 +680,30 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
         }
 
         SmsPassageAccess passageAccess = getAccessFromRedis(userId, routeType, cmcp, provinceCode);
-        return passageAccess != null ? passageAccess : getAccessFromDb(userId, routeType, cmcp, provinceCode);
+        if (passageAccess == null) {
+            passageAccess = getAccessFromDb(userId, routeType, cmcp, provinceCode);
+        }
+
+        if (passageAccess == null) {
+            return null;
+        }
+
+        // 加载可用数据至JVM内存中
+        GLOBAL_PASSAGE_ACCESS_CONTAINER.put(dataKey, passageAccess);
+
+        return passageAccess;
     }
 
     /**
-     * TODO 在DB中查询可用通道数据
+     * 在DB中查询可用通道数据
      * 
-     * @param userId
-     * @param routeType
-     * @param cmcp
-     * @param provinceCode
-     * @return
+     * @param userId 用户ID
+     * @param routeType 路由类型
+     * @param cmcp 运营商
+     * @param provinceCode 省份编码
+     * @return 可用通道信息
      */
     private SmsPassageAccess getAccessFromDb(int userId, int routeType, int cmcp, int provinceCode) {
-        String mainKey = getMainKey(userId, PassageCallType.DATA_SEND.getCode());
-        String assistKey = getAssistKey(routeType, cmcp, provinceCode);
         try {
             SmsPassageAccess passageAccess = smsPassageAccessMapper.selectByUserIdAndRouteCmcp(userId, routeType, cmcp,
                                                                                                provinceCode);
@@ -696,9 +711,11 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
                 return null;
             }
 
-            GLOBAL_PASSAGE_ACCESS_CONTAINER.put(mainKey + assistKey, passageAccess);
+            // 加载到REDIS中
+            stringRedisTemplate.opsForHash().put(getMainKey(userId, passageAccess.getCallType()),
+                                                 getAssistKey(routeType, cmcp, provinceCode),
+                                                 JSON.toJSONString(passageAccess));
 
-            loadToRedis(passageAccess);
         } catch (Exception e) {
             logger.warn("Redis 用户可用通道信息添加失败, userId : {}, cmcp : {}", userId, cmcp, e);
         }
@@ -706,24 +723,21 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 在redis中查询可用通道
+     * 在redis中查询可用通道
      * 
-     * @param userId
-     * @param routeType
-     * @param cmcp
-     * @param provinceCode
-     * @return
+     * @param userId 用户ID
+     * @param routeType 路由类型
+     * @param cmcp 运营商
+     * @param provinceCode 省份编码
+     * @return 可用通道信息
      */
     private SmsPassageAccess getAccessFromRedis(int userId, int routeType, int cmcp, int provinceCode) {
-        SmsPassageAccess passageAccess = null;
         String mainKey = getMainKey(userId, PassageCallType.DATA_SEND.getCode());
         String assistKey = getAssistKey(routeType, cmcp, provinceCode);
         try {
             Object object = stringRedisTemplate.opsForHash().get(mainKey, assistKey);
             if (object != null) {
-                passageAccess = JSON.parseObject(object.toString(), SmsPassageAccess.class);
-                GLOBAL_PASSAGE_ACCESS_CONTAINER.put(mainKey + assistKey, passageAccess);
-                return passageAccess;
+                return JSON.parseObject(object.toString(), SmsPassageAccess.class);
             }
         } catch (Exception e) {
             logger.warn("Redis 用户可用通道信息查询失败, userId : {}, cmcp : {}", userId, cmcp, e);
@@ -732,77 +746,85 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
     }
 
     /**
-     * TODO 加载到REDIS
+     * 加载到REDIS
      * 
-     * @param access
+     * @param access 可用通道信息
      */
     private void loadToRedis(SmsPassageAccess access) {
         try {
-            String mainKey = getMainKey(access.getUserId(), access.getCallType());
-            String assistKey = getAssistKey(access.getRouteType(), access.getCmcp(), access.getProvinceCode());
 
-            stringRedisTemplate.opsForHash().put(mainKey, assistKey, JSON.toJSONString(access));
-            publishToRedis();
+            stringRedisTemplate.execute((connection) -> {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                byte[] mainKey = serializer.serialize(getMainKey(access.getUserId(), access.getCallType()));
+                byte[] assistKey = serializer.serialize(getAssistKey(access.getRouteType(), access.getCmcp(),
+                                                                     access.getProvinceCode()));
+
+                connection.openPipeline();
+
+                connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(access)));
+
+                // 采用订阅发布来通知 分布式节点清理各自的JVM 内存数据
+                connection.publish(serializer.serialize(SmsRedisConstant.BROADCAST_PASSAGE_ACCESS_TOPIC),
+                                   JSON.toJSONBytes(access));
+
+                return connection.closePipeline();
+            }, false, true);
+
         } catch (Exception e) {
             logger.warn("Redis 用户可用通道信息加载到REDIS失败, userId : {}, cmcp : {}", access.getUserId(), access.getCmcp(), e);
         }
     }
 
     /**
-     * TODO 移除REDIS数据
+     * 移除REDIS数据
      * 
-     * @param access
+     * @param access 可用通道信息
      */
     private void removeFromRedis(SmsPassageAccess access) {
         try {
-            String mainKey = getMainKey(access.getUserId(), access.getCallType());
-            String assistKey = getAssistKey(access.getRouteType(), access.getCmcp(), access.getProvinceCode());
+            stringRedisTemplate.execute((connection) -> {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                byte[] mainKey = serializer.serialize(getMainKey(access.getUserId(), access.getCallType()));
+                byte[] assistKey = serializer.serialize(getAssistKey(access.getRouteType(), access.getCmcp(),
+                                                                     access.getProvinceCode()));
 
-            stringRedisTemplate.opsForHash().delete(mainKey, assistKey);
-            publishToRedis();
+                connection.hDel(mainKey, assistKey);
+
+                // 采用订阅发布来通知 分布式节点清理各自的JVM 内存数据
+                connection.publish(serializer.serialize(SmsRedisConstant.BROADCAST_PASSAGE_ACCESS_TOPIC),
+                                   JSON.toJSONBytes(access));
+
+                return connection.closePipeline();
+            }, false, true);
+
         } catch (Exception e) {
             logger.warn("Redis 移除可用通道信息加载到REDIS失败, userId : {}, cmcp : {}", access.getUserId(), access.getCmcp(), e);
         }
     }
 
     /**
-     * TODO REDIS队列数据操作(订阅发布模式)
-     *
-     * @param mobile
-     * @param action
-     * @return
+     * 批量加载可用通道数据至redis
+     * 
+     * @param list 可用通道集合
      */
-    private void publishToRedis() {
-        try {
-
-            stringRedisTemplate.convertAndSend(SmsRedisConstant.BROADCAST_PASSAGE_ACCESS_TOPIC, "clear");
-        } catch (Exception e) {
-            logger.error("发布清除JVM可用通道失败", e);
-        }
-    }
-
     private void batchLoadToRedis(List<SmsPassageAccess> list) {
         try {
-            stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+            stringRedisTemplate.execute((connection) -> {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (SmsPassageAccess access : list) {
+                    byte[] mainKey = serializer.serialize(getMainKey(access.getUserId(), access.getCallType()));
+                    byte[] assistKey = serializer.serialize(getAssistKey(access.getRouteType(), access.getCmcp(),
+                                                                         access.getProvinceCode()));
 
-                @Override
-                public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
-                    RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
-                    connection.openPipeline();
-                    for (SmsPassageAccess access : list) {
-                        byte[] mainKey = serializer.serialize(getMainKey(access.getUserId(), access.getCallType()));
-                        byte[] assistKey = serializer.serialize(getAssistKey(access.getRouteType(), access.getCmcp(),
-                                                                             access.getProvinceCode()));
-
-                        connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(access)));
-                    }
-
-                    return connection.closePipeline();
+                    connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(access)));
                 }
+
+                return connection.closePipeline();
 
             }, false, true);
 
-            publishToRedis();
         } catch (Exception e) {
             logger.warn("Redis 用户可用通道信息加载到REDIS失败", e);
         }

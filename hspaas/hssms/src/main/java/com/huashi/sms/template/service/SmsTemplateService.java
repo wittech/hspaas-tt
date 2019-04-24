@@ -1,11 +1,6 @@
 package com.huashi.sms.template.service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
@@ -15,6 +10,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -41,7 +37,7 @@ import com.huashi.sms.template.dao.MessageTemplateMapper;
 import com.huashi.sms.template.domain.MessageTemplate;
 
 /**
- * TODO 短信模板服务实现
+ * 短信模板服务实现
  * 
  * @author zhengying
  * @version V1.0
@@ -51,21 +47,27 @@ import com.huashi.sms.template.domain.MessageTemplate;
 public class SmsTemplateService implements ISmsTemplateService {
 
     @Reference
-    private IUserService                             userService;
+    private IUserService                                       userService;
     @Autowired
-    private MessageTemplateMapper                    messageTemplateMapper;
+    private MessageTemplateMapper                              messageTemplateMapper;
     @Reference
-    private IUserSmsConfigService                    userSmsConfigService;
+    private IUserSmsConfigService                              userSmsConfigService;
     @Autowired
-    private IForbiddenWordsService                   forbiddenWordsService;
+    private IForbiddenWordsService                             forbiddenWordsService;
     @Resource
-    private StringRedisTemplate                      stringRedisTemplate;
-    private final Logger                             logger                  = LoggerFactory.getLogger(getClass());
+    private StringRedisTemplate                                stringRedisTemplate;
+
+    private final Logger                                       logger                  = LoggerFactory.getLogger(getClass());
 
     /**
      * 全局短信模板（与REDIS 同步采用广播模式）
      */
-    public static volatile Map<Integer, Set<String>> GLOBAL_MESSAGE_TEMPLATE = new ConcurrentHashMap<>();
+    public static volatile Map<Integer, List<MessageTemplate>> GLOBAL_MESSAGE_TEMPLATE = new ConcurrentHashMap<>();
+
+    /**
+     * 超级模板正则表达式（一般指无限制）
+     */
+    private static final String                                SUPER_TEMPLATE_REGEX    = "^[\\s\\S]*$";
 
     @Override
     public PaginationVo<MessageTemplate> findPage(int userId, String status, String content, String currentPage) {
@@ -104,71 +106,100 @@ public class SmsTemplateService implements ISmsTemplateService {
     }
 
     /**
-     * TODO 添加到REDIS
-     * 
-     * @param template
-     * @param userId
+     * 添加到REDIS
+     *
+     * @param userId 用户编号
+     * @param templates 短信模板数据
      */
-    private void pushToRedis(int userId, MessageTemplate template) {
+    private void pushToRedis(int userId, MessageTemplate... templates) {
         try {
-            stringRedisTemplate.opsForZSet().add(getKey(userId), JSON.toJSONString(template),
-                                                 template.getPriority().doubleValue());
 
-            // 订阅发布模式订阅
-            stringRedisTemplate.convertAndSend(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC, "all");
+            stringRedisTemplate.execute((connection) -> {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                byte[] key = serializer.serialize(getKey(userId));
+
+                for (MessageTemplate template : templates) {
+                    connection.zAdd(key, template.getPriority().doubleValue(), JSON.toJSONBytes(template));
+
+                    // publish message for flush jvm map data
+                    connection.publish(serializer.serialize(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC),
+                                       JSON.toJSONBytes(template));
+                }
+
+                return connection.closePipeline();
+            }, false, true);
+
         } catch (Exception e) {
             logger.warn("REDIS 短信模板设置失败", e);
         }
     }
 
     /**
-     * TODO 查询REDIS
+     * 根据用户编号查询短信模板集合信息
      * 
-     * @param userId
+     * @param userId 用户ID
+     * @return 模板集合数据
      */
-    private Set<String> getFromRedis(int userId) {
+    private List<MessageTemplate> getFromRedis(int userId) {
         try {
-
-            if (MapUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE)
-                || CollectionUtils.isEmpty(GLOBAL_MESSAGE_TEMPLATE.get(userId))) {
-                Set<String> set = stringRedisTemplate.opsForZSet().reverseRangeByScore(getKey(userId), 0, 1000);
-                if (CollectionUtils.isEmpty(set)) {
-                    return null;
-                }
-
-                GLOBAL_MESSAGE_TEMPLATE.put(userId, set);
+            Set<String> set = stringRedisTemplate.opsForZSet().reverseRangeByScore(getKey(userId), 0, 1000);
+            if (CollectionUtils.isEmpty(set)) {
+                return null;
             }
 
-            return GLOBAL_MESSAGE_TEMPLATE.get(userId);
+            List<MessageTemplate> list = new ArrayList<>(set.size());
+            for (String s : set) {
+                if (StringUtils.isEmpty(s)) {
+                    continue;
+                }
 
+                list.add(JSON.parseObject(s, MessageTemplate.class));
+            }
+
+            return list;
         } catch (Exception e) {
-            logger.warn("REDIS 短信模板设置失败", e);
+            logger.warn("REDIS 短信模板获取失败", e);
             return null;
         }
     }
 
+    /**
+     * 从redis和内存中移除模板数据
+     * 
+     * @param template 模板信息
+     */
     private void removeRedis(MessageTemplate template) {
         try {
-            Set<String> set = stringRedisTemplate.opsForZSet().reverseRangeByScore(getKey(template.getUserId()), 0,
-                                                                                   template.getPriority());
-            if (CollectionUtils.isEmpty(set)) {
-                logger.info("未找到短信模板信息:{}", template.getUserId());
-                return;
-            }
+            stringRedisTemplate.execute((connection) -> {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
 
-            for (String s : set) {
-                MessageTemplate jt = JSON.parseObject(s, MessageTemplate.class);
-                if (jt == null) {
-                    continue;
+                byte[] key = serializer.serialize(getKey(template.getUserId()));
+                Set<byte[]> templates = connection.zRevRangeByScore(key, 0, 1000);
+                if (CollectionUtils.isEmpty(templates)) {
+                    logger.warn("redis中未找到短信模板 userId[" + template.getUserId() + "]信息");
+                    return null;
                 }
 
-                if (template.getContent().equals(jt.getContent())) {
-                    stringRedisTemplate.opsForZSet().remove(getKey(template.getUserId()), s);
-                }
-            }
+                for (byte[] templateJson : templates) {
+                    MessageTemplate messageTemplate = JSON.parseObject(templateJson, MessageTemplate.class);
+                    if (messageTemplate == null) {
+                        continue;
+                    }
 
-            // 订阅发布模式订阅
-            stringRedisTemplate.convertAndSend(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC, "all");
+                    if (template.getContent().equals(messageTemplate.getContent())) {
+                        connection.zRem(key, templateJson);
+                        // 发布订阅频道消息
+                        connection.publish(serializer.serialize(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC),
+                                           templateJson);
+                        break;
+                    }
+                }
+
+                return connection.closePipeline();
+
+            }, false, true);
 
         } catch (Exception e) {
             logger.warn("REDIS 短信模板移除失败", e);
@@ -177,7 +208,7 @@ public class SmsTemplateService implements ISmsTemplateService {
 
     @Override
     public boolean update(MessageTemplate template) {
-        MessageTemplate originTemplate = null;
+        MessageTemplate originTemplate;
         try {
             originTemplate = isAllowAccess(template.getUserId(), template.getId());
         } catch (IllegalArgumentException e) {
@@ -189,17 +220,17 @@ public class SmsTemplateService implements ISmsTemplateService {
         template.setCreateTime(originTemplate.getCreateTime());
         int result = messageTemplateMapper.updateByPrimaryKey(template);
         if (result > 0) {
-            reloadUserTemplate(template.getUserId());
+            updateTemplateInRedis(template);
         }
         return result > 0;
     }
 
     /**
-     * TODO 是否允许被访问（针对用户ID进行鉴权,防止恶意使用userID来篡改其他userId数据）
+     * 是否允许被访问（针对用户ID进行鉴权,防止恶意使用userID来篡改其他userId数据）
      * 
-     * @param userId
-     * @param templateId
-     * @return
+     * @param userId 用户ID
+     * @param templateId 模板ID
+     * @return 模板信息
      */
     private MessageTemplate isAllowAccess(int userId, long templateId) {
         MessageTemplate template = get(templateId);
@@ -213,7 +244,8 @@ public class SmsTemplateService implements ISmsTemplateService {
                                                + "] , 本次用户ID:[" + userId + "]");
         }
 
-        if (AppType.WEB.getCode() == template.getAppType() && template.getStatus() != ApproveStatus.WAITING.getValue()) {
+        if (AppType.WEB.getCode() == template.getAppType()
+            && template.getStatus() != ApproveStatus.WAITING.getValue()) {
             throw new IllegalArgumentException("用户模板[" + templateId + "]模板状态为非待审核状态[" + template.getStatus() + "]不能修改");
         }
 
@@ -274,70 +306,33 @@ public class SmsTemplateService implements ISmsTemplateService {
     }
 
     /**
-     * TODO 由REDIS查询短信模板
+     * 根据内容匹配最符合条件的的短信模板数据（按照优先级排序选择，按照有精确模板优先，超级模板次之）
      * 
-     * @param userId
-     * @param content
-     * @return
+     * @param list 短信模板集合
+     * @param content 短信内容
+     * @return 匹配后的模板数据
      */
-    private MessageTemplate getTemplateFromRedis(int userId, String content) {
-        try {
-            // 超级模板表达式
-            String superTemplateRegex = "^[\\s\\S]*$";
-            MessageTemplate superTemplate = null;
-            Set<String> texts = getFromRedis(userId);
-            if (CollectionUtils.isNotEmpty(texts)) {
-                for (String text : texts) {
-                    MessageTemplate template = JSON.parseObject(text, MessageTemplate.class);
-                    if (template == null) {
-                        logger.warn("LOOP当前值为空");
-                        continue;
-                    }
-
-                    if (StringUtils.isEmpty(template.getRegexValue())) {
-                        continue;
-                    }
-
-                    if (superTemplateRegex.equalsIgnoreCase(template.getRegexValue())) {
-                        superTemplate = template;
-                        continue;
-                    }
-
-                    // 如果普通短信模板存在，则以普通模板为主
-                    if (PatternUtil.isRight(template.getRegexValue(), content)) {
-                        return template;
-                    }
-
-                }
-            }
-
-            // 如果普通短信模板未找到，判断是否找到超级模板，有则直接返回
-            if (superTemplate != null) {
-                return superTemplate;
-            }
-        } catch (Exception e) {
-            logger.error("短信模板REDIS查询失败", e);
-        }
-        return null;
-    }
-
-    private MessageTemplate getTemplateFromDb(int userId, String content) {
-        // REDIS没查到
-        // MessageTemplate superTemplate = null;
-        List<MessageTemplate> list = messageTemplateMapper.findAvaiableByUserId(userId);
+    private MessageTemplate matchAccessTemplate(List<MessageTemplate> list, String content) {
         if (CollectionUtils.isEmpty(list)) {
+            logger.warn("There is no message template result matched");
             return null;
         }
 
+        MessageTemplate superTemplate = null;
         for (MessageTemplate template : list) {
+            if (template == null) {
+                logger.warn("LOOP当前值为空");
+                continue;
+            }
+
             if (StringUtils.isEmpty(template.getRegexValue())) {
                 continue;
             }
 
-            // if (TEMPLATE_SUPER_REGEX.equalsIgnoreCase(template.getRegexValue())) {
-            // superTemplate = template;
-            // continue;
-            // }
+            if (SUPER_TEMPLATE_REGEX.equalsIgnoreCase(template.getRegexValue())) {
+                superTemplate = template;
+                continue;
+            }
 
             // 如果普通短信模板存在，则以普通模板为主
             if (PatternUtil.isRight(template.getRegexValue(), content)) {
@@ -346,32 +341,64 @@ public class SmsTemplateService implements ISmsTemplateService {
         }
 
         // 如果普通短信模板未找到，判断是否找到超级模板，有则直接返回
-        // if (superTemplate != null)
-        // return superTemplate;
+        if (superTemplate != null) {
+            return superTemplate;
+        }
 
         return null;
     }
 
     @Override
     public MessageTemplate getByContent(int userId, String content) {
-        MessageTemplate template = getTemplateFromRedis(userId, content);
-        if (template != null) {
-            return template;
+        List<MessageTemplate> list = getTemplatesByUserId(userId);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
         }
 
-        return getTemplateFromDb(userId, content);
+        return matchAccessTemplate(list, content);
     }
 
-    @Override
-    public boolean save(MessageTemplate template) {
-        if (StringUtils.isEmpty(template.getContent())) {
-            throw new RuntimeException("模板内容不能为空");
+    /**
+     * 根据用户ID获取该用户所有的短信模板数据
+     *
+     * @param userId 用户ID
+     * @return 模板集合
+     */
+    private List<MessageTemplate> getTemplatesByUserId(int userId) {
+        if (CollectionUtils.isNotEmpty(GLOBAL_MESSAGE_TEMPLATE.get(userId))) {
+            return GLOBAL_MESSAGE_TEMPLATE.get(userId);
         }
 
-        Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
-        if (CollectionUtils.isNotEmpty(words)) {
-            throw new RuntimeException(String.format("模板内容包含敏感词：%s", words));
+        List<MessageTemplate> list = null;
+        try {
+            list = getFromRedis(userId);
+            if (CollectionUtils.isNotEmpty(list)) {
+                return list;
+            }
+
+            list = messageTemplateMapper.findAvaiableByUserId(userId);
+            if (CollectionUtils.isNotEmpty(list)) {
+                // 如果DB中存在，REDIS中不存在，则需要加载至REDIS
+                pushToRedis(userId, list.toArray(new MessageTemplate[] {}));
+            }
+
+            return list;
+        } catch (Exception e) {
+            logger.warn("No templates found by userId [" + userId + "]", e);
+            return null;
+        } finally {
+            if (CollectionUtils.isNotEmpty(list)) {
+                GLOBAL_MESSAGE_TEMPLATE.put(userId, list);
+            }
         }
+    }
+
+    /**
+     * 设置常规属性数据
+     * 
+     * @param template 模板信息
+     */
+    private void setProperties(MessageTemplate template) {
         template.setCreateTime(new Date());
         // 融合平台判断 后台添加 状态默认
         if (AppType.WEB.getCode() == template.getAppType()) {
@@ -382,6 +409,20 @@ public class SmsTemplateService implements ISmsTemplateService {
         if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
             pushToRedis(template.getUserId(), template);
         }
+    }
+
+    @Override
+    public boolean save(MessageTemplate template) {
+        if (StringUtils.isEmpty(template.getContent())) {
+            throw new IllegalArgumentException("模板内容不能为空");
+        }
+
+        Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
+        if (CollectionUtils.isNotEmpty(words)) {
+            throw new IllegalArgumentException("模板内容包含敏感词[" + words + "]");
+        }
+
+        setProperties(template);
 
         return messageTemplateMapper.insertSelective(template) > 0;
     }
@@ -391,44 +432,48 @@ public class SmsTemplateService implements ISmsTemplateService {
     public boolean saveToBatchContent(MessageTemplate template, String[] contents) {
         Set<String> words = forbiddenWordsService.filterForbiddenWords(template.getContent());
         if (CollectionUtils.isNotEmpty(words)) {
-            throw new RuntimeException(String.format("模板内容包含敏感词：%s", words));
+            throw new IllegalArgumentException("模板内容包含敏感词[" + words + "]");
         }
 
         if (AppType.WEB.getCode() == template.getAppType()) {
             template.setStatus(ApproveStatus.WAITING.getValue());
         }
 
-        Set<String> set = new HashSet<>();
-        CollectionUtils.addAll(set, contents);
-        boolean allResult = true;
-        for (String content : set) {
-            template.setId(null);
-            template.setContent(content);
-            template.setCreateTime(new Date());
-            template.setRegexValue(parseContent2Regex(content));
+        List<MessageTemplate> list = new ArrayList<>();
+        for (String content : contents) {
+            MessageTemplate newTemplate = new MessageTemplate();
+            BeanUtils.copyProperties(template, newTemplate);
 
-            int result = messageTemplateMapper.insertSelective(template);
-            if (result <= 0) {
-                allResult = false;
-                break;
-            }
+            newTemplate.setContent(content);
+            newTemplate.setCreateTime(new Date());
+            newTemplate.setRegexValue(parseContent2Regex(content));
 
-            if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
-                pushToRedis(template.getUserId(), template);
-            }
+            list.add(newTemplate);
         }
-        if (!allResult) {
-            // 非全部成功的，全部回滚
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+        if (CollectionUtils.isEmpty(list)) {
+            logger.warn("No template data need to process by contents [" + StringUtils.join(contents) + "]");
+            return false;
         }
-        return allResult;
+
+        int result = messageTemplateMapper.batchInsert(list);
+        if (result <= 0) {
+            logger.error("Template contents[" + StringUtils.join(contents) + "] persist process failed");
+            return false;
+        }
+
+        if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
+            pushToRedis(template.getUserId(), list.toArray(new MessageTemplate[] {}));
+        }
+
+        return true;
     }
 
     /**
-     * TODO 内容转换正则表达式
+     * 内容转换正则表达式
      * 
-     * @param content
-     * @return
+     * @param content 短信内容
+     * @return 转换后的内容
      */
     private static String parseContent2Regex(String content) {
         // modify 变量内容 增加不可见字符
@@ -462,19 +507,36 @@ public class SmsTemplateService implements ISmsTemplateService {
         return template != null && PatternUtil.isRight(template.getRegexValue(), content);
     }
 
-    private void reloadUserTemplate(int userId) {
-        List<MessageTemplate> list = messageTemplateMapper.findAvaiableByUserId(userId);
-        stringRedisTemplate.delete(getKey(userId));
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
+    /**
+     * 跟新缓存中模板数据
+     * 
+     * @param template 模板数据
+     */
+    private void updateTemplateInRedis(MessageTemplate template) {
+        final MessageTemplate originTemplate = messageTemplateMapper.selectByPrimaryKey(template.getId());
+        try {
+            stringRedisTemplate.execute((connection) -> {
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                byte[] key = serializer.serialize(getKey(template.getUserId()));
 
-        for (MessageTemplate t : list) {
-            stringRedisTemplate.opsForZSet().add(getKey(userId), JSON.toJSONString(t), t.getPriority().doubleValue());
-        }
+                if (originTemplate != null) {
+                    // 删除原有的模板数据
+                    connection.zRem(key, JSON.toJSONBytes(originTemplate));
+                }
 
-        // 订阅发布模式订阅
-        stringRedisTemplate.convertAndSend(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC, "all");
+                connection.zAdd(key, template.getPriority().doubleValue(), JSON.toJSONBytes(template));
+
+                // publish message for flush jvm map data
+                connection.publish(serializer.serialize(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC),
+                                   JSON.toJSONBytes(template));
+
+                return connection.closePipeline();
+            }, false, true);
+
+        } catch (Exception e) {
+            logger.warn("REDIS 短信模板[" + JSON.toJSONString(template) + "]加载失败", e);
+        }
     }
 
     @Override
@@ -485,22 +547,23 @@ public class SmsTemplateService implements ISmsTemplateService {
             return false;
         }
 
-        stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_USER_MESSAGE_TEMPLATE + "*"));
-        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+        List<Object> con = stringRedisTemplate.execute((connection) -> {
+            RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+            connection.openPipeline();
 
-            @Override
-            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
-                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
-                connection.openPipeline();
-                for (MessageTemplate template : list) {
-                    byte[] key = serializer.serialize(getKey(template.getUserId()));
-
-                    connection.zAdd(key, template.getPriority().doubleValue(),
-                                    serializer.serialize(JSON.toJSONString(template)));
-                }
-
-                return connection.closePipeline();
+            // 查询该用户编号下的所有模板信息
+            Set<byte[]> keys = connection.keys(serializer.serialize(SmsRedisConstant.RED_USER_MESSAGE_TEMPLATE + "*"));
+            if (CollectionUtils.isNotEmpty(keys)) {
+                connection.del(keys.toArray(new byte[][] {}));
             }
+
+            for (MessageTemplate template : list) {
+                byte[] key = serializer.serialize(getKey(template.getUserId()));
+
+                connection.zAdd(key, template.getPriority().doubleValue(),JSON.toJSONBytes(template));
+            }
+
+            return connection.closePipeline();
 
         }, false, true);
 
@@ -509,7 +572,7 @@ public class SmsTemplateService implements ISmsTemplateService {
 
     @Override
     public boolean delete(long id, int userId) {
-        MessageTemplate originTemplate = null;
+        MessageTemplate originTemplate;
         try {
             originTemplate = isAllowAccess(userId, id);
         } catch (IllegalArgumentException e) {

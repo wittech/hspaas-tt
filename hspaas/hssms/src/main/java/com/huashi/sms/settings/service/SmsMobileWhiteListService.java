@@ -35,7 +35,7 @@ import com.huashi.sms.settings.dao.SmsMobileWhiteListMapper;
 import com.huashi.sms.settings.domain.SmsMobileWhiteList;
 
 /**
- * TODO 白名单服务接口实现类
+ * 白名单服务接口实现类
  *
  * @author zhengying
  * @version V1.0.0
@@ -51,10 +51,10 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
     @Resource
     private StringRedisTemplate      stringRedisTemplate;
 
-    private Logger                   logger = LoggerFactory.getLogger(getClass());
+    private final Logger             logger = LoggerFactory.getLogger(getClass());
 
     private static Map<String, Object> response(String code, String msg) {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("result_code", code);
         resultMap.put("result_msg", msg);
         return resultMap;
@@ -165,10 +165,10 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
     }
 
     /**
-     * TODO 获取白名单手机号码KEY名称
+     * 获取白名单手机号码KEY名称
      *
-     * @param userId
-     * @return
+     * @param userId 用户ID
+     * @return key
      */
     private String getKey(Integer userId) {
         return String.format("%s:%d", SmsRedisConstant.RED_MOBILE_WHITELIST, userId);
@@ -184,19 +184,16 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
         try {
             stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_MOBILE_WHITELIST + "*"));
 
-            List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+            List<Object> con = stringRedisTemplate.execute((connection) -> {
 
-                @Override
-                public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
-                    RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
-                    connection.openPipeline();
-                    for (SmsMobileWhiteList mwl : list) {
-                        byte[] key = serializer.serialize(getKey(mwl.getUserId()));
-                        connection.sAdd(key, serializer.serialize(JSON.toJSONString(mwl)));
-                    }
-
-                    return connection.closePipeline();
+                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+                connection.openPipeline();
+                for (SmsMobileWhiteList mwl : list) {
+                    byte[] key = serializer.serialize(getKey(mwl.getUserId()));
+                    connection.sAdd(key, serializer.serialize(JSON.toJSONString(mwl)));
                 }
+
+                return connection.closePipeline();
 
             }, false, true);
 
@@ -208,9 +205,9 @@ public class SmsMobileWhiteListService implements ISmsMobileWhiteListService {
     }
 
     /**
-     * TODO 添加到REDIS 数据中
+     * 添加到REDIS 数据中
      * 
-     * @param mwl
+     * @param mwl 手机白名单数据
      */
     private void pushToRedis(SmsMobileWhiteList mwl) {
         try {

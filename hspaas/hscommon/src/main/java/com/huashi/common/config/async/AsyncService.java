@@ -28,26 +28,21 @@ public class AsyncService {
     @Async
     public void publishMobilesLocalToRedis() {
         long startTime = System.currentTimeMillis();
-        
-        stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
 
-            @Override
-            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
+        stringRedisTemplate.execute((connection)  -> {
                 RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
                 connection.openPipeline();
-
                 byte[] key = serializer.serialize(CommonRedisConstant.RED_PROVINCE_MOBILES_LOCAL);
 
                 byte[] value = JSON.toJSONBytes(CommonRedisConstant.GLOBAL_MOBILES_LOCAL);
-                
+
                 connection.set(key, value);
 
                 return connection.closePipeline();
-            }
 
         }, false, true);
 
-        logger.info("RED_PROVINCE_MOBILES_LOCAL redis 共耗时 :{} ms", (System.currentTimeMillis() - startTime));
+        logger.info("Mobiles province local data has published to redis, it costs {} ms", (System.currentTimeMillis() - startTime));
     }
 
 }

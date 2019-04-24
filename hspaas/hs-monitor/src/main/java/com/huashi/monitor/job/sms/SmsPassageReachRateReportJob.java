@@ -28,7 +28,7 @@ import com.huashi.sms.record.service.ISmsMtSubmitService;
 import com.huashi.sms.task.context.TaskContext;
 
 /**
- * TODO 监控短信回执率告警
+ * 监控短信回执率告警
  *
  * @author yangmeng
  * @version V1.0.0
@@ -58,7 +58,7 @@ public class SmsPassageReachRateReportJob extends AbstractJob {
     private static final String                 PASSAGE_REACH_RATE_TEMPLATE = "【华时科技】%s至%s %s，发送%d条，未成功%d条，成功率%.2f%%";
 
     /**
-     * TODO 获取需要发送内容
+     * 获取需要发送内容
      * 
      * @param startTime 开始时间
      * @param stopTime 截止时间
@@ -66,7 +66,7 @@ public class SmsPassageReachRateReportJob extends AbstractJob {
      * @param totalNum 总条量
      * @param failedNum 失败条数
      * @param reachRate 到达率
-     * @return
+     * @return 短信内容
      */
     private static String getSendContent(String startTime, String stopTime, String passageName, int totalNum,
                                          int failedNum, double reachRate) {
@@ -147,13 +147,14 @@ public class SmsPassageReachRateReportJob extends AbstractJob {
     }
 
     /**
-     * TODO 加入本次报告至REDIS中
+     * 加入本次报告至REDIS中
      * 
-     * @param passageId
-     * @param passageName
-     * @param successRate
-     * @param expectRate
-     * @param statTimeMillis
+     * @param passageId 通道ID
+     * @param passageName 通道名称
+     * @param successRate 成功率
+     * @param expectRate 预设成功率
+     * @param statTimeMillis 开始时间
+     * @param isSms 是否发送短信
      */
     private void pushReportToRedis(Long passageId, String passageName, double successRate, double expectRate,
                                    long statTimeMillis, boolean isSms) {

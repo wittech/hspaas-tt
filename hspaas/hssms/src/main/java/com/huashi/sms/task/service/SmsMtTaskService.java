@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.shaded.com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -66,7 +67,7 @@ import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.huashi.sms.template.service.ISmsTemplateService;
 
 /**
- * TODO 短信下行任务服务实现
+ * 短信下行任务服务实现
  *
  * @author zhengying
  * @version V1.0
@@ -83,14 +84,8 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     private IUserBalanceService        userBalanceService;
     @Autowired
     private SmsMtTaskMapper            taskMapper;
-    @Reference
-    private IUserPassageService        userPassageService;
     @Autowired
     private SmsMtTaskPacketsMapper     taskPacketsMapper;
-    @Reference
-    private IUserSmsConfigService      userSmsConfigService;
-    @Reference
-    private IPushConfigService         pushConfigService;
     @Autowired
     private IForbiddenWordsService     forbiddenWordsService;
     @Autowired
@@ -140,7 +135,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     // // rabbitTemplate如果为单例的话，那回调就是最后设置的内容
     // rabbitTemplate.setConfirmCallback(this);
     // }
-    private Logger                     logger = LoggerFactory.getLogger(getClass());
+    private final Logger               logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public BossPaginationVo<SmsMtTask> findPage(Map<String, Object> condition) {
@@ -171,9 +166,9 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 转换时间戳信息
+     * 转换时间戳信息
      *
-     * @param queryParams
+     * @param queryParams 查询参数
      */
     private void changeTimestampeParamsIfExists(Map<String, Object> queryParams) {
         String startDate = queryParams.get("startDate") == null ? "" : queryParams.get("startDate").toString();
@@ -192,7 +187,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     /**
      * 获取待处理的短信任务条数
      *
-     * @return
+     * @return 待处理的总个数
      */
     @Override
     public Integer getWaitSmsTaskCount() {
@@ -231,8 +226,6 @@ public class SmsMtTaskService implements ISmsMtTaskService {
             }
 
         }
-        provinceMap = null;
-        passageMap = null;
 
         return childList;
     }
@@ -269,7 +262,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     @Override
     public void save(SmsMtTask task) {
         if (task == null) {
-            logger.error("任务数据 [ " + JSON.toJSONString(task) + "] 为空，处理失败");
+            logger.error("任务数据为空，处理失败");
             return;
         }
 
@@ -361,10 +354,10 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 根据通道ID获取通道相关参数信息
+     * 根据通道ID获取通道相关参数信息
      *
-     * @param passageId
-     * @return
+     * @param passageId 通道ID
+     * @return 通道参数
      */
     private SmsPassageParameter getPassageParameter(int passageId) {
         SmsPassage passage = smsPassageService.findById(passageId);
@@ -382,10 +375,10 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 任务是否仅仅包含 '通道错误'
+     * 任务是否仅仅包含 '通道错误'
      *
-     * @param packets
-     * @return
+     * @param packets 子任务
+     * @return true,false
      */
     private boolean isOnlyContainPassageError(SmsMtTaskPackets packets) {
         if (StringUtils.isEmpty(packets.getForceActions())) {
@@ -567,10 +560,10 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 根据提交类型获取队列名称（批量/点对点/模板点对点）
+     * 根据提交类型获取队列名称（批量/点对点/模板点对点）
      *
-     * @param task
-     * @return
+     * @param task 主任务
+     * @return 队列名称
      */
     private String getQueueNameBySubmitType(SmsMtTask task) {
         if (TaskSubmitType.BATCH_MESSAGE.getCode() == task.getSubmitType()) {
@@ -578,7 +571,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
         }
 
         if (StringUtils.isEmpty(task.getContent())) {
-            throw new RuntimeException("点对点短信原报文数据为空，无法执行");
+            throw new IllegalArgumentException("点对点短信原报文数据为空，无法执行");
         }
 
         // 点对点报文内容解析
@@ -734,16 +727,16 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 根据任务执行异步并行任务
+     * 根据任务执行异步并行任务
      * 
-     * @param tasks
+     * @param tasks 主任务
      * @param status HANDLING_COMPLETE/REJECT
-     * @return
-     * @throws ExecutionException
-     * @throws InterruptedException
+     * @return 任务处理结果
+     * @throws ExecutionException 执行异常
+     * @throws InterruptedException 终端异常
      */
     private ResponseMessage asyncTask(List<SmsMtTask> tasks, PacketsApproveStatus status) throws InterruptedException,
-                                                                                         ExecutionException {
+                                                                                          ExecutionException {
         // 根据并行阈值分发任务数据
         List<List<SmsMtTask>> distributeTasks = smsMtTaskForkService.distributeTasks(tasks, status);
         if (CollectionUtils.isEmpty(distributeTasks)) {
@@ -772,10 +765,10 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 发送分包数据至网关队列
+     * 发送分包数据至网关队列
      * 
-     * @param packets
-     * @return
+     * @param packets 子任务
+     * @return 成功标记
      */
     private boolean sendPacketsToQueue(SmsMtTaskPackets packets) {
         if (packets == null) {
@@ -789,7 +782,7 @@ public class SmsMtTaskService implements ISmsMtTaskService {
             // 复制用户传递相关值
             smsMtTaskForkService.copyUserCustomProperties(task, packets);
 
-            smsMtSubmitService.sendToSubmitQueue(Arrays.asList(packets));
+            smsMtSubmitService.sendToSubmitQueue(Lists.newArrayList(packets));
 
             return true;
         } catch (Exception e) {
@@ -799,11 +792,11 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 根据短信内容和匹配模式查询可匹配的待处理任务信息
+     * 根据短信内容和匹配模式查询可匹配的待处理任务信息
      * 
-     * @param content
-     * @param isLikePattern
-     * @return
+     * @param content 发送内容
+     * @param isLikePattern 是否模糊匹配模式 true:是，false:否
+     * @return 拆分任务信息
      */
     private Map<String[], List<SmsMtTask>> findTasksByContent(String content, boolean isLikePattern) {
         if (StringUtils.isEmpty(content)) {
@@ -897,16 +890,17 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 短信内容是否匹配
+     * 短信内容是否匹配
      *
      * @param sourceContent 原短信内容（数据库）
      * @param targetContent 页面传递的短信内容
      * @param isLikePattern 是否为模糊匹配模式
-     * @return
+     * @return 匹配结果
      */
     private static boolean isContentMatched(String sourceContent, String targetContent, boolean isLikePattern) {
-        return isLikePattern ? StringUtils.isNotBlank(sourceContent) && sourceContent.contains(targetContent) : StringUtils.isNotBlank(sourceContent)
-                                                                                                                && sourceContent.equals(targetContent);
+        return isLikePattern ? StringUtils.isNotBlank(sourceContent)
+                               && sourceContent.contains(targetContent) : StringUtils.isNotBlank(sourceContent)
+                                                                          && sourceContent.equals(targetContent);
 
     }
 
@@ -963,12 +957,12 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 重新设置通道参数相关信息，状态等信息（切换新通道后重置最终任务发送的通道信息）
+     * 重新设置通道参数相关信息，状态等信息（切换新通道后重置最终任务发送的通道信息）
      *
-     * @param task
-     * @param packets
-     * @param passageParameter
-     * @return
+     * @param task 主任务
+     * @param packets 子任务
+     * @param passageParameter 通道参数
+     * @return 结果
      */
     private boolean resetFinalPassage(SmsMtTask task, SmsMtTaskPackets packets, SmsPassageParameter passageParameter) {
         try {
@@ -1003,11 +997,11 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     }
 
     /**
-     * TODO 检查任务是否执行中
+     * 检查任务是否执行中
      *
      * @param repeatGroupKey 执行中重复KEY组名
      * @param taskIds 任务IDS（可能为多个）
-     * @return
+     * @return 过滤结果
      */
     private List<String> filterTaskExecuting(String repeatGroupKey, String... taskIds) {
         // edit by 20180416 介于当前分布式zookeeper 经常超时，待查，而分布式还未上暂时切换为JVM的可重入锁
@@ -1040,8 +1034,8 @@ public class SmsMtTaskService implements ISmsMtTaskService {
     /**
      * 清除执行中KEY标识
      *
-     * @param repeatGroupKey
-     * @param taskIds
+     * @param repeatGroupKey 重复键
+     * @param taskIds 主任务ID集合
      */
     private void flushTaskDoingFlag(String repeatGroupKey, List<String> taskIds) {
         if (CollectionUtils.isEmpty(taskIds)) {

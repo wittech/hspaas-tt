@@ -2,6 +2,8 @@ package com.huashi.sms.config.cache.redis;
 
 import java.lang.reflect.Method;
 
+import com.huashi.sms.config.cache.redis.pubsub.SmsMessageTemplateListener;
+import com.huashi.sms.config.cache.redis.pubsub.SmsPassageAccessListener;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -16,17 +18,16 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import redis.clients.jedis.JedisPoolConfig;
 
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
-import com.huashi.sms.config.cache.redis.pubsub.SmsMessageTemplateListener;
 import com.huashi.sms.config.cache.redis.pubsub.SmsMobileBlacklistListener;
-import com.huashi.sms.config.cache.redis.pubsub.SmsPassageAccessListener;
 import com.huashi.sms.config.cache.redis.serializer.RedisObjectSerializer;
 
 @Configuration
@@ -153,57 +154,57 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 	
 	/**
 	 * 
-	   * TODO 黑名单数据变更广播通知监听配置
-	   * @return
+	   * 黑名单数据变更广播通知监听配置
+	   * @return 消息监听适配器
 	 */
 	@Bean
-    MessageListenerAdapter smsMobileBlacklistMessageListener() {
-        return new MessageListenerAdapter(new SmsMobileBlacklistListener(stringRedisTemplate()));
+    MessageListenerAdapter smsMobileBlacklistMessageListener(StringRedisTemplate stringRedisTemplate) {
+        return new SmsMobileBlacklistListener(stringRedisTemplate);
     }
-	
+
 	/**
-	 * 
-	   * TODO 短信模板变更广播通知监听配置
-	   * @return
+	 *
+	   * 短信模板变更广播通知监听配置
+	   * @return 短信模板监听器
 	 */
 	@Bean
     MessageListenerAdapter smsMessageTemplateMessageListener() {
-        return new MessageListenerAdapter(new SmsMessageTemplateListener());
+        return new SmsMessageTemplateListener();
     }
-	
+
 	/**
-     * 
-       * TODO 可用通道变更广播通知监听配置
-       * @return
+     *
+       * 可用通道变更广播通知监听配置
+       * @return 可用通道监听器
      */
     @Bean
     MessageListenerAdapter smsPassageAccessMessageListener() {
-        return new MessageListenerAdapter(new SmsPassageAccessListener());
+        return new SmsPassageAccessListener();
     }
 
     @Bean
-    RedisMessageListenerContainer redisContainer() {
+    RedisMessageListenerContainer redisContainer(StringRedisTemplate stringRedisTemplate) {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(jedisConnectionFactory());
-        container.addMessageListener(smsMobileBlacklistMessageListener(), mobileBlacklistTopic());
+        container.addMessageListener(smsMobileBlacklistMessageListener(stringRedisTemplate), mobileBlacklistTopic());
         container.addMessageListener(smsMessageTemplateMessageListener(), messageTemplateTopic());
         container.addMessageListener(smsPassageAccessMessageListener(), passageAccessTopic());
         return container;
     }
 
     @Bean
-    ChannelTopic mobileBlacklistTopic() {
-        return new ChannelTopic(SmsRedisConstant.BROADCAST_MOBILE_BLACKLIST_TOPIC);
+	Topic mobileBlacklistTopic() {
+        return new PatternTopic(SmsRedisConstant.BROADCAST_MOBILE_BLACKLIST_TOPIC);
     }
     
     @Bean
-    ChannelTopic messageTemplateTopic() {
-        return new ChannelTopic(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC);
+	Topic messageTemplateTopic() {
+        return new PatternTopic(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC);
     }
     
     @Bean
-    ChannelTopic passageAccessTopic() {
-        return new ChannelTopic(SmsRedisConstant.BROADCAST_PASSAGE_ACCESS_TOPIC);
+	Topic passageAccessTopic() {
+        return new PatternTopic(SmsRedisConstant.BROADCAST_PASSAGE_ACCESS_TOPIC);
     }
 
 }
