@@ -347,12 +347,10 @@ public class MmsMtSubmitService implements IMmsMtSubmitService {
     }
 
     @Override
-    public boolean declareNewSubmitMessageQueue(String protocol, String passageCode) {
+    public boolean declareNewSubmitMessageQueue(String passageCode) {
         String mqName = getSubmitMessageQueueName(passageCode);
         try {
-            rabbitMessageQueueManager.createQueue(mqName,
-                                                  mmsPassageService.isPassageBelongtoDirect(protocol, passageCode),
-                                                  mmsWaitSubmitListener);
+            rabbitMessageQueueManager.createQueue(mqName, false, mmsWaitSubmitListener);
             logger.info("RabbitMQ添加新队列：{} 成功", mqName);
             return true;
         } catch (Exception e) {

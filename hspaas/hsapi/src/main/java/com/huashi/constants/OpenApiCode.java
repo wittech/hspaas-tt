@@ -32,7 +32,7 @@ public class OpenApiCode {
         COMMON_REQUEST_IP_INVALID("H0004", "IP未报备"), COMMON_APPKEY_INVALID("H0005", "账户无效"),
         COMMON_APPKEY_NOT_AVAIABLE("H0006", "账户冻结或停用"), COMMON_AUTHENTICATION_FAILED("H0007", "账户鉴权失败"),
         COMMON_BALANCE_EXCEPTION("H0008", "账户计费异常"), COMMON_BALANCE_NOT_ENOUGH("H0009", "账户余额不足"),
-        COMMON_SERVER_EXCEPTION("H0100", "未知异常");
+        COMMON_BEYOND_MOBILE_THRESHOLD("H0010", "手机号码数量超限（1000个）"), COMMON_SERVER_EXCEPTION("H0100", "未知异常");
 
         private String code;
         private String message;
@@ -71,7 +71,7 @@ public class OpenApiCode {
 
     /**
      * 彩信API回执状态码
-     * 
+     *
      * @author zhengying
      * @version V1.0
      * @date 2019年3月15日 下午11:01:27
@@ -104,14 +104,15 @@ public class OpenApiCode {
 
     /**
      * 彩信API回执信息
-     * 
+     *
      * @author zhengying
      * @version V1.0
      * @date 2019年3月15日 下午10:59:38
      */
     public enum MmsApiCode {
         MMS_MODEL_BODY_RULE_NOT_MATCHED("M0001", "彩信模板信息不匹配"), MMS_MODEL_APPLY_FAILED("M0002", "彩信模板信息报备失败"),
-        MMS_MODEL_ID_UNDEFAINED("M0003", "彩信模板ID不可用"), MMS_CUSTOM_BODY_RULE_NOT_MATCHED("M0004", "彩信发送内容格式不匹配"), ;
+        MMS_MODEL_ID_UNDEFAINED("M0003", "彩信模板ID不可用"), MMS_CUSTOM_BODY_RULE_NOT_MATCHED("M0004", "彩信发送内容格式不匹配"),
+        MMS_BEYOND_BODY_SIZE( "M0005", "彩信内容大小超限");
 
         private String code;
         private String message;
@@ -233,7 +234,7 @@ public class OpenApiCode {
 
     /**
      * TODO 枚举信息转JSON格式输出
-     * 
+     *
      * @param code
      * @param message
      * @return

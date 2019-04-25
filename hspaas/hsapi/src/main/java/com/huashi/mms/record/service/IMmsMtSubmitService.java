@@ -10,7 +10,7 @@ import com.huashi.mms.task.domain.MmsMtTaskPackets;
 import com.huashi.mms.template.domain.MmsMessageTemplate;
 
 /**
- * TODO 下行彩信提交服务
+ * 下行彩信提交服务
  * 
  * @author zhengying
  * @version V1.0
@@ -19,18 +19,9 @@ import com.huashi.mms.template.domain.MmsMessageTemplate;
 public interface IMmsMtSubmitService {
 
     /**
-     * TODO 查询彩信发送记录(BOSS)
-     * 
-     * @param pageNum
-     * @param sid
-     * @param mobile
-     * @param content
-     * @param status
-     * @param appKey
-     * @param deliverStatus
-     * @param start
-     * @param end
-     * @return
+     * 查询彩信发送记录(BOSS)
+     * @param queryParams 条件参数
+     * @return 分页列表
      */
     BossPaginationVo<MmsMtMessageSubmit> findPage(Map<String, Object> queryParams);
 
@@ -49,7 +40,7 @@ public interface IMmsMtSubmitService {
                                               String currentPage, String sid);
 
     /**
-     * TODO 根据SID查询提交列表信息
+     * 根据SID查询提交列表信息
      * 
      * @param sid
      * @return
@@ -57,7 +48,7 @@ public interface IMmsMtSubmitService {
     List<MmsMtMessageSubmit> findBySid(long sid);
 
     /**
-     * TODO 保存
+     * 保存
      * 
      * @param submit
      * @return
@@ -65,7 +56,7 @@ public interface IMmsMtSubmitService {
     boolean save(MmsMtMessageSubmit submit);
 
     /**
-     * TODO 批量插入提交信息
+     * 批量插入提交信息
      * 
      * @param list
      * @return
@@ -73,7 +64,7 @@ public interface IMmsMtSubmitService {
     void batchInsertSubmit(List<MmsMtMessageSubmit> list);
 
     /**
-     * TODO 根据消息ID或手机号码获取待回执信息（已提交）
+     * 根据消息ID或手机号码获取待回执信息（已提交）
      * 
      * @param msgId 消息ID
      * @param mobile 手机号码
@@ -82,7 +73,7 @@ public interface IMmsMtSubmitService {
     MmsMtMessageSubmit getSubmitWaitReceipt(String msgId, String mobile);
 
     /**
-     * TODO 根据MO参数分析具体的userId和SID
+     * 根据MO参数分析具体的userId和SID
      * 
      * @param passageId 通道ID
      * @param msgId 回执消息ID
@@ -93,7 +84,7 @@ public interface IMmsMtSubmitService {
     MmsMtMessageSubmit getByMoMapping(Integer passageId, String msgId, String mobile, String spcode);
 
     /**
-     * TODO 根据消息ID和手机号码获取提交信息
+     * 根据消息ID和手机号码获取提交信息
      * 
      * @param msgId 消息ID
      * @param mobile 手机号码
@@ -102,7 +93,7 @@ public interface IMmsMtSubmitService {
     MmsMtMessageSubmit getByMsgidAndMobile(String msgId, String mobile);
 
     /**
-     * TODO 根据消息ID获取提交信息
+     * 根据消息ID获取提交信息
      * 
      * @param msgId 消息ID
      * @return
@@ -110,39 +101,38 @@ public interface IMmsMtSubmitService {
     MmsMtMessageSubmit getByMsgid(String msgId);
 
     /**
-     * TODO 异常彩信处理，如黑名单/驳回/超时，超速
+     * 异常彩信处理，如黑名单/驳回/超时，超速
      * 
-     * @param submit
-     * @return
+     * @param submits 提交数据集合
+     * @return true
      */
     boolean doSmsException(List<MmsMtMessageSubmit> submits);
 
     /**
-     * TODO 声明新的待提交队列
-     * 
-     * @param protocol 协议类型
-     * @param passageCode
-     * @return
+     * 声明新的待提交队列
+     *
+     * @param passageCode 通道代码
+     * @return true/false
      */
-    boolean declareNewSubmitMessageQueue(String protocol, String passageCode);
+    boolean declareNewSubmitMessageQueue(String passageCode);
 
     /**
-     * TODO 移除通道提交消息队列
+     * 移除通道提交消息队列
      * 
-     * @param passageCode
-     * @return
+     * @param passageCode 通道代码
+     * @return true/false
      */
     boolean removeSubmitMessageQueue(String passageCode);
 
     /**
-     * TODO 声明所有使用中通道队列(彩信提交队列)
+     * 声明所有使用中通道队列(彩信提交队列)
      * 
      * @return
      */
     boolean declareWaitSubmitMessageQueues();
 
     /**
-     * TODO 获取提交队列名称
+     * 获取提交队列名称
      * 
      * @param passageCode
      * @return
@@ -150,7 +140,7 @@ public interface IMmsMtSubmitService {
     String getSubmitMessageQueueName(String passageCode);
 
     /**
-     * TODO 发送数据到提交队列
+     * 发送数据到提交队列
      * 
      * @param packets
      * @return
@@ -158,7 +148,7 @@ public interface IMmsMtSubmitService {
     boolean sendToSubmitQueue(List<MmsMtTaskPackets> packets);
 
     /**
-     * TODO 获取告警彩信记录信息
+     * 获取告警彩信记录信息
      * 
      * @param passageId
      * @param startTime
@@ -168,7 +158,7 @@ public interface IMmsMtSubmitService {
     List<MmsMtMessageSubmit> getRecordListToMonitor(Long passageId, Long startTime, Long endTime);
 
     /**
-     * TODO 获取提交统计报告数据
+     * 获取提交统计报告数据
      * 
      * @param startTime 开始时间（毫秒值）
      * @param endTime 截止时间（毫秒值）
@@ -177,14 +167,14 @@ public interface IMmsMtSubmitService {
     List<Map<String, Object>> getSubmitStatReport(Long startTime, Long endTime);
 
     /**
-     * TODO 获取上一小时提交报告
+     * 获取上一小时提交报告
      * 
      * @return
      */
     List<Map<String, Object>> getLastHourSubmitReport();
 
     /**
-     * TODO 获取提交分省运营商统计信息
+     * 获取提交分省运营商统计信息
      * 
      * @param startTime
      * @param endTime
@@ -193,7 +183,7 @@ public interface IMmsMtSubmitService {
     List<Map<String, Object>> getSubmitCmcpReport(Long startTime, Long endTime);
 
     /**
-     * TODO 判断彩信是否需要推送，需要则设置推送信息
+     * 判断彩信是否需要推送，需要则设置推送信息
      * 
      * @param submits
      */

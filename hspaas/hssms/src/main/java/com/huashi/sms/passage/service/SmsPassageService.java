@@ -1,10 +1,6 @@
 package com.huashi.sms.passage.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
@@ -14,9 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,9 +123,8 @@ public class SmsPassageService implements ISmsPassageService {
      * 
      * @param passage 通道
      * @param provinceCodes 省份代码（半角分号分割）
-     * @param isModify 是否为修改模式
      */
-    private void bindPassageProvince(SmsPassage passage, String provinceCodes, boolean isModify) {
+    private void bindPassageProvince(SmsPassage passage, String provinceCodes) {
         if (StringUtils.isEmpty(provinceCodes)) {
             return;
         }
@@ -147,10 +139,6 @@ public class SmsPassageService implements ISmsPassageService {
         }
 
         if (CollectionUtils.isNotEmpty(passage.getProvinceList())) {
-            if (isModify) {
-                smsPassageProvinceMapper.deleteByPassageId(passage.getId());
-            }
-
             smsPassageProvinceMapper.batchInsert(passage.getProvinceList());
         }
     }
@@ -232,7 +220,7 @@ public class SmsPassageService implements ISmsPassageService {
 
             isQueueCreateFinished = bindPassageParameters(passage, false);
 
-            bindPassageProvince(passage, provinceCodes, false);
+            bindPassageProvince(passage, provinceCodes);
 
             isRedisPushFinished = pushToRedis(passage);
 
@@ -256,31 +244,28 @@ public class SmsPassageService implements ISmsPassageService {
      * 
      * @param parameter 通道参数
      * @param packetsSize 手机号码拆包大小
-     * @return 处理结果
      */
-    private boolean startProxyIfMatched(SmsPassageParameter parameter, Integer packetsSize) {
+    private void startProxyIfMatched(SmsPassageParameter parameter, Integer packetsSize) {
         try {
             if (parameter.getCallType() != PassageCallType.DATA_SEND.getCode()) {
-                return true;
+                return;
             }
 
             if (StringUtils.isEmpty(parameter.getProtocol())) {
-                return true;
+                return;
             }
 
             // 是否需要出发通道代理逻辑(目前主要针对CMPP,SGIP,SGMP等直连协议),通道未使用中不无加载,后续会延迟加载(发短信逻辑初始发现无代理会初始化相关代理)
             if (!smsProxyManageService.isProxyAvaiable(parameter.getPassageId())) {
-                return true;
+                return;
             }
 
             // 重新刷新代理信息
             parameter.setPacketsSize(packetsSize);
             smsProxyManageService.startProxy(parameter);
 
-            return true;
         } catch (Exception e) {
             logger.error("加载通道代理失败", e);
-            return false;
         }
     }
 
@@ -320,7 +305,7 @@ public class SmsPassageService implements ISmsPassageService {
             bindPassageParameters(passage, true);
 
             // 绑定省份通道关系
-            bindPassageProvince(passage, provinceCodes, false);
+            bindPassageProvince(passage, provinceCodes);
 
             // 更新可用通道信息
             smsPassageAccessService.updateByModifyPassage(passage.getId());

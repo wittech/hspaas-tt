@@ -153,10 +153,6 @@ public class SmsPassageAccessService implements ISmsPassageAccessService {
         return getMainKey(userId, callType) + MAP_KEY_SEPERATOR + getAssistKey(routeType, cmcp, provinceCode);
     }
 
-    private String getFullKey(String mainKey, String fieldKey) {
-        return mainKey + MAP_KEY_SEPERATOR + fieldKey;
-    }
-
     /**
      * 获取REDIS主KEY
      *
