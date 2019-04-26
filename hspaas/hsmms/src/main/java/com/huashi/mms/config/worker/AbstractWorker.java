@@ -248,7 +248,7 @@ public abstract class AbstractWorker<E> implements Runnable {
 
             try {
                 // 先休眠1毫秒，避免cpu占用过高
-                Thread.sleep(1L);
+                Thread.sleep(500L);
             } catch (InterruptedException e) {
             }
 

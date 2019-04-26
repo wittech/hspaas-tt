@@ -7,7 +7,6 @@ package com.huashi.common.settings.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -16,9 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
@@ -194,19 +190,20 @@ public class HostWhiteListService implements IHostWhiteListService {
 
     @Override
     public boolean ipAllowedPass(int userId, String ip) {
-        try {
-            Set<String> set = stringRedisTemplate.opsForSet().members(getKey(userId));
-
-            return CollectionUtils.isNotEmpty(set) && set.contains(ip);
-
-        } catch (Exception e) {
-            logger.warn("REDIS 操作用户服务器IP配置失败", e);
-        }
-
-        // int result = hostWhiteListMapper.selectByUserIdAndIp(userId, ip);
-        // if(result == 0) {
-        // logger.warn("用户IP 未报备，及时备案");
-        // }
+//        try {
+//            Set<String> set = stringRedisTemplate.opsForSet().members(getKey(userId));
+//            if(CollectionUtils.isNotEmpty(set) && set.contains(ip)) {
+//                return true;
+//            }
+//
+//        } catch (Exception e) {
+//            logger.warn("REDIS 操作用户服务器IP配置失败", e);
+//        }
+//
+//         int result = hostWhiteListMapper.selectByUserIdAndIp(userId, ip);
+//         if(result == 0) {
+//             logger.warn("用户IP 未报备，及时备案");
+//         }
 
         return true;
     }
@@ -236,19 +233,16 @@ public class HostWhiteListService implements IHostWhiteListService {
             return true;
         }
 
-        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+        List<Object> con = stringRedisTemplate.execute((connection) -> {
 
-            @Override
-            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
-                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
-                connection.openPipeline();
-                for (HostWhiteList hwl : list) {
-                    byte[] key = serializer.serialize(getKey(hwl.getUserId()));
-                    connection.sAdd(key, serializer.serialize(JSON.toJSONString(hwl)));
-                }
-
-                return connection.closePipeline();
+            RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+            connection.openPipeline();
+            for (HostWhiteList hwl : list) {
+                byte[] key = serializer.serialize(getKey(hwl.getUserId()));
+                connection.sAdd(key, serializer.serialize(JSON.toJSONString(hwl)));
             }
+
+            return connection.closePipeline();
 
         }, false, true);
 

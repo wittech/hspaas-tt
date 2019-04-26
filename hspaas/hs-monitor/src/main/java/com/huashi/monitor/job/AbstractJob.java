@@ -30,15 +30,13 @@ public abstract class AbstractJob implements SimpleJob {
             // shardingContext.getShardingItem(), shardingContext.getShardingParameter(),
             // shardingContext.getJobName(), shardingContext.getJobParameter()));
             long cost = System.currentTimeMillis() - startTime;
-            logger.info("[" + context.getShardingTotalCount() + "-" + context.getShardingParameter()
-                        + "] executing cost " + cost + " ms");
-
+            logger.info("It costs " + cost + " ms");
         }
 
     }
 
     protected String getJobDes(ShardingContext context) {
-        return getClass().getSimpleName() + ":" + context.getShardingTotalCount();
+        return context.getShardingTotalCount() + "";
     }
 
     public abstract void run(ShardingContext context);

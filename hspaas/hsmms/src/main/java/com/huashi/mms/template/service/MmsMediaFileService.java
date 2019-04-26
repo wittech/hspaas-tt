@@ -22,6 +22,11 @@ public class MmsMediaFileService {
      */
     private static final String FILE_EXTENSION_NAME_CHARACTOR = ".";
 
+    /**
+     * 文件名参数分隔符
+     */
+    private static final String FILE_NAME_PARAMS_CHARACTOR    = "?";
+
     @Autowired
     private AliyunOssStorage    aliyunOssStorage;
 
@@ -125,7 +130,13 @@ public class MmsMediaFileService {
             return null;
         }
 
-        return aliyunOssStorage.getUrl(name);
+        // 需要截取URL后面的授权参数，防止浏览器不识别（有些上家通道需要强校验扩展名）
+        String url = aliyunOssStorage.getUrl(name);
+        if (url.contains(FILE_NAME_PARAMS_CHARACTOR)) {
+            url = url.substring(0, url.indexOf(FILE_NAME_PARAMS_CHARACTOR));
+        }
+
+        return url;
     }
 
 }

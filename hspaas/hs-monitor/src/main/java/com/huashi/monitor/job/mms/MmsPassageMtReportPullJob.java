@@ -5,12 +5,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.huashi.common.util.DateUtil;
@@ -31,16 +26,19 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
  * @date 2017年6月6日 上午10:37:24
  */
 
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MmsPassageMtReportPullJob extends AbstractJob {
 
-    @Reference
     private IMmsMtDeliverService   mmsMtDeliverService;
-    @Reference
     private IMmsProviderService    mmsProviderService;
-    @Autowired
     private IPassageMonitorService passageMonitorService;
+    
+    public MmsPassageMtReportPullJob(IMmsMtDeliverService mmsMtDeliverService, IMmsProviderService mmsProviderService,
+                              IPassageMonitorService passageMonitorService) {
+        super();
+        this.mmsMtDeliverService = mmsMtDeliverService;
+        this.mmsProviderService = mmsProviderService;
+        this.passageMonitorService = passageMonitorService;
+    }
 
     @Override
     public void run(ShardingContext context) {

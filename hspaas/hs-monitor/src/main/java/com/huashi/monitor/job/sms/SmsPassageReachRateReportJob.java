@@ -6,10 +6,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
@@ -34,8 +31,6 @@ import com.huashi.sms.task.context.TaskContext;
  * @version V1.0.0
  * @date 2017年4月5日 下午9:34:08
  */
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SmsPassageReachRateReportJob extends AbstractJob {
 
     @Reference
@@ -47,15 +42,24 @@ public class SmsPassageReachRateReportJob extends AbstractJob {
     @Reference
     private ISmsPassageReachrateSettingsService smsPassageReachrateSettingsService;
 
+    public SmsPassageReachRateReportJob(ISmsMtSubmitService smsMtSubmitService, ISmsPassageService smsPassageService,
+                                        StringRedisTemplate stringRedisTemplate,
+                                        ISmsPassageReachrateSettingsService smsPassageReachrateSettingsService) {
+        this.smsMtSubmitService = smsMtSubmitService;
+        this.smsPassageService = smsPassageService;
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.smsPassageReachrateSettingsService = smsPassageReachrateSettingsService;
+    }
+
     /**
      * 停止状态
      */
-    private static final int                    STOP_STATUS                 = 2;
+    private static final int    STOP_STATUS                 = 2;
 
     /**
      * 通道到达率模板内容（用于告警发送）
      */
-    private static final String                 PASSAGE_REACH_RATE_TEMPLATE = "【华时科技】%s至%s %s，发送%d条，未成功%d条，成功率%.2f%%";
+    private static final String PASSAGE_REACH_RATE_TEMPLATE = "【华时科技】%s至%s %s，发送%d条，未成功%d条，成功率%.2f%%";
 
     /**
      * 获取需要发送内容

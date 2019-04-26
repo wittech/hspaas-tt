@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -171,35 +172,26 @@ public class SmsTemplateService implements ISmsTemplateService {
      */
     private void removeRedis(MessageTemplate template) {
         try {
-            stringRedisTemplate.execute((connection) -> {
-                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
-                connection.openPipeline();
 
-                byte[] key = serializer.serialize(getKey(template.getUserId()));
-                Set<byte[]> templates = connection.zRevRangeByScore(key, 0, 1000);
-                if (CollectionUtils.isEmpty(templates)) {
-                    logger.warn("redis中未找到短信模板 userId[" + template.getUserId() + "]信息");
-                    return null;
+            Set<String> set = stringRedisTemplate.opsForZSet().reverseRangeByScore(getKey(template.getUserId()), 0,
+                                                                                   1000);
+            if (CollectionUtils.isEmpty(set)) {
+                logger.warn("redis中未找到短信模板 userId[" + template.getUserId() + "]信息");
+                return;
+            }
+
+            for (String templateJson : set) {
+                MessageTemplate messageTemplate = JSON.parseObject(templateJson, MessageTemplate.class);
+                if (messageTemplate == null) {
+                    continue;
                 }
 
-                for (byte[] templateJson : templates) {
-                    MessageTemplate messageTemplate = JSON.parseObject(templateJson, MessageTemplate.class);
-                    if (messageTemplate == null) {
-                        continue;
-                    }
-
-                    if (template.getContent().equals(messageTemplate.getContent())) {
-                        connection.zRem(key, templateJson);
-                        // 发布订阅频道消息
-                        connection.publish(serializer.serialize(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC),
-                                           templateJson);
-                        break;
-                    }
+                if (template.getContent().equals(messageTemplate.getContent())) {
+                    stringRedisTemplate.opsForZSet().remove(getKey(template.getUserId()), templateJson);
+                    stringRedisTemplate.convertAndSend(SmsRedisConstant.BROADCAST_MESSAGE_TEMPLATE_TOPIC, templateJson);
+                    break;
                 }
-
-                return connection.closePipeline();
-
-            }, false, true);
+            }
 
         } catch (Exception e) {
             logger.warn("REDIS 短信模板移除失败", e);
@@ -244,8 +236,7 @@ public class SmsTemplateService implements ISmsTemplateService {
                                                + "] , 本次用户ID:[" + userId + "]");
         }
 
-        if (AppType.WEB.getCode() == template.getAppType()
-            && template.getStatus() != ApproveStatus.WAITING.getValue()) {
+        if (AppType.WEB.getCode() == template.getAppType() && template.getStatus() != ApproveStatus.WAITING.getValue()) {
             throw new IllegalArgumentException("用户模板[" + templateId + "]模板状态为非待审核状态[" + template.getStatus() + "]不能修改");
         }
 
@@ -439,34 +430,41 @@ public class SmsTemplateService implements ISmsTemplateService {
             template.setStatus(ApproveStatus.WAITING.getValue());
         }
 
-        List<MessageTemplate> list = new ArrayList<>();
-        for (String content : contents) {
-            MessageTemplate newTemplate = new MessageTemplate();
-            BeanUtils.copyProperties(template, newTemplate);
+        try {
+            List<MessageTemplate> list = new ArrayList<>();
+            for (String content : contents) {
+                MessageTemplate newTemplate = new MessageTemplate();
+                BeanUtils.copyProperties(template, newTemplate);
 
-            newTemplate.setContent(content);
-            newTemplate.setCreateTime(new Date());
-            newTemplate.setRegexValue(parseContent2Regex(content));
+                newTemplate.setContent(content);
+                newTemplate.setCreateTime(new Date());
+                newTemplate.setRegexValue(parseContent2Regex(content));
 
-            list.add(newTemplate);
-        }
+                int reulst = messageTemplateMapper.insertSelective(newTemplate);
+                if (reulst <= 0) {
+                    throw new RuntimeException("模板数据插入失败");
+                }
 
-        if (CollectionUtils.isEmpty(list)) {
-            logger.warn("No template data need to process by contents [" + StringUtils.join(contents) + "]");
+                list.add(newTemplate);
+            }
+
+            if (CollectionUtils.isEmpty(list)) {
+                logger.warn("No template data need to process by contents [" + StringUtils.join(contents) + "]");
+                return false;
+            }
+
+            if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
+                pushToRedis(template.getUserId(), list.toArray(new MessageTemplate[] {}));
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            logger.error("添加短信模板失败失败, {}", JSON.toJSONString(template), e);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return false;
         }
 
-        int result = messageTemplateMapper.batchInsert(list);
-        if (result <= 0) {
-            logger.error("Template contents[" + StringUtils.join(contents) + "] persist process failed");
-            return false;
-        }
-
-        if (template.getStatus() == ApproveStatus.SUCCESS.getValue()) {
-            pushToRedis(template.getUserId(), list.toArray(new MessageTemplate[] {}));
-        }
-
-        return true;
     }
 
     /**
@@ -547,20 +545,22 @@ public class SmsTemplateService implements ISmsTemplateService {
             return false;
         }
 
+        stringRedisTemplate.delete(stringRedisTemplate.keys(SmsRedisConstant.RED_USER_MESSAGE_TEMPLATE + "*"));
         List<Object> con = stringRedisTemplate.execute((connection) -> {
             RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
             connection.openPipeline();
 
             // 查询该用户编号下的所有模板信息
-            Set<byte[]> keys = connection.keys(serializer.serialize(SmsRedisConstant.RED_USER_MESSAGE_TEMPLATE + "*"));
-            if (CollectionUtils.isNotEmpty(keys)) {
-                connection.del(keys.toArray(new byte[][] {}));
-            }
+            // Set<byte[]> keys = connection.keys(serializer.serialize(SmsRedisConstant.RED_USER_MESSAGE_TEMPLATE +
+            // "*"));
+            // if (CollectionUtils.isNotEmpty(keys)) {
+            // connection.del(keys.toArray(new byte[][] {}));
+            // }
 
             for (MessageTemplate template : list) {
                 byte[] key = serializer.serialize(getKey(template.getUserId()));
 
-                connection.zAdd(key, template.getPriority().doubleValue(),JSON.toJSONBytes(template));
+                connection.zAdd(key, template.getPriority().doubleValue(), JSON.toJSONBytes(template));
             }
 
             return connection.closePipeline();

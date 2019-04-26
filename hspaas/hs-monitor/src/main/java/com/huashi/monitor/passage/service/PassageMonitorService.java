@@ -21,8 +21,12 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.huashi.constants.CommonContext.PassageCallType;
+import com.huashi.exchanger.service.IMmsProviderService;
+import com.huashi.exchanger.service.ISmsProviderService;
 import com.huashi.mms.passage.domain.MmsPassageAccess;
 import com.huashi.mms.passage.service.IMmsPassageAccessService;
+import com.huashi.mms.record.service.IMmsMoMessageService;
+import com.huashi.mms.record.service.IMmsMtDeliverService;
 import com.huashi.monitor.config.redis.MonitorRedisConstant;
 import com.huashi.monitor.constant.MonitorConstant;
 import com.huashi.monitor.job.ElasticJobManager;
@@ -37,6 +41,10 @@ import com.huashi.sms.passage.domain.SmsPassageAccess;
 import com.huashi.sms.passage.domain.SmsPassageReachrateSettings;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.passage.service.ISmsPassageReachrateSettingsService;
+import com.huashi.sms.passage.service.ISmsPassageService;
+import com.huashi.sms.record.service.ISmsMoMessageService;
+import com.huashi.sms.record.service.ISmsMtDeliverService;
+import com.huashi.sms.record.service.ISmsMtSubmitService;
 
 @Service
 public class PassageMonitorService implements IPassageMonitorService {
@@ -65,25 +73,30 @@ public class PassageMonitorService implements IPassageMonitorService {
      * 每秒钟间隔单位值
      */
     private static final int                    TIME_UNIT = 60;
-
-    @Autowired
-    private SmsPassageMtReportPullJob           smsPassageMtReportPullJob;
-    @Autowired
-    private SmsPassageMoReportPullJob           smsPassageMoReportPullJob;
-    @Autowired
-    private SmsPassageReachRateReportJob        smsPassageReachRateReportJob;
-
-    @Autowired
-    private MmsPassageMtReportPullJob           mmsPassageMtReportPullJob;
-    @Autowired
-    private MmsPassageMoReportPullJob           mmsPassageMoReportPullJob;
-
     @Reference(mock = "return null")
     private ISmsPassageAccessService            smsPassageAccessService;
     @Reference(mock = "return null")
     private IMmsPassageAccessService            mmsPassageAccessService;
     @Reference
     private ISmsPassageReachrateSettingsService smsPassageReachrateSettingsService;
+
+    @Reference
+    private ISmsMtSubmitService                 smsMtSubmitService;
+    @Reference
+    private ISmsPassageService                  smsPassageService;
+    @Reference
+    private ISmsMtDeliverService                smsMtDeliverService;
+    @Reference
+    private ISmsProviderService                 smsProviderService;
+    @Reference
+    private ISmsMoMessageService                smsMoMessageService;
+
+    @Reference
+    private IMmsMoMessageService                mmsMoMessageService;
+    @Reference
+    private IMmsProviderService                 mmsProviderService;
+    @Reference
+    private IMmsMtDeliverService                mmsMtDeliverService;
 
     private final Logger                        logger    = LoggerFactory.getLogger(getClass());
 
@@ -98,7 +111,8 @@ public class PassageMonitorService implements IPassageMonitorService {
         }
 
         for (SmsPassageAccess access : list) {
-            elasticJobManager.addJobScheduler(smsPassageMtReportPullJob, commonLevelPullCron,
+            elasticJobManager.addJobScheduler(new SmsPassageMtReportPullJob(smsMtDeliverService, smsProviderService,
+                                                                            this), commonLevelPullCron,
                                               commonLevelPullShardingCount, commonLevelPullShardingItemParameters,
                                               JSON.toJSONString(access));
         }
@@ -115,8 +129,10 @@ public class PassageMonitorService implements IPassageMonitorService {
         }
 
         for (SmsPassageAccess access : list) {
-            elasticJobManager.addJobScheduler(smsPassageMoReportPullJob, lowLevelPullCron, lowLevelPullShardingCount,
-                                              lowLevelPullShardingItemParameters, JSON.toJSONString(access));
+            elasticJobManager.addJobScheduler(new SmsPassageMoReportPullJob(smsMoMessageService, smsProviderService,
+                                                                            this), lowLevelPullCron,
+                                              lowLevelPullShardingCount, lowLevelPullShardingItemParameters,
+                                              JSON.toJSONString(access));
         }
     }
 
@@ -131,7 +147,8 @@ public class PassageMonitorService implements IPassageMonitorService {
         }
 
         for (MmsPassageAccess access : list) {
-            elasticJobManager.addJobScheduler(mmsPassageMtReportPullJob, commonLevelPullCron,
+            elasticJobManager.addJobScheduler(new MmsPassageMtReportPullJob(mmsMtDeliverService, mmsProviderService,
+                                                                            this), commonLevelPullCron,
                                               commonLevelPullShardingCount, commonLevelPullShardingItemParameters,
                                               JSON.toJSONString(access));
         }
@@ -148,22 +165,30 @@ public class PassageMonitorService implements IPassageMonitorService {
         }
 
         for (MmsPassageAccess access : list) {
-            elasticJobManager.addJobScheduler(mmsPassageMoReportPullJob, lowLevelPullCron, lowLevelPullShardingCount,
-                                              lowLevelPullShardingItemParameters, JSON.toJSONString(access));
+            elasticJobManager.addJobScheduler(new MmsPassageMoReportPullJob(mmsMoMessageService, mmsProviderService,
+                                                                            this), lowLevelPullCron,
+                                              lowLevelPullShardingCount, lowLevelPullShardingItemParameters,
+                                              JSON.toJSONString(access));
         }
     }
 
     private void doSmsPassageMonitorPulling() {
         try {
-            StringBuilder passage = new StringBuilder();
             List<SmsPassageReachrateSettings> list = smsPassageReachrateSettingsService.getByUseable();
             for (SmsPassageReachrateSettings model : list) {
-                elasticJobManager.addJobScheduler(smsPassageReachRateReportJob, secondsToCron(model.getInterval()),
-                                                  lowLevelPullShardingCount, lowLevelPullShardingItemParameters,
-                                                  model.getId().toString());
+//                String cron = secondsToCron(model.getInterval());
+
+                elasticJobManager.addJobScheduler(new SmsPassageReachRateReportJob(smsMtSubmitService,
+                                                                                   smsPassageService,
+                                                                                   stringRedisTemplate,
+                                                                                   smsPassageReachrateSettingsService),
+                                                                                   lowLevelPullCron, lowLevelPullShardingCount,
+                                                  lowLevelPullShardingItemParameters, model.getId().toString());
+
+                logger.info("通道 [" + model.getPassageId() + "] 扫描[" + lowLevelPullCron + "] 到达率检测已开启");
+
             }
 
-            logger.info("通道回执率监控已开启：{}", passage.toString());
         } catch (Exception e) {
             logger.info("通道回执率监控启动失败：{}", e);
         }
@@ -316,9 +341,15 @@ public class PassageMonitorService implements IPassageMonitorService {
     @Override
     public boolean addSmsPassageMonitor(SmsPassageReachrateSettings model) {
         try {
-            elasticJobManager.addJobScheduler(smsPassageReachRateReportJob, secondsToCron(model.getInterval()),
-                                              lowLevelPullShardingCount, lowLevelPullShardingItemParameters,
+
+//            String cron = secondsToCron(model.getInterval());
+            elasticJobManager.addJobScheduler(new SmsPassageReachRateReportJob(smsMtSubmitService, smsPassageService,
+                                                                               stringRedisTemplate,
+                                                                               smsPassageReachrateSettingsService),
+                                                                               lowLevelPullCron, lowLevelPullShardingCount, lowLevelPullShardingItemParameters,
                                               model.getId().toString());
+
+            logger.info("通道 [" + model.getPassageId() + "] 扫描[" + lowLevelPullCron + "] 到达率检测已开启");
 
             return true;
         } catch (Exception e) {
@@ -414,6 +445,10 @@ public class PassageMonitorService implements IPassageMonitorService {
             return lowLevelPullCron;
         }
 
+        if (senconds < TIME_UNIT) {
+            return String.format("0/%d * * * * ?", senconds);
+        }
+
         // 目前页面配置的均为分钟且不超过60分钟
         return minuteCron(senconds / TIME_UNIT);
     }
@@ -421,10 +456,10 @@ public class PassageMonitorService implements IPassageMonitorService {
     private static String minuteCron(long minutes) {
 
         if (minutes / TIME_UNIT > (TIME_UNIT)) {
-            return String.format("* * */%d * * ?", minutes);
+            return String.format("* * 0/%d * * ?", minutes);
         }
 
-        return String.format("* */%d * * * ?", minutes);
+        return String.format("* 0/%d * * * ?", minutes);
     }
 
 }
