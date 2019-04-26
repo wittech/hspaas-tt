@@ -263,7 +263,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
 
         String ss = "{\"sign\":\"97fc0679fba5c83c0f14b407845af1c9\",\"report\":[{\\\"sendId\\\":155628123114624242,\\\"mobile\\\":\\\"18368031231\\\",\\\"reportStatus\\\":\\\"DELIVRD\\\",\\\"status\\\":2,\\\"sendTime\\\":\\\"2019-04-26 20:20:42\\\"}]}";
 
-        ss = ss.replace("[", "\"[").replace("]", "]\"");
+        ss = ss.replace("[", "'[").replace("]", "]'");
         
         System.out.println(ss);
 
