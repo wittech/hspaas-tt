@@ -1,6 +1,10 @@
 package com.huashi.mms.passage.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -30,6 +34,7 @@ import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.constants.CommonContext.ProtocolType;
 import com.huashi.constants.OpenApiCode;
+import com.huashi.mms.config.cache.redis.constant.MmsRedisConstant;
 import com.huashi.mms.passage.dao.MmsPassageMapper;
 import com.huashi.mms.passage.dao.MmsPassageParameterMapper;
 import com.huashi.mms.passage.dao.MmsPassageProvinceMapper;
@@ -150,7 +155,6 @@ public class MmsPassageService implements IMmsPassageService {
             return false;
         }
 
-        String passageSendProtocol = null;
         for (MmsPassageParameter parameter : passage.getParameterList()) {
             parameter.setPassageId(passage.getId());
             parameter.setCreateTime(new Date());
@@ -167,7 +171,7 @@ public class MmsPassageService implements IMmsPassageService {
 
         if (rows > 0) {
             // add by zhengying 20170319 每个通道单独分开 提交队列
-            return mmsMtSubmitService.declareNewSubmitMessageQueue(passageSendProtocol, passage.getCode());
+            return mmsMtSubmitService.declareNewSubmitMessageQueue(passage.getCode());
         }
 
         return false;
@@ -182,7 +186,7 @@ public class MmsPassageService implements IMmsPassageService {
      */
     private void release(MmsPassage passage, boolean isQueueCreateFinished, boolean isRedisPushFinished) {
         if (isQueueCreateFinished) {
-            smsMtSubmitService.removeSubmitMessageQueue(passage.getCode().trim());
+            mmsMtSubmitService.removeSubmitMessageQueue(passage.getCode().trim());
         }
 
         if (isRedisPushFinished) {
@@ -192,7 +196,7 @@ public class MmsPassageService implements IMmsPassageService {
 
     @Override
     @Transactional
-    public Map<String, Object> create(MmsPassage passage, String provinceCodes) {
+    public Map<String, Object> add(MmsPassage passage, String provinceCodes) {
         boolean isQueueCreateFinished = false;
         boolean isRedisPushFinished = false;
         try {
@@ -238,7 +242,7 @@ public class MmsPassageService implements IMmsPassageService {
 
         passage.setStatus(originPassage.getStatus());
         passage.setCreateTime(originPassage.getCreateTime());
-        passage.setModifyTime(new Date());
+        passage.setUpdateTime(new Date());
 
         // 更新通道信息
         return mmsPassageMapper.updateByPrimaryKey(passage) > 0;
@@ -322,7 +326,7 @@ public class MmsPassageService implements IMmsPassageService {
                 throw new RuntimeException("删除可用通道失败");
             }
 
-            smsMtSubmitService.removeSubmitMessageQueue(passage.getCode());
+            mmsMtSubmitService.removeSubmitMessageQueue(passage.getCode());
 
             return true;
         } catch (Exception e) {
@@ -384,7 +388,7 @@ public class MmsPassageService implements IMmsPassageService {
     @Override
     public List<MmsPassage> findAll() {
         try {
-            Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(SmsRedisConstant.RED_SMS_PASSAGE);
+            Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(MmsRedisConstant.RED_MMS_PASSAGE);
             if (MapUtils.isNotEmpty(map)) {
                 List<MmsPassage> passages = new ArrayList<>();
 
@@ -410,7 +414,7 @@ public class MmsPassageService implements IMmsPassageService {
     public MmsPassage findById(int id) {
         MmsPassage mmsPassage = null;
         try {
-            Object obj = stringRedisTemplate.opsForHash().get(SmsRedisConstant.RED_SMS_PASSAGE, id + "");
+            Object obj = stringRedisTemplate.opsForHash().get(MmsRedisConstant.RED_MMS_PASSAGE, id + "");
             if (obj != null) {
                 mmsPassage = JSON.parseObject(obj.toString(), MmsPassage.class);
             }
@@ -496,7 +500,7 @@ public class MmsPassageService implements IMmsPassageService {
             connection.openPipeline();
             for (MmsPassage mmsPassage : list) {
 
-                byte[] mainKey = serializer.serialize(SmsRedisConstant.RED_SMS_PASSAGE);
+                byte[] mainKey = serializer.serialize(MmsRedisConstant.RED_MMS_PASSAGE);
                 byte[] assistKey = serializer.serialize(mmsPassage.getId().toString());
 
                 connection.hSet(mainKey, assistKey, serializer.serialize(JSON.toJSONString(mmsPassage)));
@@ -520,7 +524,7 @@ public class MmsPassageService implements IMmsPassageService {
 
     private boolean pushToRedis(MmsPassage mmsPassage) {
         try {
-            stringRedisTemplate.opsForHash().put(SmsRedisConstant.RED_SMS_PASSAGE, mmsPassage.getId() + "",
+            stringRedisTemplate.opsForHash().put(MmsRedisConstant.RED_MMS_PASSAGE, mmsPassage.getId() + "",
                     JSON.toJSONString(mmsPassage));
             return true;
         } catch (Exception e) {
@@ -531,7 +535,7 @@ public class MmsPassageService implements IMmsPassageService {
 
     private void removeFromRedis(Integer passageId) {
         try {
-            stringRedisTemplate.opsForHash().delete(SmsRedisConstant.RED_SMS_PASSAGE, passageId + "");
+            stringRedisTemplate.opsForHash().delete(MmsRedisConstant.RED_MMS_PASSAGE, passageId + "");
         } catch (Exception e) {
             logger.warn("REDIS 删除短信通道[" + passageId + "]数据失败", e);
         }
@@ -548,7 +552,7 @@ public class MmsPassageService implements IMmsPassageService {
             MmsPassage mmsPassage = findById(passageId);
             if (mmsPassage != null) {
                 mmsPassage.setStatus(status);
-                stringRedisTemplate.opsForHash().put(SmsRedisConstant.RED_SMS_PASSAGE, passageId + "",
+                stringRedisTemplate.opsForHash().put(MmsRedisConstant.RED_MMS_PASSAGE, passageId + "",
                         JSON.toJSONString(mmsPassage));
             }
 
@@ -559,7 +563,7 @@ public class MmsPassageService implements IMmsPassageService {
 
     @Override
     @Transactional
-    public boolean doMonitorSmsSend(String mobile, String content) {
+    public boolean doMonitorMmsSend(String mobile, String content) {
         SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.SMS_ALARM_USER.name(),
                 "user_id");
         if (systemConfig == null) {
@@ -599,61 +603,6 @@ public class MmsPassageService implements IMmsPassageService {
     }
 
     @Override
-    @Transactional
-    public boolean doTestPassage(Integer passageId, String mobile, String content) {
-        SystemConfig systemConfig = systemConfigService.findByTypeAndKey(SystemConfigType.PASSAGE_TEST_USER.name(),
-                SettingsContext.USER_ID_KEY_NAME);
-        if (systemConfig == null) {
-            logger.error("通道测试用户未配置，请于系统配置表进行配置");
-            return false;
-        }
-
-        String userId = systemConfig.getAttrValue();
-        if (StringUtils.isEmpty(userId)) {
-            logger.error("通道测试用户数据为空，请配置");
-            return false;
-        }
-
-        try {
-            Integer passageGroupId = userPassageService.getByUserIdAndType(Integer.parseInt(userId),
-                    PlatformType.SEND_MESSAGE_SERVICE.getCode());
-            if (passageGroupId == null) {
-                logger.error("通道测试用户未配置短信通道组信息");
-                return false;
-            }
-
-            boolean result = passageGroupService.doChangeGroupPassage(passageGroupId, passageId);
-            if (!result) {
-                logger.error("通道组ID：{}，切换通道ID：{} 失败", passageGroupId, passageId);
-                return false;
-            }
-
-            // 更新通道组下 的可用通道相关
-            result = mmsPassageAccessService.updateByModifyPassageGroup(passageGroupId);
-            if (!result) {
-                logger.error("通道组ID：{}，切换可用通道失败", passageGroupId);
-                return false;
-            }
-
-            // 根据用户ID获取开发者相关信息
-            UserDeveloper developer = userDeveloperService.getByUserId(Integer.parseInt(userId));
-            if (developer == null) {
-                logger.error("用户ID：{}，开发者信息为空", userId);
-                return false;
-            }
-
-            // 调用发送短信接口
-            SmsResponse response = messageSendService.sendCustomMessage(developer.getAppKey(), developer.getAppSecret(),
-                    mobile, content);
-            return OpenApiCode.SUCCESS.equals(response.getCode());
-        } catch (Exception e) {
-            logger.error("通道测试逻辑失败", e);
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return false;
-        }
-    }
-
-    @Override
     public List<String> findPassageCodes() {
         return mmsPassageMapper.selectAvaiableCodes();
     }
@@ -675,30 +624,6 @@ public class MmsPassageService implements IMmsPassageService {
         }
 
         return ProtocolType.isBelongtoDirect(parameter.getProtocol());
-    }
-
-    @Override
-    public boolean kill(int id) {
-        try {
-            // 是否需要出发通道代理逻辑(目前主要针对CMPP,SGIP,SGMP等直连协议)
-            if (smsProxyManageService.isProxyAvaiable(id)) {
-                if (!smsProxyManageService.stopProxy(id)) {
-                    logger.error("通道 [" + id + "] 断开连接失败");
-                    return false;
-                }
-            } else {
-                logger.info("通道 [" + id + "] 连接不存在，忽略断开连接操作");
-                return true;
-            }
-
-            logger.info("通道 [" + id + "] 断开连接成功");
-            return true;
-
-        } catch (Exception e) {
-            logger.error("通道 [" + id + "] 断开连接操作失败", e);
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return false;
-        }
     }
 
 }

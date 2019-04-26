@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +103,8 @@ public class ParameterUtil {
                     }
                     readLen += readLengthThisTime;
                 }
+                
+                
 
                 // 自定义参数包名称，后台exchanger 反解析， 默认字符编码UTF-8
                 jsonObject.put(ParameterFilterContext.PARAMETER_NAME_IN_STREAM,
@@ -172,5 +175,12 @@ public class ParameterUtil {
             e.printStackTrace();
         }
         return parameters;
+    }
+    
+    public static void main(String[] args) {
+        String ss = "{\"sign\":\"aebc697c69489de76c883a98d9f2daae\",\"report\":\"[{\\\"sendId\\\":155627935914615543,\\\"mobile\\\":\\\"18368031231\\\",\\\"reportStatus\\\":\\\"DELIVRD\\\",\\\"status\\\":2,\\\"sendTime\\\":\\\"2019-04-26 19:49:29\\\"}]\"}";
+        
+        System.out.println(StringEscapeUtils.unescapeJava(ss));
+        
     }
 }

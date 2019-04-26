@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
 import com.huashi.developer.annotation.ValidateField;
+import com.huashi.developer.constant.PassportConstant;
 import com.huashi.developer.exception.ValidateException;
 
 /**
@@ -25,7 +26,7 @@ import com.huashi.developer.exception.ValidateException;
  */
 public class Validator {
 
-    protected final Logger      logger                = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * TODO 验证参数信息并赋值给object
@@ -129,6 +130,12 @@ public class Validator {
         // return false;
         // }
         return true;
+    }
+
+    protected void isBeyondMobileSize(int mobiles) throws ValidateException {
+        if (mobiles > PassportConstant.MAX_REQUEST_MOBILE_SIZE) {
+            throw new ValidateException(CommonApiCode.COMMON_BEYOND_MOBILE_THRESHOLD);
+        }
     }
 
 }

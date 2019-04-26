@@ -28,9 +28,9 @@ import com.huashi.developer.validator.Validator;
 public class SmsP2PValidator extends Validator {
 
     @Autowired
-    private AuthorizationValidator   passportValidator;
+    private AuthorizationValidator passportValidator;
     @Reference
-    private IUserBalanceService userBalanceService;
+    private IUserBalanceService    userBalanceService;
 
     /**
      * TODO 用户参数完整性校验

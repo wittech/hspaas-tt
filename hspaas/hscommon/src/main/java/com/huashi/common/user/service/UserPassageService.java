@@ -10,9 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
@@ -233,24 +230,21 @@ public class UserPassageService implements IUserPassageService {
             return false;
         }
 
-        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+        stringRedisTemplate.execute((connection) -> {
 
-            @Override
-            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
-                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
-                connection.openPipeline();
-                for (UserPassage userPassage : list) {
-                    byte[] key = serializer.serialize(getKey(userPassage.getUserId(), userPassage.getType()));
+            RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+            connection.openPipeline();
+            for (UserPassage userPassage : list) {
+                byte[] key = serializer.serialize(getKey(userPassage.getUserId(), userPassage.getType()));
 
-                    connection.set(key, serializer.serialize(JSON.toJSONString(userPassage)));
-                }
-
-                return connection.closePipeline();
+                connection.set(key, serializer.serialize(JSON.toJSONString(userPassage)));
             }
+
+            return connection.closePipeline();
 
         }, false, true);
 
-        return CollectionUtils.isNotEmpty(con);
+        return true;
     }
 
 }

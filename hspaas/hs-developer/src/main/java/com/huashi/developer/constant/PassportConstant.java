@@ -30,6 +30,11 @@ public class PassportConstant {
     public static final int    DEFAULT_EXPIRE_TIMESTAMP_MILLISECOND = 30 * 1000;
 
     /**
+     * 请求最大手机号码数量
+     */
+    public static final int    MAX_REQUEST_MOBILE_SIZE              = 1000;
+
+    /**
      * TODO 短信节点常量定义
      * 
      * @author zhengying

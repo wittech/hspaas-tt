@@ -1,7 +1,6 @@
 package com.huashi.sms.task.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,12 +33,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.huashi.common.settings.domain.Province;
 import com.huashi.common.settings.service.IProvinceService;
-import com.huashi.common.settings.service.IPushConfigService;
 import com.huashi.common.user.model.P2pBalanceResponse;
 import com.huashi.common.user.service.IUserBalanceService;
-import com.huashi.common.user.service.IUserPassageService;
 import com.huashi.common.user.service.IUserService;
-import com.huashi.common.user.service.IUserSmsConfigService;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.util.IdGenerator;
 import com.huashi.common.vo.BossPaginationVo;

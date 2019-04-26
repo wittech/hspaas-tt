@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
@@ -51,6 +52,8 @@ public class MmsSendByModelValidator extends Validator {
 
         // 校验模板ID信息
         checkModelIdIsAvaiable(mmsModelSendRequest);
+        
+        isBeyondMobileSize(mmsModelSendRequest.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length);
 
         return mmsModelSendRequest;
     }

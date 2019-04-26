@@ -1,6 +1,13 @@
 package com.huashi.mms.passage.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
@@ -138,10 +145,6 @@ public class MmsPassageAccessService implements IMmsPassageAccessService {
      */
     private String getFullKey(Integer userId, Integer callType, Integer routeType, Integer cmcp, Integer provinceCode) {
         return getMainKey(userId, callType) + MAP_KEY_SEPERATOR + getAssistKey(routeType, cmcp, provinceCode);
-    }
-
-    private String getFullKey(String mainKey, String fieldKey) {
-        return mainKey + MAP_KEY_SEPERATOR + fieldKey;
     }
 
     /**

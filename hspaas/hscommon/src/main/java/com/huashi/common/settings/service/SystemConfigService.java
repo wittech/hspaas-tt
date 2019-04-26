@@ -189,7 +189,7 @@ public class SystemConfigService implements ISystemConfigService {
             stringRedisTemplate.opsForValue().set(key, value);
             return true;
         } catch (Exception e) {
-            logger.error("黑名单黑词");
+            logger.error("REDIS黑名单黑词[" + value + "]加载失败", e);
             return false;
         }
     }

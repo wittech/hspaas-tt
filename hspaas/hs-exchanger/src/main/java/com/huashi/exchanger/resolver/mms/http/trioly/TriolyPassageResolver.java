@@ -50,7 +50,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
 
             // 转换参数，并调用网关接口，接收返回结果s
             String result = HttpClientManager.post(parameter.getUrl(),
-                                                  sendRequest(tparameter, modelId, mobile, extNumber));
+                                                   sendRequest(tparameter, modelId, mobile, extNumber));
 
             // 解析返回结果并返回
             return sendResponse(result, parameter.getSuccessCode());
@@ -88,7 +88,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
 
         try {
             sign = URLEncoder.encode(sign, DEFAULT_ENCODING);
-            
+
             logger.info("================" + sign);
         } catch (UnsupportedEncodingException e) {
             logger.error("Signature generate failed", e);
@@ -167,7 +167,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
 
         return JSON.toJSONString(params);
     }
-    
+
     /**
      * TODO 模板返回值解析
      * 
@@ -176,7 +176,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
      * @return
      */
     private ProviderModelResponse modelResponse(String result, String successCode) {
-//        {"code":0,"msg":"\u521b\u5efa\u6210\u529f","rets":{"modeId":"1263745"}}
+        // {"code":0,"msg":"\u521b\u5efa\u6210\u529f","rets":{"modeId":"1263745"}}
         if (StringUtils.isEmpty(result)) {
             return null;
         }
@@ -257,13 +257,18 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
         }
         return list;
     }
-    
+
     public static void main(String[] args) {
         TriolyPassageResolver r = new TriolyPassageResolver();
-        System.out.println(r.mtDeliver("{\"sign\":\"ac2c8f270e5a426304583db9512b8739\",\"report\":[{\"sendId\":155519638616792840,\"mobile\":\"18368031231\",\"reportStatus\":\"DELIVRD\",\"status\":2,\"sendTime\":\"2019-04-14 06:59:56\"}]}", "0"));
+
+        String ss = "{\"sign\":\"97fc0679fba5c83c0f14b407845af1c9\",\"report\":[{\\\"sendId\\\":155628123114624242,\\\"mobile\\\":\\\"18368031231\\\",\\\"reportStatus\\\":\\\"DELIVRD\\\",\\\"status\\\":2,\\\"sendTime\\\":\\\"2019-04-26 20:20:42\\\"}]}";
+
+        ss = ss.replace("[", "\"[").replace("]", "]\"");
         
-        r.modelResponse("{\"code\":0,\"msg\":\"\\u521b\\u5efa\\u6210\\u529f\",\"rets\":{\"modeId\":\"1263745\"}}", "0");
-        
+        System.out.println(ss);
+
+        System.out.println(JSON.toJSONString(r.mtDeliver(ss, "0")));
+
     }
 
     @Override
@@ -275,23 +280,25 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
                 return null;
             }
             
-            report = report.replace("\"[", "[").replace("]\"", "]");
-            
+            // 针对回执的数据携带反斜杠转移符处理后的数据， 数组'[]'无法转移，需要单独替换
+            report = report.replace("[", "\"[").replace("]", "]\"");
+
             JSONObject jsonData = JSON.parseObject(report);
-            if(MapUtils.isEmpty(jsonData)) {
+            if (MapUtils.isEmpty(jsonData)) {
                 return null;
             }
-            
+
             Object reportData = jsonData.get("report");
-            if(reportData == null) {
+            if (reportData == null) {
                 return null;
             }
-            
 
             List<MmsMtMessageDeliver> list = new ArrayList<>();
-            List<JSONObject> result = JSONObject.parseObject(reportData.toString(), new TypeReference<List<JSONObject>>() {
-            });
+            List<JSONObject> result = JSONObject.parseObject(reportData.toString(),
+                                                             new TypeReference<List<JSONObject>>() {
+                                                             });
             for (JSONObject jsonobj : result) {
+
                 String msgId = jsonobj.getString("sendId");
                 String mobile = jsonobj.getString("mobile");
                 String status = jsonobj.getString("status");
@@ -326,22 +333,23 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
             if (StringUtils.isEmpty(report)) {
                 return null;
             }
-            
-            report = report.replace("\"[", "[").replace("]\"", "]");
-            
+
+            report = report.replace("[", "\"[").replace("]", "]\"");
+
             JSONObject jsonData = JSON.parseObject(report);
-            if(MapUtils.isEmpty(jsonData)) {
+            if (MapUtils.isEmpty(jsonData)) {
                 return null;
             }
-            
+
             Object reportData = jsonData.get("report");
-            if(reportData == null) {
+            if (reportData == null) {
                 return null;
             }
 
             List<MmsMoMessageReceive> list = new ArrayList<>();
-            List<JSONObject> result = JSONObject.parseObject(reportData.toString(), new TypeReference<List<JSONObject>>() {
-            });
+            List<JSONObject> result = JSONObject.parseObject(reportData.toString(),
+                                                             new TypeReference<List<JSONObject>>() {
+                                                             });
             for (JSONObject jsonobj : result) {
                 MmsMoMessageReceive response = new MmsMoMessageReceive();
                 String msgId = jsonobj.getString("sendId");

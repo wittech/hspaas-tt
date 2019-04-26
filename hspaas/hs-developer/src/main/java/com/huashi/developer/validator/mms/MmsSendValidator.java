@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.huashi.common.third.model.MobileCatagory;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.constants.OpenApiCode.CommonApiCode;
@@ -50,6 +51,8 @@ public class MmsSendValidator extends Validator {
 
         // 校验用户短信余额是否满足
         checkBalanceAvaiable(mmsCustomContentSendRequest, passportModel);
+
+        isBeyondMobileSize(mmsCustomContentSendRequest.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length);
 
         // 校验自定义内容发送模板规则是否符合
         checkCustomBodyRule(mmsCustomContentSendRequest);

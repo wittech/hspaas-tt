@@ -15,9 +15,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
@@ -539,19 +536,16 @@ public class UserService implements IUserService {
             return false;
         }
 
-        List<Object> con = stringRedisTemplate.execute(new RedisCallback<List<Object>>() {
+        List<Object> con = stringRedisTemplate.execute((connection) -> {
 
-            @Override
-            public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
-                RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
-                connection.openPipeline();
-                for (UserModel user : list) {
-                    byte[] key = serializer.serialize(getKey(user.getUserId()));
-                    connection.set(key, serializer.serialize(JSON.toJSONString(user)));
-                }
-
-                return connection.closePipeline();
+            RedisSerializer<String> serializer = stringRedisTemplate.getStringSerializer();
+            connection.openPipeline();
+            for (UserModel user : list) {
+                byte[] key = serializer.serialize(getKey(user.getUserId()));
+                connection.set(key, serializer.serialize(JSON.toJSONString(user)));
             }
+
+            return connection.closePipeline();
 
         }, false, true);
 
