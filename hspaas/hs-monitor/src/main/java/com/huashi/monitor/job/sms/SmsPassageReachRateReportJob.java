@@ -3,12 +3,8 @@ package com.huashi.monitor.job.sms;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
-
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.huashi.common.util.DateUtil;
@@ -17,7 +13,6 @@ import com.huashi.monitor.job.AbstractJob;
 import com.huashi.monitor.passage.model.PassageReachRateReport;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.domain.SmsPassageReachrateSettings;
-import com.huashi.sms.passage.service.ISmsPassageReachrateSettingsService;
 import com.huashi.sms.passage.service.ISmsPassageService;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
@@ -33,22 +28,17 @@ import com.huashi.sms.task.context.TaskContext;
  */
 public class SmsPassageReachRateReportJob extends AbstractJob {
 
-    @Reference
-    private ISmsMtSubmitService                 smsMtSubmitService;
-    @Reference
-    private ISmsPassageService                  smsPassageService;
-    @Resource
-    private StringRedisTemplate                 stringRedisTemplate;
-    @Reference
-    private ISmsPassageReachrateSettingsService smsPassageReachrateSettingsService;
+    private ISmsMtSubmitService               smsMtSubmitService;
+    private ISmsPassageService                smsPassageService;
+    private StringRedisTemplate               stringRedisTemplate;
+    private List<SmsPassageReachrateSettings> list;
 
     public SmsPassageReachRateReportJob(ISmsMtSubmitService smsMtSubmitService, ISmsPassageService smsPassageService,
-                                        StringRedisTemplate stringRedisTemplate,
-                                        ISmsPassageReachrateSettingsService smsPassageReachrateSettingsService) {
+                                        StringRedisTemplate stringRedisTemplate, List<SmsPassageReachrateSettings> list) {
         this.smsMtSubmitService = smsMtSubmitService;
         this.smsPassageService = smsPassageService;
         this.stringRedisTemplate = stringRedisTemplate;
-        this.smsPassageReachrateSettingsService = smsPassageReachrateSettingsService;
+        this.list = list;
     }
 
     /**
@@ -80,72 +70,73 @@ public class SmsPassageReachRateReportJob extends AbstractJob {
 
     @Override
     public void run(ShardingContext context) {
-        if (StringUtils.isEmpty(context.getJobParameter())) {
-            logger.warn("无法识别通道信息");
-            return;
-        }
+        // if (StringUtils.isEmpty(context.getJobParameter())) {
+        // logger.warn("无法识别通道信息");
+        // return;
+        // }
 
-        try {
+        for (SmsPassageReachrateSettings smsPassageReachrateSettings : list) {
 
-            SmsPassageReachrateSettings smsPassageReachrateSettings = smsPassageReachrateSettingsService.findById(Long.parseLong(context.getJobParameter()));
-
-            // 禁用的轮询 直接跳出
-            if (smsPassageReachrateSettings.getStatus() == STOP_STATUS) {
-                return;
-            }
-
-            long passageId = smsPassageReachrateSettings.getPassageId();
-            long startTime = smsPassageReachrateSettings.getSelectStartTime();
-            long endTime = smsPassageReachrateSettings.getSelectEndTime();
-
-            List<SmsMtMessageSubmit> smsSubmitList = smsMtSubmitService.getRecordListToMonitor(passageId, startTime,
-                                                                                               endTime);
-            int totalCount = smsSubmitList.size();
-            int successCount = 0;
-            int failCount = 0;
-
-            // 统计的总量大于等于设置告警阀值则进行判断 edit by 20170702
-            if (totalCount >= smsPassageReachrateSettings.getCountPoint()) {
-                boolean isAlarm = false;
-
-                for (SmsMtMessageSubmit submit : smsSubmitList) {
-                    SmsMtMessageDeliver deliver = submit.getMessageDeliver();
-                    if (deliver != null && deliver.getStatus() != null
-                        && deliver.getStatus() == TaskContext.MessageSubmitStatus.SUCCESS.getCode()) {
-                        successCount++;
-                    } else {
-                        failCount++;
-                    }
+            try {
+                // 禁用的轮询 直接跳出
+                if (smsPassageReachrateSettings.getStatus() == STOP_STATUS) {
+                    return;
                 }
 
-                SmsPassage passage = smsPassageService.findById(Integer.parseInt(passageId + ""));
-                double successRate = (double) successCount / totalCount;
+                long passageId = smsPassageReachrateSettings.getPassageId();
+                long startTime = smsPassageReachrateSettings.getSelectStartTime();
+                long endTime = smsPassageReachrateSettings.getSelectEndTime();
 
-                // 成功率小于等于设置的告警阀值进行告警短信
-                if (successRate <= smsPassageReachrateSettings.getSuccessRate()) {
-                    isAlarm = true;
-                    try {
-                        String content = getSendContent(DateUtil.getSecondOnlyStr(new Date(startTime)),
-                                                        DateUtil.getSecondOnlyStr(new Date(endTime)),
-                                                        passage.getName(), totalCount, failCount, (successRate * 100));
+                List<SmsMtMessageSubmit> smsSubmitList = smsMtSubmitService.getRecordListToMonitor(passageId,
+                                                                                                   startTime, endTime);
+                int totalCount = smsSubmitList.size();
+                int successCount = 0;
+                int failCount = 0;
 
-                        boolean result = smsPassageService.doMonitorSmsSend(smsPassageReachrateSettings.getMobile(),
-                                                                            content);
+                // 统计的总量大于等于设置告警阀值则进行判断 edit by 20170702
+                if (totalCount >= smsPassageReachrateSettings.getCountPoint()) {
+                    boolean isAlarm = false;
 
-                        // 打印日志
-                        logger.info("告警短息发送结果：{}, 短信内容：{}， 接收手机号码：{}", result, content,
-                                    smsPassageReachrateSettings.getMobile());
-
-                    } catch (Exception e) {
-                        logger.error("告警短息发送异常", e);
+                    for (SmsMtMessageSubmit submit : smsSubmitList) {
+                        SmsMtMessageDeliver deliver = submit.getMessageDeliver();
+                        if (deliver != null && deliver.getStatus() != null
+                            && deliver.getStatus() == TaskContext.MessageSubmitStatus.SUCCESS.getCode()) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
                     }
-                }
 
-                pushReportToRedis(passageId, passage.getName(), successRate,
-                                  smsPassageReachrateSettings.getSuccessRate(), startTime, isAlarm);
+                    SmsPassage passage = smsPassageService.findById(Integer.parseInt(passageId + ""));
+                    double successRate = (double) successCount / totalCount;
+
+                    // 成功率小于等于设置的告警阀值进行告警短信
+                    if (successRate <= smsPassageReachrateSettings.getSuccessRate()) {
+                        isAlarm = true;
+                        try {
+                            String content = getSendContent(DateUtil.getSecondOnlyStr(new Date(startTime)),
+                                                            DateUtil.getSecondOnlyStr(new Date(endTime)),
+                                                            passage.getName(), totalCount, failCount,
+                                                            (successRate * 100));
+
+                            boolean result = smsPassageService.doMonitorSmsSend(smsPassageReachrateSettings.getMobile(),
+                                                                                content);
+
+                            // 打印日志
+                            logger.info("告警短息发送结果：{}, 短信内容：{}， 接收手机号码：{}", result, content,
+                                        smsPassageReachrateSettings.getMobile());
+
+                        } catch (Exception e) {
+                            logger.error("告警短息发送异常", e);
+                        }
+                    }
+
+                    pushReportToRedis(passageId, passage.getName(), successRate,
+                                      smsPassageReachrateSettings.getSuccessRate(), startTime, isAlarm);
+                }
+            } catch (Exception e) {
+                logger.error("短信到达率统计JOB[" + context.getJobParameter() + "]异常", e);
             }
-        } catch (Exception e) {
-            logger.error("短信到达率统计JOB[" + context.getJobParameter() + "]异常", e);
         }
 
     }

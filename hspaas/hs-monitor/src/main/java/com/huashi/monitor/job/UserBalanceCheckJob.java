@@ -34,7 +34,7 @@ public class UserBalanceCheckJob extends AbstractJob {
     @Reference
     private ISmsPassageService  smsPassageService;
 
-    private final Logger        logger                   = LoggerFactory.getLogger(getClass());
+    private Logger              logger                   = LoggerFactory.getLogger(getClass());
 
     private static final String WARNING_MESSAGE_TEMPLATE = "【华时科技】[%s][%s]余额到达告警阈值，当前余额为%d，请关注";
 
@@ -48,8 +48,7 @@ public class UserBalanceCheckJob extends AbstractJob {
             return;
         }
 
-        // logger.info("Users " + JSON.toJSONString(list,new SimplePropertyPreFilter("userId,balance")) +
-        // " balance checking");
+//        logger.info("Users " + JSON.toJSONString(list,new SimplePropertyPreFilter("userId,balance")) + " balance checking");
 
         for (UserBalance ub : list) {
             if (!isNeedAndReachWarning(ub)) {

@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.huashi.monitor.passage.service.IPassageMonitorService;
+import com.huashi.monitor.passage.thread.hook.ShutdownHookWorker;
 
 @Component
 public class MonitorInitializeRunner implements CommandLineRunner {
@@ -35,7 +36,7 @@ public class MonitorInitializeRunner implements CommandLineRunner {
        * TODO 注册JVM关闭钩子函数
      */
     private void registShutdownHook() {
-//        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHookWorker()));
+        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHookWorker()));
     }
 
 }
