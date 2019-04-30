@@ -4,7 +4,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -13,12 +13,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import redis.clients.jedis.Jedis;
+
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
-import com.huashi.sms.config.worker.config.SmsDbPersistenceRunner;
+import com.huashi.sms.config.cache.redis.RedisConfiguration;
+import com.huashi.sms.config.worker.hook.ShutdownHookWorker;
 
 /**
- * TODO 抽象进程基础类
+ * 抽象进程基础类
  *
  * @author zhengying
  * @version V1.0
@@ -28,40 +31,40 @@ public abstract class AbstractWorker<E> implements Runnable {
 
     protected ApplicationContext applicationContext;
 
-    protected Logger logger = LoggerFactory.getLogger(getClass());
+    protected Logger             logger                        = LoggerFactory.getLogger(getClass());
 
     /**
      * 批量扫描大小
      */
-    private static final int DEFAULT_SCAN_SIZE = 2000;
+    private static final int     DEFAULT_SCAN_SIZE             = 2000;
 
     /**
      * 超时时间毫秒值(JOB一秒内处理)
      */
-    private static final int DEFAULT_TIMEOUT = 1000;
+    private static final int     DEFAULT_TIMEOUT               = 1000;
 
     /**
      * 当前时间计时
      */
-    protected final AtomicLong timer = new AtomicLong(0);
-    
-    /**
-     * 备份数据恢复完成
-     */
-    private final AtomicBoolean backupsRecovered = new AtomicBoolean();
-    
+    protected final AtomicLong   timer                         = new AtomicLong(0);
+
     /**
      * REDIS 队列备份KEY名称前缀
      */
-    private static final String REDIS_QUEUE_BACKUP_KEY_PREFIX = "bak_";
+    private static final String  REDIS_QUEUE_BACKUP_KEY_PREFIX = "bak_";
 
     /**
-     * TODO 是否终止执行(JVM 应用程序钩子HOOK设置)
+     * 默认睡眠5毫秒
+     */
+    private static final int     DEFAULT_SLEEP_TIME            = 5;
+
+    /**
+     * 是否终止执行(JVM 应用程序钩子HOOK设置)
      *
      * @return
      */
     protected boolean isApplicationStop() {
-        return SmsDbPersistenceRunner.shutdownSignal;
+        return ShutdownHookWorker.shutdownSignal;
     }
 
     protected StringRedisTemplate getStringRedisTemplate() {
@@ -74,14 +77,14 @@ public abstract class AbstractWorker<E> implements Runnable {
     }
 
     /**
-     * TODO 执行具体操作
+     * 执行具体操作
      *
      * @param list
      */
     protected abstract void operate(List<E> list);
 
     /**
-     * TODO 获取REDIS操作值
+     * 获取REDIS操作值
      *
      * @return
      */
@@ -95,7 +98,7 @@ public abstract class AbstractWorker<E> implements Runnable {
     protected abstract String jobTitle();
 
     /**
-     * TODO redis 备份KEY 名称
+     * redis 备份KEY 名称
      *
      * @return
      */
@@ -104,21 +107,27 @@ public abstract class AbstractWorker<E> implements Runnable {
     }
 
     /**
-     * TODO 数据失败后持久化REDIS
+     * 数据消费失败后备份数据，保障数据不丢失
      *
      * @param list 本次失败集合数据
+     * @param cause 备份原因
      */
-    private void backupIfFailed(List<E> list) {
+    private void backupIfNecessary(List<E> list, String cause) {
         try {
-            getStringRedisTemplate().opsForList().rightPushAll(redisBackupKey(), JSON.toJSONString(list));
-            logger.info(jobTitle() + "源数据队列：{} 处理失败，加入失败队列: {} 完成，共{}条", redisKey(), redisBackupKey(), list.size());
+            Jedis jedis = RedisConfiguration.getJedis();
+            jedis.rpush(redisBackupKey(), JSON.toJSONString(list));
+
+            // getStringRedisTemplate().opsForList().rightPushAll(redisBackupKey(), JSON.toJSONString(list));
+            logger.info("Queue[" + redisKey() + "]" + " data[" + list.size() + "] backup to queue[" + redisBackupKey()
+                        + "] successfully cause by '" + cause + "'");
         } catch (Exception e) {
-            logger.error(jobTitle() + "源数据队列：{} 处理失败，加入失败队列: {} 异常，共{}条", redisKey(), redisBackupKey(), list.size(), e);
+            logger.error("Queue[" + redisKey() + "]" + " data[" + list.size() + "] backup to queue[" + redisBackupKey()
+                         + "] failed cause by '" + cause + "'", e);
         }
     }
 
     /**
-     * TODO 每次扫描的总数量
+     * 每次扫描的总数量
      *
      * @return
      */
@@ -127,7 +136,7 @@ public abstract class AbstractWorker<E> implements Runnable {
     }
 
     /**
-     * TODO 截止超时时间（单位：毫秒）
+     * 截止超时时间（单位：毫秒）
      *
      * @return
      */
@@ -136,7 +145,7 @@ public abstract class AbstractWorker<E> implements Runnable {
     }
 
     /**
-     * TODO 清除资源，重新开始
+     * 清除资源，重新开始
      *
      * @param list
      */
@@ -144,44 +153,40 @@ public abstract class AbstractWorker<E> implements Runnable {
         timer.set(0);
         list.clear();
     }
-    
+
     /**
-     * 
-       * TODO 检查并恢复处理失败或者JVM关闭备份数据（入队列前面，优先处理）
+     * 检查并恢复处理失败或者JVM关闭备份数据（入队列前面，优先处理）
      */
-    protected void recoverFromBackups() {
-        if(backupsRecovered.get()) {
-            return;
-        }
-        
+    private void recoverFromBackups() {
+        long startTime = System.currentTimeMillis();
         try {
-            List<String> list = new ArrayList<>();
-            while(true) {
+            final List<String> list = new ArrayList<>();
+            while (true) {
                 String row = getStringRedisTemplate().opsForList().leftPop(redisBackupKey());
-                if(StringUtils.isEmpty(row)) {
+                if (StringUtils.isEmpty(row)) {
                     break;
                 }
-                
+
                 list.add(row);
             }
-            
-            if(CollectionUtils.isEmpty(list)) {
+
+            if (CollectionUtils.isEmpty(list)) {
                 return;
             }
-            
+
             // 采用LEFT 入队，优先处理
             getStringRedisTemplate().opsForList().leftPushAll(redisKey(), list);
-            logger.error(jobTitle() + "源数据队列：{} 从备份队列 :{} 恢复完成，共{}条", redisKey(), redisBackupKey(), list.size());
+            logger.info("Recover data[" + list.size() + "] from queue[" + redisBackupKey()
+                        + "] successfully, it costs {} ms", (System.currentTimeMillis() - startTime));
         } catch (Exception e) {
-            logger.error(jobTitle() + "源数据队列：{} 从备份队列 :{} 恢复异常", redisKey(), redisBackupKey(), e);
-        } finally {
-            backupsRecovered.set(true);
+            logger.error("Recover data from queue[" + redisBackupKey() + "] failed, it costs {} ms",
+                         (System.currentTimeMillis() - startTime), e);
         }
-            
+
     }
 
     /**
-     * TODO 获取对象实例
+     * 获取对象实例
      *
      * @param clazz
      * @return
@@ -201,25 +206,43 @@ public abstract class AbstractWorker<E> implements Runnable {
     }
 
     /**
-     * TODO 执行任务并统计耗时
+     * 执行任务并统计耗时
      *
      * @param list
      */
     private void executeWithTimeCost(List<E> list) {
         long startTime = System.currentTimeMillis();
         try {
-            operate(list);
             
-            long timeCost = System.currentTimeMillis() - startTime;
-            if(timeCost > 500 || list.size() > 50) {
-                logger.info("job::[" + jobTitle() + "] 执行耗时：{} ms， 共处理：{} 个", timeCost , list.size());
+            if (isApplicationStop()) {
+                backupIfNecessary(list, "jvm shutdown in doing");
+                return;
             }
             
+            
+            operate(list);
+
+            long timeCost = System.currentTimeMillis() - startTime;
+            if (timeCost > 500 || list.size() > 50) {
+                logger.info("job::[" + jobTitle() + "] 执行耗时：{} ms， 共处理：{} 个", timeCost, list.size());
+            }
+
         } catch (Exception e) {
             logger.error("job::[" + jobTitle() + "] 执行失败", e);
-            backupIfFailed(list);
+            backupIfNecessary(list, "logic process exception[" + e.getMessage() + "]");
         } finally {
             clear(list);
+        }
+    }
+
+    /**
+     * 休息片刻，防止CPU过高
+     */
+    private void haveARest() {
+        int time = new Random().nextInt(10);
+        try {
+            Thread.sleep(time == 0 ? DEFAULT_SLEEP_TIME : time);
+        } catch (InterruptedException e) {
         }
     }
 
@@ -235,30 +258,26 @@ public abstract class AbstractWorker<E> implements Runnable {
 
     @Override
     public void run() {
+
+        // 检查备份数据是否有数据产生，如果有则恢复数据
+        recoverFromBackups();
+
         List<E> list = new ArrayList<>();
         while (true) {
             if (isApplicationStop()) {
                 if (CollectionUtils.isNotEmpty(list)) {
-                    logger.info("JVM关闭事件---当前线程处理数据不为空，执行最后一次后关闭线程...");
-                    executeWithTimeCost(list);
+                    logger.info("Backup data[" + list.size() + "] cause by jvm shutdown.");
+                    backupIfNecessary(list, "jvm shutdown");
                 }
                 break;
             }
 
-
             try {
-                // 先休眠1毫秒，避免cpu占用过高
-                Thread.sleep(500L);
-            } catch (InterruptedException e) {
-            }
 
-            try {
-                
+                haveARest();
+
                 // 时间启动器（开始计时）
                 timeStarter();
-                
-                // 检查备份数据是否有数据产生，如果产生需要恢复（系统启动第一次恢复）
-                recoverFromBackups();
 
                 // 如果本次量达到批量取值数据，则跳出
                 if (list.size() >= scanSize()) {
@@ -273,9 +292,9 @@ public abstract class AbstractWorker<E> implements Runnable {
                 }
 
                 // 获取REDIS 队列中的数据
-//                Object o = getStringRedisTemplate().opsForList().rightPopAndLeftPush(redisKey(), redisBackupKey());
+                // Object o = getStringRedisTemplate().opsForList().rightPopAndLeftPush(redisKey(), redisBackupKey());
                 String row = getStringRedisTemplate().opsForList().leftPop(redisKey());
-                
+
                 // 执行到redis中没有数据为止
                 if (StringUtils.isEmpty(row)) {
                     if (CollectionUtils.isNotEmpty(list)) {

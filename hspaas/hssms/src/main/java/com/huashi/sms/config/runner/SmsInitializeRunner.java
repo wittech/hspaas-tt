@@ -4,13 +4,17 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.huashi.sms.config.worker.hook.ShutdownHookWorker;
 import com.huashi.sms.passage.service.ISmsPassageAccessService;
 import com.huashi.sms.passage.service.ISmsPassageService;
 import com.huashi.sms.record.service.ISmsMtPushService;
@@ -34,8 +38,6 @@ public class SmsInitializeRunner implements CommandLineRunner {
     @Autowired
     private ISmsMtSubmitService        smsMtSubmitService;
     @Autowired
-    private ISmsMtPushService          smsMtPushService;
-    @Autowired
     private ISmsPassageService         smsPassageService;
     @Autowired
     private ISmsTemplateService        smsTemplateService;
@@ -47,6 +49,10 @@ public class SmsInitializeRunner implements CommandLineRunner {
     private IForbiddenWordsService     forbiddenWordsService;
     @Autowired
     private ISmsMobileWhiteListService mobileWhiteListService;
+    @Autowired
+    private ISmsMtPushService          smsMtPushService;
+    @Resource
+    private ThreadPoolTaskExecutor     threadPoolTaskExecutor;
 
     public static final Lock           LOCK                   = new ReentrantLock();
     public static final Condition      CONDITION              = LOCK.newCondition();
@@ -68,7 +74,8 @@ public class SmsInitializeRunner implements CommandLineRunner {
             initForbiddenWordsList();
             initMobileBlacklist();
             initMobileWhiteList();
-            initUserMtReportPushConfigQueue();
+            initDeliverFailoverPushThreads();
+            registShutdownHook();
             logger.info("=======================初始化REDIS完成=======================");
         } catch (Exception e) {
             logger.info("=======================初始化REDIS失败=======================", e);
@@ -137,16 +144,8 @@ public class SmsInitializeRunner implements CommandLineRunner {
         return smsMtSubmitService.declareWaitSubmitMessageQueues();
     }
 
-    /**
-     * 初始化所有用户下行状态推送队列数据
-     */
-    private void initUserMtReportPushConfigQueue() {
-        boolean isSuccess = smsMtPushService.doListenerAllUser();
-        if (isSuccess) {
-            logger.info("用户下行状态报告推送队列初始化完成");
-        } else {
-            logger.info("用户下行状态报告推送队列初始化失败");
-        }
+    private void initDeliverFailoverPushThreads() {
+        smsMtPushService.startFailoverListener();
     }
 
     /**
@@ -161,6 +160,14 @@ public class SmsInitializeRunner implements CommandLineRunner {
         } finally {
             LOCK.unlock();
         }
+    }
+
+    /**
+     * TODO 注册JVM关闭钩子函数
+     */
+    private void registShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHookWorker(threadPoolTaskExecutor)));
+        logger.info("Jvm hook thread has registed");
     }
 
 }

@@ -11,7 +11,7 @@ import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 
 /**
  * 
-  * TODO 短信推送服务
+  * 短信推送服务
   * @author zhengying
   * @version V1.0   
   * @date 2016年12月1日 下午6:48:47
@@ -20,7 +20,7 @@ public interface ISmsMtPushService {
 
 	/**
 	 * 
-	   * TODO 保存推送记录
+	   * 保存推送记录
 	   * 
 	   * @param list
 	 */
@@ -28,7 +28,7 @@ public interface ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 监听所有用户信息
+	   * 监听所有用户信息
 	   * 
 	   * @return
 	 */
@@ -36,7 +36,7 @@ public interface ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 根据用户ID获取用户待推送队列名称
+	   * 根据用户ID获取用户待推送队列名称
 	   * 
 	   * @param userId
 	   * @return
@@ -45,7 +45,7 @@ public interface ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 设置消息ID组装待推送数据配置信息（异步）
+	   * 设置消息ID组装待推送数据配置信息（异步）
 	   * @param submits
 	   * @return
 	 */
@@ -53,7 +53,7 @@ public interface ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 比对回执报文数据并且发送报文至下家（异步）
+	   * 比对回执报文数据并且发送报文至下家（异步）
 	   * 
 	   * @param delivers
 	   * @return
@@ -62,7 +62,7 @@ public interface ISmsMtPushService {
 	
 	/**
 	 * 
-	   * TODO 推送下行短信回执报告至开发者（下家客户）
+	   * 推送下行短信回执报告至开发者（下家客户）
 	   * 
 	   * @param bodies
 	   * 	组装的推送报文数据
@@ -71,7 +71,7 @@ public interface ISmsMtPushService {
 	
 	 /**
      * 
-       * TODO 获取待推送数据报告（如 SID,用户自定义内容）
+       * 获取待推送数据报告（如 SID,用户自定义内容）
        * 
        * @param msgId
        * 	消息ID
@@ -83,7 +83,7 @@ public interface ISmsMtPushService {
     
     /**
      * 
-       * TODO 添加用户推送队列监听（添加用户后需要添加监听）
+       * 添加用户推送队列监听（添加用户后需要添加监听）
        * @param userId
        * @return
      */
@@ -91,10 +91,17 @@ public interface ISmsMtPushService {
     
     /**
      * 
-       * TODO 获取下行短信待推送消息 KEY
+       * 获取下行短信待推送消息 KEY
        * @param msgId
        * @return
      */
     String getMtPushConfigKey(String msgId); 
+    
+    /**
+     * 
+       * 开启针对状态回执过快/插入submit慢的数据进行重试（防止丢数据）
+       * @return
+     */
+    boolean startFailoverListener();
 	
 }

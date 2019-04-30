@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Resource;
 
@@ -26,6 +29,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -36,6 +40,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.huashi.common.user.service.IUserService;
 import com.huashi.mms.config.cache.redis.constant.MmsRedisConstant;
+import com.huashi.mms.config.worker.fork.MtReportFailoverPushWorker;
 import com.huashi.mms.config.worker.fork.MtReportPushToDeveloperWorker;
 import com.huashi.mms.record.dao.MmsMtMessagePushMapper;
 import com.huashi.mms.record.domain.MmsMtMessageDeliver;
@@ -47,71 +52,73 @@ import com.huashi.util.HttpClientUtil;
 import com.huashi.util.HttpClientUtil.RetryResponse;
 
 /**
- * TODO 下行彩信推送服务实现
- * 
+ * 下行彩信推送服务实现
+ *
  * @author zhengying
- * @version V1.0
- * @date 2019年1月15日 下午5:59:30
+ * @version V1.0.0
+ * @date 2019年3月20日 下午9:52:18
  */
 @Service
 public class MmsMtPushService implements IMmsMtPushService {
 
     @Reference(mock = "fail:return+null")
-    private IUserService           userService;
+    private IUserService                       userService;
     @Autowired
-    private MmsMtMessagePushMapper mmsMtMessagePushMapper;
+    private MmsMtMessagePushMapper             mmsMtMessagePushMapper;
     @Resource
-    private StringRedisTemplate    stringRedisTemplate;
+    private StringRedisTemplate                stringRedisTemplate;
     @Autowired
-    private IMmsMtSubmitService    mmsMtSubmitService;
-
+    private IMmsMtSubmitService                mmsMtSubmitService;
     @Value("${thread.poolsize.push:2}")
-    private int                    pushThreadPoolSize;
+    private int                                pushThreadPoolSize;
+    @Value("${thread.poolsize:5}")
+    private int                                failoverThreadPoolSize;
     @Autowired
-    private ApplicationContext     applicationContext;
+    private ApplicationContext                 applicationContext;
+    @Resource
+    private ThreadPoolTaskExecutor             threadPoolTaskExecutor;
 
-    private final Logger           logger                   = LoggerFactory.getLogger(getClass());
+    private final Logger                       logger                   = LoggerFactory.getLogger(getClass());
+
+    /**
+     * 用户推送报告过滤器
+     */
+    private static final PropertyPreFilter     USER_PUSH_REPORT_FILTER  = new SimplePropertyPreFilter("sid", "mobile",
+                                                                                                      "attach",
+                                                                                                      "status",
+                                                                                                      "receiveTime",
+                                                                                                      "errorMsg");
+
+    /**
+     * 用户推送线程映射标识
+     */
+    private static volatile Map<Integer, Long> USER_PUTH_THREAD_FLAG    = new ConcurrentHashMap<>();
+
+    /**
+     * 添加用户推送线程锁
+     */
+    private static final Lock                  ADD_PUSH_THREAD_MONITOR  = new ReentrantLock();
 
     /**
      * 推送分包分割主键（根据推送地址进行切割）
      */
-    private static final String    PUSH_BODY_SUBPACKAGE_KEY = "pushUrl";
+    private static final String                PUSH_BODY_SUBPACKAGE_KEY = "pushUrl";
 
     @Override
     public void savePushMessage(List<MmsMtMessagePush> pushes) {
-        long start = System.currentTimeMillis();
         mmsMtMessagePushMapper.batchInsert(pushes);
-        logger.info("推送数据插入耗时：{} ms", (System.currentTimeMillis() - start));
     }
 
     @Override
     public boolean doListenerAllUser() {
-        Set<Integer> userIds = userService.findAvaiableUserIds();
-        if (CollectionUtils.isEmpty(userIds)) {
-            logger.error("待推送可用用户数据为空，无法监听");
-            return false;
-        }
-
-        try {
-            for (Integer userId : userIds) {
-                addUserMtPushListener(userId);
-            }
-            
-            logger.info("用户[" + userIds + "] 推送队列开始监听..");
-
-            return true;
-        } catch (Exception e) {
-            logger.info("用户初始化下行推送队列失败", e);
-        }
-
-        return false;
+        return true;
     }
 
     /**
      * 获取当前用户[userId]对应的状态报告推送队列名称
      * 
      * @param userId 用户ID，每个用户ID不同的队列（用户独享队列，非共享一个推送队列）
-     * @return
+     * @return 推送队列名称
      */
     @Override
     public String getUserPushQueueName(Integer userId) {
@@ -119,13 +126,13 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * TODO 组装报文前半部分信息
+     * 组装报文前半部分信息
      * 
      * @param body 报文信息（上下文使用）
      * @param deliver 网关回执数据
      * @param cachedPushArgs 本地缓存推送参数信息（为了加快速度缓存变量，而不是每次都根据MSG_ID和MOBILE查询REDIS或者DB）
      * @param failoverDeliversQueue 本次处理失败（一般是查询REDIS或者DB都没有推送配置信息）重入待处理回执状态（后续线程重试）
-     * @return
+     * @return true/false
      */
     private boolean assembleBody(JSONObject body, MmsMtMessageDeliver deliver, Map<String, JSONObject> cachedPushArgs,
                                  List<MmsMtMessageDeliver> failoverDeliversQueue) {
@@ -135,34 +142,32 @@ public class MmsMtPushService implements IMmsMtPushService {
             return true;
         }
 
-        else {
-            try {
-                JSONObject redisArgs = getWaitPushBodyArgs(deliver.getMsgId(), deliver.getMobile());
-                if (redisArgs == null) {
-                    // 如果数据生成时间超过[5分钟]舍弃，不再重新补偿
-                    // if(System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 5 * 60 * 1000 )
+        try {
+            JSONObject redisArgs = getWaitPushBodyArgs(deliver.getMsgId(), deliver.getMobile());
+            if (redisArgs == null) {
+                // 如果数据生成时间超过[5分钟]舍弃，不再重新补偿
+                // if(System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 5 * 60 * 1000 )
 
-                    if (System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 20 * 1000) {
-                        return false;
-                    }
-
-                    failoverDeliversQueue.add(deliver);
-                } else {
-                    body.putAll(redisArgs);
-                    cachedPushArgs.put(deliver.getMsgId(), body);
-                    return true;
-
+                if (System.currentTimeMillis() - deliver.getCreateTime().getTime() >= 20 * 1000) {
+                    return false;
                 }
-            } catch (IllegalStateException e) {
-                logger.warn(e.getMessage());
+
+                failoverDeliversQueue.add(deliver);
+            } else {
+                body.putAll(redisArgs);
+                cachedPushArgs.put(deliver.getMsgId(), body);
+                return true;
             }
 
-            return false;
+        } catch (IllegalStateException e) {
+            logger.warn(e.getMessage());
         }
+
+        return false;
     }
 
     /**
-     * TODO 回执信息按照用户分包，上家一次性回执多个回执报文，报文中很可能是我司多个用户数据回执信息，顾要分包
+     * 回执信息按照用户分包，上家一次性回执多个回执报文，报文中很可能是我司多个用户数据回执信息，顾要分包
      * 
      * @param body 单个报文信息
      * @param deliver 上家回执报文信息
@@ -196,14 +201,32 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
+     * 添加用户推送线程
+     * 
+     * @param userId
+     */
+    private void addThreadIfNessary(Integer userId) {
+        if (USER_PUTH_THREAD_FLAG.containsKey(userId)) {
+            return;
+        }
+
+        boolean isOk = addUserMtPushListener(userId);
+        if (isOk) {
+            USER_PUTH_THREAD_FLAG.putIfAbsent(userId, System.currentTimeMillis());
+            logger.info("There are " + (USER_PUTH_THREAD_FLAG.size() * 2) + " threads["
+                        + USER_PUTH_THREAD_FLAG.keySet() + "] joined");
+        }
+
+    }
+
+    /**
      * 比较报文内容并完成加入推送redis队列（方法异步）
      * 
      * @param delivers
      * @return
-     * @see com.huashi.sms.record.service.ISmsMtPushService#compareAndPushBody(java.util.List)
      */
     @Override
-    // @Async
+    @Async
     public Future<Boolean> compareAndPushBody(List<MmsMtMessageDeliver> delivers) {
         if (CollectionUtils.isEmpty(delivers)) {
             return new AsyncResult<Boolean>(false);
@@ -245,6 +268,10 @@ public class MmsMtPushService implements IMmsMtPushService {
 
             // 根据用户ID分别组装数据，并发送至各自队列, key:userId, value:bodies（推送报文数据）
             for (Entry<Integer, List<JSONObject>> userBody : userBodies.entrySet()) {
+
+                // 加入用户独立推送线程
+                addThreadIfNessary(userBody.getKey());
+
                 stringRedisTemplate.opsForList().rightPush(getUserPushQueueName(userBody.getKey()),
                                                            JSON.toJSONString(userBody.getValue()));
             }
@@ -262,7 +289,7 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * TODO 针对上家回执数据已回但我方回执数据未入库情况需要 推送集合数据
+     * 针对上家回执数据已回但我方回执数据未入库情况需要 推送集合数据
      * 
      * @param failoverDeliversQueue
      */
@@ -277,14 +304,14 @@ public class MmsMtPushService implements IMmsMtPushService {
                                                                                                      "remark",
                                                                                                      "status",
                                                                                                      "createTime")));
-            // stringRedisTemplate.expire(SmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 5, TimeUnit.MINUTES);
+            // stringRedisTemplate.expire(MmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 5, TimeUnit.MINUTES);
         } catch (Exception e) {
             logger.error("针对上家回执数据已回但我方回执数据未入库情况需要 推送集合数据失败", e);
         }
     }
 
     /**
-     * TODO 获取待处理的推送报告定义参数信息 eg. （SID, pushUrl, pushTimes ...）
+     * 获取待处理的推送报告定义参数信息 eg. （SID, pushUrl, pushTimes ...）
      * 
      * @param msgId
      * @param mobile
@@ -311,7 +338,7 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * TODO REDIS 查询不到反查数据库是否需要推送
+     * REDIS 查询不到反查数据库是否需要推送
      * 
      * @param msgId
      * @param mobile
@@ -357,7 +384,7 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * TODO 移除待推送信息配置信息
+     * 移除待推送信息配置信息
      * 
      * @param msgId
      * @param mobile
@@ -391,18 +418,20 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * TODO 推送守候线程名称
+     * 推送守候线程名称
      * 
      * @param userId 用户ID
      * @param sequence 序列号
      * @return
      */
     private static String pushThreadName(Integer userId, Integer sequence) {
-        return String.format("push-daemon-thread-%d-%d", userId, sequence == null ? 1 : sequence++);
+        return String.format("push-%d:%d", userId, sequence == null ? 1 : sequence++);
     }
 
     @Override
     public boolean addUserMtPushListener(Integer userId) {
+        final Lock lock = ADD_PUSH_THREAD_MONITOR;
+        lock.lock();
         try {
             for (int i = 0; i < pushThreadPoolSize; i++) {
                 Thread thread = new Thread(new MtReportPushToDeveloperWorker(applicationContext,
@@ -411,9 +440,12 @@ public class MmsMtPushService implements IMmsMtPushService {
                 thread.start();
             }
 
+            logger.info("User[" + userId + "] add push thread[" + pushThreadPoolSize + "] successfully");
             return true;
         } catch (Exception e) {
-            logger.error("用户加入彩信状态报告回执推送监听失败, 用户ID：{}", userId, e);
+            logger.info("User[" + userId + "] add push thread[" + pushThreadPoolSize + "] failed", e);
+        } finally {
+            lock.unlock();
         }
         return false;
     }
@@ -455,15 +487,7 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * 用户推送报告过滤器
-     */
-    private static final PropertyPreFilter USER_PUSH_REPORT_FILTER = new SimplePropertyPreFilter("sid", "mobile",
-                                                                                                 "attach", "status",
-                                                                                                 "receiveTime",
-                                                                                                 "errorMsg");
-
-    /**
-     * TODO 转义用户推送报告数据
+     * 转义用户推送报告数据
      * 
      * @param bodies
      * @return
@@ -479,7 +503,7 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * TODO 发送短信状态报文至下家并完成异步持久化
+     * 发送短信状态报文至下家并完成异步持久化
      * 
      * @param urlBodies
      * @return
@@ -487,8 +511,17 @@ public class MmsMtPushService implements IMmsMtPushService {
     private boolean sendBody(Map<String, List<JSONObject>> urlBodies) {
         try {
             for (Entry<String, List<JSONObject>> urlBody : urlBodies.entrySet()) {
-                doPushPersistence(urlBody.getValue(),
-                                  HttpClientUtil.postBody(urlBody.getKey(), translateBodies(urlBody.getValue()), 1));
+
+                long startTime = System.currentTimeMillis();
+                String pushContent = translateBodies(urlBody.getValue());
+
+                // print result and cost time
+                RetryResponse response = HttpClientUtil.postBody(urlBody.getKey(), pushContent, 1);
+                logger.info("Url [" + urlBody.getKey() + "] push body [" + pushContent + "]'s result is"
+                                    + response.isSuccess() + ", it costs {} ms ",
+                            (System.currentTimeMillis() - startTime));
+
+                doPushPersistence(urlBody.getValue(), response);
             }
 
             return true;
@@ -499,7 +532,7 @@ public class MmsMtPushService implements IMmsMtPushService {
     }
 
     /**
-     * TODO 推送报告持久化
+     * 推送报告持久化
      * 
      * @param report
      * @param retryResponse 推送处理结果
@@ -540,6 +573,19 @@ public class MmsMtPushService implements IMmsMtPushService {
         push = null;
         persistPushesList = null;
         waitPushMsgIdRedisKeys = null;
+    }
+
+    @Override
+    public boolean startFailoverListener() {
+        for (int i = 0; i < failoverThreadPoolSize; i++) {
+
+            // 用户下行状态延迟推送（针对上家下行状态报告回复过快而短信提交记录未入库情况，后续延迟推送）
+            threadPoolTaskExecutor.execute(new MtReportFailoverPushWorker(applicationContext));
+        }
+
+        logger.info("Deliver failover threads[" + failoverThreadPoolSize + "] has joined");
+
+        return true;
     }
 
 }

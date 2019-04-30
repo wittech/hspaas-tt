@@ -71,7 +71,8 @@ public class MmsMtDeliverService implements IMmsMtDeliverService {
             }
 
             // 将待推送消息发送至用户队列进行处理（2017-03-20 合包处理），异步执行
-            threadPoolTaskExecutor.submit(new JoinPushQueueThread(mmsMtPushService, delivers));
+            mmsMtPushService.compareAndPushBody(delivers);
+            
             batchInsert(delivers);
 
             return delivers.size();
@@ -79,31 +80,6 @@ public class MmsMtDeliverService implements IMmsMtDeliverService {
             logger.error("处理待回执信息REDIS失败，失败信息：{}", JSON.toJSONString(delivers), e);
             throw new RuntimeException("状态报告回执处理失败");
         }
-    }
-
-    /**
-     * TODO 加入推送队列数据线程
-     * 
-     * @author zhengying
-     * @version V1.0
-     * @date 2018年4月16日 下午6:34:25
-     */
-    private static class JoinPushQueueThread implements Runnable {
-
-        private IMmsMtPushService         mmsMtPushService;
-        private List<MmsMtMessageDeliver> delivers;
-
-        public JoinPushQueueThread(IMmsMtPushService mmsMtPushService, List<MmsMtMessageDeliver> delivers) {
-            super();
-            this.mmsMtPushService = mmsMtPushService;
-            this.delivers = delivers;
-        }
-
-        @Override
-        public void run() {
-            mmsMtPushService.compareAndPushBody(delivers);
-        }
-
     }
 
     @Override

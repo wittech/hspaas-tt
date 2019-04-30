@@ -4,13 +4,17 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.huashi.mms.config.worker.hook.ShutdownHookWorker;
 import com.huashi.mms.passage.service.IMmsPassageAccessService;
 import com.huashi.mms.passage.service.IMmsPassageService;
 import com.huashi.mms.record.service.IMmsMtPushService;
@@ -30,16 +34,18 @@ public class MmsInitializeRunner implements CommandLineRunner {
     @Autowired
     private IMmsMtSubmitService      mmsMtSubmitService;
     @Autowired
-    private IMmsMtPushService        mmsMtPushService;
-    @Autowired
     private IMmsPassageService       mmsPassageService;
     @Autowired
+    private IMmsMtPushService        mmsMtPushService;
+    @Autowired
     private IMmsPassageAccessService mmsPassageAccessService;
+    @Resource
+    private ThreadPoolTaskExecutor   threadPoolTaskExecutor;
 
     public static final Lock         LOCK                   = new ReentrantLock();
     public static final Condition    CONDITION              = LOCK.newCondition();
 
-    private Logger                   logger                 = LoggerFactory.getLogger(getClass());
+    private final Logger             logger                 = LoggerFactory.getLogger(getClass());
 
     /**
      * 自定义初始化资源是否完成（因有些服务强依赖某些资源初始化完成，如 rabbit listener 消费）
@@ -50,10 +56,11 @@ public class MmsInitializeRunner implements CommandLineRunner {
     public void run(String... arg0) throws Exception {
         logger.info("=======================数据初始化MQ=======================");
         initMessageQueues();
-        initUserMtReportPushConfigQueue();
         initPassage();
         initAccessPassage();
         initSignal();
+        initDeliverFailoverPushThreads();
+        registShutdownHook();
         logger.info("=======================数据初始化MQ完成=======================");
     }
 
@@ -64,21 +71,6 @@ public class MmsInitializeRunner implements CommandLineRunner {
         return mmsMtSubmitService.declareWaitSubmitMessageQueues();
     }
 
-    /**
-     * TODO 初始化所有用户下行状态推送队列数据
-     * 
-     * @return
-     */
-    private boolean initUserMtReportPushConfigQueue() {
-        boolean isSuccess = mmsMtPushService.doListenerAllUser();
-        if (isSuccess) {
-            logger.info("用户下行状态报告推送队列初始化完成");
-        } else {
-            logger.info("用户下行状态报告推送队列初始化失败");
-        }
-        return isSuccess;
-    }
-
     private void initPassage() {
         mmsPassageService.reloadToRedis();
         logger.info("彩信通道初始化完成");
@@ -87,6 +79,10 @@ public class MmsInitializeRunner implements CommandLineRunner {
     private void initAccessPassage() {
         mmsPassageAccessService.reload();
         logger.info("彩信可用通道初始化完成");
+    }
+
+    private void initDeliverFailoverPushThreads() {
+        mmsMtPushService.startFailoverListener();
     }
 
     /**
@@ -101,6 +97,14 @@ public class MmsInitializeRunner implements CommandLineRunner {
         } finally {
             LOCK.unlock();
         }
+    }
+
+    /**
+     * TODO 注册JVM关闭钩子函数
+     */
+    private void registShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHookWorker(threadPoolTaskExecutor)));
+        logger.info("Jvm hook thread has registed");
     }
 
 }

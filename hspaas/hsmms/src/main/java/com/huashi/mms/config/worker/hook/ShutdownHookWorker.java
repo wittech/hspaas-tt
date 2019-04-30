@@ -1,6 +1,5 @@
 package com.huashi.mms.config.worker.hook;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -22,11 +21,9 @@ public class ShutdownHookWorker implements Runnable {
     // private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-    ApplicationContext             applicationContext;
 
-    public ShutdownHookWorker(ApplicationContext applicationContext, ThreadPoolTaskExecutor threadPoolTaskExecutor) {
+    public ShutdownHookWorker(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
 
-        this.applicationContext = applicationContext;
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 

@@ -68,7 +68,8 @@ public class SmsValidator extends Validator {
         // 总手机号码数量
         int mobiles = smsSendRequest.getMobile().split(MobileCatagory.MOBILE_SPLIT_CHARCATOR).length;
         
-        isBeyondMobileSize(mobiles);
+        // 暂时先不加
+//        isBeyondMobileSize(mobiles);
         
         // 计费总条数
         int totalFee = fee * mobiles;

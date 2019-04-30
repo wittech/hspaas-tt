@@ -86,5 +86,12 @@ public interface IMmsMtPushService {
      * @return
      */
     String getMtPushConfigKey(String msgId);
+    
+    /**
+     * 
+       * 开启针对状态回执过快/插入submit慢的数据进行重试（防止丢数据）
+       * @return
+     */
+    boolean startFailoverListener();
 
 }

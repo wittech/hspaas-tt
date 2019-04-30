@@ -281,7 +281,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
             }
             
             // 针对回执的数据携带反斜杠转移符处理后的数据， 数组'[]'无法转移，需要单独替换
-            report = report.replace("[", "\"[").replace("]", "]\"");
+            report = report.replace("\\", "").replace("\"[", "'[").replace("]\"", "]'");
 
             JSONObject jsonData = JSON.parseObject(report);
             if (MapUtils.isEmpty(jsonData)) {
@@ -334,7 +334,7 @@ public class TriolyPassageResolver extends AbstractMmsPassageResolver {
                 return null;
             }
 
-            report = report.replace("[", "\"[").replace("]", "]\"");
+            report = report.replace("\\", "").replace("\"[", "'[").replace("]\"", "]'");
 
             JSONObject jsonData = JSON.parseObject(report);
             if (MapUtils.isEmpty(jsonData)) {
