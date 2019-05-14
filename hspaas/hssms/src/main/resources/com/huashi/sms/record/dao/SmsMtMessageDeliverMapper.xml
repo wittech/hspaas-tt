@@ -156,7 +156,18 @@
 	<select id="selectByMobileAndMsgid" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
-		from sms_mt_message_deliver where msg_id = #{msgId} and mobile = #{mobile} limit 1
+		from sms_mt_message_deliver where msg_id = #{msgId} and mobile =
+		#{mobile} limit 1
+	</select>
+
+	<select id="findByIds" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_mt_message_deliver where id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
 	</select>
 
 	<insert id="batchInsert" parameterType="List">

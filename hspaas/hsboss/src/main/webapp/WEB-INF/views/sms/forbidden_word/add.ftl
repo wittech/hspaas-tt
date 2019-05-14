@@ -15,6 +15,7 @@
     <link href="${BASE_PATH}/resources/css/jquery-ui.min.css" rel="stylesheet">
     <script src="${BASE_PATH}/resources/js/bootstrap/pace.min.js"></script>
     <script src="${BASE_PATH}/resources/js/common.js"></script>
+    <link href="${BASE_PATH}/resources/css/colorpicker.css" rel="stylesheet">
 </head>
 
 <body>
@@ -56,6 +57,15 @@
                                 <div class="col-xs-5">
                                 	<input type="text" class="form-control validate[required,maxSize[32]]"
                                            name="forbiddenWords.label" id="label" placeholder="用于显示敏感词区分" />
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="col-xs-3 control-label">颜色</label>
+                                <div class="col-xs-5">
+                                	<div id="picker"></div>
+                                	
+    								<script src="${BASE_PATH}/resources/js/colorpicker.js"></script>
                                 </div>
                             </div>
 				    		

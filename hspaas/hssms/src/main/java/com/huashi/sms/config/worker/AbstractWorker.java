@@ -31,7 +31,7 @@ public abstract class AbstractWorker<E> implements Runnable {
 
     protected ApplicationContext applicationContext;
 
-    protected Logger             logger                        = LoggerFactory.getLogger(getClass());
+    protected final Logger       logger                        = LoggerFactory.getLogger(getClass());
 
     /**
      * 批量扫描大小
@@ -199,9 +199,7 @@ public abstract class AbstractWorker<E> implements Runnable {
     private Class<E> getClildType() {
         Class<E> clazz = (Class<E>) getClass();
         ParameterizedType type = (ParameterizedType) clazz.getGenericSuperclass();
-        // 3返回实际参数类型(泛型可以写多个)
         Type[] types = type.getActualTypeArguments();
-        // 4 获取第一个参数(泛型的具体类) Person.class
         return (Class<E>) types[0];
     }
 
@@ -213,13 +211,12 @@ public abstract class AbstractWorker<E> implements Runnable {
     private void executeWithTimeCost(List<E> list) {
         long startTime = System.currentTimeMillis();
         try {
-            
+
             if (isApplicationStop()) {
                 backupIfNecessary(list, "jvm shutdown in doing");
                 return;
             }
-            
-            
+
             operate(list);
 
             long timeCost = System.currentTimeMillis() - startTime;

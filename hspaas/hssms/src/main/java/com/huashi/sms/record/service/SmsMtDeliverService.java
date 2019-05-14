@@ -9,20 +9,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.alibaba.druid.util.StringUtils;
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.huashi.common.settings.service.IPushConfigService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.record.dao.SmsMtMessageDeliverMapper;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 
 /**
- * TODO 短信回执服务实现
+ * 短信回执服务实现
  * 
  * @author zhengying
  * @version V1.0
@@ -31,18 +28,14 @@ import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 @Service
 public class SmsMtDeliverService implements ISmsMtDeliverService {
 
+    @Autowired
+    private ISmsMtPushService         smsMtPushService;
     @Resource
     private StringRedisTemplate       stringRedisTemplate;
     @Autowired
     private SmsMtMessageDeliverMapper smsMtMessageDeliverMapper;
-    @Reference
-    private IPushConfigService        pushConfigService;
-    @Autowired
-    private ISmsMtPushService         smsMtPushService;
-    @Resource
-    private ThreadPoolTaskExecutor    threadPoolTaskExecutor;
 
-    private Logger                    logger = LoggerFactory.getLogger(getClass());
+    private final Logger              logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public SmsMtMessageDeliver findByMobileAndMsgid(String mobile, String msgId) {

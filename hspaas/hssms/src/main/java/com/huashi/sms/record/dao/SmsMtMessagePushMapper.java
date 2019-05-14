@@ -7,35 +7,34 @@ import org.apache.ibatis.annotations.Param;
 import com.huashi.sms.record.domain.SmsMtMessagePush;
 
 public interface SmsMtMessagePushMapper {
-	int deleteByPrimaryKey(Long id);
 
-	int insert(SmsMtMessagePush record);
+    int deleteByPrimaryKey(Long id);
 
-	int insertSelective(SmsMtMessagePush record);
+    int insert(SmsMtMessagePush record);
 
-	SmsMtMessagePush selectByPrimaryKey(Long id);
+    int insertSelective(SmsMtMessagePush record);
 
-	int updateByPrimaryKeySelective(SmsMtMessagePush record);
+    SmsMtMessagePush selectByPrimaryKey(Long id);
 
-	int updateByPrimaryKey(SmsMtMessagePush record);
+    int updateByPrimaryKeySelective(SmsMtMessagePush record);
 
-	/**
-	 * 
-	 * TODO 根据手机号码和消息ID查询推送记录信息
-	 * 
-	 * @param mobile
-	 * @param msgId
-	 * @return
-	 */
-	SmsMtMessagePush findByMobileAndMsgid(@Param("mobile") String mobile,
-			@Param("msgId") String msgId);
+    int updateByPrimaryKey(SmsMtMessagePush record);
 
-	/**
-	 * 
-	 * TODO 批量插入信息
-	 * 
-	 * @param list
-	 * @return
-	 */
-	int batchInsert(List<SmsMtMessagePush> list);
+    /**
+     * 根据手机号码和消息ID查询推送记录信息
+     * 
+     * @param mobile
+     * @param msgId
+     * @return
+     */
+    SmsMtMessagePush findByMobileAndMsgid(@Param("mobile") String mobile, @Param("msgId") String msgId);
+
+    /**
+     * 批量插入信息
+     * 
+     * @param list
+     * @return
+     */
+    int batchInsert(List<SmsMtMessagePush> list);
+
 }

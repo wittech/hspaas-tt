@@ -33,7 +33,7 @@ public class MobileLocalImportTest {
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			
 			LOGGER.info("EXCEL数据读取中...");
-			List<String[]> list = ExcelUtil.readExcel("C:\\Users\\tenody\\Desktop\\1484824855636RTF32\\", "手机号段-20170101-357213-全新版.xlsx");
+			List<String[]> list = ExcelUtil.readExcel("C:\\Users\\tenx\\Desktop\\phone-qqzeng-201904-424014\\", "phone-qqzeng-201904-424014.xlsx");
 			LOGGER.info("EXCEL文件共 {} 条数据", list.size());
 			
 			for(String[] rowData : list) {
@@ -118,7 +118,7 @@ public class MobileLocalImportTest {
 		if(cmcpName.contains(CMCP.CHINA_UNICOM.getTitle()))
 			return CMCP.CHINA_UNICOM.getCode();
 		
-		return CMCP.UNRECOGNIZED.getCode();
+		return CMCP.GLOBAL.getCode();
 	}
 
 	

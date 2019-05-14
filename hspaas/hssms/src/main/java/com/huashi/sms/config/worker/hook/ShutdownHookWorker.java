@@ -3,7 +3,7 @@ package com.huashi.sms.config.worker.hook;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
- * TODO 钩子回调线程
+ * 钩子回调线程
  * 
  * @author zhengying
  * @version V1.0
@@ -21,7 +21,6 @@ public class ShutdownHookWorker implements Runnable {
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     public ShutdownHookWorker(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
-
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 

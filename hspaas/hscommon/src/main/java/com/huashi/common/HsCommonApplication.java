@@ -12,24 +12,21 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import com.huashi.common.util.LogUtils;
 
 @EnableAsync
-//@EnableTransactionManagement
 @SpringBootApplication
-//@EnableDubboConfiguration
 @ImportResource({ "classpath:spring-dubbo-provider.xml" })
 public class HsCommonApplication {
 
-	@Bean
-	public CountDownLatch closeLatch() {
-		return new CountDownLatch(1);
-	}
+    @Bean
+    public CountDownLatch closeLatch() {
+        return new CountDownLatch(1);
+    }
 
-	public static void main(String args[]) throws InterruptedException {
-		ApplicationContext ctx = SpringApplication.run(
-				HsCommonApplication.class, args);
+    public static void main(String args[]) throws InterruptedException {
+        ApplicationContext ctx = SpringApplication.run(HsCommonApplication.class, args);
 
-		LogUtils.info("华时融合公共服务项目启动!");
+        LogUtils.info("华时融合公共服务项目启动!");
 
-		CountDownLatch closeLatch = ctx.getBean(CountDownLatch.class);
-		closeLatch.await();
-	}
+        CountDownLatch closeLatch = ctx.getBean(CountDownLatch.class);
+        closeLatch.await();
+    }
 }

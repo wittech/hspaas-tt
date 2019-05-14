@@ -28,6 +28,14 @@ public interface ISmsMtSubmitService {
     BossPaginationVo<SmsMtMessageSubmit> findPage(Map<String, Object> queryParams);
 
     /**
+     * 根据条件查询发送列表集合（含回执信息）
+     * 
+     * @param queryParams 查询条件
+     * @return 列表
+     */
+    List<SmsMtMessageSubmit> findList(Map<String, Object> queryParams);
+
+    /**
      * 查询短信发送记录（前端）
      * 
      * @param userId 用户ID

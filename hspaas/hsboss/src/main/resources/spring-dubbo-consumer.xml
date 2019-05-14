@@ -90,6 +90,9 @@
 
 	<dubbo:reference id="iSmsMtSubmitService"
 		interface="com.huashi.sms.record.service.ISmsMtSubmitService" />
+		
+	<dubbo:reference id="iSmsMtPushService"
+		interface="com.huashi.sms.record.service.ISmsMtPushService" />
 	<dubbo:reference id="iSmsMtTaskService"
 		interface="com.huashi.sms.task.service.ISmsMtTaskService" timeout="1200000" />
 

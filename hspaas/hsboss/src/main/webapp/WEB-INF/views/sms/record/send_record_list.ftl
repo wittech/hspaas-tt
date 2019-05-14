@@ -63,14 +63,14 @@
                                 <div class="col-md-3">
                                     <div class="input-group">
                                         <span class="input-group-addon">所属用户</span>
-                                        <input type="text" class="form-control" id="username" name="username"
-                                               value="${username!''}" readonly style="background: #fff"
-                                               placeholder="选择用户">
-                                        <input type="hidden" name="userId" id="userId" value="${userId!-1}"/>
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-info" type="button"
-                                                    onclick="openUserList();">选择</button>
-                                        </span>
+                                        <select class="form-control selectpicker show-tick" id="userId" name="userId" data-live-search="true">
+				                        	<option value="-1">全部</option>
+				                        	<#if userList??>
+					    					<#list userList as p>
+					    						<option value="${p.id!''}" <#if userId?? && userId == p.id>selected</#if>>${p.name!''}</option>
+					    					</#list>
+								    		</#if>
+				                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -116,7 +116,6 @@
                                 </div>
                             </div>
                             <div class="row" style="margin-top:5px">
-                            	
                                 <div class="col-md-3">
                                 	 <div class="input-group">
                                         <span class="input-group-addon">通道</span>
@@ -134,9 +133,11 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-9">
                                     <a class="btn btn-primary" onclick="jumpPage(1);">查&nbsp;&nbsp;&nbsp;询</a>
-                                    <a class="btn btn-default" onclick="commonClearForm();">重&nbsp;&nbsp;&nbsp;置</a>
+                                    <a class="btn btn-mint" onclick="repushSearch();">按条件推送</a>
+                                    <label class="form-checkbox form-icon form-mint active form-text">
+                                            <input id="ignorePushData" type="checkbox" checked>不统计已推送信息</label>
                                 </div>
                             </div>
                         </form>
@@ -246,25 +247,6 @@
         <#include "/WEB-INF/views/main/left.ftl">
         </div>
 
-        <div class="modal fade" id="myModal">
-            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" onclick="closeModal();"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">手机号</h4>
-                    </div>
-                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000"
-                         id="myModelBody">
-                        <textarea id="all_mobile" class="form-control" rows="6"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div>
-
         <div class="modal fade" id="deliverModal">
             <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
                 <div class="modal-content">
@@ -281,8 +263,8 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
                     </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
+                </div>
+            </div>
         </div>
         
         <!--推送-->
@@ -303,8 +285,8 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" onclick="closePushModal();">关闭</button>
                     </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
+                </div>
+            </div>
         </div>
 
         <div class="modal fade" id="submitRemarkModal">
@@ -322,15 +304,57 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" onclick="closeModal();">关闭</button>
                     </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal fade" id="repushModal">
+            <div class="modal-dialog" style="width:auto;height:auto;min-width:420px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeModal();"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">当前条件推送详情</h4>
+                    </div>
+                    <div class="modal-body" data-scrollbar="true" data-height="500" data-scrollcolor="#000">
+                        <div class="panel-body">
+                        	可推送数量占比统计如下
+	                        <div class="progress progress-striped progress-lg">
+	                            <div id="deiver_title" style="width: 100%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="15" role="progressbar" class="progress-bar progress-bar-progress-bar progress-bar-warning">
+	                                <span>100%</span>
+	                            </div>
+	                        </div>
+	                        
+	                                                                已推送成功数量占比统计如下
+	                        <div class="progress progress-striped progress-lg">
+	                            <div id="pushed_title" style="width: 100%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="15" role="progressbar" class="progress-bar progress-bar-progress-bar progress-bar-success">
+	                                <span>100%</span>
+	                            </div>
+	                        </div>
+                        
+                            <ul class="list-group">
+                            	<li class="list-group-item"> <span id="ready_push_count" class="badge">0</span>准备推送数</li>
+                                <li class="list-group-item"> <span id="pushed_success_count" class="badge">0</span>已推送成功数</li>
+                                <li class="list-group-item"> <span id="pushed_failed_count" class="badge">0</span>已推送失败数（重试2次）</li>
+                                <li class="list-group-item"> <span id="uncatched_push_count" class="badge">0</span>无法推送数（未回执）</li>
+                                <li class="list-group-item"> <span id="pushed_all_count" class="badge">0</span>可重推总数（所有已回执）</li>
+                            </ul>
+                            
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" onclick="repush();">重推</button>
+                        <button type="button" class="btn btn-default" onclick="closeModal();">取消</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
     <script src="${BASE_PATH}/resources/js/bootstrap/jquery-2.1.1.min.js"></script>  <script src="${BASE_PATH}/resources/js/confirm/jquery-confirm.js"></script> <script src="${BASE_PATH}/resources/js/pop/jquery-migrate-1.2.1.js"></script> <script src="${BASE_PATH}/resources/js/pop/yanue.pop.js"></script>
     <script src="${BASE_PATH}/resources/js/bootstrap/bootstrap.min.js"></script>
     <script src="${BASE_PATH}/resources/js/bootstrap/scripts.js"></script>
-    <#include "/WEB-INF/views/base/customer/pop_user_list.ftl">
 </body>
 <script type="text/javascript">
 
@@ -373,6 +397,32 @@
         $('#deliverModal').modal('show');
     }
     
+    function repushSearch() {
+    	var data = $('#myform').serialize();
+    	
+    	if($("#ignorePushData").prop("checked") == "checked") {
+    		data = data + "&ignorePushData=1";
+    	}
+    
+    	$.ajax({
+            url: '${BASE_PATH}/sms/record/repushSearch',
+            data: data,
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+            	if (data.result) {
+                    $("#repushModal .modal-title").html("提交量&nbsp;<span class='label label-success'>"+data.submitCount+"</span> &nbsp;&nbsp; 已回执&nbsp;<span class='label label-primary'>"+data.deliverCount+"</span>");
+    				// $("#deiver_title").attr("style", "width:")
+    				
+    				$("#repushModal").modal('show');
+                }
+            }, error: function (data) {
+                Boss.alert('重推查询失败!');
+            }
+        });
+    	
+    }
+    
     //推送
     function showMessagePush(time,obj){
         $('#pushShowTime').val(time);
@@ -387,17 +437,11 @@
         $('#pushShowContent').modal('hide');
         $('#pushShowTime').modal('hide');
     }
-    
-
-    function showAllMobile(mobile) {
-        $('#all_mobile').val(mobile);
-        $('#myModal').modal('show');
-    }
 
     function closeModal() {
-        $('#myModal').modal('hide');
         $('#deliverModal').modal('hide');
         $('#submitRemarkModal').modal('hide');
+        $('#repushModal').modal('hide');
     }
 
     function showSubmitList(obj, id) {
@@ -412,5 +456,6 @@
             $('.create_child_' + id).hide();
         }
     }
+    
 </script>
 </html>

@@ -5,63 +5,63 @@ import java.util.Date;
 
 import com.huashi.common.user.model.UserModel;
 
-public class SmsMtMessageSubmit implements Serializable{
-    
-	private static final long serialVersionUID = -2043630223588424833L;
+public class SmsMtMessageSubmit implements Serializable {
 
-	private Long id;
+    private static final long   serialVersionUID = -2043630223588424833L;
 
-    private Integer userId;
+    private Long                id;
 
-    private Long sid;
+    private Integer             userId;
 
-    private String mobile;
-    
-    private Integer provinceCode;
+    private Long                sid;
 
-    private Integer cmcp;
+    private String              mobile;
 
-    private String content;
+    private Integer             provinceCode;
 
-    private Integer fee;
+    private Integer             cmcp;
 
-    private String attach;
+    private String              content;
 
-    private Integer passageId;
+    private Integer             fee;
 
-    private Boolean needPush = false;
+    private String              attach;
 
-    private String pushUrl;
+    private Integer             passageId;
 
-    private Date createTime;
+    private Boolean             needPush         = false;
 
-    private Long createUnixtime;
+    private String              pushUrl;
 
-    private Integer status;
+    private Date                createTime;
 
-    private String remark;
+    private Long                createUnixtime;
 
-    private String msgId;
-    
-    private UserModel userModel;
-    
+    private Integer             status;
+
+    private String              remark;
+
+    private String              msgId;
+
+    private UserModel           userModel;
+
     private SmsMtMessageDeliver messageDeliver;
 
-    private SmsMtMessagePush messagePush;
+    private SmsMtMessagePush    messagePush;
 
-    private String passageName;
+    private String              passageName;
 
-    private String appKey;
+    private String              appKey;
     // 回调网址
-    private String callback;
-    
+    private String              callback;
+
     // 发送条数，伪列
-    private Integer amount;
-    
+    private Integer             amount;
+
     // 接入号码
-    private String destnationNo;
+    private String              destnationNo;
     // 针对提交失败补状态码
-    private String pushErrorCode;
+    private String              pushErrorCode;
 
     public Long getId() {
         return id;
@@ -191,84 +191,84 @@ public class SmsMtMessageSubmit implements Serializable{
         this.msgId = msgId == null ? null : msgId.trim();
     }
 
-	public UserModel getUserModel() {
-		return userModel;
-	}
+    public UserModel getUserModel() {
+        return userModel;
+    }
 
-	public void setUserModel(UserModel userModel) {
-		this.userModel = userModel;
-	}
+    public void setUserModel(UserModel userModel) {
+        this.userModel = userModel;
+    }
 
-	public SmsMtMessageDeliver getMessageDeliver() {
-		return messageDeliver;
-	}
+    public SmsMtMessageDeliver getMessageDeliver() {
+        return messageDeliver;
+    }
 
-	public void setMessageDeliver(SmsMtMessageDeliver messageDeliver) {
-		this.messageDeliver = messageDeliver;
-	}
+    public void setMessageDeliver(SmsMtMessageDeliver messageDeliver) {
+        this.messageDeliver = messageDeliver;
+    }
 
-	public SmsMtMessagePush getMessagePush() {
-		return messagePush;
-	}
+    public SmsMtMessagePush getMessagePush() {
+        return messagePush;
+    }
 
-	public void setMessagePush(SmsMtMessagePush messagePush) {
-		this.messagePush = messagePush;
-	}
+    public void setMessagePush(SmsMtMessagePush messagePush) {
+        this.messagePush = messagePush;
+    }
 
-	public String getPassageName() {
-		return passageName;
-	}
+    public String getPassageName() {
+        return passageName;
+    }
 
-	public void setPassageName(String passageName) {
-		this.passageName = passageName;
-	}
+    public void setPassageName(String passageName) {
+        this.passageName = passageName;
+    }
 
-	public String getAppKey() {
-		return appKey;
-	}
+    public String getAppKey() {
+        return appKey;
+    }
 
-	public void setAppKey(String appKey) {
-		this.appKey = appKey;
-	}
+    public void setAppKey(String appKey) {
+        this.appKey = appKey;
+    }
 
-	public String getCallback() {
-		return callback;
-	}
+    public String getCallback() {
+        return callback;
+    }
 
-	public void setCallback(String callback) {
-		this.callback = callback;
-	}
+    public void setCallback(String callback) {
+        this.callback = callback;
+    }
 
-	public Integer getAmount() {
-		return amount;
-	}
+    public Integer getAmount() {
+        return amount;
+    }
 
-	public void setAmount(Integer amount) {
-		this.amount = amount;
-	}
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
 
-	public String getDestnationNo() {
-		return destnationNo;
-	}
+    public String getDestnationNo() {
+        return destnationNo;
+    }
 
-	public void setDestnationNo(String destnationNo) {
-		this.destnationNo = destnationNo;
-	}
+    public void setDestnationNo(String destnationNo) {
+        this.destnationNo = destnationNo;
+    }
 
-	public Integer getProvinceCode() {
-		return provinceCode;
-	}
+    public Integer getProvinceCode() {
+        return provinceCode;
+    }
 
-	public void setProvinceCode(Integer provinceCode) {
-		this.provinceCode = provinceCode;
-	}
+    public void setProvinceCode(Integer provinceCode) {
+        this.provinceCode = provinceCode;
+    }
 
-	public String getPushErrorCode() {
-		return pushErrorCode;
-	}
+    public String getPushErrorCode() {
+        return pushErrorCode;
+    }
 
-	public void setPushErrorCode(String pushErrorCode) {
-		this.pushErrorCode = pushErrorCode;
-	}
-	
+    public void setPushErrorCode(String pushErrorCode) {
+        this.pushErrorCode = pushErrorCode;
+    }
+
 }

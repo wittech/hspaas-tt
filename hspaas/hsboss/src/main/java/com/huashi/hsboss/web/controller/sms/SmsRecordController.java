@@ -26,6 +26,7 @@ import com.huashi.sms.record.domain.SmsApiFailedRecord;
 import com.huashi.sms.record.service.ISmsApiFaildRecordService;
 import com.huashi.sms.record.service.ISmsMoMessageService;
 import com.huashi.sms.record.service.ISmsMtProcessFailedService;
+import com.huashi.sms.record.service.ISmsMtPushService;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.huashi.sms.task.service.ISmsMtTaskService;
@@ -50,6 +51,8 @@ public class SmsRecordController extends BaseController {
     private ISmsMtTaskService          iSmsMtTaskService;
     @Inject.BY_NAME
     private ISmsMtSubmitService        iSmsMtSubmitService;
+    @Inject.BY_NAME
+    private ISmsMtPushService          iSmsMtPushService;
     @Inject.BY_NAME
     private ISmsPassageService         iSmsPassageService;
     @Inject.BY_NAME
@@ -120,14 +123,14 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 根据运营商查询通道列表信息
+     * 根据运营商查询通道列表信息
      */
     public void passage_list() {
         renderJson(iSmsPassageService.findByCmcpOrAll(getParaToInt("cmcp")));
     }
 
     /**
-     * TODO 拼接查询条件
+     * 拼接查询条件
      * 
      * @return
      */
@@ -189,14 +192,14 @@ public class SmsRecordController extends BaseController {
     @ActionMode
     public void send_record_list() {
         Map<String, Object> condition = appendQueryParams();
-
         setAttr("page", iSmsMtSubmitService.findPage(condition));
-        setAttrs(condition);
         setAttr("passageList", iSmsPassageService.findAll());
+        setAttr("userList", iUserService.findAll());
+        setAttrs(condition);
     }
 
     /**
-     * TODO 获取一小时前
+     * 获取一小时前
      * 
      * @return
      */
@@ -208,7 +211,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 拼接查询条件
+     * 拼接查询条件
      * 
      * @return
      */
@@ -217,7 +220,6 @@ public class SmsRecordController extends BaseController {
         paramMap.put("sid", getPara("sid"));
         paramMap.put("mobile", getPara("mobile"));
         paramMap.put("content", getPara("content"));
-        paramMap.put("username", getPara("username"));
         paramMap.put("userId", getParaToInt("userId", -1));
 
         String startDate = getPara("startDate");
@@ -245,7 +247,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 批量审批通过
+     * 批量审批通过
      */
     @AuthCode(code = { OperCode.OPER_CODE_2001001001 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -258,7 +260,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 同内容批放
+     * 同内容批放
      */
     @AuthCode(code = { OperCode.OPER_CODE_2001001002 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -278,7 +280,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 批量驳回任务
+     * 批量驳回任务
      */
     @AuthCode(code = { OperCode.OPER_CODE_2001001003 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -291,7 +293,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 同内容驳回
+     * 同内容驳回
      */
     @AuthCode(code = { OperCode.OPER_CODE_2001001004 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -306,7 +308,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 批量切换通道
+     * 批量切换通道
      */
     @AuthCode(code = { OperCode.OPER_CODE_2001001005 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -319,7 +321,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 批量重新分包
+     * 批量重新分包
      */
     @AuthCode(code = { OperCode.OPER_CODE_2001001006 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -328,7 +330,7 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 批量更新短信内容
+     * 批量更新短信内容
      */
     @AuthCode(code = { OperCode.OPER_CODE_2001001007 })
     @ActionMode(type = EnumConstant.ActionType.JSON)
@@ -337,7 +339,21 @@ public class SmsRecordController extends BaseController {
     }
 
     /**
-     * TODO 驳回（子任务）
+     * 重推条件查询
+     */
+    public void repushSearch() {
+        renderResultJson(iSmsMtPushService.getPushReport(appendQueryParams()));
+    }
+
+    /**
+     * 重推提交
+     */
+    public void repush() {
+        renderResultJson(iSmsMtPushService.repush(getParaToLong("serialNo")));
+    }
+
+    /**
+     * 驳回（子任务）
      */
     public void refuse_task() {
         renderResultJson(iSmsMtTaskService.doRejectInTaskPackets(getParaToLong("childId")));

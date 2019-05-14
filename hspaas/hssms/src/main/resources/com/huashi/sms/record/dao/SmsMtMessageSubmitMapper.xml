@@ -7,7 +7,8 @@
 		<result column="user_id" property="userId" jdbcType="INTEGER" />
 		<result column="sid" property="sid" jdbcType="BIGINT" />
 		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
-		<result column="province_code" property="provinceCode" jdbcType="INTEGER" />
+		<result column="province_code" property="provinceCode"
+			jdbcType="INTEGER" />
 		<result column="cmcp" property="cmcp" jdbcType="INTEGER" />
 		<result column="content" property="content" jdbcType="VARCHAR" />
 		<result column="fee" property="fee" jdbcType="INTEGER" />
@@ -52,7 +53,8 @@
 		</association>
 	</resultMap>
 	<sql id="Base_Column_List">
-		id, user_id, sid, mobile, province_code, cmcp, content, fee, attach,
+		id, user_id, sid, mobile, province_code, cmcp, content,
+		fee, attach,
 		passage_id,
 		need_push, push_url,destnation_no,
 		create_time,
@@ -81,11 +83,14 @@
 		attach, passage_id, need_push,
 		push_url, create_time,
 		create_unixtime,
-		status, remark, msg_id,destnation_no
+		status, remark,
+		msg_id,destnation_no
 		)
 		values
-		(#{userId,jdbcType=INTEGER}, #{sid,jdbcType=BIGINT},
-		#{mobile,jdbcType=VARCHAR}, #{provinceCode,jdbcType=INTEGER},
+		(#{userId,jdbcType=INTEGER},
+		#{sid,jdbcType=BIGINT},
+		#{mobile,jdbcType=VARCHAR},
+		#{provinceCode,jdbcType=INTEGER},
 		#{cmcp,jdbcType=INTEGER},
 		#{content,jdbcType=VARCHAR}, #{fee,jdbcType=INTEGER},
 		#{attach,jdbcType=VARCHAR}, #{passageId,jdbcType=INTEGER},
@@ -297,18 +302,25 @@
 	</update>
 
 	<select id="findList" resultMap="BaseResultMap">
-		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp, s.content, s.fee,
+		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp,
+		s.content, s.fee,
 		s.attach, s.passage_id,
-		s.need_push, s.push_url,s.create_time,
-		s.create_unixtime, s.status, s.remark, s.msg_id,s.destnation_no,
-		sd.mobile deliver_mobile,sd.id deliver_id,sd.status_code
+		s.need_push,
+		s.push_url,s.create_time,
+		s.create_unixtime, s.status, s.remark,
+		s.msg_id,s.destnation_no,
+		sd.mobile deliver_mobile,sd.id
+		deliver_id,sd.status_code
 		deliver_status_code,
-		sd.status deliver_status,sd.deliver_time,sd.create_time
+		sd.status
+		deliver_status,sd.deliver_time,sd.create_time
 		deliver_create_time,sd.remark deliver_remark
 		from
-		sms_mt_message_submit s
+		sms_mt_message_submit
+		s
 		left join sms_mt_message_deliver sd on
-		sd.msg_id = s.msg_id and sd.mobile = s.mobile
+		sd.msg_id = s.msg_id and
+		sd.mobile = s.mobile
 		where 1 = 1
 		<if test="userId != null and userId > -1">
 			and s.user_id = #{userId}
@@ -334,8 +346,9 @@
 		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
 			and s.status = #{sendStatus}
 		</if>
-		
-		<!-- deliverStatus is 2, it means that has no deliver data, waitting for gateway callback -->
+
+		<!-- deliverStatus is 2, it means that has no deliver data, waitting for 
+			gateway callback -->
 		<if test="deliverStatus == 2">
 			and sd.status is null
 		</if>
@@ -344,7 +357,12 @@
 			and sd.status = #{deliverStatus}
 		</if>
 
-		order by s.create_unixtime desc limit #{start},#{end}
+		order by s.create_unixtime desc
+
+		<if test="start != null and end != null">
+			limit #{start},#{end}
+		</if>
+
 	</select>
 
 
@@ -378,7 +396,8 @@
 		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
 			and s.status = #{sendStatus}
 		</if>
-		<!-- deliverStatus is 2, it means that has no deliver data, waitting for gateway callback -->
+		<!-- deliverStatus is 2, it means that has no deliver data, waitting for 
+			gateway callback -->
 		<if test="deliverStatus == 2">
 			and sd.status is null
 		</if>
@@ -386,18 +405,23 @@
 		<if test="deliverStatus == 0 or deliverStatus == 1">
 			and sd.status = #{deliverStatus}
 		</if>
-		
+
 	</select>
-	
-	
+
+
 	<select id="findListByUser" resultMap="BaseResultMap">
-		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp, s.content, s.fee,
+		select s.id, s.user_id, s.sid, s.mobile, s.province_code, s.cmcp,
+		s.content, s.fee,
 		s.attach, s.passage_id,
-		s.need_push, s.push_url,s.create_time,
-		s.create_unixtime, s.status, s.remark, s.msg_id,s.destnation_no
+		s.need_push,
+		s.push_url,s.create_time,
+		s.create_unixtime, s.status, s.remark,
+		s.msg_id,s.destnation_no
 		from sms_mt_message_submit s
-		where s.user_id = #{userId} and s.create_unixtime &gt;=#{startDate} and s.create_unixtime &lt;=#{endDate}
-		
+		where s.user_id =
+		#{userId} and s.create_unixtime &gt;=#{startDate} and
+		s.create_unixtime &lt;=#{endDate}
+
 		<if test="sid != null and sid != ''">
 			and s.sid = #{sid}
 		</if>
@@ -417,7 +441,9 @@
 
 	<select id="findCountByUser" resultType="java.lang.Integer">
 		select count(0) from sms_mt_message_submit s
-		where user_id = #{userId} and s.create_unixtime &gt;=#{startDate} and s.create_unixtime &lt;=#{endDate}
+		where user_id = #{userId}
+		and s.create_unixtime &gt;=#{startDate} and s.create_unixtime
+		&lt;=#{endDate}
 		<if test="sid != null and sid != ''">
 			and s.sid = #{sid}
 		</if>
@@ -430,9 +456,9 @@
 		<if test="sendStatus != null and sendStatus !='' and sendStatus > -1">
 			and s.status = #{sendStatus}
 		</if>
-		
+
 	</select>
-	
+
 
 	<select id="findBySid" resultMap="BaseResultMap">
 		select s.*,p.name passage_name
@@ -442,9 +468,11 @@
 	</select>
 
 	<select id="selectByMsgId" resultMap="BaseResultMap">
-		select id,user_id,sid,msg_id,mobile,passage_id, create_time, need_push,
+		select
+		id,user_id,sid,msg_id,mobile,passage_id, create_time, need_push,
 		push_url,attach,destnation_no from
-		sms_mt_message_submit where msg_id = #{msgId} order by id desc limit 1
+		sms_mt_message_submit where msg_id =
+		#{msgId} order by id desc limit 1
 	</select>
 
 	<select id="selectByMobile" resultMap="BaseResultMap">
@@ -479,26 +507,28 @@
 		insert ignore into sms_mt_message_submit (user_id, sid, mobile,
 		province_code, cmcp, content,
 		fee, attach, destnation_no,
-		passage_id, need_push, push_url,
+		passage_id,
+		need_push, push_url,
 		create_time, create_unixtime, status,
-		remark, msg_id) values
-		
+		remark,
+		msg_id) values
+
 		<foreach collection="list" item="message" index="index"
 			separator=",">
-			(#{message.userId,jdbcType=INTEGER}, 
-			#{message.sid,jdbcType=BIGINT}, 
+			(#{message.userId,jdbcType=INTEGER},
+			#{message.sid,jdbcType=BIGINT},
 			#{message.mobile,jdbcType=VARCHAR},
 			#{message.provinceCode,jdbcType=INTEGER},
 			#{message.cmcp,jdbcType=INTEGER},
-			#{message.content,jdbcType=VARCHAR}, 
+			#{message.content,jdbcType=VARCHAR},
 			#{message.fee,jdbcType=INTEGER},
 			#{message.attach,jdbcType=VARCHAR},
-			#{message.destnationNo,jdbcType=VARCHAR}, 
+			#{message.destnationNo,jdbcType=VARCHAR},
 			#{message.passageId,jdbcType=INTEGER},
-			#{message.needPush,jdbcType=BIT}, 
+			#{message.needPush,jdbcType=BIT},
 			#{message.pushUrl,jdbcType=VARCHAR},
 			#{message.createTime,jdbcType=TIMESTAMP},
-			#{message.createUnixtime,jdbcType=BIGINT}, 
+			#{message.createUnixtime,jdbcType=BIGINT},
 			#{message.status,jdbcType=INTEGER},
 			#{message.remark,jdbcType=VARCHAR},
 			#{message.msgId,jdbcType=VARCHAR})
@@ -513,38 +543,50 @@
 	</select>
 
 	<select id="getRecordListToMonitor" resultMap="BaseResultMap">
-		select ss.*,sd.id deliver_id,sd.status deliver_status from sms_mt_message_submit ss
-		left join sms_mt_message_deliver sd on ss.msg_id = sd.msg_id and ss.mobile = sd.mobile
-		where ss.passage_id = #{passageId} and ss.create_unixtime &gt;= #{startTime}
-		and ss.create_unixtime &lt;= #{endTime} order by sd.id desc
+		select ss.*,sd.id
+		deliver_id,sd.status deliver_status from sms_mt_message_submit ss
+		left
+		join sms_mt_message_deliver sd on ss.msg_id = sd.msg_id and ss.mobile
+		= sd.mobile
+		where ss.passage_id = #{passageId} and ss.create_unixtime
+		&gt;= #{startTime}
+		and ss.create_unixtime &lt;= #{endTime} order by
+		sd.id desc
 	</select>
 
 	<select id="selectSubmitReport" resultType="java.util.Map">
-		SELECT  s.user_id, s.province_code, s.passage_id,
-				count(*) as submit_count, 
-				sum(s.fee) as bill_count,
-				sum(CASE sd.status WHEN 0 THEN fee ELSE 0 END) AS success_count,
-				sum(CASE  WHEN  sd.status IS NOT NULL AND sd.status!=0  THEN fee ELSE 0 END) AS submit_failed_count,
-				sum(CASE  WHEN  sd.status IS NULL THEN fee ELSE 0 END) AS unknown_count
- 		FROM sms_mt_message_submit s LEFT JOIN sms_mt_message_deliver sd 
- 		ON sd.msg_id = s.msg_id AND sd.mobile = s.mobile 
-		WHERE s.create_unixtime &gt;= #{startTime} and s.create_unixtime &lt;= #{endTime}
+		SELECT s.user_id,
+		s.province_code, s.passage_id,
+		count(*) as submit_count,
+		sum(s.fee) as bill_count,
+		sum(CASE sd.status WHEN 0 THEN fee ELSE 0 END) AS success_count,
+		sum(CASE WHEN sd.status IS NOT NULL AND sd.status!=0 THEN fee ELSE 0 END) AS
+		submit_failed_count,
+		sum(CASE WHEN sd.status IS NULL THEN fee ELSE 0 END) AS unknown_count
+		FROM sms_mt_message_submit s LEFT JOIN sms_mt_message_deliver sd
+		ON sd.msg_id = s.msg_id AND sd.mobile = s.mobile
+		WHERE s.create_unixtime &gt;= #{startTime} and s.create_unixtime &lt;=
+		#{endTime}
 		GROUP BY s.user_id, s.province_code, s.passage_id
 	</select>
-	
+
 	<select id="selectByUserIdAndMobile" resultType="java.util.Map">
-		SELECT s.id, s.user_id, s.content, s.create_time, s.status as send_status,
-			sd.status as deliver_status, sd.create_time as deliver_time, sd.status_code
- 		FROM sms_mt_message_submit s LEFT JOIN sms_mt_message_deliver sd 
- 		ON sd.msg_id = s.msg_id AND sd.mobile = s.mobile 
+		SELECT s.id,
+		s.user_id, s.content, s.create_time, s.status as send_status,
+		sd.status as deliver_status, sd.create_time as deliver_time,
+		sd.status_code
+		FROM sms_mt_message_submit s LEFT JOIN sms_mt_message_deliver sd
+		ON sd.msg_id = s.msg_id AND sd.mobile = s.mobile
 		WHERE s.user_id = #{userId} and s.mobile = #{mobile}
 	</select>
 
 	<select id="selectCmcpReport" resultType="java.util.Map">
-		SELECT COUNT(*) as count, province_code, cmcp FROM sms_mt_message_submit 
-			WHERE create_unixtime &gt;= #{startTime} and create_unixtime &lt;= #{endTime}
-			GROUP BY province_code, cmcp
+		SELECT COUNT(*) as
+		count, province_code, cmcp FROM sms_mt_message_submit
+		WHERE create_unixtime &gt;= #{startTime} and create_unixtime &lt;=
+		#{endTime}
+		GROUP BY province_code, cmcp
 	</select>
 
-	
+
 </mapper>

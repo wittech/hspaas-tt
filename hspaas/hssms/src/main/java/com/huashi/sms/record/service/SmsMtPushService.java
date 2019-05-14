@@ -44,10 +44,12 @@ import com.huashi.sms.config.worker.fork.MtReportFailoverPushWorker;
 import com.huashi.sms.config.worker.fork.MtReportPushToDeveloperWorker;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;
 import com.huashi.sms.passage.context.PassageContext.PushStatus;
+import com.huashi.sms.record.dao.SmsMtMessageDeliverMapper;
 import com.huashi.sms.record.dao.SmsMtMessagePushMapper;
 import com.huashi.sms.record.domain.SmsMtMessageDeliver;
 import com.huashi.sms.record.domain.SmsMtMessagePush;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
+import com.huashi.sms.record.vo.SmsPushReport;
 import com.huashi.util.HttpClientUtil;
 import com.huashi.util.HttpClientUtil.RetryResponse;
 
@@ -65,6 +67,8 @@ public class SmsMtPushService implements ISmsMtPushService {
     private IUserService                       userService;
     @Autowired
     private SmsMtMessagePushMapper             smsMtMessagePushMapper;
+    @Autowired
+    private SmsMtMessageDeliverMapper          smsMtMessageDeliverMapper;
     @Resource
     private StringRedisTemplate                stringRedisTemplate;
     @Autowired
@@ -80,6 +84,16 @@ public class SmsMtPushService implements ISmsMtPushService {
     private ApplicationContext                 applicationContext;
     @Resource
     private ThreadPoolTaskExecutor             threadPoolTaskExecutor;
+
+    /**
+     * 重推回执ID集合间
+     */
+    private static final String                REPUSH_DELIVER_IDS_KEY   = "repush_deliver_ids:";
+
+    /**
+     * 重推送锁
+     */
+    private static final Lock                  REPUSH_MONITOR           = new ReentrantLock();
 
     private final Logger                       logger                   = LoggerFactory.getLogger(getClass());
 
@@ -606,6 +620,118 @@ public class SmsMtPushService implements ISmsMtPushService {
         logger.info("Deliver failover threads[" + failoverThreadPoolSize + "] has joined");
 
         return true;
+    }
+
+    private String getRepushKey(Long serialNo) {
+        return REPUSH_DELIVER_IDS_KEY + serialNo;
+    }
+
+    @Override
+    public SmsPushReport getPushReport(Map<String, Object> queryParams) {
+        SmsPushReport report = new SmsPushReport();
+
+        List<SmsMtMessageSubmit> list = smsMtSubmitService.findList(queryParams);
+        if (CollectionUtils.isEmpty(list)) {
+            return report;
+        }
+
+        report.setSubmitCount(list.size());
+
+        boolean isIgnoredPushData = isIgnoredPushData(queryParams);
+
+        try {
+
+            List<String> deliverIds = new ArrayList<>();
+            for (SmsMtMessageSubmit submit : list) {
+                if (submit.getMessageDeliver() == null || submit.getMessageDeliver().getId() == null) {
+                    report.setUndeliverCount(report.getUndeliverCount() + 1);
+                    continue;
+                }
+
+                report.setDeliverCount(report.getDeliverCount() + 1);
+                deliverIds.add(submit.getMessageDeliver().getId() + "");
+
+                if (!submit.getNeedPush()) {
+                    report.setUnecessaryPushCount(report.getUnecessaryPushCount() + 1);
+                    continue;
+                }
+
+                if (isIgnoredPushData) {
+                    continue;
+                }
+
+                SmsMtMessagePush push = smsMtMessagePushMapper.findByMobileAndMsgid(submit.getMobile(),
+                                                                                    submit.getMsgId());
+                if (push == null) {
+                    report.setReadyPushCount(report.getReadyPushCount() + 1);
+                } else if (PushStatus.SUCCESS.getValue() == push.getStatus()) {
+                    report.setPushedSuccessCount(report.getPushedSuccessCount());
+                } else if (PushStatus.FAILED.getValue() == push.getStatus()) {
+                    report.setPushedFailedCount(report.getPushedFailedCount());
+                }
+            }
+
+            report.setSerialNo(push2Redis(deliverIds));
+
+        } catch (Exception e) {
+            logger.error("Push report generate failed", e);
+        }
+
+        return report;
+    }
+
+    private Long push2Redis(List<String> deliverIds) {
+        Long curentTime = System.currentTimeMillis();
+        try {
+            stringRedisTemplate.opsForList().leftPushAll(getRepushKey(curentTime), deliverIds);
+
+            // ttl 5 minute, expired if operate data beyond 5 minutes
+            stringRedisTemplate.expire(getRepushKey(curentTime), 5, TimeUnit.MINUTES);
+
+        } catch (Exception e) {
+            logger.error("Load repush data[" + deliverIds + "] to redis failed", e);
+        }
+
+        return curentTime;
+    }
+
+    private boolean isIgnoredPushData(Map<String, Object> queryParams) {
+        return MapUtils.isNotEmpty(queryParams) && queryParams.containsKey("ignorePushData");
+    }
+
+    @Override
+    public boolean repush(Long serialNo) {
+        if (serialNo == null || serialNo == 0L) {
+            logger.error("Repush args[serialNo] is illegal");
+            return false;
+        }
+
+        REPUSH_MONITOR.lock();
+        try {
+
+            List<String> deliverIds = stringRedisTemplate.opsForList().range(getRepushKey(serialNo), 0, -1);
+            if (CollectionUtils.isEmpty(deliverIds)) {
+                logger.error("No data in redis [" + getRepushKey(serialNo) + "] found");
+                return false;
+            }
+
+            List<SmsMtMessageDeliver> delivers = smsMtMessageDeliverMapper.findByIds(deliverIds);
+            if (CollectionUtils.isEmpty(delivers)) {
+                logger.error("Can't find any data in deliverIds [" + deliverIds + "]");
+                return false;
+            }
+
+            compareAndPushBody(delivers);
+
+            return true;
+
+        } catch (Exception e) {
+            logger.error("Repush data [" + serialNo + "] failed", e);
+        } finally {
+            REPUSH_MONITOR.unlock();
+        }
+
+        return false;
     }
 
 }

@@ -122,6 +122,15 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
         return page;
     }
+    
+
+    @Override
+    public List<SmsMtMessageSubmit> findList(Map<String, Object> queryParams) {
+        
+        changeTimestampeParamsIfExists(queryParams);
+        
+        return smsMtMessageSubmitMapper.findList(queryParams);
+    }
 
     /**
      * TODO 转换时间戳信息
