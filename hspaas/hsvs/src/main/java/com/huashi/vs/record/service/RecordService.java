@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.vs.record.dao.RecordMapper;
 import com.huashi.vs.record.domain.Record;

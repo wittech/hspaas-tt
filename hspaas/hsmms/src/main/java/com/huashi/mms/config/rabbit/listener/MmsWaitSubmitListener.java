@@ -19,7 +19,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.settings.context.SettingsContext.PushConfigStatus;
 import com.huashi.common.settings.domain.ProvinceLocal;

@@ -9,7 +9,7 @@ import com.huashi.common.user.exception.LoginException;
 import com.huashi.common.util.SecurityUtil;
 import com.huashi.common.vo.SessionUser;
 
-@com.alibaba.dubbo.config.annotation.Service
+@org.apache.dubbo.config.annotation.Service
 public class LoginService implements ILoginService {
 
     @Autowired

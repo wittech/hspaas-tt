@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.util.DateUtil;
 import com.huashi.common.vo.PaginationVo;
 import com.huashi.sms.report.domain.SmsSubmitHourReport;

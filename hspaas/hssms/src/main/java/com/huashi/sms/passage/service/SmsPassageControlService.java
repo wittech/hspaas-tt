@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.sms.passage.context.PassageContext.PassageStatus;
 import com.huashi.sms.passage.context.PassageContext.ResultCode;

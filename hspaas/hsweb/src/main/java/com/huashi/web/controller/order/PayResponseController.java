@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.bill.pay.constant.PayContext;
 import com.huashi.bill.pay.exception.AlipayException;
 import com.huashi.bill.pay.service.IAlipayService;

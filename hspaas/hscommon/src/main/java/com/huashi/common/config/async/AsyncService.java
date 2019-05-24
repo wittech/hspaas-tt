@@ -7,12 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.config.redis.CommonRedisConstant;
 
 @Service
+@EnableAsync
 public class AsyncService {
 
     @Resource

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.spring.ReferenceBean;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +16,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.alibaba.dubbo.config.spring.ReferenceBean;
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.CommonContext.CMCP;
 import com.huashi.sms.passage.context.PassageContext.DeliverStatus;

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.config.redis.CommonRedisConstant;
 import com.huashi.common.settings.context.SettingsContext;
 import com.huashi.common.settings.context.SettingsContext.SystemConfigType;

@@ -1,6 +1,6 @@
 package com.huashi.exchanger.test;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.util.IdGenerator;
 import com.huashi.common.util.RandomUtil;
 import com.huashi.constants.CommonContext.CMCP;

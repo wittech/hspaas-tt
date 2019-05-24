@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.notice.dao.EmailSendRecordMapper;
 import com.huashi.common.notice.domain.EmailSendRecord;
 import com.huashi.common.notice.domain.EmailTemplate;

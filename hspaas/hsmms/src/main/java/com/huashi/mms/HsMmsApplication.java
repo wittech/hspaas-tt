@@ -1,13 +1,13 @@
 package com.huashi.mms;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ImportResource;
 
 import com.huashi.common.util.LogUtils;
 
 @SpringBootApplication
-@ImportResource({ "classpath:spring-dubbo-provider.xml" })
+@MapperScan("com.huashi.mms.**.dao")
 public class HsMmsApplication {
 
     public static void main(String[] args) {

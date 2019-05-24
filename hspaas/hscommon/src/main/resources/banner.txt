@@ -8,6 +8,6 @@ ${AnsiColor.BRIGHT_YELLOW}
 		|_|  |_|\__,_|\__,_|___/_| |_|_|   \_____\___/|_| |_| |_|_| |_| |_|\___/|_| |_|
 
 
-${AnsiColor.BRIGHT_BLUE}
+${AnsiColor.BLUE}
 ::: Huashi ::: ${application.formatted-version}  ＼(^O^)／    Spring-Boot ${spring-boot.formatted-version}
 ${AnsiColor.CYAN}                                                            

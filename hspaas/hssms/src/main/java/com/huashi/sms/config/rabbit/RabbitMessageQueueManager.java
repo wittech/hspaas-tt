@@ -9,15 +9,11 @@ import javax.annotation.Resource;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,7 +22,7 @@ import com.alibaba.druid.util.StringUtils;
 import com.huashi.sms.config.rabbit.constant.RabbitConstant;
 
 /**
- * TODO 消息队列管理
+ * 消息队列管理
  *
  * @author zhengying
  * @version V1.0.0
@@ -67,7 +63,7 @@ public class RabbitMessageQueueManager {
     // private SimpleMessageListenerContainer simpleMessageListenerContainer;
 
     /**
-     * TODO 创建指定消费者数量消息队列
+     * 创建指定消费者数量消息队列
      * 
      * @param queueName 队列名称
      * @param isDirectProtocol 是否为直连协议
@@ -105,29 +101,29 @@ public class RabbitMessageQueueManager {
     }
 
     /**
-     * TODO 移除队列
+     * 移除队列
      * 
-     * @param queueName
+     * @param queueName 队列名称
      */
     public boolean removeQueue(String queueName) {
         return rabbitAdmin.deleteQueue(queueName);
     }
 
     /**
-     * TODO 判断队列是否存在
+     * 判断队列是否存在
      * 
-     * @param queueName
-     * @return
+     * @param queueName 队列名称
+     * @return true/false
      */
     public boolean isQueueExists(String queueName) {
         return rabbitAdmin.getQueueProperties(queueName) != null;
     }
 
     /**
-     * TODO 获取消息个数
+     * 获取消息个数
      * 
-     * @param queueName
-     * @return
+     * @param queueName 队列名称
+     * @return  数量
      */
     public int getMessageCount(String queueName) {
         if (StringUtils.isEmpty(queueName)) {
@@ -156,12 +152,12 @@ public class RabbitMessageQueueManager {
     }
 
     /**
-     * TODO 声明队列消费者信息
+     * 声明队列消费者信息
      * 
      * @param queueName 队列名称
      * @param consumers 消费者线程数量
-     * @param channelAwareMessageListener
-     * @return
+     * @param channelAwareMessageListener 频道消息监听
+     * @return 消息处理器
      */
     private SimpleMessageListenerContainer messageListenerContainer(String queueName,
                                                                     Integer consumers,

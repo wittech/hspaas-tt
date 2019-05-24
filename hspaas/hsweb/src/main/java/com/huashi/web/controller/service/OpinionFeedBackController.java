@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.service.context.OpinionFeedBackContext;
 import com.huashi.common.service.domain.OpinionFeedBack;
 import com.huashi.common.service.service.IOpinionFeedBackService;

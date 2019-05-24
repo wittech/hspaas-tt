@@ -1,28 +1,20 @@
 package com.huashi.sms.record.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.bill.bill.domain.ConsumptionReport;
 import com.huashi.common.user.model.UserModel;
@@ -50,14 +42,14 @@ import com.huashi.sms.task.context.TaskContext.MessageSubmitStatus;
 import com.huashi.sms.task.domain.SmsMtTaskPackets;
 
 /**
- * TODO 下行短信服务实现
+ * 下行短信服务实现
  *
  * @author zhengying
  * @version V1.0
  * @date 2017年2月27日 下午5:48:03
  */
 @Service
-public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.ConfirmCallback {
+public class SmsMtSubmitService implements ISmsMtSubmitService {
 
     @Reference
     private IUserService              userService;
@@ -75,8 +67,6 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
     @Resource
     private RabbitTemplate            rabbitTemplate;
-    @Resource
-    private StringRedisTemplate       stringRedisTemplate;
 
     @Autowired
     private SmsWaitSubmitListener     smsWaitSubmitListener;
@@ -122,18 +112,17 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
 
         return page;
     }
-    
 
     @Override
     public List<SmsMtMessageSubmit> findList(Map<String, Object> queryParams) {
-        
+
         changeTimestampeParamsIfExists(queryParams);
-        
+
         return smsMtMessageSubmitMapper.findList(queryParams);
     }
 
     /**
-     * TODO 转换时间戳信息
+     * 转换时间戳信息
      *
      * @param queryParams
      */
@@ -152,7 +141,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     }
 
     /**
-     * TODO 加入记录关联列数据（主要针对回执数据和推送数据）
+     * 加入记录关联列数据（主要针对回执数据和推送数据）
      *
      * @param submits
      */
@@ -243,7 +232,8 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
             // record.setMessagePush(pushMapper.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
             // }
             if (record.getStatus() == 0) {
-                record.setMessageDeliver(smsMtDeliverService.findByMobileAndMsgid(record.getMobile(), record.getMsgId()));
+                record.setMessageDeliver(smsMtDeliverService.findByMobileAndMsgid(record.getMobile(),
+                                                                                  record.getMsgId()));
             }
         }
         return new PaginationVo<>(dataList, _currentPage, totalRecord);
@@ -498,21 +488,6 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     }
 
     @Override
-    public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-        // if (correlationData == null) {
-        // return;
-        // }
-
-        // if (ack) {
-        // logger.error("=================待提交消息队列处理成功：{}",
-        // correlationData.getId());
-        // } else {
-        // logger.error("=================待提交消息队列处理失败：{}，信息：{}",
-        // correlationData.getId(), cause);
-        // }
-    }
-
-    @Override
     public boolean sendToSubmitQueue(List<SmsMtTaskPackets> packets) {
         if (CollectionUtils.isEmpty(packets)) {
             logger.warn("子任务数据为空，无需发送队列");
@@ -529,10 +504,8 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
                     continue;
                 }
 
-                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS,
-                                              getSubmitMessageQueueName(passageCode),
-                                              packet,
-                                              (message) -> {
+                rabbitTemplate.convertAndSend(RabbitConstant.EXCHANGE_SMS, getSubmitMessageQueueName(passageCode),
+                                              packet, (message) -> {
 
                                                   message.getMessageProperties().setPriority(WordsPriority.getLevel(packet.getContent()));
 
@@ -546,7 +519,7 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
     }
 
     /**
-     * TODO 根据子任务中的通道获取通道代码信息
+     * 根据子任务中的通道获取通道代码信息
      *
      * @param passageCodesMap
      * @param packet
@@ -568,12 +541,6 @@ public class SmsMtSubmitService implements ISmsMtSubmitService, RabbitTemplate.C
         }
 
         return packet.getPassageCode();
-    }
-
-    @PostConstruct
-    public void setConfirmCallback() {
-        // rabbitTemplate如果为单例的话，那回调就是最后设置的内容
-        rabbitTemplate.setConfirmCallback(this);
     }
 
     @Override

@@ -23,8 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.alibaba.druid.util.StringUtils;
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.passage.context.TemplateEnum.PassageTemplateType;
 import com.huashi.common.settings.domain.Province;

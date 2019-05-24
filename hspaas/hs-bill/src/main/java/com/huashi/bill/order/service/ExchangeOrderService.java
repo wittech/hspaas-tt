@@ -4,8 +4,8 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.bill.order.constant.ExchangeOrderContext.ExchangeStatus;
 import com.huashi.bill.order.constant.ExchangeOrderContext.ExchangeType;
 import com.huashi.bill.order.dao.ExchangeOrderMapper;

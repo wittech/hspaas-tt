@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.exchanger.constant.ParameterFilterContext;
 import com.huashi.exchanger.service.ISmsProviderService;

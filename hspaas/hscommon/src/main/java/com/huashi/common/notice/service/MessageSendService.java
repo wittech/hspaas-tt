@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.notice.dao.SmsMtRecordMapper;
 import com.huashi.common.notice.domain.SmsMtRecord;
 import com.huashi.common.notice.util.MessageSendUtil;

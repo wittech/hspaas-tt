@@ -6,7 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.provider.domain.ProviderApiCode;
 import com.huashi.common.provider.service.IProviderApiCodeService;
 import com.huashi.constants.CommonContext.PlatformType;

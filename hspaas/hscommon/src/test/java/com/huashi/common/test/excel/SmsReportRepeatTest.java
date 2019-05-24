@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.spring.ReferenceBean;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,7 +21,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.alibaba.dubbo.config.spring.ReferenceBean;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.user.util.ExcelUtil;
 import com.huashi.common.util.DateUtil;
@@ -52,7 +52,7 @@ public class SmsReportRepeatTest {
 		
 		String url = "dubbo://106.14.37.153:20882/com.huashi.sms.record.service.ISmsMtDeliverService?anyhost=true&application=hssms-provider&default.retries=0&default.timeout=100000&dubbo=2.8.4&generic=false&interface=com.huashi.sms.record.service.ISmsMtDeliverService&logger=slf4j&methods=doFinishDeliver,batchInsert,doDeliverToException,saveDeliverLog,findByMobileAndMsgid&pid=21708&serialization=kryo&side=provider×tamp=1514741539828";
 		  
-        ReferenceBean<ISmsMtDeliverService> referenceBean = new ReferenceBean<ISmsMtDeliverService>();  
+        ReferenceBean<ISmsMtDeliverService> referenceBean = new ReferenceBean<ISmsMtDeliverService>();
         referenceBean.setApplicationContext(applicationContext);  
         referenceBean.setInterface(ISmsMtDeliverService.class);  
         referenceBean.setUrl(url);  

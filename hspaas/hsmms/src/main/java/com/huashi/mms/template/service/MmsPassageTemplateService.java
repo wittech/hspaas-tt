@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.alibaba.druid.util.StringUtils;
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.exchanger.domain.ProviderModelResponse;

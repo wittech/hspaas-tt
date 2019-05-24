@@ -8,7 +8,6 @@
 	</parent>
 	<groupId>com.huashi.listener</groupId>
 	<artifactId>hs-listener</artifactId>
-	<name>华时监管中心</name>
 	<description>针对网关回执监听，通道状态更新，后台报表数据定时更新，接收厂商推送报告，上行回执等信息</description>
 
 	<dependencies>
@@ -46,16 +45,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-framework</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>de.javakaffee</groupId>
-			<artifactId>kryo-serializers</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.huashi</groupId>
 			<artifactId>hsapi</artifactId>
 			<version>${project.parent.version}</version>
@@ -67,14 +56,36 @@
 			</exclusions>
 		</dependency>
 
+		<!-- dubbo -->
 		<dependency>
-			<groupId>com.alibaba</groupId>
+			<groupId>org.apache.dubbo</groupId>
+			<artifactId>dubbo-spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.dubbo</groupId>
 			<artifactId>dubbo</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+
+		<!--  zookeeper client-->
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-framework</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-recipes</artifactId>
 		</dependency>
 
 		<dependency>
@@ -82,16 +93,23 @@
 			<artifactId>spring-boot-starter-amqp</artifactId>
 			<exclusions>
 				<exclusion>
-					<artifactId>log4j-over-slf4j</artifactId>
 					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
+					<artifactId>log4j-over-slf4j</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Jackson 相关 -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -100,17 +118,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring-boot.version}</version>
-				<configuration>
-					<mainClass>com.huashi.listener.HsListenerApplication</mainClass>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -7,8 +7,8 @@
 
 	<contextName>${appName}</contextName>
 
-	<!-- appender 指定日志的输出位置, 可以自己实现,决定要把日志输出到什么位置 -->
-	<!-- 定义主要的几个日志等级 TRACE < DEBUG < INFO < WARN < ERROR < OFF -->
+	!-- 加载颜色解析器 -->
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
 
 	<!-- 控制台输出日志 -->
 	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
@@ -21,7 +21,7 @@
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<!--格式化输出,%d:日期;%thread:线程名;%-5level：级别,从左显示5个字符宽度,可以自定义模板类 -->
 			<!--<layout class="chapters.layouts.MySampleLayout" /> -->
-			<pattern>${pattern}</pattern>
+			<pattern>%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%15.15t]){faint} %clr(%-40.40logger{0}){cyan} | %msg%n</pattern>
 		</encoder>
 
 	</appender>

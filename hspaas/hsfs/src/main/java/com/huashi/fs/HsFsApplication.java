@@ -3,12 +3,8 @@
  */
 package com.huashi.fs;
 
-import java.util.concurrent.CountDownLatch;
-
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 
 import com.huashi.common.util.LogUtils;
@@ -24,19 +20,12 @@ import com.huashi.common.util.LogUtils;
 @SpringBootApplication
 @ImportResource({ "classpath:spring.xml" })
 public class HsFsApplication {
-	@Bean
-	public CountDownLatch closeLatch() {
-		return new CountDownLatch(1);
-	}
 
-	public static void main(String args[]) throws InterruptedException {
+	public static void main(String args[]){
 
-		ApplicationContext ctx = new SpringApplicationBuilder()
-				.sources(HsFsApplication.class).web(false).run(args);
+		SpringApplication.run(HsFsApplication.class, args);
 
 		LogUtils.info("----------------华时流量服务项目已启动----------------");
 
-		CountDownLatch closeLatch = ctx.getBean(CountDownLatch.class);
-		closeLatch.await();
 	}
 }

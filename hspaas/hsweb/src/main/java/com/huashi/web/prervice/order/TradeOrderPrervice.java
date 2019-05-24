@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.bill.order.model.AlipayTradeOrderModel;
 import com.huashi.bill.order.service.ITradeOrderService;
 import com.huashi.bill.product.service.IComboService;

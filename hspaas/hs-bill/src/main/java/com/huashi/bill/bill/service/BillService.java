@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.bill.bill.dao.ConsumptionReportMapper;
 import com.huashi.bill.bill.domain.ConsumptionReport;
 import com.huashi.bill.bill.model.FluxDiscountModel;

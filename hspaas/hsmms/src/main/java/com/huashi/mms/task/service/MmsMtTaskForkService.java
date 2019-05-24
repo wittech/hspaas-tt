@@ -20,7 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.settings.context.SettingsContext.PushConfigStatus;
 import com.huashi.common.settings.domain.Province;
 import com.huashi.common.settings.domain.PushConfig;

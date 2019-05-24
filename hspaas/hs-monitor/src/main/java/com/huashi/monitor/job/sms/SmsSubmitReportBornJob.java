@@ -2,7 +2,7 @@ package com.huashi.monitor.job.sms;
 
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.huashi.monitor.job.AbstractJob;
 import com.huashi.sms.report.service.ISmsSubmitHourReportService;

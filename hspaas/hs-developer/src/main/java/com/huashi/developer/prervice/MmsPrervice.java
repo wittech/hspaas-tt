@@ -5,15 +5,15 @@ import java.util.Date;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.huashi.common.user.domain.UserBalance;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.common.util.IdGenerator;
@@ -34,7 +34,7 @@ import com.huashi.mms.template.service.IMmsTemplateService;
 import com.huashi.sms.task.exception.QueueProcessException;
 
 /**
- * TODO 彩信前置服务
+ * 彩信前置服务
  *
  * @author zhengying
  * @version V1.0
@@ -60,10 +60,10 @@ public class MmsPrervice {
     public static final Integer DEFAULT_FEE_IN_SINGLE = 1;
 
     /**
-     * TODO 模板发送
+     * 模板发送
      *
-     * @param smsSendRequest
-     * @return
+     * @param mmsSendByModelRequest 模板蔡雄请求报文
+     * @return 响应信息
      */
     public MmsSendResponse sendMessageByModel(MmsSendByModelRequest mmsSendByModelRequest) {
         MmsMtTask task = new MmsMtTask();
@@ -86,10 +86,10 @@ public class MmsPrervice {
     }
 
     /**
-     * TODO 自定义内容发送
+     * 自定义内容发送
      *
-     * @param mmsSendByModelRequest
-     * @return
+     * @param msSendRequest 普通彩信请求
+     * @return 响应信息
      */
     public MmsSendResponse sendMessage(MmsSendRequest msSendRequest) {
         MmsMtTask task = new MmsMtTask();
@@ -116,10 +116,10 @@ public class MmsPrervice {
     }
 
     /**
-     * TODO 模板报备
+     * 模板报备
      * 
-     * @param mmsModelApplyRequest
-     * @return
+     * @param mmsModelApplyRequest 彩信模板申请
+     * @return 响应信息
      */
     public MmsModelApplyResponse applyModel(MmsModelApplyRequest mmsModelApplyRequest) {
         try {
@@ -147,9 +147,9 @@ public class MmsPrervice {
     }
 
     /**
-     * TODO 获取短余额信息
+     * 获取短余额信息
      *
-     * @return
+     * @return 用户余额响应
      */
     public MmsBalanceResponse getBalance(int userId) {
         UserBalance userBalance = userBalanceService.getByUserId(userId, PlatformType.MULTIMEDIA_MESSAGE_SERVICE);
@@ -163,10 +163,10 @@ public class MmsPrervice {
     }
 
     /**
-     * TODO 提交任务到队列
+     * 提交任务到队列
      *
-     * @param task
-     * @return
+     * @param task 彩信任务
+     * @return 消息ID
      */
     private long joinTask2Queue(MmsMtTask task) {
         try {

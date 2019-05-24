@@ -1,7 +1,7 @@
 package com.huashi.bill.order.service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.bill.order.OrderBuilderException;
 import com.huashi.bill.order.constant.TradeOrderContext;
 import com.huashi.bill.order.constant.TradeOrderContext.TradeOrderStatus;

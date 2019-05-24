@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.notice.context.TemplateContext.EmailCode;
 import com.huashi.common.notice.dao.EmailTemplateMapper;
 import com.huashi.common.notice.domain.EmailTemplate;

@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.notice.dao.EmailVerifyMapper;
 import com.huashi.common.notice.domain.EmailVerify;
 import com.huashi.common.util.DateUtil;

@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.provider.dao.ProviderApiCodeMapper;
 import com.huashi.common.provider.domain.ProviderApiCode;
 

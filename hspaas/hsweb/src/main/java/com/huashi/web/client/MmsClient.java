@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.notice.vo.BaseResponse;
 import com.huashi.common.user.domain.UserDeveloper;
 import com.huashi.common.user.service.IUserDeveloperService;

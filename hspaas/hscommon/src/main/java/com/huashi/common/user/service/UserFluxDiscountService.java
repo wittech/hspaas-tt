@@ -2,7 +2,7 @@ package com.huashi.common.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.user.dao.UserFluxDiscountMapper;
 import com.huashi.common.user.domain.UserFluxDiscount;
 

@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.user.dao.UserBalanceLogMapper;
 import com.huashi.common.user.dao.UserMapper;
 import com.huashi.common.user.domain.UserBalanceLog;

@@ -1,14 +1,7 @@
 package com.huashi.sms.record.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +13,7 @@ import javax.annotation.Resource;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +25,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.PropertyPreFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
-import com.huashi.common.user.service.IUserService;
 import com.huashi.sms.config.cache.redis.constant.SmsRedisConstant;
 import com.huashi.sms.config.worker.fork.MtReportFailoverPushWorker;
 import com.huashi.sms.config.worker.fork.MtReportPushToDeveloperWorker;
@@ -63,8 +54,6 @@ import com.huashi.util.HttpClientUtil.RetryResponse;
 @Service
 public class SmsMtPushService implements ISmsMtPushService {
 
-    @Reference(mock = "fail:return+null")
-    private IUserService                       userService;
     @Autowired
     private SmsMtMessagePushMapper             smsMtMessagePushMapper;
     @Autowired
@@ -237,7 +226,7 @@ public class SmsMtPushService implements ISmsMtPushService {
     /**
      * 添加用户推送线程
      * 
-     * @param userId
+     * @param userId 用户ID
      */
     private void addThreadIfNessary(Integer userId) {
         if (USER_PUTH_THREAD_FLAG.containsKey(userId)) {
@@ -247,8 +236,8 @@ public class SmsMtPushService implements ISmsMtPushService {
         boolean isOk = addUserMtPushListener(userId);
         if (isOk) {
             USER_PUTH_THREAD_FLAG.putIfAbsent(userId, System.currentTimeMillis());
-            logger.info("There are " + (USER_PUTH_THREAD_FLAG.size() * 2) + " threads["
-                        + USER_PUTH_THREAD_FLAG.keySet() + "] joined");
+            logger.info("There are " + (USER_PUTH_THREAD_FLAG.size() * 2) + " threads[" + USER_PUTH_THREAD_FLAG.keySet()
+                        + "] joined");
         }
 
     }
@@ -335,8 +324,7 @@ public class SmsMtPushService implements ISmsMtPushService {
                                                                          new SimplePropertyPreFilter("msgId", "mobile",
                                                                                                      "statusCode",
                                                                                                      "deliverTime",
-                                                                                                     "remark",
-                                                                                                     "status",
+                                                                                                     "remark", "status",
                                                                                                      "createTime")));
             // stringRedisTemplate.expire(SmsRedisConstant.RED_MESSAGE_DELIVED_WAIT_PUSH_LIST, 5, TimeUnit.MINUTES);
         } catch (Exception e) {
@@ -436,8 +424,7 @@ public class SmsMtPushService implements ISmsMtPushService {
     public void setMessageReadyPushConfigurations(List<SmsMtMessageSubmit> submits) {
         try {
             for (SmsMtMessageSubmit submit : submits) {
-                stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()),
-                                                     submit.getMobile(),
+                stringRedisTemplate.opsForHash().put(getMtPushConfigKey(submit.getMsgId()), submit.getMobile(),
                                                      JSON.toJSONString(submit,
                                                                        new SimplePropertyPreFilter("sid", "userId",
                                                                                                    "msgId", "attach",
@@ -510,7 +497,6 @@ public class SmsMtPushService implements ISmsMtPushService {
                 }
             } catch (Exception e) {
                 logger.error("解析推送数据报文异常:{}", body.toJSONString(), e);
-                continue;
             }
         }
 
@@ -539,8 +525,8 @@ public class SmsMtPushService implements ISmsMtPushService {
     /**
      * 发送短信状态报文至下家并完成异步持久化
      * 
-     * @param urlBodies
-     * @return
+     * @param urlBodies 多url对应不同的报文信息
+     * @return 推送结果
      */
     private boolean sendBody(Map<String, List<JSONObject>> urlBodies) {
         try {
@@ -551,9 +537,8 @@ public class SmsMtPushService implements ISmsMtPushService {
 
                 // print result and cost time
                 RetryResponse response = HttpClientUtil.postBody(urlBody.getKey(), pushContent, 1);
-                logger.info("Url [" + urlBody.getKey() + "] push body [" + pushContent + "]'s result is"
-                                    + response.isSuccess() + ", it costs {} ms ",
-                            (System.currentTimeMillis() - startTime));
+                logger.info("Url [" + urlBody.getKey() + "] push body [" + pushContent + "]'s result is "
+                            + response.isSuccess() + ", it costs {} ms ", (System.currentTimeMillis() - startTime));
 
                 doPushPersistence(urlBody.getValue(), response);
             }
@@ -568,16 +553,14 @@ public class SmsMtPushService implements ISmsMtPushService {
     /**
      * 推送报告持久化
      * 
-     * @param report
+     * @param bodies 推送报文
      * @param retryResponse 推送处理结果
-     * @param timeCost 耗时（毫秒）
      */
     private void doPushPersistence(List<JSONObject> bodies, RetryResponse retryResponse) {
-        SmsMtMessagePush push = null;
         Set<String> waitPushMsgIdRedisKeys = new HashSet<>();
         List<SmsMtMessagePush> persistPushesList = new ArrayList<>();
         for (JSONObject body : bodies) {
-            push = new SmsMtMessagePush();
+            SmsMtMessagePush push = new SmsMtMessagePush();
             push.setMsgId(body.getString("msgId"));
             push.setMobile(body.getString("mobile"));
             if (retryResponse == null) {
@@ -586,11 +569,11 @@ public class SmsMtPushService implements ISmsMtPushService {
             } else {
                 push.setStatus(retryResponse.isSuccess() ? PushStatus.SUCCESS.getValue() : PushStatus.FAILED.getValue());
                 push.setRetryTimes(retryResponse.getAttemptTimes());
+                push.setResponseMilliseconds(retryResponse.getTimeCost());
             }
 
             // 暂时先用作批量处理ID
             push.setResponseContent(System.nanoTime() + "");
-            push.setResponseMilliseconds(retryResponse.getTimeCost());
             push.setContent(JSON.toJSONString(body, USER_PUSH_REPORT_FILTER, SerializerFeature.WriteMapNullValue,
                                               SerializerFeature.WriteNullStringAsEmpty));
             push.setCreateTime(new Date());
@@ -603,10 +586,6 @@ public class SmsMtPushService implements ISmsMtPushService {
         stringRedisTemplate.delete(waitPushMsgIdRedisKeys);
         // 发送数据至带持久队列中
         savePushMessage(persistPushesList);
-
-        push = null;
-        persistPushesList = null;
-        waitPushMsgIdRedisKeys = null;
     }
 
     @Override

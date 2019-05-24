@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.constants.CommonContext.AppType;
 import com.huashi.sms.template.context.SmsTemplateContext.ApproveStatus;
 import com.huashi.sms.template.domain.MessageTemplate;

@@ -3,7 +3,7 @@ package com.huashi.listener.prervice;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.bill.bill.service.IBillService;
 import com.huashi.constants.CommonContext.PlatformType;
 import com.huashi.listener.constant.ListenerConstant;

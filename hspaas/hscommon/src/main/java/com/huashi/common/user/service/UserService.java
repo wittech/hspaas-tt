@@ -11,6 +11,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +22,6 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.config.redis.CommonRedisConstant;
 import com.huashi.common.settings.context.SettingsContext.SystemConfigType;
@@ -256,23 +256,21 @@ public class UserService implements IUserService {
         }
         page.getList().addAll(dataList);
 
-        testUserId = null;
-        alarmUserId = null;
         return page;
     }
 
     /**
-     * TODO 设置用户ID标签信息
+     * 设置用户ID标签信息
      * 
-     * @param up
-     * @param testUserId
-     * @param alarmUserId
+     * @param up 用户属性
+     * @param testUserId 测试用户ID
+     * @param alarmUserId 告警用户ID
      */
     private void setUserProfileLabel(UserProfile up, Integer testUserId, Integer alarmUserId) {
-        if (testUserId != null && up.getUserId().equals(testUserId)) {
+        if (testUserId != null && up.getUserId() == testUserId) {
             up.setLabel(SystemConfigType.PASSAGE_TEST_USER.name());
         }
-        if (alarmUserId != null && up.getUserId().equals(alarmUserId)) {
+        if (alarmUserId != null && up.getUserId() == alarmUserId) {
             up.setLabel(SystemConfigType.SMS_ALARM_USER.name());
         }
     }
@@ -440,7 +438,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public boolean updateFs(int userId, String balance, int payType, PushConfig pushConfig,
                             UserFluxDiscount userFluxDiscount, int passageGroupId) {
         try {
@@ -459,7 +457,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public boolean updateVs(int userId, String balance, int payType, PushConfig pushConfig, int passageGroupId) {
         try {
             userBalanceMapper.updateByUserId(new UserBalance(userId, PlatformType.VOICE_SERVICE.getCode(), payType,

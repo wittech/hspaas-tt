@@ -1,6 +1,6 @@
 package com.huashi.common.user.service;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.huashi.bill.order.exception.ExchangeException;
 import com.huashi.bill.pay.constant.PayContext.PaySource;

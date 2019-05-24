@@ -1,5 +1,6 @@
 package com.huashi.sms.test.service;
 
+import org.apache.dubbo.config.spring.ReferenceBean;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +11,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.alibaba.dubbo.config.spring.ReferenceBean;
 import com.huashi.sms.report.service.ISmsSubmitHourReportService;
 
 @RunWith(SpringJUnit4ClassRunner.class)

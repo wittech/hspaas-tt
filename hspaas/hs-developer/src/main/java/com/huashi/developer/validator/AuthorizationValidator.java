@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.settings.service.IHostWhiteListService;
 import com.huashi.common.user.context.UserContext.UserStatus;
 import com.huashi.common.user.domain.UserDeveloper;

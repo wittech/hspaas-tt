@@ -1,6 +1,6 @@
 package com.huashi.common.config.redis;
 
-import java.lang.reflect.Method;
+import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,77 +34,55 @@ import redis.clients.jedis.JedisPoolConfig;
 @Order(1)
 public class RedisConfiguration extends CachingConfigurerSupport {
 
-    @Value("${redis.host}")
+    @Value("${spring.redis.host}")
     private String  host;
-
-    @Value("${redis.port}")
+    @Value("${spring.redis.port}")
     private int     port;
-
-    @Value("${redis.password}")
+    @Value("${spring.redis.password}")
     private String  password;
-
-    @Value("${redis.pool.maxActive}")
-    private Integer maxTotal;
-
-    @Value("${redis.pool.minIdle}")
-    private Integer minIdle;
-
-    @Value("${redis.pool.maxIdle}")
-    private Integer maxIdle;
-
-    @Value("${redis.pool.maxWaitMillis}")
-    private Integer maxWaitMillis;
-
-    @Value("${redis.database}")
+    @Value("${spring.redis.database}")
     private int     database;
-    @Value("${redis.client.connectionTimeout}")
+    @Value("${spring.redis.timeout}")
     private Integer timeout;
 
-    @Value("${redis.pool.testOnBorrow}")
-    private boolean testOnBorrow;
-    @Value("${redis.pool.testOnReturn}")
-    private boolean testOnReturn;
-    @Value("${redis.pool.testWhileIdle}")
-    private boolean testWhileIdle;
-
-    @Value("${redis.pool.timeBetweenEvictionRunsMillis}")
-    private Integer timeBetweenEvictionRunsMillis;
-    @Value("${redis.pool.minEvictableIdleTimeMillis}")
-    private Integer minEvictableIdleTimeMillis;
-    @Value("${redis.pool.softMinEvictableIdleTimeMillis}")
-    private Integer softMinEvictableIdleTimeMillis;
-    @Value("${redis.pool.numTestsPerEvictionRun}")
-    private Integer numTestsPerEvictionRun;
+    @Value("${spring.redis.jedis.pool.max-active}")
+    private Integer maxActive;
+    @Value("${spring.redis.jedis.pool.min-idle}")
+    private Integer minIdle;
+    @Value("${spring.redis.jedis.pool.max-idle}")
+    private Integer maxIdle;
+    @Value("${spring.redis.jedis.pool.max-wait}")
+    private Integer maxWait;
 
     @Bean
     public JedisPoolConfig jedisPoolConfig() {
-        JedisPoolConfig config = new JedisPoolConfig();
-        config.setMaxTotal(maxTotal);
-        config.setMaxIdle(maxIdle);
-        config.setMinIdle(minIdle);
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(maxActive);
+        jedisPoolConfig.setMaxIdle(maxIdle);
+        jedisPoolConfig.setMinIdle(minIdle);
+        jedisPoolConfig.setMaxWaitMillis(maxWait);
 
-        config.setMaxWaitMillis(maxWaitMillis);
-        config.setTestOnBorrow(testOnBorrow);
-        config.setTestOnReturn(testOnReturn);
-        config.setTestWhileIdle(testWhileIdle);
-        config.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
-        config.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
-        config.setSoftMinEvictableIdleTimeMillis(softMinEvictableIdleTimeMillis);
-        config.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
-        return config;
+        return jedisPoolConfig;
+    }
+
+    @Bean
+    public RedisStandaloneConfiguration redisStandaloneConfiguration() {
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+        redisStandaloneConfiguration.setHostName(host);
+        redisStandaloneConfiguration.setPort(port);
+        redisStandaloneConfiguration.setDatabase(database);
+        redisStandaloneConfiguration.setPassword(password);
+
+        return redisStandaloneConfiguration;
     }
 
     @Bean(name = "jedisConnectionFactory")
-    public JedisConnectionFactory jedisConnectionFactory() {
-        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(jedisPoolConfig());
-        jedisConnectionFactory.setUsePool(true);
-        jedisConnectionFactory.setHostName(host);
-        jedisConnectionFactory.setPort(port);
-        jedisConnectionFactory.setPassword(password);
-        jedisConnectionFactory.setDatabase(database);
-        jedisConnectionFactory.setTimeout(timeout);
+    public JedisConnectionFactory jedisConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration) {
 
-        return jedisConnectionFactory;
+        JedisClientConfiguration.JedisClientConfigurationBuilder jedisClientConfiguration = JedisClientConfiguration.builder();
+        jedisClientConfiguration.connectTimeout(Duration.ofMillis(timeout));
+
+        return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration.build());
     }
 
     @Bean(name = "stringRedisTemplate")
@@ -115,29 +95,22 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @Bean
     public KeyGenerator wiselyKeyGenerator() {
-        return new KeyGenerator() {
+        return (target, method, params) -> {
 
-            @Override
-            public Object generate(Object target, Method method, Object... params) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(target.getClass().getName());
-                sb.append(method.getName());
-                for (Object obj : params) {
-                    sb.append(obj.toString());
-                }
-                return sb.toString();
+            StringBuilder sb = new StringBuilder();
+            sb.append(target.getClass().getName());
+            sb.append(method.getName());
+            for (Object obj : params) {
+                sb.append(obj.toString());
             }
+            return sb.toString();
+
         };
     }
 
     @Bean
-    public CacheManager cacheManager(RedisTemplate<String, Object> redisTemplate) {
-        RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
-        // Number of seconds before expiration. Defaults to unlimited (0)
-
-        // 设置key-value超时时间
-        cacheManager.setDefaultExpiration(10);
-        return cacheManager;
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        return RedisCacheManager.builder(connectionFactory).build();
     }
 
     @Bean(name = "redisTemplate")

@@ -19,7 +19,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.settings.context.SettingsContext.PushConfigStatus;
 import com.huashi.common.settings.domain.ProvinceLocal;
@@ -56,7 +56,7 @@ import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.rabbitmq.client.Channel;
 
 /**
- * TODO 短信待提交队列监听
+ * 短信待提交队列监听
  *
  * @author zhengying
  * @version V1.0
@@ -93,7 +93,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     private ThreadPoolTaskExecutor            threadPoolTaskExecutor;
 
     /**
-     * TODO 处理分包产生的数据，并调用上家通道接口
+     * 处理分包产生的数据，并调用上家通道接口
      *
      * @param packets 子任务
      */
@@ -157,9 +157,9 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取用户的拓展号码
+     * 获取用户的拓展号码
      *
-     * @param userId
+     * @param userId 用户ID
      * @param templateExtNumber 短信模板扩展号码
      * @param extNumber 用户自定义扩展号码
      * @return
@@ -199,7 +199,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 截取超出通道扩展号最大长度的位数
+     * 截取超出通道扩展号最大长度的位数
      *
      * @param extNumber 扩展号码
      * @param smsPassage 通道信息
@@ -243,7 +243,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     private static final int    PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED = 0;
 
     /**
-     * TODO 根据签名模式调整短信内容（主要针对签名位置）
+     * 根据签名模式调整短信内容（主要针对签名位置）
      *
      * @param content 短信内容
      * @param signMode 签名模型
@@ -288,11 +288,11 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 转换获取通道参数信息
+     * 转换获取通道参数信息
      *
      * @param packets 分包信息
      * @param smsPassage 通道信息
-     * @return
+     * @return 通道参数
      */
     private SmsPassageParameter getPassageParameter(SmsMtTaskPackets packets, SmsPassage smsPassage) {
         SmsPassageParameter parameter = new SmsPassageParameter();
@@ -346,9 +346,9 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 处理提交完成逻辑
+     * 处理提交完成逻辑
      *
-     * @param submits
+     * @param submits 提交记录集合信息
      */
     private void persistSubmitMessage(List<SmsMtMessageSubmit> submits) {
         try {
@@ -363,14 +363,14 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 组装提交完成的短息信息入库
+     * 组装提交完成的短息信息入库
      * 
-     * @param packets
+     * @param packets 子任务
      * @param mobileStr 以逗号分隔的手机号码字符串（可能多个手机号码，也可能单个）
-     * @param responses
+     * @param responses 回执信息集合
      * @param extNumber 扩展号码
-     * @param pushConfig
-     * @return
+     * @param pushConfig 推送信息
+     * @return 提交集合信息
      */
     private List<SmsMtMessageSubmit> makeSubmitReport(SmsMtTaskPackets packets, String mobileStr,
                                                       List<ProviderSendResponse> responses, String extNumber,
@@ -412,12 +412,12 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 生成短消息提交模板记录
+     * 生成短消息提交模板记录
      * 
-     * @param packets
-     * @param pushConfig
-     * @param extNumber
-     * @return
+     * @param packets 子任务
+     * @param pushConfig 推送信息
+     * @param extNumber 扩展名
+     * @return 短信提交记录
      */
     private SmsMtMessageSubmit makeMessageSubmitTemplate(SmsMtTaskPackets packets, PushConfig pushConfig,
                                                          String extNumber) {
@@ -442,11 +442,11 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据回执信息填充submit
+     * 根据回执信息填充submit
      * 
-     * @param submit
-     * @param responses
-     * @param sid
+     * @param submit 提交数据
+     * @param responses 网关回执
+     * @param sid 消息ID
      */
     private void fillSubmitFromResponse(SmsMtMessageSubmit submit, List<ProviderSendResponse> responses, Long sid) {
         // 回执数据可能为空（直连协议常见）
@@ -487,11 +487,11 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 提交短信至上家通道（发送网关错误，组装伪造包S0099）
+     * 提交短信至上家通道（发送网关错误，组装伪造包S0099）
      *
-     * @param model
-     * @param mobileReport
-     * @param pushConfig
+     * @param packets 子任务
+     * @param mobileReport 手机号码信息
+     * @param pushConfig 推送信息
      */
     private void sendMqueueIfFailed(SmsMtTaskPackets packets, String mobileReport, PushConfig pushConfig) {
 
@@ -514,10 +514,10 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 待提交短信处理
+     * 待提交短信处理
      *
-     * @param message
-     * @param channel
+     * @param message 队列信息
+     * @param channel 频道
      */
     @Override
     public void onMessage(Message message, Channel channel) throws Exception {
@@ -544,9 +544,9 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 主任务（多个子任务）发送网关
+     * 主任务（多个子任务）发送网关
      *
-     * @param task
+     * @param task 主任务
      */
     private void transport2Gateway(SmsMtTask task) {
         if (task == null) {
@@ -572,11 +572,11 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据通道分包数重组手机号码
+     * 根据通道分包数重组手机号码
      * 
-     * @param mobile
-     * @param smsPassage
-     * @return
+     * @param mobile 手机号码
+     * @param smsPassage 短信通道
+     * @return 重组后的手机号码
      */
     private static List<String> regroupMobileByPacketsSize(String mobile, SmsPassage smsPassage) {
         if (StringUtils.isBlank(mobile)) {

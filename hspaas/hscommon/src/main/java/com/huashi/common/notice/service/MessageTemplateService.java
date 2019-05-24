@@ -2,7 +2,7 @@ package com.huashi.common.notice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.notice.context.TemplateContext.SmsCode;
 import com.huashi.common.notice.dao.SmsTemplateMapper;
 import com.huashi.common.notice.domain.SmsTemplate;

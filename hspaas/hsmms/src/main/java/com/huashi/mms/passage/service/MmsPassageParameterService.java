@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.constants.CommonContext.PassageCallType;
 import com.huashi.mms.passage.dao.MmsPassageParameterMapper;
 import com.huashi.mms.passage.domain.MmsPassageParameter;

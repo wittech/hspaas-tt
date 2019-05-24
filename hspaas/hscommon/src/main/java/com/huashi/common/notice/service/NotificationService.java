@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.notice.dao.NotificationMapper;
 import com.huashi.common.notice.domain.Notification;
 import com.huashi.common.vo.BossPaginationVo;

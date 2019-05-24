@@ -11,7 +11,6 @@
 	<artifactId>hsapi</artifactId>
 	<packaging>jar</packaging>
 	<version>${project.parent.version}</version>
-	<name>融合平台-内部接口定义</name>
 	<description>内部接口定义，包括接口名称，方法名以及通过网络传递的DTO定义，目前采用dubbo 架构 dubbo协议</description>
 
 	<dependencies>

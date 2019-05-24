@@ -21,7 +21,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.bill.pay.constant.PayContext.PaySource;
 import com.huashi.bill.pay.constant.PayContext.PayType;
 import com.huashi.common.settings.context.SettingsContext;

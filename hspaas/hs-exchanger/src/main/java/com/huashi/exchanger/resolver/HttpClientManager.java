@@ -334,7 +334,6 @@ public class HttpClientManager {
     /**
      * TODO 设置HTTP参数信息
      * 
-     * @param httpPost
      * @param params
      */
     private static String setHttpGetParameters(Map<String, Object> params) {
@@ -344,7 +343,6 @@ public class HttpClientManager {
     /**
      * TODO 设置HTTP参数信息（包含编码）
      * 
-     * @param httpPost
      * @param params
      * @param encoding
      */

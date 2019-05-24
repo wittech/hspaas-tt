@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-	<context:property-placeholder location="classpath:application.properties" />
+    <context:property-placeholder location="classpath:application.properties"/>
 
-	<dubbo:application name="hscommon-provider" logger="slf4j" />
+    <dubbo:application name="hscommon-provider" logger="slf4j"/>
 
-	<dubbo:registry protocol="zookeeper" address="${zk.address}"
-		timeout="15000" file="${user.home}/applications/hscommon-dubbo.cache" />
+    <dubbo:registry protocol="zookeeper" address="${zk.address}"
+                    timeout="15000" file="${user.home}/applications/hscommon-dubbo.cache"/>
 
-	<dubbo:provider timeout="100000" retries="0" protocol="dubbo"
-		default="true" />
-	<dubbo:protocol name="dubbo" serialization="kryo" port="-1" />
+    <dubbo:provider timeout="100000" retries="0" protocol="dubbo"
+                    default="true"/>
+    <dubbo:protocol name="dubbo" serialization="kryo" port="-1"/>
 
-	<dubbo:protocol name="hessian" port="-1" />
+    <dubbo:protocol name="hessian" port="-1"/>
 
-	<dubbo:annotation package="com.huashi.common" />
+    <dubbo:annotation package="com.huashi.common"/>
 
-	<!-- 定义全局的配置，测试中@Reference的check=false不起作用，在这里配置 -->
-	<dubbo:consumer check="false" />
+    <!-- 定义全局的配置，测试中@Reference的check=false不起作用，在这里配置 -->
+    <dubbo:consumer check="false"/>
 
 </beans>

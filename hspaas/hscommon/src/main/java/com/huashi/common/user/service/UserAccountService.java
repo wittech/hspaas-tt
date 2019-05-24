@@ -5,7 +5,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.bill.order.exception.ExchangeException;
 import com.huashi.bill.pay.constant.PayContext.PaySource;
 import com.huashi.bill.pay.constant.PayContext.PayType;

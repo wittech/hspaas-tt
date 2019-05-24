@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 
 import com.huashi.sms.config.runner.SmsInitializeRunner;
 import com.rabbitmq.client.Channel;
@@ -78,7 +78,6 @@ public abstract class AbstartRabbitListener implements ChannelAwareMessageListen
      * @param message
      * @param channel
      * @throws Exception
-     * @see org.springframework.amqp.rabbit.core.ChannelAwareMessageListener#onMessage(org.springframework.amqp.core.Message,
      * com.rabbitmq.client.Channel)
      */
     public abstract void onMessage(Message message, Channel channel) throws Exception;

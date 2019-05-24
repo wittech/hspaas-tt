@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Reference;
 import com.huashi.common.user.service.IUserBalanceService;
 import com.huashi.constants.OpenApiCode.MmsApiCode;
 import com.huashi.developer.exception.ValidateException;

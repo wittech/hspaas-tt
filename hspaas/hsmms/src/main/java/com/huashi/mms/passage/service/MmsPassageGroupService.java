@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.mms.passage.dao.MmsPassageGroupDetailMapper;
 import com.huashi.mms.passage.dao.MmsPassageGroupMapper;

@@ -1,6 +1,6 @@
 package com.huashi.sms.passage.service;
 
-import com.alibaba.dubbo.config.annotation.Service;
+import org.apache.dubbo.config.annotation.Service;
 import com.huashi.common.vo.BossPaginationVo;
 import com.huashi.sms.passage.dao.SmsPassageReachrateSettingsMapper;
 import com.huashi.sms.passage.domain.SmsPassage;

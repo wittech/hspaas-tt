@@ -1,24 +1,20 @@
 package com.huashi.mms.record.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huashi.common.user.model.UserModel;
 import com.huashi.common.user.service.IUserService;
@@ -375,7 +371,8 @@ public class MmsMtSubmitService implements IMmsMtSubmitService {
     @Override
     public boolean sendToSubmitQueue(List<MmsMtTaskPackets> packets) {
         if (CollectionUtils.isEmpty(packets)) {
-            logger.warn("子任务数据为空，无需发送队列");
+            logger.warn("子任务数据为空，无需发" +
+                    "送队列");
             return false;
         }
 
