@@ -21,7 +21,7 @@ public class BaseController {
 	protected HttpServletRequest request;
 	
 	// 返回成功标识（目前没有具体意义）
-	protected static final String SUCCESS = "ok"; 
+	protected static final String SUCCESS = "1";
 
 	protected boolean validate() {
 

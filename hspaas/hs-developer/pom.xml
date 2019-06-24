@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1-RELEASE</version>
 	</parent>
 	<artifactId>hs-developer</artifactId>
 	<packaging>jar</packaging>

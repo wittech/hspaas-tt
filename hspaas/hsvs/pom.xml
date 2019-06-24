@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.huashi</groupId>
 		<artifactId>hspaas</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1-RELEASE</version>
 	</parent>
 	<artifactId>hsvs</artifactId>
 	<name>华时语音验证码-语音通知服务</name>
