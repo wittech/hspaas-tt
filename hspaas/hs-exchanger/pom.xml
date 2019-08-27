@@ -8,7 +8,6 @@
 	</parent>
 	<groupId>com.huashi.exchanger</groupId>
 	<artifactId>hs-exchanger</artifactId>
-	<name>华时融合服务商调度中心</name>
 
 	<dependencies>
 
