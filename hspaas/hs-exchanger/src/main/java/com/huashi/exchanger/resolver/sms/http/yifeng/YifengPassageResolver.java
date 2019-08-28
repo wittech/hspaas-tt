@@ -40,6 +40,16 @@ public class YifengPassageResolver extends AbstractPassageResolver {
      */
     private static final String REPORT_HAS_BODY_FLAG = "taskid";
 
+    /**
+     * 发送成功标识
+     */
+    private static final String STATUS_SUCCESS_MSG   = "发送成功";
+
+    /**
+     * 错误码
+     */
+    private static final String COMMON_ERROR_CODE    = "MN:0000";
+
     @Override
     public List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content,
                                            String extNumber) {
@@ -137,6 +147,26 @@ public class YifengPassageResolver extends AbstractPassageResolver {
     }
 
     /**
+     * 获取最终的状态码信息
+     * @param status
+     * @param errorCode
+     * @return
+     */
+    private String getResponseStatus(String status, String errorCode) {
+        if(StringUtils.isEmpty(status)) {
+            return COMMON_ERROR_CODE;
+        } else if(status.contains(STATUS_SUCCESS_MSG)) {
+            return COMMON_MT_STATUS_SUCCESS_CODE;
+        } else {
+            if(StringUtils.isNotEmpty(errorCode)) {
+                return errorCode;
+            }
+
+            return COMMON_ERROR_CODE;
+        }
+    }
+
+    /**
      * 解析发送返回值
      * 
      * @param result
@@ -177,14 +207,14 @@ public class YifengPassageResolver extends AbstractPassageResolver {
                 response.setMsgId(et.getChild("taskid", ns).getText());
                 response.setMobile(et.getChild("mobile", ns).getText());
                 response.setCmcp(CMCP.local(response.getMobile()).getCode());
-                if (StringUtils.isNotEmpty(et.getChild("status", ns).getText())
-                    && et.getChild("status", ns).getText().equalsIgnoreCase(successCode)) {
-                    response.setStatusCode(COMMON_MT_STATUS_SUCCESS_CODE);
-                    response.setStatus(DeliverStatus.SUCCESS.getValue());
-                } else {
-                    response.setStatusCode(et.getChild("errorcode", ns).getText());
-                    response.setStatus(DeliverStatus.FAILED.getValue());
-                }
+
+                // 状态转义
+                String status = getResponseStatus(et.getChild("status", ns).getText(),
+                        et.getChild("errorcode", ns).getText());
+                response.setStatusCode(status);
+                response.setStatus(COMMON_MT_STATUS_SUCCESS_CODE.equals(status) ? DeliverStatus.SUCCESS.getValue() :
+                        DeliverStatus.FAILED.getValue());
+
                 response.setRemark(String.format("taskid : %s, mobile : %s, status_code : %s", response.getMsgId(),
                                                  response.getMobile(), response.getStatusCode()));
 
@@ -243,7 +273,6 @@ public class YifengPassageResolver extends AbstractPassageResolver {
                 response.setMsgId(et.getChild("taskid", ns).getText());
                 response.setMobile(et.getChild("mobile", ns).getText());
                 response.setContent(et.getChild("content", ns).getText());
-                response.setDestnationNo(et.getChild("extno", ns).getText());
                 if (et.getChild("receivetime", ns) == null) {
                     response.setReceiveTime(DateUtil.getNow());
                 } else {
