@@ -43,12 +43,22 @@ public class YifengPassageResolver extends AbstractPassageResolver {
     /**
      * 发送成功标识
      */
-    private static final String STATUS_SUCCESS_MSG   = "发送成功";
+    private static final String STATUS_SUCCESS_MSG   = "成功";
+
+    /**
+     * 其他状态码描述
+     */
+    private static final String STATUS_OTHER_MSG     = "其他";
 
     /**
      * 错误码
      */
     private static final String COMMON_ERROR_CODE    = "MN:0000";
+
+    /**
+     * 其他错误码
+     */
+    private static final String OTHER_ERROR_CODE     = "MN:9999";
 
     @Override
     public List<ProviderSendResponse> send(SmsPassageParameter parameter, String mobile, String content,
@@ -157,7 +167,10 @@ public class YifengPassageResolver extends AbstractPassageResolver {
             return COMMON_ERROR_CODE;
         } else if(status.contains(STATUS_SUCCESS_MSG)) {
             return COMMON_MT_STATUS_SUCCESS_CODE;
-        } else {
+        } else if(status.contains(STATUS_OTHER_MSG)) {
+            // 转义错误码为"其他"返回具体状态码（英文）
+            return OTHER_ERROR_CODE;
+        }else {
             if(StringUtils.isNotEmpty(errorCode)) {
                 return errorCode;
             }

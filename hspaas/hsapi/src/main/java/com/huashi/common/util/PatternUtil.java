@@ -229,7 +229,9 @@ public class PatternUtil {
 //			System.out.println("手机号：" + matcher.group(2));
 //			System.out.println("---------------------");
 //		}
-		System.out.println(isUrl("http://s"));
+//		System.out.println(isUrl("http://s"));
+
+		System.out.println(isRight("^(1[0-9]{10})$", "15995140801"));
 	}
 	
 }
