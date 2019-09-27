@@ -167,11 +167,13 @@ public class YifengPassageResolver extends AbstractPassageResolver {
             return COMMON_ERROR_CODE;
         } else if(status.contains(STATUS_SUCCESS_MSG)) {
             return COMMON_MT_STATUS_SUCCESS_CODE;
-        } else if(status.contains(STATUS_OTHER_MSG)) {
-            // 转义错误码为"其他"返回具体状态码（英文）
-            return OTHER_ERROR_CODE;
-        }else {
+        } else {
             if(StringUtils.isNotEmpty(errorCode)) {
+                // 转义错误码为"其他"返回具体状态码（英文）
+                if(errorCode.contains(STATUS_OTHER_MSG)) {
+                    return OTHER_ERROR_CODE;
+                }
+
                 return errorCode;
             }
 
