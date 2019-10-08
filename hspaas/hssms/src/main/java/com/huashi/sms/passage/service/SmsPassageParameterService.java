@@ -34,4 +34,8 @@ public class SmsPassageParameterService implements ISmsPassageParameterService {
 		return smsPassageParameterMapper.getByTypeAndUrl(callType.getCode(), passageCode);
 	}
 
+	@Override
+	public SmsPassageParameter getByPassageIdInSendType(int passageId) {
+		return smsPassageParameterMapper.getByPassageIdAndType(passageId, PassageCallType.DATA_SEND.getCode());
+	}
 }

@@ -44,7 +44,10 @@ public class SettingsContext {
         REGULAR_EXPRESSION("正则表达式"),
 
         // 词汇库
-        WORDS_LIBRARY("词汇库");
+        WORDS_LIBRARY("词汇库"),
+
+        // 通道手机黑名单
+        PASSAGE_BLACK_MOBILE("通道手机黑名单切换组");
 
         private String title;
 
@@ -172,7 +175,6 @@ public class SettingsContext {
      * 针对各种环境下的user_id KEY命名（如测试通道用户，告警通道用户等）
      */
     public static final String USER_ID_KEY_NAME = "user_id";
-
 
     /**
      * TODO 词汇库详细

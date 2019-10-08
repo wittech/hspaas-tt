@@ -23,6 +23,8 @@ public interface ISmsPassageParameterService {
 	 */
 	List<SmsPassageParameter> findByPassageId(int passageId);
 
+	SmsPassageParameter getByPassageIdInSendType(int passageId);
+
 	/**
 	 * 
 	 * TODO 根据通道代码获取参数详细信息（主要针对回执报告和上行信息）

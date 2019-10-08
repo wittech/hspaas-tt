@@ -1,13 +1,16 @@
 package com.huashi.sms.config.rabbit.listener;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import com.huashi.common.settings.context.SettingsContext;
+import com.huashi.common.settings.domain.SystemConfig;
+import com.huashi.common.settings.service.ISystemConfigService;
+import com.huashi.constants.CommonContext;
+import com.huashi.sms.passage.domain.SmsPassageAccess;
+import com.huashi.sms.passage.service.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.core.Message;
@@ -43,9 +46,6 @@ import com.huashi.sms.passage.context.PassageContext.PassageSmsTemplateParam;
 import com.huashi.sms.passage.domain.SmsPassage;
 import com.huashi.sms.passage.domain.SmsPassageMessageTemplate;
 import com.huashi.sms.passage.domain.SmsPassageParameter;
-import com.huashi.sms.passage.service.ISmsPassageMessageTemplateService;
-import com.huashi.sms.passage.service.ISmsPassageService;
-import com.huashi.sms.passage.service.SmsPassageMessageTemplateService;
 import com.huashi.sms.record.domain.SmsMtMessageSubmit;
 import com.huashi.sms.record.service.ISmsMtSubmitService;
 import com.huashi.sms.signature.service.ISignatureExtNoService;
@@ -56,7 +56,7 @@ import com.huashi.sms.task.domain.SmsMtTaskPackets;
 import com.rabbitmq.client.Channel;
 
 /**
- * TODO 短信待提交队列监听
+ * 短信待提交队列监听
  *
  * @author zhengying
  * @version V1.0
@@ -84,16 +84,107 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     @Autowired
     private ISmsPassageService                smsPassageService;
     @Autowired
+    private ISmsPassageParameterService       smsPassageParameterService;
+    @Autowired
     private ISignatureExtNoService            signatureExtNoService;
     @Autowired
     private Jackson2JsonMessageConverter      messageConverter;
     @Autowired
     private ISmsPassageMessageTemplateService smsPassageMessageTemplateService;
+    @Reference
+    private ISystemConfigService              systemConfigService;
     @Resource
     private ThreadPoolTaskExecutor            threadPoolTaskExecutor;
 
     /**
-     * TODO 处理分包产生的数据，并调用上家通道接口
+     * 通道手机号黑名单
+     */
+    private static final Set<String>          PASSAGE_BLACK_MOBILES        = new HashSet<>();
+
+    private static final String               RED_PASSAGE_BLACK_MOBILE_KEY = "red_passage_black_mobile";
+
+    @PostConstruct
+    public void loadPassageMobiles() {
+        Set<String> mobiles = null;
+        try {
+            mobiles = stringRedisTemplate.opsForSet().members(RED_PASSAGE_BLACK_MOBILE_KEY);
+        } catch (Exception e) {
+            logger.error("loadPassageMobiles failed", e);
+        }
+
+        if (CollectionUtils.isEmpty(mobiles)) {
+            return;
+        }
+
+        PASSAGE_BLACK_MOBILES.addAll(mobiles);
+    }
+
+    /**
+     * 转换通道信息如果手机号码是黑名单
+     *
+     * @param packets 子任务
+     * @param smsPassage 原通道信息
+     * @param mobile 手机号码
+     * @return 最终通道信息
+     */
+    private SmsPassage transformPassageIfMobileIsBlack(SmsMtTaskPackets packets, SmsPassage smsPassage, String mobile) {
+        Integer sourcePassageId = systemConfigService.getPassageIdInBlackMobile(true);
+        if (sourcePassageId == null) {
+            return smsPassage;
+        }
+
+        if (!smsPassage.getId().equals(sourcePassageId)) {
+            return smsPassage;
+        }
+
+        if (CollectionUtils.isEmpty(PASSAGE_BLACK_MOBILES)) {
+            logger.warn("加载通道手机号码黑名单为空");
+            return smsPassage;
+        }
+
+        if (!PASSAGE_BLACK_MOBILES.contains(mobile)) {
+            return smsPassage;
+        }
+
+        Integer targetPassageId = systemConfigService.getPassageIdInBlackMobile(false);
+        if (targetPassageId == null) {
+            logger.warn("Can't find any passages Caused by Passage[{}] and mobile[{}] in [Passage-Black-Mobiles]",
+                        smsPassage.getId(), mobile);
+            return smsPassage;
+        }
+
+        logger.info("PassageId[{}] and mobile[{}] was matched new-passageId[{}] in [Passage-Black-Mobiles]",
+                    smsPassage.getId(), mobile, targetPassageId);
+
+        smsPassage = smsPassageService.findById(targetPassageId);
+
+        setSmsPassagePackets(packets, smsPassage);
+
+        return smsPassage;
+    }
+
+    private void setSmsPassagePackets(SmsMtTaskPackets smsMtTaskPackets, SmsPassage smsPassage) {
+        SmsPassageParameter smsPassageParameter = smsPassageParameterService.getByPassageIdInSendType(smsPassage.getId());
+        if(smsPassageParameter == null) {
+            logger.error("Can't find any parameters by passageId[{}]", smsPassage.getId());
+            return;
+        }
+
+        smsMtTaskPackets.setPassageId(smsPassage.getId());
+        smsMtTaskPackets.setFinalPassageId(smsPassage.getId());
+        smsMtTaskPackets.setPassageProtocol(smsPassageParameter.getProtocol());
+        smsMtTaskPackets.setPassageUrl(smsPassageParameter.getUrl());
+        smsMtTaskPackets.setPassageParameter(smsPassageParameter.getParams());
+        smsMtTaskPackets.setResultFormat(smsPassageParameter.getResultFormat());
+        smsMtTaskPackets.setPosition(smsPassageParameter.getPosition());
+        smsMtTaskPackets.setSuccessCode(smsPassageParameter.getSuccessCode());
+        smsMtTaskPackets.setPassageSpeed(smsPassage.getPacketsSize());
+
+        logger.info("Found smsPassageParameter[{}] by passageId[]", JSON.toJSONString(smsPassageParameter), smsPassage.getId());
+    }
+
+    /**
+     * 处理分包产生的数据，并调用上家通道接口
      *
      * @param packets 子任务
      */
@@ -134,14 +225,19 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
                     continue;
                 }
 
+                // add by zhengying 20191007 判断是否需要加入通道手机号码黑名单
+                smsPassage = transformPassageIfMobileIsBlack(packets, smsPassage, groupMobile);
+
+                SmsPassageParameter passageParameter = getPassageParameter(packets, smsPassage);
+
                 // 调用网关通道处理器，提交短信信息，并接收回执
-                List<ProviderSendResponse> responses = smsProviderService.sendSms(getPassageParameter(packets,
-                                                                                                      smsPassage),
-                                                                                  groupMobile, packets.getContent(),
+                List<ProviderSendResponse> responses = smsProviderService.sendSms(passageParameter, groupMobile,
+                                                                                  packets.getContent(),
                                                                                   packets.getSingleFee(), extNumber);
 
                 // ProviderSendResponse response = list.iterator().next();
-                List<SmsMtMessageSubmit> list = makeSubmitReport(packets, groupMobile, responses, extNumber, pushConfig);
+                List<SmsMtMessageSubmit> list = makeSubmitReport(packets, groupMobile, responses, extNumber,
+                                                                 pushConfig);
                 if (CollectionUtils.isEmpty(list)) {
                     logger.error("解析上家回执数据逻辑数据为空，伪造包逻辑处理");
                     continue;
@@ -157,7 +253,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 获取用户的拓展号码
+     * 获取用户的拓展号码
      *
      * @param userId
      * @param templateExtNumber 短信模板扩展号码
@@ -199,7 +295,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 截取超出通道扩展号最大长度的位数
+     * 截取超出通道扩展号最大长度的位数
      *
      * @param extNumber 扩展号码
      * @param smsPassage 通道信息
@@ -243,7 +339,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     private static final int    PASSAGE_EXT_NUMBER_LENGTH_NOT_ALLOWED = 0;
 
     /**
-     * TODO 根据签名模式调整短信内容（主要针对签名位置）
+     * 根据签名模式调整短信内容（主要针对签名位置）
      *
      * @param content 短信内容
      * @param signMode 签名模型
@@ -288,7 +384,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 转换获取通道参数信息
+     * 转换获取通道参数信息
      *
      * @param packets 分包信息
      * @param smsPassage 通道信息
@@ -313,7 +409,8 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
         parameter.setConnectionSize(smsPassage.getConnectionSize());
         parameter.setReadTimeout(smsPassage.getReadTimeout());
 
-        if (smsPassage.getWordNumber() != null && smsPassage.getWordNumber() != UserBalanceConstant.WORDS_SIZE_PER_NUM) {
+        if (smsPassage.getWordNumber() != null
+            && smsPassage.getWordNumber() != UserBalanceConstant.WORDS_SIZE_PER_NUM) {
             parameter.setFeeByWords(smsPassage.getWordNumber());
         }
 
@@ -346,7 +443,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 处理提交完成逻辑
+     * 处理提交完成逻辑
      *
      * @param submits
      */
@@ -363,7 +460,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 组装提交完成的短息信息入库
+     * 组装提交完成的短息信息入库
      * 
      * @param packets
      * @param mobileStr 以逗号分隔的手机号码字符串（可能多个手机号码，也可能单个）
@@ -412,7 +509,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 生成短消息提交模板记录
+     * 生成短消息提交模板记录
      * 
      * @param packets
      * @param pushConfig
@@ -442,7 +539,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据回执信息填充submit
+     * 根据回执信息填充submit
      * 
      * @param submit
      * @param responses
@@ -487,9 +584,9 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 提交短信至上家通道（发送网关错误，组装伪造包S0099）
+     * 提交短信至上家通道（发送网关错误，组装伪造包S0099）
      *
-     * @param model
+     * @param packets
      * @param mobileReport
      * @param pushConfig
      */
@@ -514,7 +611,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 待提交短信处理
+     * 待提交短信处理
      *
      * @param message
      * @param channel
@@ -544,7 +641,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 主任务（多个子任务）发送网关
+     * 主任务（多个子任务）发送网关
      *
      * @param task
      */
@@ -572,7 +669,7 @@ public class SmsWaitSubmitListener extends AbstartRabbitListener {
     }
 
     /**
-     * TODO 根据通道分包数重组手机号码
+     * 根据通道分包数重组手机号码
      * 
      * @param mobile
      * @param smsPassage

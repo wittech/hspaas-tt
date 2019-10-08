@@ -203,6 +203,14 @@
 		order by id desc limit 1
 	</select>
 
+	<select id="getByPassageIdAndType" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sms_passage_parameter where passage_id = #{passageId} and call_type =
+		#{callType}
+		order by id desc limit 1
+	</select>
+
 	<select id="selectSendProtocol" resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List" />

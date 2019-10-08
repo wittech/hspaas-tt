@@ -1,11 +1,10 @@
-/**
- * 
- */
 package com.huashi.common.settings.service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Resource;
 
@@ -34,10 +33,26 @@ import com.huashi.constants.CommonContext.CMCP;
 public class SystemConfigService implements ISystemConfigService {
 
     @Autowired
-    private SystemConfigMapper  systemConfigMapper;
+    private SystemConfigMapper      systemConfigMapper;
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
-    private final Logger        logger = LoggerFactory.getLogger(getClass());
+    private StringRedisTemplate     stringRedisTemplate;
+    private final Logger            logger                       = LoggerFactory.getLogger(getClass());
+
+    private static final String     SOURCE_PASSAGE_ID_KEY        = "source_passage_id";
+
+    private static final String     TARGET_PASSAGE_ID_KEY        = "target_passage_id";
+
+    private static final Lock       INIT_LOCK                    = new ReentrantLock();
+
+    /**
+     * 源通道ID
+     */
+    private static volatile Integer sourcePassageIdInBlackMobile = null;
+
+    /**
+     * 目标通道ID
+     */
+    private static volatile Integer targetPassageIdInBlackMobile = null;
 
     @Override
     public List<SystemConfig> findByType(String type) {
@@ -68,13 +83,17 @@ public class SystemConfigService implements ISystemConfigService {
         resultMap.put("result", true);
         resultMap.put("message", "修改配置成功！");
         try {
-            SystemConfig source = systemConfigMapper.findByTypeAndKey(systemConfig.getType(), systemConfig.getAttrKey());
+            SystemConfig source = systemConfigMapper.findByTypeAndKey(systemConfig.getType(),
+                                                                      systemConfig.getAttrKey());
 
             if (source != null && !source.getId().equals(systemConfig.getId())) {
                 return resultMap;
             }
 
             systemConfigMapper.updateByPrimaryKeySelective(systemConfig);
+            // add by 20191007 判断是否修改内存中的通道ID相关
+            reloadPassageIdToMemory(systemConfig);
+
 
             // edit by 2017-06-19 判断是否加入REDIS缓存
             if (checkPushRedis(systemConfig.getType(), systemConfig.getAttrKey())) {
@@ -156,8 +175,8 @@ public class SystemConfigService implements ISystemConfigService {
     }
 
     /**
-     * TODO 根据类型和键名判断是否需要缓存到REDIS
-     * 
+     *  根据类型和键名判断是否需要缓存到REDIS
+     *
      * @param type
      * @return
      */
@@ -178,8 +197,8 @@ public class SystemConfigService implements ISystemConfigService {
     }
 
     /**
-     * TODO 添加到REDIS缓存
-     * 
+     *  添加到REDIS缓存
+     *
      * @param key
      * @param value
      * @return
@@ -195,9 +214,7 @@ public class SystemConfigService implements ISystemConfigService {
     }
 
     /**
-     * TODO 缓存所有黑名单词库数据
-     * 
-     * @return
+     *  缓存所有黑名单词库数据
      */
     private boolean reloadAllBlacklistWords() {
         SystemConfig config = findByTypeAndKey(SystemConfigType.WORDS_LIBRARY.name(), WordsLibrary.BLACKLIST.name());
@@ -214,9 +231,7 @@ public class SystemConfigService implements ISystemConfigService {
     }
 
     /**
-     * TODO 加载正则表达式
-     * 
-     * @return
+     *  加载正则表达式
      */
     private boolean reloadAllCmcpRegex() {
         List<SystemConfig> list = findByType(SystemConfigType.REGULAR_EXPRESSION.name());
@@ -246,4 +261,63 @@ public class SystemConfigService implements ISystemConfigService {
         return reloadAllBlacklistWords();
     }
 
+    private String getPassageIdKey(boolean isSource) {
+        return isSource ? SOURCE_PASSAGE_ID_KEY : TARGET_PASSAGE_ID_KEY;
+    }
+
+    private Integer getPassageIdInMemory(boolean isSource) {
+        return isSource ? sourcePassageIdInBlackMobile : targetPassageIdInBlackMobile;
+    }
+
+    private void reloadPassageIdToMemory(SystemConfig systemConfig) {
+        if(!SystemConfigType.PASSAGE_BLACK_MOBILE.name().equals(systemConfig.getType())) {
+            return;
+        }
+
+        if(SOURCE_PASSAGE_ID_KEY.equals(systemConfig.getAttrKey())) {
+            sourcePassageIdInBlackMobile = Integer.parseInt(systemConfig.getAttrValue());
+        } else if(TARGET_PASSAGE_ID_KEY.equals(systemConfig.getAttrKey())) {
+            targetPassageIdInBlackMobile = Integer.parseInt(systemConfig.getAttrValue());
+        }
+    }
+
+
+
+    private void loadPassageIdToMemory(boolean isSource, Integer passageId) {
+        if (isSource) {
+            sourcePassageIdInBlackMobile = passageId;
+        } else {
+            targetPassageIdInBlackMobile = passageId;
+        }
+    }
+
+    @Override
+    public Integer getPassageIdInBlackMobile(boolean isSource) {
+        Lock lock = INIT_LOCK;
+        lock.lock();
+        try {
+            Integer passageId = getPassageIdInMemory(isSource);
+            if(passageId != null) {
+                return passageId;
+            }
+
+            SystemConfig systemConfig = findByTypeAndKey(SettingsContext.SystemConfigType.PASSAGE_BLACK_MOBILE.name(),
+                    getPassageIdKey(isSource));
+            if(systemConfig == null) {
+                return null;
+            }
+
+            passageId = Integer.parseInt(systemConfig.getAttrValue());
+
+            loadPassageIdToMemory(isSource, passageId);
+
+            return passageId;
+
+        } catch (Exception e) {
+            logger.error("Getting passageIdInBlackMobile failed", e);
+            return null;
+        } finally {
+            lock.unlock();
+        }
+    }
 }

@@ -82,6 +82,13 @@ public interface ISystemConfigService {
        * @return
      */
     String getCmcpRegex(Integer cmcp);
+
+	/**
+	 * 根据来源标识查询通道ID
+	 * @param isSource 是否为源通道ID  源通道/目标通道
+	 * @return 通道ID
+	 */
+	Integer getPassageIdInBlackMobile(boolean isSource);
     
     /**
      * 

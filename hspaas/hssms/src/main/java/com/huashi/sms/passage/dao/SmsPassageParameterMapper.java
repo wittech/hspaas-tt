@@ -30,6 +30,8 @@ public interface SmsPassageParameterMapper {
      */
     List<SmsPassageParameter> findByPassageId(@Param("passageId") int passageId);
 
+    SmsPassageParameter getByPassageIdAndType(@Param("passageId") int passageId, @Param("callType") int callType);
+
     /**
      * TODO 根据通道代码和调用类型获取通道参数信息
      * 
